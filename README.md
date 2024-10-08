@@ -1,6 +1,9 @@
-# WzComparerR2-JMS
-- これは、JMS 用に設計されたメイプルストーリー抽出ツールです。
-- KMS、GMS、CMS などの他のクライアントで動作します。
+# WzComparerR2-CMS
+- 这是一个专为CMS设计的冒险岛提取工具。
+- 与其他客户端合作，例如 KMS、GMS、CMS。
+
+# Tooltip
+- EasyCompare可输出Skilltooltip、Itemtooltip、Eqptooltip、Mobtooltip和Npctooltip
 
 # Modules
 - **WzComparerR2** 主程序
@@ -18,9 +21,9 @@
 - **2.x**: Win7+/.net4.8+/dx11.0
 
 # NX OpenAPI
-- [API キーを取得する方法については、こちらをご覧ください。](https://openapi.nexon.com/guide/prepare-in-advance/)
-- 他の国や地域のNX IDは使用できません。韓国のNX IDのみ使用できます。
-- [OpenAPI 機能の詳細については、こちらをご覧ください。](https://openapi.nexon.com/game/maplestory/)
+- [了解如何获取API密钥。](https://openapi.nexon.com/guide/prepare-in-advance/)
+- 无法使用其他国家或地区的NexonID。只能使用韩国NexonID。
+- [了解有关OpenAPI功能的更多信息。](https://openapi.nexon.com/game/maplestory/)
 
 ### ItemID to NX OpenAPI ItemIcon Filename
 |   |1st |2nd |3rd |4th |5th |6th |7th |
@@ -36,16 +39,11 @@
 |8  |    |H   |K   |D   |P   |G   |J   |
 |9  |    |G   |I   |C   |O   |H   |I   |
 
-たとえば、次の ItemIcon URL はアイテム ID 1802767 を表します。非 KMS アイテムは利用できません。
+例如，以下ItemIcon URL 表示道具ID 1802767。非KMS道具不可用。
 ```
 https://open.api.nexon.com/static/maplestory/ItemIcon/KEHCJAIG.png
 ```
 
-# About Game Section
-
-Since JMS v427 the old patch server is abandoned. Now the game can be only run with Nexon Game Manager. To make the entire procedure easier for new players, Download Game (ゲームをダウンロード) and Game Start (ゲームスタート) buttons were added to WzComparerR2-JMS v5.5.0.
-
-If you see message says You'll need a new app to open this ngm link, please download Nexon Game Manager from either [KMS official website](https://maplestory.nexon.com/Common/PDS/Download) or [JMS official website](https://maplestory.nexon.co.jp).
 
 # Compile
 - vs2022 or higher/.net 6 SDK
