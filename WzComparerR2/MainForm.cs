@@ -232,6 +232,7 @@ namespace WzComparerR2
             tooltipQuickView.GearRender.ShowSpeed = Setting.Gear.ShowWeaponSpeed;
             tooltipQuickView.GearRender.ShowLevelOrSealed = Setting.Gear.ShowLevelOrSealed;
             tooltipQuickView.GearRender.ShowMedalTag = Setting.Gear.ShowMedalTag;
+            tooltipQuickView.GearRender.AutoTitleWrap = Setting.Gear.AutoTitleWrap;
             tooltipQuickView.ItemRender.ShowObjectID = Setting.Item.ShowID;
             tooltipQuickView.ItemRender.LinkRecipeInfo = Setting.Item.LinkRecipeInfo;
             tooltipQuickView.ItemRender.LinkRecipeItem = Setting.Item.LinkRecipeItem;
@@ -581,6 +582,84 @@ namespace WzComparerR2
             this.pictureBoxEx1.PictureName = aniName;
         }
 
+        private void buttonItemGif2_Click(object sender, EventArgs e)
+        {
+            // code from buttonItemGif_Click()
+            if (advTree3.SelectedNode == null)
+                return;
+
+            Wz_Node node = advTree3.SelectedNode.AsWzNode();
+            string aniName = "嵌套_" + GetSelectedNodeImageName();
+
+            if (node.Value is Wz_Png)
+            {
+                var pngFrameData = this.pictureBoxEx1.LoadPngFrameAnimation(node);
+
+                if (pngFrameData != null)
+                {
+                    this.pictureBoxEx1.ShowOverlayAnimation(pngFrameData, true);
+                    this.cmbItemAniNames.Items.Clear();
+                    this.cmbItemSkins.Visible = false;
+                    this.pictureBoxEx1.PictureName = aniName;
+                }
+
+                return;
+            }
+
+            //添加到动画控件
+            if (node.Text.EndsWith(".atlas", StringComparison.OrdinalIgnoreCase))
+            {
+                /*
+                var spineData = this.pictureBoxEx1.LoadSpineAnimation(node);
+                if (spineData != null)
+                {
+                    this.pictureBoxEx1.ShowAnimation(spineData);
+                    var aniItem = this.pictureBoxEx1.Items[0] as Animation.SpineAnimator;
+                    this.cmbItemAniNames.Items.Clear();
+                    this.cmbItemAniNames.Items.Add("");
+                    this.cmbItemAniNames.Items.AddRange(aniItem.Animations.ToArray());
+                    this.cmbItemAniNames.SelectedIndex = 0;
+                    this.cmbItemSkins.Visible = true;
+                    this.cmbItemSkins.Items.Clear();
+                    this.cmbItemSkins.Items.AddRange(aniItem.Skins.ToArray());
+                    this.cmbItemSkins.SelectedIndex = aniItem.Skins.IndexOf(aniItem.SelectedSkin);
+                }
+                */
+                MessageBoxEx.Show("Spine动画不可重合。", "未支持");
+                return;
+            }
+            else
+            {
+                var frameData = this.pictureBoxEx1.LoadFrameAnimation(node);
+
+                if (frameData != null)
+                {
+                    this.pictureBoxEx1.ShowOverlayAnimation(frameData);
+                    this.cmbItemAniNames.Items.Clear();
+                    this.cmbItemSkins.Visible = false;
+                    this.pictureBoxEx1.PictureName = aniName;
+                }
+                else
+                {
+                    var multiData = this.pictureBoxEx1.LoadMultiFrameAnimation(node);
+
+                    if (multiData != null)
+                    {
+                        /*
+                        this.pictureBoxEx1.ShowAnimation(multiData);
+                        var aniItem = this.pictureBoxEx1.Items[0] as Animation.MultiFrameAnimator;
+                        this.cmbItemAniNames.Items.Clear();
+                        this.cmbItemAniNames.Items.AddRange(aniItem.Animations.ToArray());
+                        this.cmbItemAniNames.SelectedIndex = 0;
+                        */
+                        MessageBoxEx.Show("Multi帧动画无法重合。", "未支持");
+                        return;
+                    }
+                }
+            }
+            //this.pictureBoxEx1.PictureName = aniName;
+        }
+
         private string GetSelectedNodeImageName()
         {
             Wz_Node node = advTree3.SelectedNode.AsWzNode();
@@ -618,6 +697,23 @@ namespace WzComparerR2
             }
         }
 
+        private void buttonDisableOverlayAni_Click(object sender, EventArgs e)
+        {
+            if (this.pictureBoxEx1.ShowOverlayAni)
+            {
+                this.pictureBoxEx1.ShowOverlayAni = false;
+                this.pictureBoxEx1.Items.Clear();
+            }
+        }
+
+        private void buttonOverlayRect_Click(object sender, EventArgs e)
+        {
+            if (this.pictureBoxEx1.ShowOverlayAni)
+            {
+                this.pictureBoxEx1.AddOverlayRect();
+            }
+        }
+
         private void buttonItemAutoSave_Click(object sender, EventArgs e)
         {
             ConfigManager.Reload();
@@ -651,7 +747,7 @@ namespace WzComparerR2
             var aniItem = this.pictureBoxEx1.Items[0];
             var frameData = (aniItem as FrameAnimator)?.Data;
             if (frameData != null && frameData.Frames.Count == 1 
-                && frameData.Frames[0].A0 == 255 && frameData.Frames[0].A1 == 255 && frameData.Frames[0].Delay == 0)
+                && frameData.Frames[0].A0 == 255 && frameData.Frames[0].A1 == 255 && frameData.Frames[0].Delay == 0 || pictureBoxEx1.ShowOverlayAni)
             {
                 // save still picture as png
                 this.OnSavePngFile(frameData.Frames[0]);
@@ -690,6 +786,43 @@ namespace WzComparerR2
                 using (var bmp = frame.Png.ExtractPng())
                 {
                     bmp.Save(pngFileName, System.Drawing.Imaging.ImageFormat.Png);
+                }
+                labelItemStatus.Text = "导出动画完毕: " + pngFileName;
+            }
+            else if (pictureBoxEx1.ShowOverlayAni && frame.Texture != null) // 嵌套动画
+            {
+                var config = ImageHandlerConfig.Default;
+                string pngFileName = pictureBoxEx1.PictureName + ".png";
+
+                if (config.AutoSaveEnabled)
+                {
+                    pngFileName = Path.Combine(config.AutoSavePictureFolder, string.Join("_", pngFileName.Split(Path.GetInvalidFileNameChars(), StringSplitOptions.None)));
+                }
+                else
+                {
+                    var dlg = new SaveFileDialog();
+                    dlg.Filter = "PNG (*.png)|*.png|全部文件 (*.*)|*.*";
+                    dlg.FileName = pngFileName;
+                    if (dlg.ShowDialog() != DialogResult.OK)
+                    {
+                        return;
+                    }
+
+                    pngFileName = dlg.FileName;
+                }
+
+                byte[] frameData = new byte[frame.Texture.Width * frame.Texture.Height * 4];
+                frame.Texture.GetData(frameData);
+                var targetSize = new Point(frame.Texture.Width, frame.Texture.Height);
+                unsafe
+                {
+                    fixed (byte* pFrameBuffer = frameData)
+                    {
+                        using (var bmp = new System.Drawing.Bitmap(targetSize.X, targetSize.Y, targetSize.X * 4, System.Drawing.Imaging.PixelFormat.Format32bppArgb, new IntPtr(pFrameBuffer)))
+                        {
+                            bmp.Save(pngFileName, System.Drawing.Imaging.ImageFormat.Png);
+                        }
+                    }
                 }
                 labelItemStatus.Text = "导出动画完毕: " + pngFileName;
             }

@@ -9,6 +9,7 @@ using System.Windows.Forms;
 using System.Reflection;
 using DevComponents.Editors;
 using WzComparerR2.Config;
+using DevComponents.DotNetBar.Controls;
 
 
 namespace WzComparerR2
@@ -128,6 +129,12 @@ namespace WzComparerR2
             set { checkBoxX11.Checked = value; }
         }
 
+        [Link]
+        public bool Gear_AutoTitleWrap
+        {
+            get { return checkBoxX18.Checked; }
+            set { checkBoxX18.Checked = value; }
+        }
 
         [Link]
         public bool Recipe_ShowID

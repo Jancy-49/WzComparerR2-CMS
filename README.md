@@ -2,6 +2,9 @@
 - 这是一个专为CMS设计的冒险岛提取工具。
 - 与其他客户端合作，例如 KMS、GMS、CMS。
 
+# Tooltip
+- EasyCompare可输出Skilltooltip、Itemtooltip、Eqptooltip、Mobtooltip和Npctooltip
+
 # Modules
 - **WzComparerR2** 主程序
 - **WzComparerR2.Common** 一些通用类

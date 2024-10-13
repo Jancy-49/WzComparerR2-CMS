@@ -30,6 +30,7 @@
         {
             this.superTabControl1 = new DevComponents.DotNetBar.SuperTabControl();
             this.superTabControlPanel1 = new DevComponents.DotNetBar.SuperTabControlPanel();
+            this.checkBoxX18 = new DevComponents.DotNetBar.Controls.CheckBoxX();
             this.checkBoxX15 = new DevComponents.DotNetBar.Controls.CheckBoxX();
             this.checkBoxX14 = new DevComponents.DotNetBar.Controls.CheckBoxX();
             this.checkBoxX13 = new DevComponents.DotNetBar.Controls.CheckBoxX();
@@ -137,6 +138,21 @@
             this.superTabControlPanel1.Size = new System.Drawing.Size(282, 251);
             this.superTabControlPanel1.TabIndex = 1;
             this.superTabControlPanel1.TabItem = this.superTabItem1;
+            // 
+            // checkBoxX18
+            // 
+            this.checkBoxX18.AutoSize = true;
+            this.checkBoxX18.BackColor = System.Drawing.Color.Transparent;
+            // 
+            // 
+            // 
+            this.checkBoxX18.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
+            this.checkBoxX18.Location = new System.Drawing.Point(13, 131);
+            this.checkBoxX18.Name = "checkBoxX18";
+            this.checkBoxX18.Size = new System.Drawing.Size(152, 16);
+            this.checkBoxX18.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
+            this.checkBoxX18.TabIndex = 10;
+            this.checkBoxX18.Text = "标题自动换行";
             // 
             // checkBoxX15
             // 
@@ -360,6 +376,7 @@
             // 
             // superTabControlPanel2
             // 
+            this.superTabControlPanel2.Controls.Add(this.checkBoxX18);
             this.superTabControlPanel2.Controls.Add(this.checkBoxX11);
             this.superTabControlPanel2.Controls.Add(this.checkBoxX6);
             this.superTabControlPanel2.Controls.Add(this.checkBoxX4);
@@ -670,5 +687,6 @@
         private DevComponents.DotNetBar.Controls.CheckBoxX checkBoxX13;
         private DevComponents.DotNetBar.Controls.CheckBoxX checkBoxX14;
         private DevComponents.DotNetBar.Controls.CheckBoxX checkBoxX15;
+        private DevComponents.DotNetBar.Controls.CheckBoxX checkBoxX18;
     }
 }

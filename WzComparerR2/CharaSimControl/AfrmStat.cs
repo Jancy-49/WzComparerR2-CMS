@@ -41,6 +41,8 @@ namespace WzComparerR2.CharaSimControl
         private Skill[] hyperStatSkillList;
 
         private ACtrlButton btnClose;
+        private ACtrlButton buttontoggleDetailOpen;
+        private ACtrlButton buttontoggleDetailClose;
         private ACtrlButton btnDetailOpen;
         private ACtrlButton btnDetailClose;
         private ACtrlButton btnHyperStatOpen;
@@ -97,7 +99,7 @@ namespace WzComparerR2.CharaSimControl
             get
             {
                 return new Rectangle(
-                    new Point(baseOffset.X - Resource.UICharacterInfo_img_remote_detailStat_HyperStat_Window_backgrnd.Width, baseOffset.Y),
+                    new Point(baseOffset.X - Resource.UICharacterInfo_img_remote_detailStat_HyperStat_Window_backgrnd.Width, baseOffset.Y + 709 - Resource.UICharacterInfo_img_remote_detailStat_HyperStat_Window_backgrnd.Height),
                     Resource.UICharacterInfo_img_remote_detailStat_HyperStat_Window_backgrnd.Size);
             }
         }
@@ -151,7 +153,6 @@ namespace WzComparerR2.CharaSimControl
                 addBtnList[i].Size = new Size(12, 12);
                 addBtnList[i].ButtonStateChanged += new EventHandler(aCtrl_RefreshCall);
             }
-
             this.btnClose = new ACtrlButton();
             this.btnClose.Normal = new BitmapOrigin(Resource.UICharacterInfo_img_common_main_buttonclose_normal_0);
             this.btnClose.Pressed = new BitmapOrigin(Resource.UICharacterInfo_img_common_main_buttonclose_pressed_0);
@@ -161,6 +162,24 @@ namespace WzComparerR2.CharaSimControl
             this.btnClose.Size = new Size(11, 11);
             this.btnClose.ButtonStateChanged += new EventHandler(aCtrl_RefreshCall);
             this.btnClose.MouseClick += new MouseEventHandler(btnClose_MouseClick);
+
+            this.buttontoggleDetailOpen = new ACtrlButton();
+            this.buttontoggleDetailOpen.Normal = new BitmapOrigin(Resource.UICharacterInfo_img_common_main_buttontoggleDetail_normal_0);
+            this.buttontoggleDetailOpen.Pressed = new BitmapOrigin(Resource.UICharacterInfo_img_common_main_buttontoggleDetail_pressed_0);
+            this.buttontoggleDetailOpen.MouseOver = new BitmapOrigin(Resource.UICharacterInfo_img_common_main_buttontoggleDetail_mouseOver_0);
+            this.buttontoggleDetailOpen.Disabled = new BitmapOrigin(Resource.UICharacterInfo_img_common_main_buttontoggleDetail_disabled_0);
+            this.buttontoggleDetailOpen.Location = new Point(10, 201);
+            this.buttontoggleDetailOpen.Size = new Size(452, 21);
+            this.buttontoggleDetailOpen.ButtonStateChanged += new EventHandler(aCtrl_RefreshCall);
+
+            this.buttontoggleDetailClose = new ACtrlButton();
+            this.buttontoggleDetailClose.Normal = new BitmapOrigin(Resource.UICharacterInfo_img_common_main_buttontoggleDetail_normal_0);
+            this.buttontoggleDetailClose.Pressed = new BitmapOrigin(Resource.UICharacterInfo_img_common_main_buttontoggleDetail_pressed_0);
+            this.buttontoggleDetailClose.MouseOver = new BitmapOrigin(Resource.UICharacterInfo_img_common_main_buttontoggleDetail_mouseOver_0);
+            this.buttontoggleDetailClose.Disabled = new BitmapOrigin(Resource.UICharacterInfo_img_common_main_buttontoggleDetail_disabled_0);
+            this.buttontoggleDetailClose.Location = new Point(10, 201);
+            this.buttontoggleDetailClose.Size = new Size(452, 21);
+            this.buttontoggleDetailClose.ButtonStateChanged += new EventHandler(aCtrl_RefreshCall);
 
             this.btnDetailOpen = new ACtrlButton();
             this.btnDetailOpen.Normal = new BitmapOrigin(Resource.UICharacterInfo_img_common_detailStat_buttonability_normal_0);
@@ -463,7 +482,7 @@ namespace WzComparerR2.CharaSimControl
             {
                 long part = value / 1_0000_0000;
                 sb.Append(firstPart ? null : " ");
-                sb.AppendFormat("{0}億", part); // Korean: 억, TradChinese+Japanese: 億, SimpChinese: 亿
+                sb.AppendFormat("{0}亿", part); // Korean: 억, TradChinese+Japanese: 億, SimpChinese: 亿
                 value -= part * 1_0000_0000;
                 firstPart = false;
             }
@@ -592,7 +611,7 @@ namespace WzComparerR2.CharaSimControl
                 }
                 g.DrawString(charStat.Level.ToString().PadLeft(3), GearGraphics.LevelBoldFont, GearGraphics.WhiteBrush, 234f, 35f);
                 g.DrawString(charStat.UnionLevel.ToString().PadLeft(5), GearGraphics.ItemDetailFont, GearGraphics.GrayBrush, 92f, 129f);
-                g.DrawString(charStat.DojoFloor.ToString().PadLeft(3) + "階", GearGraphics.ItemDetailFont, GearGraphics.GrayBrush, 92f, 151f);
+                g.DrawString(charStat.DojoFloor.ToString().PadLeft(3) + "层", GearGraphics.ItemDetailFont, GearGraphics.GrayBrush, 92f, 151f);
 
                 // g.DrawString(charStat.Ap.ToString().PadLeft(4), GearGraphics.ItemDetailFont, GearGraphics.WhiteBrush, 73f, 181f);
                 g.DrawString(charStat.Strength.GetSum().ToString("N0").PadLeft(7), GearGraphics.ItemDetailFont, GearGraphics.WhiteBrush, 187f, 342f);
@@ -638,14 +657,14 @@ namespace WzComparerR2.CharaSimControl
         {
             Rectangle rect = this.DetailRect;
             g.TranslateTransform(rect.X, rect.Y);
-            int AbilityYOffset = Resource.UICharacterInfo_img_common_main_backgrnd.Height + Resource.UICharacterInfo_img_local_detail_backgrnd.Height - Resource.UICharacterInfo_img_remote_detailStat_ability_backgrnd.Height + 2;
+            int AbilityYOffset = Resource.UICharacterInfo_img_common_main_backgrnd.Height + Resource.UICharacterInfo_img_local_detail_backgrnd.Height - Resource.UICharacterInfo_img_remote_detailStat_ability_backgrnd.Height;
             g.DrawImage(Resource.UICharacterInfo_img_remote_detailStat_ability_backgrnd, 0, AbilityYOffset);
             //g.DrawImage(Resource.UICharacterInfo_img_remote_detailStat_ability_backgrnd4, 12, 222);
 
-            g.DrawImage(Resource.UICharacterInfo_img_common_detailStat_ability_abilityTitle_legendary_0, 10, (AbilityYOffset + 31));
-            g.DrawImage(Resource.UICharacterInfo_img_common_detailStat_ability_metierLine_activated_0_legendary_0, 12, (AbilityYOffset + 63));
-            g.DrawImage(Resource.UICharacterInfo_img_common_detailStat_ability_metierLine_activated_0_unique_0, 12, (AbilityYOffset + 83));
-            g.DrawImage(Resource.UICharacterInfo_img_common_detailStat_ability_metierLine_activated_0_unique_0, 12, (AbilityYOffset + 103));
+            g.DrawImage(Resource.UICharacterInfo_img_remote_detailStat_ability_abilityTitle_legendary_0, 10, (AbilityYOffset + 30));
+            g.DrawImage(Resource.UICharacterInfo_img_remote_detailStat_ability_metierLine_activated_0_legendary_0, 11, (AbilityYOffset + 62));
+            g.DrawImage(Resource.UICharacterInfo_img_remote_detailStat_ability_metierLine_activated_0_unique_0, 11, (AbilityYOffset + 82));
+            g.DrawImage(Resource.UICharacterInfo_img_remote_detailStat_ability_metierLine_activated_0_unique_0, 11, (AbilityYOffset + 102));
 
             if (this.character != null)
             {

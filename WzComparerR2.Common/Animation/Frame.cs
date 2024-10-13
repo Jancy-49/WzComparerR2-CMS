@@ -27,7 +27,13 @@ namespace WzComparerR2.Animation
             this.Texture = atlasPage;
             this.AtlasRect = atlasRect;
         }
-
+        public Frame(Texture2D texture, Point origin, int z, int delay, bool blend) : this(texture)
+        {
+            this.Origin = origin;
+            this.Z = z;
+            this.Delay = delay;
+            this.Blend = blend;
+        }
         public Texture2D Texture { get; set; }
         public Rectangle? AtlasRect { get; set; }
         public Wz_Png Png { get; set; }
