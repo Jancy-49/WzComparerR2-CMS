@@ -44,11 +44,13 @@ namespace WzComparerR2.Comparer
         private List<string> eqpTooltipInfo = new List<string>();
         private List<string> mobTooltipInfo = new List<string>();
         private List<string> npcTooltipInfo = new List<string>();
+        private List<string> cashTooltipInfo = new List<string>();
         private Dictionary<string, List<string>> diffSkillTags = new Dictionary<string, List<string>>();
         private Dictionary<string, List<string>> diffItemTags = new Dictionary<string, List<string>>();
         private Dictionary<string, List<string>> diffEqpTags = new Dictionary<string, List<string>>();
         private Dictionary<string, List<string>> diffMobTags = new Dictionary<string, List<string>>();
         private Dictionary<string, List<string>> diffNpcTags = new Dictionary<string, List<string>>();
+        private Dictionary<string, List<string>> diffCashTags = new Dictionary<string, List<string>>();
         public WzFileComparer Comparer { get; protected set; }
         private string stateInfo;
         private string stateDetail;
@@ -58,6 +60,7 @@ namespace WzComparerR2.Comparer
         public bool EnableDarkMode { get; set; }
         public bool saveSkillTooltip { get; set; }
         public bool saveItemTooltip { get; set; }
+        public bool saveCashTooltip { get; set; }
         public bool saveEqpTooltip { get; set; }
         public bool saveMobTooltip { get; set; }
         public bool saveNpcTooltip { get; set; }
@@ -602,6 +605,14 @@ namespace WzComparerR2.Comparer
                 }
                 saveTooltip5(npcTooltipPath);
             }
+            if (saveCashTooltip && type.ToString() == "String" && cashTooltipInfo != null)
+            {
+                if (!Directory.Exists(itemTooltipPath))
+                {
+                    Directory.CreateDirectory(itemTooltipPath);
+                }
+                saveTooltip6(itemTooltipPath);
+            }
         }
 
         // 变更技能Tooltip输出
@@ -781,22 +792,14 @@ namespace WzComparerR2.Comparer
                 {
                     itemNodePath = String.Format(@"Item\Cash\0{0:D}.img\{1:D}", int.Parse(itemID) / 10000, itemID);
                 }
-                else if (itemID.StartsWith("09")) // 判断第1位是否是09
-                {
-                    itemNodePath = String.Format(@"Item\Special\0{0:D}.img\{1:D}", int.Parse(itemID) / 10000, itemID);
-                }
                 int heightNew = 0, heightOld = 0;
                 int width = 0;
                 // 变更后Tooltip图像生成
                 Item itemNew = Item.CreateFromNode(PluginManager.FindWz(itemNodePath, wzNew?.GetNodeWzFile()), PluginManager.FindWz);
-                //if (itemID.StartsWith("09"))
-                //{
-                //    CashPackage itemNew = CashPackage.CreateFromNode(PluginManager.FindWz(itemNodePath, wzNew?.GetNodeWzFile()), PluginManager.FindWz);
-                //}
                 if (itemNew != null)
                 {
-                    itemRenderNew.Item = itemNew;
-                    itemImageNew = itemRenderNew.Render();
+                    itemRenderNew.Item = itemNew;  // 使用 itemRenderNew 渲染 Item 类型
+                    itemImageNew = itemRenderNew.Render(); // 渲染图像
                     width += itemImageNew.Width;
                     heightNew = itemImageNew.Height;
                 }
@@ -805,8 +808,8 @@ namespace WzComparerR2.Comparer
                 Item itemOld = Item.CreateFromNode(PluginManager.FindWz(itemNodePath, wzOld?.GetNodeWzFile()), PluginManager.FindWz);
                 if (itemOld != null)
                 {
-                    itemRenderOld.Item = itemOld;
-                    itemImageOld = itemRenderOld.Render();
+                    itemRenderOld.Item = itemOld;  // 使用 itemRenderNew 渲染 Item 类型
+                    itemImageOld = itemRenderOld.Render(); // 渲染图像
                     width += itemImageOld.Width;
                     heightOld = itemImageOld.Height;
                 }
@@ -875,12 +878,11 @@ namespace WzComparerR2.Comparer
                 count3++;
                 StateInfo = string.Format("{0}/{1} 装备: {2}", count3, allCount3, eqpID);
                 StateDetail = "正在以Tooltip图像处理装备变更点...";
-
                 Bitmap eqpImageNew = null;
                 Bitmap eqpImageOld = null;
                 string eqpType = "删除";
                 string eqpNodePath = null;
-                if (eqpID.StartsWith("010")) // 判断开头是否是010
+                if (Regex.IsMatch(eqpID, "^0101|^0102|^0103|^0112|^0113|^0114|^0115|^0116|^0118|^0119")) // 判断开头是否是0101~0103或0112~0116-0118~0119
                 {
                     eqpNodePath = String.Format(@"Character\Accessory\{0:D}.img", eqpID);
                 }
@@ -920,13 +922,17 @@ namespace WzComparerR2.Comparer
                 {
                     eqpNodePath = String.Format(@"Character\Ring\{0:D}.img", eqpID);
                 }
-                else if (Regex.IsMatch(eqpID, "^012|^013|^014|^015|^0160|^0169|^0170")) // 判断开头是否是012~015
+                else if (eqpID.StartsWith("0120") || eqpID.StartsWith("120")) // 判断开头是否是0120
+                {
+                    eqpNodePath = String.Format(@"Character\Totem\{0:D}.img", eqpID);
+                }
+                else if (Regex.IsMatch(eqpID, "^012[1-9]|^013|^014|^015|^0160|^0169|^0170")) // 判断开头是否是012~015、0160或0169-0179
                 {
                     eqpNodePath = String.Format(@"Character\Weapon\{0:D}.img", eqpID);
                 }
                 else if (Regex.IsMatch(eqpID, "^0161|^0162|^0163|^0164|^0165"))// 判断开头是否是0161~0165
                 {
-                    eqpNodePath = String.Format(@"Character\Android\{0:D}.img", eqpID);
+                    eqpNodePath = String.Format(@"Character\Mechanic\{0:D}.img", eqpID);
                 }
                 else if (Regex.IsMatch(eqpID, "^0166|^0167")) // 判断开头是否是0166或0167
                 {
@@ -942,7 +948,11 @@ namespace WzComparerR2.Comparer
                 }
                 else if (Regex.IsMatch(eqpID, "^01713|^01714")) // 判断开头是否是01713或01714
                 {
-                    eqpNodePath = String.Format(@"Character\ArcaneForce\{0:D}.img", eqpID);
+                    eqpNodePath = String.Format(@"Character\AuthenticForce\{0:D}.img", eqpID);
+                }
+                else if (Regex.IsMatch(eqpID, "^0179"))  // 判断开头是否是0179
+                {
+                    eqpNodePath = String.Format(@"Character\NT_Beauty\{0:D}.img", eqpID);
                 }
                 else if (eqpID.StartsWith("018")) // 判断开头是否是018
                 {
@@ -962,7 +972,7 @@ namespace WzComparerR2.Comparer
                 }
                 else if (Regex.IsMatch(eqpID, "^0003|^0004|^0006")) // 判断开头是否是0003、0004或0006
                 {
-                    eqpNodePath = String.Format(@"Character\Face\{0:D}.img", eqpID);
+                    eqpNodePath = String.Format(@"Character\Hair\{0:D}.img", eqpID);
                 }
                 int heightNew = 0, heightOld = 0;
                 int width = 0;
@@ -1098,8 +1108,8 @@ namespace WzComparerR2.Comparer
                     mobType = "新增";
                 }
                 var mobTypeTextInfo = g.MeasureString(mobType, GearGraphics.EquipDetailFont2);
-                int picH = 13;
-                GearGraphics.DrawPlainText(g, mobType, mobTypeFont, Color.FromArgb(255, 255, 255), 2, (int)Math.Ceiling(mobTypeTextInfo.Width) + 2, ref picH, 10);
+                //int picH = 13;
+                //GearGraphics.DrawPlainText(g, mobType, mobTypeFont, Color.FromArgb(255, 255, 255), 2, (int)Math.Ceiling(mobTypeTextInfo.Width) + 2, ref picH, 10);
 
                 string imageName = Path.Combine(mobTooltipPath, "Mob_" + mobID + "_" + mobType + ".png");
                 if (!File.Exists(imageName))
@@ -1189,8 +1199,8 @@ namespace WzComparerR2.Comparer
                     npcType = "新增";
                 }
                 var npcTypeTextInfo = g.MeasureString(npcType, GearGraphics.EquipDetailFont2);
-                int picH = 13;
-                GearGraphics.DrawPlainText(g, npcType, npcTypeFont, Color.FromArgb(255, 255, 255), 2, (int)Math.Ceiling(npcTypeTextInfo.Width) + 2, ref picH, 10);
+                //int picH = 13;
+                //GearGraphics.DrawPlainText(g, npcType, npcTypeFont, Color.FromArgb(255, 255, 255), 2, (int)Math.Ceiling(npcTypeTextInfo.Width) + 2, ref picH, 10);
 
                 string imageName = Path.Combine(npcTooltipPath, "Npc_" + npcID + "_" + npcType + ".png");
                 if (!File.Exists(imageName))
@@ -1202,6 +1212,100 @@ namespace WzComparerR2.Comparer
             }
             npcTooltipInfo.Clear();
             diffNpcTags.Clear();
+        }
+
+        private void saveTooltip6(string itemTooltipPath)
+        {
+            StringLinker slNew = new StringLinker();
+            StringLinker slOld = new StringLinker();
+            CashPackageTooltipRender cashRenderNew = new CashPackageTooltipRender();
+            CashPackageTooltipRender cashRenderOld = new CashPackageTooltipRender();
+            int count6 = 0;
+            int allCount6 = cashTooltipInfo.Count;
+            var itemTypeFont = new Font("宋体", 11f, GraphicsUnit.Pixel);
+
+            this.stringWzNew = wzNew?.FindNodeByPath("String").GetNodeWzFile();
+            this.itemWzNew = wzNew?.FindNodeByPath("Item").GetNodeWzFile();
+            this.etcWzNew = wzNew?.FindNodeByPath("Etc").GetNodeWzFile();
+            this.stringWzOld = wzOld?.FindNodeByPath("String").GetNodeWzFile();
+            this.itemWzOld = wzOld?.FindNodeByPath("Item").GetNodeWzFile();
+            this.etcWzOld = wzOld?.FindNodeByPath("Etc").GetNodeWzFile();
+            slNew.Load(stringWzNew, itemWzNew, etcWzNew);
+            slOld.Load(stringWzOld, itemWzOld, etcWzOld);
+            cashRenderNew.StringLinker = slNew;
+            cashRenderOld.StringLinker = slOld;
+            cashRenderNew.ShowObjectID = true;
+            cashRenderOld.ShowObjectID = true;
+            foreach (var itemID in cashTooltipInfo)
+            {
+                count6++;
+                StateInfo = string.Format("{0}/{1} 礼包: {2}", count6, allCount6, itemID);
+                StateDetail = "正在以Tooltip图像处理道具变更点...";
+
+                Bitmap itemImageNew = null;
+                Bitmap itemImageOld = null;
+                string itemType = "删除";
+                string itemNodePath = null;
+                if (itemID.StartsWith("9")) // 判断第1位是否是09
+                {
+                    itemNodePath = String.Format(@"Item\Special\0{0:D}.img\{1:D}", int.Parse(itemID) / 10000, itemID);
+                }
+                int heightNew = 0, heightOld = 0;
+                int width = 0;
+                // 变更后Tooltip图像生成
+                CashPackage itemNew = CashPackage.CreateFromNode(PluginManager.FindWz(itemNodePath, wzNew?.GetNodeWzFile()), PluginBase.PluginManager.FindWz(string.Format(@"Etc\CashPackage.img\{0}", itemID)), PluginManager.FindWz);
+                if (itemNew != null)
+                {
+                    cashRenderNew.CashPackage = itemNew;
+                    itemImageNew = cashRenderNew.Render();
+                    width += itemImageNew.Width;
+                    heightNew = itemImageNew.Height;
+                }
+                if (width == 0) continue;
+                // 变更前Tooltip图像生成
+                CashPackage itemOld = CashPackage.CreateFromNode(PluginManager.FindWz(itemNodePath, wzNew?.GetNodeWzFile()), PluginBase.PluginManager.FindWz(string.Format(@"Etc\CashPackage.img\{0}", itemID)), PluginManager.FindWz);
+                if (itemOld != null)
+                {
+                    cashRenderOld.CashPackage = itemOld;
+                    itemImageOld = cashRenderOld.Render();
+                    width += itemImageOld.Width;
+                    heightOld = itemImageOld.Height;
+                }
+                if (width == 0) continue;
+                // Tooltip图像合成
+                Bitmap resultImage = new Bitmap(width, Math.Max(heightNew, heightOld));
+                Graphics g = Graphics.FromImage(resultImage);
+                if (itemImageOld != null)
+                {
+                    if (itemImageNew != null)
+                    {
+                        g.DrawImage(itemImageNew, itemImageOld.Width, 0);
+                        itemImageNew.Dispose();
+                        itemType = "变更";
+                    }
+                    g.DrawImage(itemImageOld, 0, 0);
+                    itemImageOld.Dispose();
+                }
+                else
+                {
+                    g.DrawImage(itemImageNew, 0, 0);
+                    itemImageNew.Dispose();
+                    itemType = "新增";
+                }
+                var itemTypeTextInfo = g.MeasureString(itemType, GearGraphics.ItemDetailFont2);
+                int picH = 13;
+                GearGraphics.DrawPlainText(g, itemType, itemTypeFont, Color.FromArgb(255, 255, 255), 2, (int)Math.Ceiling(itemTypeTextInfo.Width) + 2, ref picH, 10);
+
+                string imageName = Path.Combine(itemTooltipPath, "Item_" + itemID + "_" + itemType + ".png");
+                if (!File.Exists(imageName))
+                {
+                    resultImage.Save(imageName, System.Drawing.Imaging.ImageFormat.Png);
+                }
+                resultImage.Dispose();
+                g.Dispose();
+            }
+            cashTooltipInfo.Clear();
+            diffItemTags.Clear();
         }
 
         // 从Skill不同节点获取SkillID
@@ -1232,10 +1336,10 @@ namespace WzComparerR2.Comparer
         private void getIDFromItem(Wz_Node node)
         {
             var tag = node.Text;
-            Match match2 = Regex.Match(node.FullPathToFile, @"^Item\\(Cash|Consume|Etc|Install|Special)\\\d+.img\\(\d+)\\.*");
-            if (match2.Success)
+            Match match = Regex.Match(node.FullPathToFile, @"^Item\\(Cash|Consume|Etc|Install)\\\d+.img\\(\d+)\\.*");
+            if (match.Success)
             {
-                string itemID = match2.Groups[2].ToString();
+                string itemID = match.Groups[2].ToString();
                 if (!itemTooltipInfo.Contains(itemID) && itemID != null)
                 {
                     itemTooltipInfo.Add(itemID);
@@ -1247,6 +1351,30 @@ namespace WzComparerR2.Comparer
                     if (!diffItemTags[itemID].Contains(tag))
                     {
                         diffItemTags[itemID].Add(tag);
+                    }
+                }
+            }
+        }
+
+        //从Item/Special不同节点获取CashID
+        private void getIDFromCash(Wz_Node node)
+        {
+            var tag = node.Text;
+            Match match = Regex.Match(node.FullPathToFile, @"^Item\\Special\\\d+.img\\(\d+)\\.*");
+            if (match.Success)
+            {
+                string cashID = match.Groups[1].ToString();
+                if (!cashTooltipInfo.Contains(cashID) && cashID != null)
+                {
+                    cashTooltipInfo.Add(cashID);
+                    diffCashTags[cashID] = new List<string>();
+                    diffCashTags[cashID].Add(tag);
+                }
+                else if (cashTooltipInfo.Contains(cashID) && cashID != null)
+                {
+                    if (!diffCashTags[cashID].Contains(tag))
+                    {
+                        diffCashTags[cashID].Add(tag);
                     }
                 }
             }
@@ -1341,10 +1469,14 @@ namespace WzComparerR2.Comparer
         // 从String不同节点获取ItemID
         private void getIDFromString2(Wz_Node node)
         {
-            Match match2 = Regex.Match(node.FullPathToFile, @"^String\\(Cash.img|Consume.img|Etc.img\\Etc|Ins.img|Pet.img)\\(\d+).*");
-            if (match2.Success)
+            Match match = Regex.Match(node.FullPathToFile, @"^String\\(Cash.img|Consume.img|Etc.img\\Etc|Ins.img|Pet.img)\\(\d+).*");
+            if (match.Success)
             {
-                string ItemID = match2.Groups[2].ToString();
+                string ItemID = match.Groups[2].ToString();
+                if (!ItemID.StartsWith("500"))
+                {
+                    ItemID = ItemID.PadLeft(8, '0'); // 如果不是以500或910开头，则补齐8位数
+                }
                 if (!itemTooltipInfo.Contains(ItemID) && ItemID != null)
                 {
                     itemTooltipInfo.Add(ItemID);
@@ -1355,10 +1487,10 @@ namespace WzComparerR2.Comparer
         // 从String不同节点获取EqpID
         private void getIDFromString3(Wz_Node node)
         {
-            Match match3 = Regex.Match(node.FullPathToFile, @"^String\\Eqp.img\\Eqp\\(\d+).*");
+            Match match3 = Regex.Match(node.FullPathToFile, @"^String\\Eqp.img\\Eqp\\\w+\\(\d+).*");
             if (match3.Success)
             {
-                string EqpID = match3.Groups[1].ToString();
+                string EqpID = match3.Groups[1].ToString().PadLeft(8, '0');
                 if (!eqpTooltipInfo.Contains(EqpID) && EqpID != null)
                 {
                     eqpTooltipInfo.Add(EqpID);
@@ -1372,24 +1504,38 @@ namespace WzComparerR2.Comparer
             Match match4 = Regex.Match(node.FullPathToFile, @"^String\\Mob.img\\(\d+).*");
             if (match4.Success)
             {
-                string MobID = match4.Groups[1].ToString();
+                string MobID = match4.Groups[1].ToString().PadLeft(7, '0');
                 if (!mobTooltipInfo.Contains(MobID) && MobID != null)
                 {
-                    eqpTooltipInfo.Add(MobID);
+                    mobTooltipInfo.Add(MobID);
                 }
             }
         }
 
-        // 从String不同节点获取MobID
+        // 从String不同节点获取NpcID
         private void getIDFromString5(Wz_Node node)
         {
             Match match5 = Regex.Match(node.FullPathToFile, @"^String\\Npc.img\\(\d+).*");
             if (match5.Success)
             {
-                string NpcID = match5.Groups[1].ToString();
-                if (!mobTooltipInfo.Contains(NpcID) && NpcID != null)
+                string NpcID = match5.Groups[1].ToString().PadLeft(7, '0');
+                if (!npcTooltipInfo.Contains(NpcID) && NpcID != null)
                 {
-                    eqpTooltipInfo.Add(NpcID);
+                    npcTooltipInfo.Add(NpcID);
+                }
+            }
+        }
+
+        // 从String不同节点获取NpcID
+        private void getIDFromString6(Wz_Node node)
+        {
+            Match match6 = Regex.Match(node.FullPathToFile, @"^Item\\Special.img\\0910.img\\(\d+)\\name");
+            if (match6.Success)
+            {
+                string cashID = match6.Groups[1].ToString();
+                if (!cashTooltipInfo.Contains(cashID) && cashID != null)
+                {
+                    cashTooltipInfo.Add(cashID);
                 }
             }
         }
@@ -1534,7 +1680,7 @@ namespace WzComparerR2.Comparer
                         getIDFromNpc(diff.NodeOld);
                     }
                 }
-                if (saveMobTooltip && outputDir.Contains("String"))
+                if (saveNpcTooltip && outputDir.Contains("String"))
                 {
                     if (diff.NodeNew != null)
                     {
@@ -1543,6 +1689,29 @@ namespace WzComparerR2.Comparer
                     if (diff.NodeOld != null)
                     {
                         getIDFromString5(diff.NodeOld);
+                    }
+                }
+                // 变更的礼包Tooltip处理
+                if (saveCashTooltip && outputDir.Contains("Item"))
+                {
+                    if (diff.NodeNew != null)
+                    {
+                        getIDFromCash(diff.NodeNew);
+                    }
+                    if (diff.NodeOld != null)
+                    {
+                        getIDFromCash(diff.NodeOld);
+                    }
+                }
+                if (saveCashTooltip && outputDir.Contains("String"))
+                {
+                    if (diff.NodeNew != null)
+                    {
+                        getIDFromString6(diff.NodeNew);
+                    }
+                    if (diff.NodeOld != null)
+                    {
+                        getIDFromString6(diff.NodeOld);
                     }
                 }
             }
@@ -1605,6 +1774,14 @@ namespace WzComparerR2.Comparer
                     if (saveEqpTooltip && outputDir.Contains("Mob")) // 变更装备Tooltip处理
                     {
                         getIDFromMob(node);
+                    }
+                    if (saveNpcTooltip && outputDir.Contains("Npc")) // 变更Npc Tooltip处理
+                    {
+                        getIDFromNpc(node);
+                    }
+                    if (saveCashTooltip && outputDir.Contains("Item")) // 变更礼包Tooltip处理
+                    {
+                        getIDFromItem(node);
                     }
 
                     if (node.Nodes.Count > 0)

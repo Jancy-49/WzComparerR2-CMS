@@ -10,6 +10,7 @@ using WzComparerR2.PluginBase;
 using WzComparerR2.WzLib;
 using WzComparerR2.Common;
 using WzComparerR2.CharaSim;
+using System.Linq;
 
 namespace WzComparerR2.CharaSimControl
 {
@@ -144,7 +145,15 @@ namespace WzComparerR2.CharaSimControl
             }
 
             picH = 10;
-            TextRenderer.DrawText(g, CashPackage.name, GearGraphics.ItemNameFont2, new Point(cashBitmap.Width, picH), Color.White, TextFormatFlags.HorizontalCenter | TextFormatFlags.NoPrefix);
+            if (IsKoreanStringPresent(CashPackage.name))
+            {
+                TextRenderer.DrawText(g, CashPackage.name, GearGraphics.KMSItemNameFont, new Point(cashBitmap.Width, picH), Color.White, TextFormatFlags.HorizontalCenter | TextFormatFlags.NoPrefix);
+            }
+            else
+            {
+                TextRenderer.DrawText(g, CashPackage.name, GearGraphics.ItemNameFont2, new Point(cashBitmap.Width, picH), Color.White, TextFormatFlags.HorizontalCenter | TextFormatFlags.NoPrefix);
+            }
+            //TextRenderer.DrawText(g, CashPackage.name, GearGraphics.ItemNameFont2, new Point(cashBitmap.Width, picH), Color.White, TextFormatFlags.HorizontalCenter | TextFormatFlags.NoPrefix);
             picH += 14;
             if (commodityPackage.termStart > 0 || commodityPackage.termEnd != null)
             {
@@ -208,10 +217,29 @@ namespace WzComparerR2.CharaSimControl
                 CashPackage.desc += "";
             CashPackage.desc += "\n";
             if (CashPackage.onlyCash == 0)
-                GearGraphics.DrawString(g, CashPackage.desc + "\n#用冒险券购买时使用前仅限与他人交换1次。(额外道具除外)#", GearGraphics.ItemDetailFont2, 11, right, ref picH, 16);
+            {                
+                if (IsKoreanStringPresent(CashPackage.desc))
+                {
+                    GearGraphics.DrawString(g, CashPackage.desc + "\n#用冒险券购买时使用前仅限与他人交换1次。(额外道具除外)#", GearGraphics.KMSItemDetailFont, 11, right, ref picH, 16);
+                }
+                else
+                {
+                    GearGraphics.DrawString(g, CashPackage.desc + "\n#用冒险券购买时使用前仅限与他人交换1次。(额外道具除外)#", GearGraphics.ItemDetailFont2, 11, right, ref picH, 16);
+                }
+            }
+            //GearGraphics.DrawString(g, CashPackage.desc + "\n#用冒险券购买时使用前仅限与他人交换1次。(额外道具除外)#", GearGraphics.ItemDetailFont2, 11, right, ref picH, 16);
             //GearGraphics.DrawString(g, CashPackage.desc + "\n#(Not applicable to free bonus items) Buy this with Nexon Cash and you can trade it with another user once if unused.", GearGraphics.ItemDetailFont2, 11, right, ref picH, 16);
             else
-                GearGraphics.DrawString(g, CashPackage.desc + "\n#只能用冒险券购买。#", GearGraphics.ItemDetailFont2, 11, right, ref picH, 16);
+            {
+                if (IsKoreanStringPresent(CashPackage.desc))
+                {
+                    GearGraphics.DrawString(g, CashPackage.desc + "\n#只能用冒险券购买。#", GearGraphics.ItemDetailFont2, 11, right, ref picH, 16);
+                }
+                else
+                {
+                    GearGraphics.DrawString(g, CashPackage.desc + "\n#只能用冒险券购买。#", GearGraphics.ItemDetailFont2, 11, right, ref picH, 16);
+                }
+            }
 
             bool hasLine = false;
             picH -= 0;//default is 4
@@ -359,7 +387,14 @@ namespace WzComparerR2.CharaSimControl
                 }
                 if (time == null)
                 {
-                    TextRenderer.DrawText(g, name.TrimEnd(Environment.NewLine.ToCharArray()), GearGraphics.ItemDetailFont, new Point(columnLeft + 55, picH + 17), Color.White, TextFormatFlags.NoPadding | TextFormatFlags.NoPrefix);
+                    if (IsKoreanStringPresent(name.TrimEnd(Environment.NewLine.ToCharArray())))
+                    {
+                        TextRenderer.DrawText(g, name.TrimEnd(Environment.NewLine.ToCharArray()), GearGraphics.KMSItemDetailFont, new Point(columnLeft + 55, picH + 17), Color.White, TextFormatFlags.NoPadding | TextFormatFlags.NoPrefix);
+                    }
+                    else
+                    {
+                        TextRenderer.DrawText(g, name.TrimEnd(Environment.NewLine.ToCharArray()), GearGraphics.ItemDetailFont, new Point(columnLeft + 55, picH + 17), Color.White, TextFormatFlags.NoPadding | TextFormatFlags.NoPrefix);
+                    }
                     if (commodity.Bonus == 0)
                     {
                         TextRenderer.DrawText(g, info, GearGraphics.ItemDetailFont, new Point(columnLeft + 55, picH + 33), Color.White, TextFormatFlags.NoPadding | TextFormatFlags.NoPrefix);
@@ -379,7 +414,15 @@ namespace WzComparerR2.CharaSimControl
                 }
                 else
                 {
-                    TextRenderer.DrawText(g, name.Replace(Environment.NewLine, ""), GearGraphics.ItemDetailFont, new Point(columnLeft + 55, picH + 8), Color.White, TextFormatFlags.NoPadding | TextFormatFlags.NoPrefix);
+                    if (IsKoreanStringPresent(name.Replace(Environment.NewLine, "")))
+                    {
+                        TextRenderer.DrawText(g, name.Replace(Environment.NewLine, ""), GearGraphics.KMSItemDetailFont, new Point(columnLeft + 55, picH + 8), Color.White, TextFormatFlags.NoPadding | TextFormatFlags.NoPrefix);
+                    }
+                    else
+                    {
+                        TextRenderer.DrawText(g, name.Replace(Environment.NewLine, ""), GearGraphics.ItemDetailFont, new Point(columnLeft + 55, picH + 8), Color.White, TextFormatFlags.NoPadding | TextFormatFlags.NoPrefix);
+
+                    }
                     if (commodity.Bonus == 0)
                     {
                         TextRenderer.DrawText(g, info, GearGraphics.ItemDetailFont, new Point(columnLeft + 55, picH + 24), Color.White, TextFormatFlags.NoPadding | TextFormatFlags.NoPrefix);
@@ -427,6 +470,16 @@ namespace WzComparerR2.CharaSimControl
             format.Dispose();
             g.Dispose();
             return cashBitmap;
+        }
+
+        private bool IsKoreanStringPresent(string checkString)
+        {
+            // 如果checkString是null，直接返回false
+            if (checkString == null)
+            {
+                return false;
+            }
+            return checkString.Any(c => (c >= '\uAC00' && c <= '\uD7A3'));
         }
 
         private void DrawDiscountNum(Graphics g, string numString, int x, int y, StringAlignment align)

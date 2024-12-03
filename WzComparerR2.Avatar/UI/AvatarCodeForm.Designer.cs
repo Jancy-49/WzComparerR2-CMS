@@ -60,7 +60,7 @@
             this.buttonX2.Size = new System.Drawing.Size(75, 23);
             this.buttonX2.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
             this.buttonX2.TabIndex = 1;
-            this.buttonX2.Text = "キャンセル";
+            this.buttonX2.Text = "取消";
             // 
             // textBoxX1
             // 
@@ -142,7 +142,7 @@
             this.MinimizeBox = false;
             this.Name = "AvatarCodeForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
-            this.Text = "アイテムコード入力";
+            this.Text = "输入道具代码";
             this.ResumeLayout(false);
             this.PerformLayout();
 

@@ -57,7 +57,7 @@ namespace WzComparerR2.Patcher
 
             if (this.patchBlock == null)
             {
-                throw new Exception("解凍エラー。ストリームからパッチブロックが見つかりません。");
+                throw new Exception("解压错误, 无法从串流找到补丁模块。");
             }
 
             BinaryReader r = new BinaryReader(patchBlock);

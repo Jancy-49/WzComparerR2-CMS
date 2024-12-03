@@ -134,8 +134,10 @@
             this.ribbonBar11 = new DevComponents.DotNetBar.RibbonBar();
             this.buttonItem1 = new DevComponents.DotNetBar.ButtonItem();
             this.ribbonBar7 = new DevComponents.DotNetBar.RibbonBar();
+            this.buttonPapulatus = new DevComponents.DotNetBar.ButtonItem();
             this.buttonItemUpdate = new DevComponents.DotNetBar.ButtonItem();
             this.ribbonBar6 = new DevComponents.DotNetBar.RibbonBar();
+            this.ribbonBar12 = new DevComponents.DotNetBar.RibbonBar();
             this.buttonItemAbout = new DevComponents.DotNetBar.ButtonItem();
             this.ribbonTabItem1 = new DevComponents.DotNetBar.RibbonTabItem();
             this.ribbonTabItem2 = new DevComponents.DotNetBar.RibbonTabItem();
@@ -173,9 +175,13 @@
             this.buttonItemAutoSaveFolder = new DevComponents.DotNetBar.ButtonItem();
             this.labelItemAutoSaveFolder = new DevComponents.DotNetBar.LabelItem();
             this.buttonItemGif = new DevComponents.DotNetBar.ButtonItem();
+            this.buttonItemGif2 = new DevComponents.DotNetBar.ButtonItem();
             this.itemContainer36 = new DevComponents.DotNetBar.ItemContainer();
             this.buttonItemExtractGifEx = new DevComponents.DotNetBar.ButtonItem();
             this.buttonItemGifSetting = new DevComponents.DotNetBar.ButtonItem();
+            this.buttonDisableOverlayAni = new DevComponents.DotNetBar.ButtonItem();
+            this.buttonOverlayRect = new DevComponents.DotNetBar.ButtonItem();
+            this.itemContainer44 = new DevComponents.DotNetBar.ItemContainer();
             this.textBoxX1 = new DevComponents.DotNetBar.Controls.TextBoxX();
             this.expandableSplitter1 = new DevComponents.DotNetBar.ExpandableSplitter();
             this.panelEx1 = new DevComponents.DotNetBar.PanelEx();
@@ -213,6 +219,7 @@
             this.chkSaveEqpTooltip = new DevComponents.DotNetBar.Controls.CheckBoxX();
             this.chkSaveMobTooltip = new DevComponents.DotNetBar.Controls.CheckBoxX();
             this.chkSaveNpcTooltip = new DevComponents.DotNetBar.Controls.CheckBoxX();
+            this.chkSaveCashTooltip = new DevComponents.DotNetBar.Controls.CheckBoxX();
             this.chkResolvePngLink = new DevComponents.DotNetBar.Controls.CheckBoxX();
             this.superTooltip1 = new DevComponents.DotNetBar.SuperTooltip();
             this.chkOutputRemovedImg = new DevComponents.DotNetBar.Controls.CheckBoxX();
@@ -1112,14 +1119,14 @@
             // 
             //this.buttonItemInstallGame.Name = "buttonItemInstallGame";
             //this.buttonItemInstallGame.SubItemsExpandWidth = 16;
-            //this.buttonItemInstallGame.Text = "ゲームをダウンロード";
+            //this.buttonItemInstallGame.Text = "游戏下载";
             //this.buttonItemInstallGame.Click += new System.EventHandler(this.buttonInstallGame_Click);
             // 
             // buttonItemGameStart
             // 
             //this.buttonItemGameStart.Name = "buttonItemGameStart";
             //this.buttonItemGameStart.SubItemsExpandWidth = 16;
-            //this.buttonItemGameStart.Text = "ゲームスタート";
+            //this.buttonItemGameStart.Text = "游戏开启";
             //this.buttonItemGameStart.Click += new System.EventHandler(this.buttonGameStart_Click);
             // 
             // ribbonBar4
@@ -1463,6 +1470,7 @@
             this.ribbonPanel3.Controls.Add(this.ribbonBar11);
             this.ribbonPanel3.Controls.Add(this.ribbonBar7);
             this.ribbonPanel3.Controls.Add(this.ribbonBar6);
+            this.ribbonPanel3.Controls.Add(this.ribbonBar12);
             this.ribbonPanel3.Dock = System.Windows.Forms.DockStyle.Fill;
             this.ribbonPanel3.Location = new System.Drawing.Point(0, 56);
             this.ribbonPanel3.Name = "ribbonPanel3";
@@ -1520,6 +1528,44 @@
             this.buttonItem1.SubItemsExpandWidth = 28;
             this.buttonItem1.Text = "测试";
             this.buttonItem1.Click += new System.EventHandler(this.buttonItem1_Click);
+            // 
+            // ribbonBar12
+            // 
+            this.ribbonBar12.AutoOverflowEnabled = true;
+            // 
+            // 
+            // 
+            this.ribbonBar12.BackgroundMouseOverStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
+            // 
+            // 
+            // 
+            this.ribbonBar12.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
+            this.ribbonBar12.ContainerControlProcessDialogKey = true;
+            this.ribbonBar12.Dock = System.Windows.Forms.DockStyle.Left;
+            this.ribbonBar12.DragDropSupport = true;
+            this.ribbonBar12.Items.AddRange(new DevComponents.DotNetBar.BaseItem[] {
+            this.buttonPapulatus});
+            this.ribbonBar12.Location = new System.Drawing.Point(110, 0);
+            this.ribbonBar12.Name = "ribbonBar12";
+            this.ribbonBar12.Size = new System.Drawing.Size(140, 91);
+            this.ribbonBar12.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
+            this.ribbonBar12.TabIndex = 2;
+            this.ribbonBar12.Text = "Papulatus";
+            // 
+            // 
+            // 
+            this.ribbonBar12.TitleStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
+            // 
+            // 
+            // 
+            this.ribbonBar12.TitleStyleMouseOver.CornerType = DevComponents.DotNetBar.eCornerType.Square;
+            // 
+            // buttonPapulatus
+            // 
+            this.buttonPapulatus.Name = "buttonPapulatus";
+            this.buttonPapulatus.SubItemsExpandWidth = 28;
+            this.buttonPapulatus.Text = "帕普拉图斯";
+            this.buttonPapulatus.Click += new System.EventHandler(this.buttonPapulatus_Click);
             // 
             // ribbonBar7
             // 
@@ -2005,7 +2051,8 @@
             this.cmbItemAniNames,
             this.cmbItemSkins,
             this.buttonItemSaveImage,
-            this.buttonItemGif});
+            this.buttonItemGif,
+            this.buttonItemGif2});
             this.ribbonBar5.Location = new System.Drawing.Point(0, 202);
             this.ribbonBar5.Name = "ribbonBar5";
             this.ribbonBar5.Size = new System.Drawing.Size(292, 26);
@@ -2111,6 +2158,15 @@
             this.buttonItemGif.Text = "动画生成";
             this.buttonItemGif.Click += new System.EventHandler(this.buttonItemGif_Click);
             // 
+            // buttonItemGif2
+            // 
+            this.buttonItemGif2.Name = "buttonItemGif2";
+            this.buttonItemGif2.SubItems.AddRange(new DevComponents.DotNetBar.BaseItem[] {
+            this.itemContainer44});
+            this.buttonItemGif2.SubItemsExpandWidth = 14;
+            this.buttonItemGif2.Text = "动画嵌套";
+            this.buttonItemGif2.Click += new System.EventHandler(this.buttonItemGif2_Click);
+            // 
             // itemContainer36
             // 
             // 
@@ -2139,6 +2195,34 @@
             this.buttonItemGifSetting.Name = "buttonItemGifSetting";
             this.buttonItemGifSetting.Text = "Gif设置";
             this.buttonItemGifSetting.Click += new System.EventHandler(this.buttonItemGifSetting_Click);
+            // 
+            // 
+            // 
+            this.itemContainer44.TitleStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
+            // 
+            // buttonDisableOverlayAni
+            // 
+            this.buttonDisableOverlayAni.Name = "buttonDisableOverlayAni";
+            this.buttonDisableOverlayAni.Text = "关闭嵌套";
+            this.buttonDisableOverlayAni.Click += new System.EventHandler(this.buttonDisableOverlayAni_Click);
+            // 
+            // buttonOverlayRect
+            // 
+            this.buttonOverlayRect.Name = "buttonOverlayRect";
+            this.buttonOverlayRect.Text = "添加范围矩形";
+            this.buttonOverlayRect.Click += new System.EventHandler(this.buttonOverlayRect_Click);
+            //
+            // itemContainer44
+            // 
+            // 
+            // 
+            // 
+            this.itemContainer44.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
+            this.itemContainer44.LayoutOrientation = DevComponents.DotNetBar.eOrientation.Vertical;
+            this.itemContainer44.Name = "itemContainer44";
+            this.itemContainer44.SubItems.AddRange(new DevComponents.DotNetBar.BaseItem[] {
+            this.buttonDisableOverlayAni,
+            this.buttonOverlayRect});
             // 
             // textBoxX1
             // 
@@ -2438,6 +2522,7 @@
             this.superTabControlPanel2.Controls.Add(this.chkSaveEqpTooltip);
             this.superTabControlPanel2.Controls.Add(this.chkSaveMobTooltip);
             this.superTabControlPanel2.Controls.Add(this.chkSaveNpcTooltip);
+            this.superTabControlPanel2.Controls.Add(this.chkSaveCashTooltip);
             this.superTabControlPanel2.Controls.Add(this.chkResolvePngLink);
             this.superTabControlPanel2.Controls.Add(this.chkOutputRemovedImg);
             this.superTabControlPanel2.Controls.Add(this.chkOutputAddedImg);
@@ -2544,6 +2629,19 @@
             this.chkSaveNpcTooltip.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
             this.chkSaveNpcTooltip.TabIndex = 11;
             this.chkSaveNpcTooltip.Text = "Npc提示框";
+            // 
+            // chkSaveCashTooltip
+            // 
+            // 
+            // 
+            // 
+            this.chkSaveCashTooltip.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
+            this.chkSaveCashTooltip.Location = new System.Drawing.Point(680, 34);
+            this.chkSaveCashTooltip.Name = "chkSaveCashTooltip";
+            this.chkSaveCashTooltip.Size = new System.Drawing.Size(85, 23);
+            this.chkSaveCashTooltip.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
+            this.chkSaveCashTooltip.TabIndex = 11;
+            this.chkSaveCashTooltip.Text = "礼包提示框";
             // 
             // chkOutputRemovedImg
             // 
@@ -3323,9 +3421,13 @@
         private DevComponents.DotNetBar.ItemContainer itemContainer34;
         private DevComponents.DotNetBar.ItemContainer itemContainer35;
         private DevComponents.DotNetBar.ButtonItem buttonItemGif;
+        private DevComponents.DotNetBar.ButtonItem buttonItemGif2;
         private DevComponents.DotNetBar.ItemContainer itemContainer36;
         private DevComponents.DotNetBar.ButtonItem buttonItemExtractGifEx;
         private DevComponents.DotNetBar.ButtonItem buttonItemGifSetting;
+        private DevComponents.DotNetBar.ItemContainer itemContainer44;
+        private DevComponents.DotNetBar.ButtonItem buttonDisableOverlayAni;
+        private DevComponents.DotNetBar.ButtonItem buttonOverlayRect;
         private System.Windows.Forms.ContextMenuStrip contextMenuStrip2;
         private System.Windows.Forms.ToolStripMenuItem tsmi2ExpandAll;
         private System.Windows.Forms.ToolStripMenuItem tsmi2CollapseAll;
@@ -3390,7 +3492,9 @@
         private DevComponents.DotNetBar.DockContainerItem dockContainerItem2;
         private DevComponents.DotNetBar.PanelDockContainer panelDockContainer2;
         private DevComponents.DotNetBar.RibbonBar ribbonBar11;
+        private DevComponents.DotNetBar.RibbonBar ribbonBar12;
         private DevComponents.DotNetBar.ButtonItem buttonItem1;
+        private DevComponents.DotNetBar.ButtonItem buttonPapulatus;
         private DevComponents.DotNetBar.ButtonItem btnNodeBack;
         private DevComponents.DotNetBar.ButtonItem btnNodeForward;
         private System.Windows.Forms.ToolStripMenuItem tsmi2SaveAs;
@@ -3414,6 +3518,7 @@
         private DevComponents.DotNetBar.Controls.CheckBoxX chkSaveEqpTooltip;
         private DevComponents.DotNetBar.Controls.CheckBoxX chkSaveMobTooltip;
         private DevComponents.DotNetBar.Controls.CheckBoxX chkSaveNpcTooltip;
+        private DevComponents.DotNetBar.Controls.CheckBoxX chkSaveCashTooltip;
         private DevComponents.DotNetBar.Controls.CheckBoxX chkHashPngFileName;
         private DevComponents.Editors.ComboItem comboItem19;
         private DevComponents.DotNetBar.ItemContainer itemContainer100;

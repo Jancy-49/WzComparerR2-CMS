@@ -253,6 +253,9 @@
   <data name="Item_Tab_disabled_4" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>Resources\Item.Tab.disabled.4.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="Item_Tab_disabled_5" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Resources\Item.Tab.disabled.5.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
   <data name="Item_Tab_enabled_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>Resources\Item.Tab.enabled.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
@@ -267,6 +270,9 @@
   </data>
   <data name="Item_Tab_enabled_4" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>Resources\Item.Tab.enabled.4.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Item_Tab_enabled_5" type="System.Resources.ResXFileRef, System.Windows.Forms">
+	<value>Resources\Item.Tab.enabled.5.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="VScr9_disabled_base" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>Resources\VScr9.disabled.base.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
@@ -572,28 +578,28 @@
     <value>Resources\Item.BtSmall.pressed.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="Item_BtGather_disabled_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\Item.BtGather.disabled.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+    <value>Resources\Item.AutoBuild.buttonGather.disabled.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="Item_BtGather_mouseOver_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\Item.BtGather.mouseOver.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+    <value>Resources\Item.AutoBuild.buttonGather.mouseOver.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="Item_BtGather_normal_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\Item.BtGather.normal.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+    <value>Resources\Item.AutoBuild.buttonGather.normal.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="Item_BtGather_pressed_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\Item.BtGather.pressed.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+    <value>Resources\Item.AutoBuild.buttonGather.pressed.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="Item_BtSort_disabled_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\Item.BtSort.disabled.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+    <value>Resources\Item.AutoBuild.buttonSort.disabled.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="Item_BtSort_mouseOver_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\Item.BtSort.mouseOver.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+    <value>Resources\Item.AutoBuild.buttonSort.mouseOver.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="Item_BtSort_normal_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\Item.BtSort.normal.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+    <value>Resources\Item.AutoBuild.buttonSort.normal.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="Item_BtSort_pressed_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\Item.BtSort.pressed.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+    <value>Resources\Item.AutoBuild.buttonSort.pressed.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="BtClose3_disabled_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>Resources\BtClose3.disabled.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
@@ -1361,28 +1367,28 @@
     <value>Resources\HyperStat.Window.statList.80000421.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="Item_BtAppraise3_disabled_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\Item.BtAppraise3.disabled.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+    <value>Resources\Item.AutoBuild.buttonAppraise.disabled.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="Item_BtAppraise3_mouseOver_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\Item.BtAppraise3.mouseOver.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+    <value>Resources\Item.AutoBuild.buttonAppraise.mouseOver.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="Item_BtAppraise3_normal_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\Item.BtAppraise3.normal.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+    <value>Resources\Item.AutoBuild.buttonAppraise.normal.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="Item_BtAppraise3_pressed_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\Item.BtAppraise3.pressed.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+    <value>Resources\Item.AutoBuild.buttonAppraise.pressed.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="Item_BtAppraise4_disabled_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\Item.BtAppraise4.disabled.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+    <value>Resources\Item.FullAutoBuild.buttonAppraise.disabled.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="Item_BtAppraise4_mouseOver_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\Item.BtAppraise4.mouseOver.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+    <value>Resources\Item.FullAutoBuild.buttonAppraise.mouseOver.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="Item_BtAppraise4_normal_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\Item.BtAppraise4.normal.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+    <value>Resources\Item.FullAutoBuild.buttonAppraise.normal.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="Item_BtAppraise4_pressed_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\Item.BtAppraise4.pressed.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+    <value>Resources\Item.FullAutoBuild.buttonAppraise.pressed.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="Item_BtBits3_disabled_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>Resources\Item.BtBits3.disabled.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
@@ -1409,100 +1415,100 @@
     <value>Resources\Item.BtBits4.pressed.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="Item_BtCashshop_disabled_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\Item.BtCashshop.disabled.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+    <value>Resources\Item.FullAutoBuild.buttonCashshop.disabled.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="Item_BtCashshop_mouseOver_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\Item.BtCashshop.mouseOver.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+    <value>Resources\Item.FullAutoBuild.buttonCashshop.mouseOver.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="Item_BtCashshop_normal_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\Item.BtCashshop.normal.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+    <value>Resources\Item.FullAutoBuild.buttonCashshop.normal.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="Item_BtCashshop_pressed_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\Item.BtCashshop.pressed.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+    <value>Resources\Item.FullAutoBuild.buttonCashshop.pressed.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="Item_BtCoin3_disabled_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\Item.BtCoin3.disabled.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+    <value>Resources\Item.AutoBuild.buttonCoin.disabled.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="Item_BtCoin3_mouseOver_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\Item.BtCoin3.mouseOver.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+    <value>Resources\Item.AutoBuild.buttonCoin.mouseOver.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="Item_BtCoin3_normal_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\Item.BtCoin3.normal.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+    <value>Resources\Item.AutoBuild.buttonCoin.normal.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="Item_BtCoin3_pressed_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\Item.BtCoin3.pressed.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+    <value>Resources\Item.AutoBuild.buttonCoin.pressed.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="Item_BtCoin4_disabled_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\Item.BtCoin4.disabled.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+    <value>Resources\Item.FullAutoBuild.buttonCoin.disabled.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="Item_BtCoin4_mouseOver_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\Item.BtCoin4.mouseOver.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+    <value>Resources\Item.FullAutoBuild.buttonCoin.mouseOver.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="Item_BtCoin4_normal_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\Item.BtCoin4.normal.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+    <value>Resources\Item.FullAutoBuild.buttonCoin.normal.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="Item_BtCoin4_pressed_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\Item.BtCoin4.pressed.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+    <value>Resources\Item.FullAutoBuild.buttonCoin.pressed.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="Item_BtDisassemble3_disabled_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\Item.BtDisassemble3.disabled.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+    <value>Resources\Item.AutoBuild.buttonDisassemble.disabled.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="Item_BtDisassemble3_mouseOver_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\Item.BtDisassemble3.mouseOver.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+    <value>Resources\Item.AutoBuild.buttonDisassemble.mouseOver.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="Item_BtDisassemble3_normal_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\Item.BtDisassemble3.normal.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+    <value>Resources\Item.AutoBuild.buttonDisassemble.normal.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="Item_BtDisassemble3_pressed_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\Item.BtDisassemble3.pressed.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+    <value>Resources\Item.AutoBuild.buttonDisassemble.pressed.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="Item_BtDisassemble4_disabled_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\Item.BtDisassemble4.disabled.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+    <value>Resources\Item.FullAutoBuild.buttonDisassemble.disabled.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="Item_BtDisassemble4_mouseOver_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\Item.BtDisassemble4.mouseOver.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+    <value>Resources\Item.FullAutoBuild.buttonDisassemble.mouseOver.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="Item_BtDisassemble4_normal_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\Item.BtDisassemble4.normal.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+    <value>Resources\Item.FullAutoBuild.buttonDisassemble.normal.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="Item_BtDisassemble4_pressed_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\Item.BtDisassemble4.pressed.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+    <value>Resources\Item.FullAutoBuild.buttonDisassemble.pressed.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="Item_BtExtract3_disabled_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\Item.BtExtract3.disabled.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+    <value>Resources\Item.AutoBuild.buttonExtract.disabled.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="Item_BtExtract3_mouseOver_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\Item.BtExtract3.mouseOver.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+    <value>Resources\Item.AutoBuild.buttonExtract.mouseOver.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="Item_BtExtract3_normal_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\Item.BtExtract3.normal.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+    <value>Resources\Item.AutoBuild.buttonExtract.normal.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="Item_BtExtract3_pressed_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\Item.BtExtract3.pressed.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+    <value>Resources\Item.AutoBuild.buttonExtract.pressed.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="Item_BtExtract4_disabled_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\Item.BtExtract4.disabled.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+    <value>Resources\Item.FullAutoBuild.buttonExtract.disabled.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="Item_BtExtract4_mouseOver_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\Item.BtExtract4.mouseOver.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+    <value>Resources\Item.FullAutoBuild.buttonExtract.mouseOver.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="Item_BtExtract4_normal_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\Item.BtExtract4.normal.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+    <value>Resources\Item.FullAutoBuild.buttonExtract.normal.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="Item_BtExtract4_pressed_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\Item.BtExtract4.pressed.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+    <value>Resources\Item.FullAutoBuild.buttonExtract.pressed.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="Item_BtPoint_disabled_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\Item.BtPoint.disabled.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+    <value>Resources\Item.AutoBuild.buttonPoint.disabled.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="Item_BtPoint_mouseOver_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\Item.BtPoint.mouseOver.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+    <value>Resources\Item.AutoBuild.buttonPoint.mouseOver.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="Item_BtPoint_normal_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\Item.BtPoint.normal.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+    <value>Resources\Item.AutoBuild.buttonPoint.normal.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="Item_BtPoint_pressed_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\Item.BtPoint.pressed.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+    <value>Resources\Item.AutoBuild.buttonPoint.pressed.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="Item_BtPot3_disabled_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>Resources\Item.BtPot3.disabled.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
@@ -1529,52 +1535,52 @@
     <value>Resources\Item.BtPot4.pressed.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="Item_BtToad3_disabled_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\Item.BtToad3.disabled.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+    <value>Resources\Item.AutoBuild.anibuttonToad.disabled.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="Item_BtToad3_mouseOver_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\Item.BtToad3.mouseOver.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+    <value>Resources\Item.AutoBuild.anibuttonToad.mouseOver.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="Item_BtToad3_normal_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\Item.BtToad3.normal.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+    <value>Resources\Item.AutoBuild.anibuttonToad.normal.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="Item_BtToad3_pressed_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\Item.BtToad3.pressed.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+    <value>Resources\Item.AutoBuild.anibuttonToad.pressed.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="Item_BtToad4_disabled_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\Item.BtToad4.disabled.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+    <value>Resources\Item.FullAutoBuild.anibuttonToad.disabled.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="Item_BtToad4_mouseOver_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\Item.BtToad4.mouseOver.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+    <value>Resources\Item.FullAutoBuild.anibuttonToad.mouseOver.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="Item_BtToad4_normal_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\Item.BtToad4.normal.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+    <value>Resources\Item.FullAutoBuild.anibuttonToad.normal.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="Item_BtToad4_pressed_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\Item.BtToad4.pressed.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+    <value>Resources\Item.FullAutoBuild.anibuttonToad.pressed.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="Item_BtUpgrade3_disabled_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\Item.BtUpgrade3.disabled.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+    <value>Resources\Item.AutoBuild.buttonUpgrade.disabled.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="Item_BtUpgrade3_mouseOver_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\Item.BtUpgrade3.mouseOver.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+    <value>Resources\Item.AutoBuild.buttonUpgrade.mouseOver.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="Item_BtUpgrade3_normal_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\Item.BtUpgrade3.normal.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+    <value>Resources\Item.AutoBuild.buttonUpgrade.normal.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="Item_BtUpgrade3_pressed_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\Item.BtUpgrade3.pressed.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+    <value>Resources\Item.AutoBuild.buttonUpgrade.pressed.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="Item_BtUpgrade4_disabled_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\Item.BtUpgrade4.disabled.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+    <value>Resources\Item.FullAutoBuild.buttonUpgrade.disabled.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="Item_BtUpgrade4_mouseOver_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\Item.BtUpgrade4.mouseOver.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+    <value>Resources\Item.FullAutoBuild.buttonUpgrade.mouseOver.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="Item_BtUpgrade4_normal_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\Item.BtUpgrade4.normal.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+    <value>Resources\Item.FullAutoBuild.buttonUpgrade.normal.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="Item_BtUpgrade4_pressed_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\Item.BtUpgrade4.pressed.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+    <value>Resources\Item.FullAutoBuild.buttonUpgrade.pressed.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="Item_monsterCollection_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>Resources\Item.monsterCollection.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
@@ -1666,35 +1672,35 @@
   <data name="UIWindow2_img_MiniMap_MaxMapMirror_w" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>Resources\UIWindow2.img.MiniMap.MaxMapMirror.w.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="UICharacterInfo_img_common_detailStat_ability_abilityTitle_epic_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\UICharacterInfo.img.common.detailStat.ability.abilityTitle.epic.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="UICharacterInfo_img_remote_detailStat_ability_abilityTitle_epic_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Resources\UICharacterInfo.img.remote.detailStat.ability.abilityTitle.epic.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="UICharacterInfo_img_common_detailStat_ability_abilityTitle_legendary_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\UICharacterInfo.img.common.detailStat.ability.abilityTitle.legendary.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="UICharacterInfo_img_remote_detailStat_ability_abilityTitle_legendary_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Resources\UICharacterInfo.img.remote.detailStat.ability.abilityTitle.legendary.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="UICharacterInfo_img_common_detailStat_ability_abilityTitle_normal_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\UICharacterInfo.img.common.detailStat.ability.abilityTitle.normal.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="UICharacterInfo_img_remote_detailStat_ability_abilityTitle_normal_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Resources\UICharacterInfo.img.remote.detailStat.ability.abilityTitle.normal.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="UICharacterInfo_img_common_detailStat_ability_abilityTitle_rare_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\UICharacterInfo.img.common.detailStat.ability.abilityTitle.rare.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="UICharacterInfo_img_remote_detailStat_ability_abilityTitle_rare_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Resources\UICharacterInfo.img.remote.detailStat.ability.abilityTitle.rare.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="UICharacterInfo_img_common_detailStat_ability_abilityTitle_unique_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\UICharacterInfo.img.common.detailStat.ability.abilityTitle.unique.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="UICharacterInfo_img_remote_detailStat_ability_abilityTitle_unique_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Resources\UICharacterInfo.img.remote.detailStat.ability.abilityTitle.unique.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="UICharacterInfo_img_common_detailStat_ability_metierLine_activated_0_epic_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\UICharacterInfo.img.common.detailStat.ability.metierLine.activated.0.epic.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="UICharacterInfo_img_remote_detailStat_ability_metierLine_activated_0_epic_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Resources\UICharacterInfo.img.remote.detailStat.ability.metierLine.activated.0.epic.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="UICharacterInfo_img_common_detailStat_ability_metierLine_activated_0_legendary_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\UICharacterInfo.img.common.detailStat.ability.metierLine.activated.0.legendary.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="UICharacterInfo_img_remote_detailStat_ability_metierLine_activated_0_legendary_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Resources\UICharacterInfo.img.remote.detailStat.ability.metierLine.activated.0.legendary.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="UICharacterInfo_img_common_detailStat_ability_metierLine_activated_0_rare_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\UICharacterInfo.img.common.detailStat.ability.metierLine.activated.0.rare.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="UICharacterInfo_img_remote_detailStat_ability_metierLine_activated_0_rare_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Resources\UICharacterInfo.img.remote.detailStat.ability.metierLine.activated.0.rare.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="UICharacterInfo_img_common_detailStat_ability_metierLine_activated_0_unique_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\UICharacterInfo.img.common.detailStat.ability.metierLine.activated.0.unique.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="UICharacterInfo_img_remote_detailStat_ability_metierLine_activated_0_unique_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Resources\UICharacterInfo.img.remote.detailStat.ability.metierLine.activated.0.unique.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="UICharacterInfo_img_common_detailStat_ability_metierLine_disabled_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\UICharacterInfo.img.common.detailStat.ability.metierLine.disabled.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="UICharacterInfo_img_remote_detailStat_ability_metierLine_disabled_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Resources\UICharacterInfo.img.remote.detailStat.ability.metierLine.disabled.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="UICharacterInfo_img_common_detailStat_attackPowerFont_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>Resources\UICharacterInfo.img.common.detailStat.attackPowerFont.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>

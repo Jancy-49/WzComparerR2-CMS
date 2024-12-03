@@ -344,7 +344,7 @@ namespace WzComparerR2
                 }
             }
 #endif
-            #endregion
+#endregion
         }
 
         [HarmonyPatch("OnMouseDown"), HarmonyTranspiler]

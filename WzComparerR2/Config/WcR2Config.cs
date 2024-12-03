@@ -17,6 +17,11 @@ namespace WzComparerR2.Config
             this.MainStyleColor = Color.DimGray;
             this.SortWzOnOpened = true;
             this.AutoDetectExtFiles = true;
+            this.NoPatcherPrompt = false;
+            this.WzVersionVerifyMode = WzLib.WzVersionVerifyMode.Fast;
+            this.EnableTranslate = false;
+            this.DesiredLanguage = "ja";
+            this.MozhiBackend = "https://mozhi.aryak.me";
         }
 
         /// <summary>
@@ -59,6 +64,49 @@ namespace WzComparerR2.Config
             get { return (ConfigItem<string>)this["nxOpenAPIKey"]; }
             set { this["nxOpenAPIKey"] = value; }
         }
+
+        /// <summary>
+        /// Mozhi Backend Configuration
+        /// </summary>
+        [ConfigurationProperty("MozhiBackend")]
+        [ConfigurationCollection(typeof(ConfigArrayList<string>.ItemElement))]
+        public ConfigItem<string> MozhiBackend
+        {
+            get { return (ConfigItem<string>)this["MozhiBackend"]; }
+            set { this["MozhiBackend"] = value; }
+        }
+
+        /// <summary>
+        /// Desired Language Configuration
+        /// </summary>
+        [ConfigurationProperty("DesiredLanguage")]
+        [ConfigurationCollection(typeof(ConfigArrayList<string>.ItemElement))]
+        public ConfigItem<string> DesiredLanguage
+        {
+            get { return (ConfigItem<string>)this["DesiredLanguage"]; }
+            set { this["DesiredLanguage"] = value; }
+        }
+
+        /// <summary>
+        /// EnableTranslate Configuration
+        /// </summary>
+        [ConfigurationProperty("EnableTranslate")]
+        public ConfigItem<bool> EnableTranslate
+        {
+            get { return (ConfigItem<bool>)this["EnableTranslate"]; }
+            set { this["EnableTranslate"] = value; }
+        }
+
+        /// <summary>
+        /// Preferred Translate Engine Configuration
+        /// </summary>
+        [ConfigurationProperty("PreferredTranslateEngine")]
+        public ConfigItem<int> PreferredTranslateEngine
+        {
+            get { return (ConfigItem<int>)this["PreferredTranslateEngine"]; }
+            set { this["PreferredTranslateEngine"] = value; }
+        }
+
         /// <summary>
         /// NXSecretKey Configuration
         /// </summary>
@@ -117,6 +165,16 @@ namespace WzComparerR2.Config
         {
             get { return (ConfigItem<bool>)this["autoDetectExtFiles"]; }
             set { this["autoDetectExtFiles"] = value; }
+        }
+
+        /// <summary>
+        /// 获取或设置一个值，指示是否不再提示游戏更新器通知。
+        /// </summary>
+        [ConfigurationProperty("noPatcherPrompt")]
+        public ConfigItem<bool> NoPatcherPrompt
+        {
+            get { return (ConfigItem<bool>)this["noPatcherPrompt"]; }
+            set { this["noPatcherPrompt"] = value; }
         }
 
         /// <summary>

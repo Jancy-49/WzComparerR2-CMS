@@ -14,9 +14,9 @@ namespace WzComparerR2.CharaSimControl
         public AfrmTooltip()
         {
             this.menu = new ContextMenuStrip();
-            this.menu.Items.Add(new ToolStripMenuItem("クリップボードにコピー", null, tsmiCopy_Click));
-            this.menu.Items.Add(new ToolStripMenuItem("PNGに保存", null, tsmiSave_Click));
-            this.menu.Items.Add(new ToolStripMenuItem("このダイアログを閉じるには、[Esc]キーを押します。", null));
+            this.menu.Items.Add(new ToolStripMenuItem("复制(&C)", null, tsmiCopy_Click));
+            this.menu.Items.Add(new ToolStripMenuItem("导出(&S)", null, tsmiSave_Click)); 
+            this.menu.Items.Add(new ToolStripMenuItem("关闭(&Esc)", null));
             this.ContextMenuStrip = this.menu;
 
             this.Size = new Size(1, 1);

@@ -333,7 +333,7 @@ namespace WzComparerR2
                             AppendStateText($"补丁前确认校验和的文件个数: {patcher.OldFileHash.Count}\r\n");
                         }
                     }
-                    AppendStateText(string.Format("文件大小: {0:N0} バイト...\r\n", decompressedSize));
+                    AppendStateText(string.Format("文件大小: {0:N0} 字节...\r\n", decompressedSize));
                     AppendStateText(string.Format("补丁的文件个数: {0}...\r\n",
                         patcher.PatchParts == null ? -1 : patcher.PatchParts.Count));
                     txtNotice.Text = patcher.NoticeText;
@@ -492,6 +492,11 @@ namespace WzComparerR2
                             comparer.OutputAddedImg = chkOutputAddedImg.Checked;
                             comparer.OutputRemovedImg = chkOutputRemovedImg.Checked;
                             comparer.EnableDarkMode = chkEnableDarkMode.Checked;
+                            comparer.saveSkillTooltip = chkSaveSkillTooltip.Checked;
+                            comparer.saveItemTooltip = chkSaveItemTooltip.Checked;
+                            comparer.saveEqpTooltip = chkSaveEqpTooltip.Checked;
+                            comparer.saveMobTooltip = chkSaveMobTooltip.Checked;
+                            comparer.saveNpcTooltip = chkSaveNpcTooltip.Checked;
                             comparer.Comparer.PngComparison = (WzPngComparison)cmbComparePng.SelectedItem;
                             comparer.Comparer.ResolvePngLink = chkResolvePngLink.Checked;
                             comparer.PatchingStateChanged += new EventHandler<PatchingEventArgs>(patcher_PatchingStateChanged);

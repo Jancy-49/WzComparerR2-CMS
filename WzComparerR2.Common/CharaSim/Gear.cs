@@ -848,7 +848,18 @@ namespace WzComparerR2.CharaSim
                                 {
                                     try
                                     {
-                                        gear.Props.Add(type, Convert.ToInt32(subNode.Value));
+                                        //gear.Props.Add(type, Convert.ToInt32(subNode.Value));
+                                        if (gear.Props.ContainsKey(type))
+                                        {
+                                            // 如果键已经存在，你可以选择更新它的值，或者执行其他逻辑
+                                            // 例如，这里我们选择更新它的值
+                                            gear.Props[type] = Convert.ToInt32(subNode.Value);
+                                        }
+                                        else
+                                        {
+                                            // 如果键不存在，我们添加新的键值对
+                                            gear.Props.Add(type, Convert.ToInt32(subNode.Value));
+                                        }
                                     }
                                     finally
                                     {

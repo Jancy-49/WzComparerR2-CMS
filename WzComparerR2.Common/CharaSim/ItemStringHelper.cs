@@ -112,7 +112,7 @@ namespace WzComparerR2.CharaSim
                 case GearPropType.equipTradeBlock: return value == 0 ? null : "佩戴后不可交换";
                 case GearPropType.accountSharable: return value == 0 ? null : "只有世界内我的角色间可移动";
                 case GearPropType.sharableOnce: return value == 0 ? null : "世界内我的角色间可移动1次\n(移动后不可交换)";
-                case GearPropType.onlyEquip: return value == 0 ? null : "固有佩戴装备";
+                case GearPropType.onlyEquip: return value == 0 ? null : "固有装备物品";
                 case GearPropType.notExtend: return value == 0 ? null : "有效时间不可延长";
                 case GearPropType.accountSharableAfterExchange: return value == 0 ? null : "可交易1次\n(交易后只能在世界内我的角色之间移动)";
                 case GearPropType.tradeAvailable:
@@ -651,11 +651,10 @@ namespace WzComparerR2.CharaSim
                     return value == 0 ? null : "任务道具";
                 case ItemPropType.pquest:
                     return value == 0 ? null : "组队任务道具";
+                case ItemPropType.multiPet:
+                    return value == 0 ? "普通宠物 (不可与其它普通宠物重复使用)" : "多重宠物 (最多可与其它3个宠物重复使用)";
                 case ItemPropType.permanent:
                     return value == 0 ? null : "可以一直使用魔法的神奇宠物。";
-                case ItemPropType.multiPet:
-                    // return value == 0 ? null : "マルチペット(他のペットと最大3個重複使用可能)";
-                    return value == 0 ? "" : "";
                 default:
                     return null;
             }

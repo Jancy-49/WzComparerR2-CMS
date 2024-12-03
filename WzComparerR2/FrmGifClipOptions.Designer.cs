@@ -883,7 +883,7 @@ namespace WzComparerR2
             this.chk768Preset.Name = "chk768Preset";
             this.chk768Preset.Size = new System.Drawing.Size(120, 16);
             this.chk768Preset.TabIndex = 2;
-            this.chk768Preset.Text = "1366x768プリセット";
+            this.chk768Preset.Text = "1366x768分辨率";
             this.chk768Preset.UseVisualStyleBackColor = true;
             this.chk768Preset.CheckedChanged += new System.EventHandler(this.chk768Preset_CheckedChanged);
             // 
