@@ -47,6 +47,18 @@
             this.chkBodyPlay = new DevComponents.DotNetBar.Controls.CheckBoxX();
             this.cmbTamingFrame = new DevComponents.DotNetBar.Controls.ComboBoxEx();
             this.cmbEmotionFrame = new DevComponents.DotNetBar.Controls.ComboBoxEx();
+            // virtual comboboxes for item effects, not shown
+            this.cmbEffectFrames = new DevComponents.DotNetBar.Controls.ComboBoxEx[18];
+            this.cmbActionEffects = new DevComponents.DotNetBar.Controls.ComboBoxEx[18];
+            for (int i = 0; i < 18; i++)
+            {
+                var t1 = new DevComponents.DotNetBar.Controls.ComboBoxEx();
+                t1.SelectedIndexChanged += new System.EventHandler(this.cmbEffectFrames_SelectedIndexChanged);
+                cmbEffectFrames[i] = t1;
+                var t2 = new DevComponents.DotNetBar.Controls.ComboBoxEx();
+                t2.SelectedIndexChanged += new System.EventHandler(this.cmbActionEffect_SelectedIndexChanged);
+                cmbActionEffects[i] = t2;
+            }
             this.cmbBodyFrame = new DevComponents.DotNetBar.Controls.ComboBoxEx();
             this.cmbActionTaming = new DevComponents.DotNetBar.Controls.ComboBoxEx();
             this.cmbEmotion = new DevComponents.DotNetBar.Controls.ComboBoxEx();
@@ -56,6 +68,7 @@
             this.cmbActionBody = new DevComponents.DotNetBar.Controls.ComboBoxEx();
             this.chkHairShade = new DevComponents.DotNetBar.Controls.CheckBoxX();
             this.chkHairCover = new DevComponents.DotNetBar.Controls.CheckBoxX();
+            this.chkApplyBRM = new DevComponents.DotNetBar.Controls.CheckBoxX();
             this.dockContainerItem2 = new DevComponents.DotNetBar.DockContainerItem();
             this.dockSite8 = new DevComponents.DotNetBar.DockSite();
             this.dockSite5 = new DevComponents.DotNetBar.DockSite();
@@ -74,6 +87,10 @@
             this.btnHayato = new DevComponents.DotNetBar.ButtonItem();
             this.btnKanna = new DevComponents.DotNetBar.ButtonItem();
             this.btnAngelicBuster = new DevComponents.DotNetBar.ButtonItem();
+            this.btnTanjiroKamado = new DevComponents.DotNetBar.ButtonItem();
+            this.btnNezukoKamado = new DevComponents.DotNetBar.ButtonItem();
+            this.btnZenitsuAgatsuma = new DevComponents.DotNetBar.ButtonItem();
+            this.btnInosukeHashibira = new DevComponents.DotNetBar.ButtonItem();
             this.btnReset = new DevComponents.DotNetBar.ButtonItem();
             this.btnLock = new DevComponents.DotNetBar.ButtonItem();
             this.btnSaveAsGif = new DevComponents.DotNetBar.ButtonItem();
@@ -263,6 +280,7 @@
             this.panelDockContainer2.Controls.Add(this.cmbActionBody);
             this.panelDockContainer2.Controls.Add(this.chkHairShade);
             this.panelDockContainer2.Controls.Add(this.chkHairCover);
+            this.panelDockContainer2.Controls.Add(this.chkApplyBRM);
             this.panelDockContainer2.Controls.Add(this.labelX5);
             this.panelDockContainer2.DisabledBackColor = System.Drawing.Color.Empty;
             this.panelDockContainer2.Location = new System.Drawing.Point(3, 23);
@@ -282,7 +300,7 @@
             this.cmbWeaponIdx.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cmbWeaponIdx.FormattingEnabled = true;
             this.cmbWeaponIdx.ItemHeight = 15;
-            this.cmbWeaponIdx.Location = new System.Drawing.Point(89, 103);
+            this.cmbWeaponIdx.Location = new System.Drawing.Point(89, 84);
             this.cmbWeaponIdx.Name = "cmbWeaponIdx";
             this.cmbWeaponIdx.Size = new System.Drawing.Size(50, 21);
             this.cmbWeaponIdx.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
@@ -296,7 +314,7 @@
             this.cmbWeaponType.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cmbWeaponType.FormattingEnabled = true;
             this.cmbWeaponType.ItemHeight = 15;
-            this.cmbWeaponType.Location = new System.Drawing.Point(35, 103);
+            this.cmbWeaponType.Location = new System.Drawing.Point(35, 84);
             this.cmbWeaponType.Name = "cmbWeaponType";
             this.cmbWeaponType.Size = new System.Drawing.Size(50, 21);
             this.cmbWeaponType.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
@@ -311,7 +329,7 @@
             // 
             // 
             this.labelX4.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
-            this.labelX4.Location = new System.Drawing.Point(3, 106);
+            this.labelX4.Location = new System.Drawing.Point(3, 87);
             this.labelX4.Name = "labelX4";
             this.labelX4.Size = new System.Drawing.Size(31, 18);
             this.labelX4.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
@@ -512,7 +530,7 @@
             // 
             // 
             this.chkHairShade.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
-            this.chkHairShade.Location = new System.Drawing.Point(82, 84);
+            this.chkHairShade.Location = new System.Drawing.Point(82, 128);
             this.chkHairShade.Name = "chkHairShade";
             this.chkHairShade.Size = new System.Drawing.Size(85, 19);
             this.chkHairShade.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
@@ -528,13 +546,30 @@
             // 
             // 
             this.chkHairCover.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
-            this.chkHairCover.Location = new System.Drawing.Point(5, 84);
+            this.chkHairCover.Location = new System.Drawing.Point(5, 128);
             this.chkHairCover.Name = "chkHairCover";
             this.chkHairCover.Size = new System.Drawing.Size(83, 19);
             this.chkHairCover.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
             this.chkHairCover.TabIndex = 9;
             this.chkHairCover.Text = "发套";
             this.chkHairCover.CheckedChanged += new System.EventHandler(this.chkHairCover_CheckedChanged);
+            // 
+            // chkApplyBRM
+            // 
+            this.chkApplyBRM.AutoSize = true;
+            this.chkApplyBRM.BackColor = System.Drawing.Color.Transparent;
+            // 
+            // 
+            // 
+            this.chkApplyBRM.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
+            this.chkApplyBRM.Location = new System.Drawing.Point(5, 128);
+            this.chkApplyBRM.Location = new System.Drawing.Point(5, 106);
+            this.chkApplyBRM.Name = "chkApplyBRM";
+            this.chkApplyBRM.Size = new System.Drawing.Size(150, 19);
+            this.chkApplyBRM.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
+            this.chkApplyBRM.TabIndex = 16;
+            this.chkApplyBRM.Text = "调整角色位置（椅子）";
+            this.chkApplyBRM.CheckedChanged += new System.EventHandler(this.chkApplyBRM_CheckedChanged);
             // 
             // dockContainerItem2
             // 
@@ -630,7 +665,11 @@
             this.btnPathfinder,
             this.btnLara,
             this.btnLynn,
-            this.btnAngelicBuster});
+            this.btnAngelicBuster,
+            this.btnTanjiroKamado,
+            this.btnNezukoKamado,
+            this.btnZenitsuAgatsuma,
+            this.btnInosukeHashibira});
             this.btnCharac.Tooltip = "初始化";
             // 
             // btnMale
@@ -699,6 +738,34 @@
             this.btnAngelicBuster.Text = "爆莉萌天使";
             this.btnAngelicBuster.Click += new System.EventHandler(this.btnAngelicBuster_Click);
             // 
+            // 
+            // btnTanjiroKamado
+            // 
+            this.btnTanjiroKamado.Name = "btnTanjiroKamado";
+            this.btnTanjiroKamado.Text = "竈門炭治郎";
+            this.btnTanjiroKamado.Click += new System.EventHandler(this.btnTanjiroKamado_Click);
+            // 
+            // 
+            // btnNezukoKamado
+            // 
+            this.btnNezukoKamado.Name = "btnNezukoKamado";
+            this.btnNezukoKamado.Text = "竈門禰豆子";
+            this.btnNezukoKamado.Click += new System.EventHandler(this.btnNezukoKamado_Click);
+            // 
+            // 
+            // btnZenitsuAgatsuma
+            // 
+            this.btnZenitsuAgatsuma.Name = "btnZenitsuAgatsuma";
+            this.btnZenitsuAgatsuma.Text = "我妻善逸";
+            this.btnZenitsuAgatsuma.Click += new System.EventHandler(this.btnZenitsuAgatsuma_Click);
+            // 
+            // 
+            // btnInosukeHashibira
+            // 
+            this.btnInosukeHashibira.Name = "btnInosukeHashibira";
+            this.btnInosukeHashibira.Text = "嘴平伊之助";
+            this.btnInosukeHashibira.Click += new System.EventHandler(this.btnInosukeHashibira_Click);
+            // 
             // btnReset
             // 
             this.btnReset.Image = global::WzComparerR2.Avatar.Properties.Resources.arrow_in;
@@ -754,7 +821,7 @@
             // 
             // 
             this.labelX5.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
-            this.labelX5.Location = new System.Drawing.Point(139, 106);
+            this.labelX5.Location = new System.Drawing.Point(139, 87);
             this.labelX5.Name = "labelX5";
             this.labelX5.Size = new System.Drawing.Size(25, 16);
             this.labelX5.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
@@ -768,7 +835,7 @@
             this.cmbEar.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cmbEar.FormattingEnabled = true;
             this.cmbEar.ItemHeight = 15;
-            this.cmbEar.Location = new System.Drawing.Point(163, 103);
+            this.cmbEar.Location = new System.Drawing.Point(163, 84);
             this.cmbEar.Name = "cmbEar";
             this.cmbEar.Size = new System.Drawing.Size(39, 21);
             this.cmbEar.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
@@ -835,15 +902,18 @@
         private DevComponents.DotNetBar.LabelX labelX2;
         private DevComponents.DotNetBar.LabelX labelX1;
         private DevComponents.DotNetBar.Controls.ComboBoxEx cmbActionBody;
+        private DevComponents.DotNetBar.Controls.ComboBoxEx[] cmbActionEffects;
         private DevComponents.DotNetBar.Controls.CheckBoxX chkTamingPlay;
         private DevComponents.DotNetBar.Controls.CheckBoxX chkEmotionPlay;
         private DevComponents.DotNetBar.Controls.CheckBoxX chkBodyPlay;
         private DevComponents.DotNetBar.Controls.ComboBoxEx cmbTamingFrame;
         private DevComponents.DotNetBar.Controls.ComboBoxEx cmbEmotionFrame;
         private DevComponents.DotNetBar.Controls.ComboBoxEx cmbBodyFrame;
+        private DevComponents.DotNetBar.Controls.ComboBoxEx[] cmbEffectFrames;
         private System.Windows.Forms.Timer timer1;
         private AvatarContainer avatarContainer1;
         private DevComponents.DotNetBar.Controls.CheckBoxX chkHairCover;
+        private DevComponents.DotNetBar.Controls.CheckBoxX chkApplyBRM;
         private DevComponents.DotNetBar.Controls.ComboBoxEx cmbWeaponIdx;
         private DevComponents.DotNetBar.Controls.ComboBoxEx cmbWeaponType;
         private DevComponents.DotNetBar.LabelX labelX4;
@@ -863,6 +933,10 @@
         private DevComponents.DotNetBar.ButtonItem btnLara;
         private DevComponents.DotNetBar.ButtonItem btnLynn;
         private DevComponents.DotNetBar.ButtonItem btnAngelicBuster;
+        private DevComponents.DotNetBar.ButtonItem btnTanjiroKamado;
+        private DevComponents.DotNetBar.ButtonItem btnNezukoKamado;
+        private DevComponents.DotNetBar.ButtonItem btnZenitsuAgatsuma;
+        private DevComponents.DotNetBar.ButtonItem btnInosukeHashibira;
         private DevComponents.DotNetBar.ButtonItem btnSaveAsGif;
         private DevComponents.DotNetBar.Controls.ComboBoxEx cmbEar;
         private DevComponents.DotNetBar.LabelX labelX5;

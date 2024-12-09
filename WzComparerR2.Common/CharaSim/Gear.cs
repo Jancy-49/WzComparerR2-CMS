@@ -42,6 +42,8 @@ namespace WzComparerR2.CharaSim
         public string EpicHs { get; internal set; }
 
         public bool FixLevel { get; internal set; }
+        public bool AdditionHideDesc { get; set; }
+
         public List<GearLevelInfo> Levels { get; internal set; }
         public List<GearSealedInfo> Seals { get; internal set; }
 
@@ -639,9 +641,16 @@ namespace WzComparerR2.CharaSim
                         case "addition": //附加属性信息
                             foreach (Wz_Node addiNode in subNode.Nodes)
                             {
-                                Addition addi = Addition.CreateFromNode(addiNode);
-                                if (addi != null)
-                                    gear.Additions.Add(addi);
+                                if (addiNode.Text == "hideDesc")
+                                {
+                                    gear.AdditionHideDesc = true;
+                                }
+                                else
+                                {
+                                    Addition addi = Addition.CreateFromNode(addiNode);
+                                    if (addi != null)
+                                        gear.Additions.Add(addi);
+                                }
                             }
                             gear.Additions.Sort((add1, add2) => (int)add1.Type - (int)add2.Type);
                             break;
@@ -964,7 +973,7 @@ namespace WzComparerR2.CharaSim
 
             if (gear.Props.TryGetValue(GearPropType.incCHUC, out value))
             {
-                gear.Star = value;
+                //gear.Star = value;
             }
 
             return gear;
