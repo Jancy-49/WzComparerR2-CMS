@@ -519,6 +519,10 @@ namespace WzComparerR2.CharaSim
         /// <summary>
         /// 宠物装备 180
         /// </summary>
+        jewel = 178,
+        /// <summary>
+        /// 宝玉 178
+        /// </summary>
         petEquip = 180,
         /// <summary>
         /// 骑兽 190

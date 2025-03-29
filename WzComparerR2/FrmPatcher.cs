@@ -180,7 +180,7 @@ namespace WzComparerR2
                 item.GetFileLength();
                 if (item.FileLength > 0)
                 {
-                    switch (MessageBoxEx.Show(string.Format("大小: {0:N0} Bytes\r\n更新时间: {1:yyyy年M月d日 HH:mm:ss}\r\n是否立即开始下载文件？", item.FileLength, item.LastModified), "確認", MessageBoxButtons.YesNo))
+                    switch (MessageBoxEx.Show(string.Format("大小: {0:N0} Bytes\r\n更新时间: {1:yyyy年M月d日 HH:mm:ss}\r\n是否立即开始下载文件？", item.FileLength, item.LastModified), "确认", MessageBoxButtons.YesNo))
                     {
                         case DialogResult.Yes:
                         #if NET6_0_OR_GREATER

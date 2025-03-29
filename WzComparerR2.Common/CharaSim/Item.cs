@@ -11,10 +11,11 @@ namespace WzComparerR2.CharaSim
     {
         public Item()
         {
-            this.Props = new Dictionary<ItemPropType, int>();
-            this.Specs = new Dictionary<ItemSpecType, int>();
+            this.Props = new Dictionary<ItemPropType, long>();
+            this.Specs = new Dictionary<ItemSpecType, long>();
             this.CoreSpecs = new Dictionary<ItemCoreSpecType, Wz_Node>();
             this.AddTooltips = new List<int>();
+            this.Recipes = new List<int>();
         }
 
         public int Level { get; set; }
@@ -24,10 +25,11 @@ namespace WzComparerR2.CharaSim
 
         public List<GearLevelInfo> Levels { get; internal set; }
 
-        public Dictionary<ItemPropType, int> Props { get; private set; }
-        public Dictionary<ItemSpecType, int> Specs { get; private set; }
+        public Dictionary<ItemPropType, long> Props { get; private set; }
+        public Dictionary<ItemSpecType, long> Specs { get; private set; }
         public Dictionary<ItemCoreSpecType, Wz_Node> CoreSpecs { get; private set; }
         public List<int> AddTooltips { get; internal set; } // Additional Tooltips
+        public List<int> Recipes { get; private set; }
 
         public bool Cash
         {
@@ -39,10 +41,14 @@ namespace WzComparerR2.CharaSim
             get { return GetBooleanValue(ItemPropType.timeLimited); }
         }
 
+        public bool ShowCosmetic
+        {
+            get { return this.Specs.TryGetValue(ItemSpecType.cosmetic, out long value) && value > 0; }
+        }
+
         public bool GetBooleanValue(ItemPropType type)
         {
-            int value;
-            return this.Props.TryGetValue(type, out value) && value != 0;
+            return this.Props.TryGetValue(type, out long value) && value != 0;
         }
 
         public static Item CreateFromNode(Wz_Node node, GlobalFindNodeFunction findNode)
@@ -240,12 +246,25 @@ namespace WzComparerR2.CharaSim
             {
                 foreach (Wz_Node subNode in specNode.Nodes)
                 {
-                    ItemSpecType type;
-                    if (Enum.TryParse(subNode.Text, out type))
+                    if (subNode.Text == "recipe")
+                    {
+                        if (subNode.Value == null && subNode.Nodes.Count > 0)
+                        {
+                            foreach (var recipeNode in subNode.Nodes)
+                            {
+                                item.Recipes.Add(recipeNode.GetValue<int>());
+                            }
+                        }
+                        else
+                        {
+                            item.Recipes.Add(subNode.GetValue<int>());
+                        }
+                    }
+                    else if (Enum.TryParse(subNode.Text, out ItemSpecType type))
                     {
                         try
                         {
-                            item.Specs.Add(type, Convert.ToInt32(subNode.Value));
+                            item.Specs.Add(type, Convert.ToInt64(subNode.Value));
                         }
                         finally
                         {

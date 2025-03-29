@@ -29,7 +29,7 @@ namespace WzComparerR2.CharaSim
             }
         }
 
-        public static string GetGearPropString(GearPropType propType, int value)
+        public static string GetGearPropString(GearPropType propType, long value)
         {
             return GetGearPropString(propType, value, 0);
         }
@@ -40,7 +40,7 @@ namespace WzComparerR2.CharaSim
         /// <param Name="propType">表示装备属性枚举GearPropType。</param>
         /// <param Name="Value">表示propType属性所对应的值。</param>
         /// <returns></returns>
-        public static string GetGearPropString(GearPropType propType, int value, int signFlag)
+        public static string GetGearPropString(GearPropType propType, long value, int signFlag)
         {
 
             string sign;
@@ -112,9 +112,10 @@ namespace WzComparerR2.CharaSim
                 case GearPropType.equipTradeBlock: return value == 0 ? null : "佩戴后不可交换";
                 case GearPropType.accountSharable: return value == 0 ? null : "只有世界内我的角色间可移动";
                 case GearPropType.sharableOnce: return value == 0 ? null : "世界内我的角色间可移动1次\n(移动后不可交换)";
-                case GearPropType.onlyEquip: return value == 0 ? null : "固有佩戴装备";
+                case GearPropType.onlyEquip: return value == 0 ? null : "固有装备物品";
                 case GearPropType.notExtend: return value == 0 ? null : "有效时间不可延长";
                 case GearPropType.accountSharableAfterExchange: return value == 0 ? null : "可交易1次\n(交易后只能在世界内我的角色之间移动)";
+                case GearPropType.mintable: return value == 0 ? null : "可铸造";
                 case GearPropType.tradeAvailable:
                     switch (value)
                     {
@@ -183,7 +184,7 @@ namespace WzComparerR2.CharaSim
                     case GearPropType.incMDD:
                     case GearPropType.incSpeed:
                     case GearPropType.incJump:
-                        subfix = $"({standardValue} #e+{value - standardValue}#)"; break;
+                        subfix = $"({standardValue} #$e+{value - standardValue}#)"; break;
                     case GearPropType.bdR:
                     case GearPropType.incBDR:
                     case GearPropType.imdR:
@@ -191,7 +192,7 @@ namespace WzComparerR2.CharaSim
                     case GearPropType.damR:
                     case GearPropType.incDAMr:
                     case GearPropType.statR:
-                        subfix = $"({standardValue}% #e+{value - standardValue}%#)"; break;
+                        subfix = $"({standardValue}% #$y+{value - standardValue}%#)"; break;
 
                     case GearPropType.addSTR:
                     case GearPropType.addDEX:
@@ -205,13 +206,13 @@ namespace WzComparerR2.CharaSim
                     case GearPropType.addSpeed:
                     case GearPropType.addJump:
                     case GearPropType.addLvlDec:
-                        openAPISubfix += $"#g+{value - standardValue}#"; break;
+                        openAPISubfix += $"#$g+{value - standardValue}#"; break;
 
 
                     case GearPropType.addBDR:
                     case GearPropType.addDamR:
                     case GearPropType.addAllStatR:
-                        openAPISubfix += $"#g+{value - standardValue}%#"; break;
+                        openAPISubfix += $"#$g+{value - standardValue}%#"; break;
 
                     case GearPropType.scrollSTR:
                     case GearPropType.scrollDEX:
@@ -224,7 +225,7 @@ namespace WzComparerR2.CharaSim
                     case GearPropType.scrollDEF:
                     case GearPropType.scrollSpeed:
                     case GearPropType.scrollJump:
-                        openAPISubfix += $" #e+{value - standardValue}#"; break;
+                        openAPISubfix += $" #$e+{value - standardValue}#"; break;
 
                     case GearPropType.starSTR:
                     case GearPropType.starDEX:
@@ -244,7 +245,7 @@ namespace WzComparerR2.CharaSim
                 {
                     openAPISubfix = $"({standardValue}" + openAPISubfix + ")";
                 }
-                propStr = "#$" + propStr + "# " + subfix + openAPISubfix;
+                propStr = "#$y" + propStr + "# " + subfix + openAPISubfix;
             }
             return propStr;
         }
@@ -412,6 +413,7 @@ namespace WzComparerR2.CharaSim
 
                 case GearType.boxingCannon: return "拳封";
                 case GearType.boxingSky: return "拳天";
+                case GearType.jewel: return "宝玉";
 
                 case GearType.breathShooter: return "龙息臂箭";
                 case GearType.weaponBelt: return "武器腰带";
@@ -627,7 +629,7 @@ namespace WzComparerR2.CharaSim
             }
         }
 
-        public static string GetItemPropString(ItemPropType propType, int value)
+        public static string GetItemPropString(ItemPropType propType, long value)
         {
             switch (propType)
             {
@@ -655,6 +657,8 @@ namespace WzComparerR2.CharaSim
                     return value == 0 ? "普通宠物 (不可与其它普通宠物重复使用)" : "多重宠物 (最多可与其它3个宠物重复使用)";
                 case ItemPropType.permanent:
                     return value == 0 ? null : "可以一直使用魔法的神奇宠物。";
+                case ItemPropType.mintable:
+                    return GetGearPropString(GearPropType.mintable, value);
                 default:
                     return null;
             }
@@ -1067,7 +1071,7 @@ namespace WzComparerR2.CharaSim
             return null;
         }
 
-        private static string ToChineseNumberExpr(int value)
+        private static string ToChineseNumberExpr(long value)
         {
             var sb = new StringBuilder(16);
             bool firstPart = true;
@@ -1078,14 +1082,14 @@ namespace WzComparerR2.CharaSim
             }
             if (value >= 1_0000_0000)
             {
-                int part = value / 1_0000_0000;
+                long part = value / 1_0000_0000;
                 sb.AppendFormat("{0}亿", part);
                 value -= part * 1_0000_0000;
                 firstPart = false;
             }
             if (value >= 1_0000)
             {
-                int part = value / 1_0000;
+                long part = value / 1_0000;
                 sb.Append(firstPart ? null : " ");
                 sb.AppendFormat("{0}万", part);
                 value -= part * 1_0000;

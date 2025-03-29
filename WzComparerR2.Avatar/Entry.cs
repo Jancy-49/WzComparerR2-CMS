@@ -84,7 +84,7 @@ namespace WzComparerR2.Avatar
                 {
                     if (frame.Delay != 0)
                     {
-                        var bone = canvas.CreateFrame(frame, faceFrames[0], null);
+                        var bone = canvas.CreateFrame(frame, faceFrames[0], null, null);
                         var bmp = canvas.DrawFrame(bone);
 
                         Point pos = bmp.OpOrigin;
@@ -93,7 +93,6 @@ namespace WzComparerR2.Avatar
                         gif.Frames.Add(f);
                     }
                 }
-                
 
                 var gifFile = gif.EncodeGif(Color.Transparent);
                 string fileName = "D:\\ms\\new_" + action.Replace('\\', '.');
@@ -229,7 +228,7 @@ namespace WzComparerR2.Avatar
                     if (frame.Delay != 0)
                     {
                         //绘制角色主动作
-                        var bone = canvas.CreateFrame(frame, null, null);
+                        var bone = canvas.CreateFrame(frame, null, null, null);
                         var bmp = canvas.DrawFrame(bone);
                         GifFrame f = new GifFrame(bmp.Bitmap, bmp.Origin, Math.Abs(frame.Delay));
                         gifCanvas.Layers[0].Frames.Add(f);
@@ -292,7 +291,7 @@ namespace WzComparerR2.Avatar
 
             foreach (var part in new [] {"prepare", "keydown", "keydownend"})
             {
-                var effects = new List<Tuple<Gif,int>>();
+                var effects = new List<Tuple<Gif, int>>();
 
                 for (int i = -1; ; i++)
                 {
@@ -321,8 +320,8 @@ namespace WzComparerR2.Avatar
                         for(int i = 0, i0 = part == "keydown" ? keydownCount : 1; i < i0; i++)
                         {
                             effGif.Item1.Frames.ForEach(af => layer.AddFrame((GifFrame)af));
-                            layers.Add(new Tuple<GifLayer, int>(layer,effGif.Item2));
-                            fDelay+= effGif.Item1.Frames.Select(f => f.Delay).Sum();
+                            layers.Add(new Tuple<GifLayer, int>(layer, effGif.Item2));
+                            fDelay += effGif.Item1.Frames.Select(f => f.Delay).Sum();
                         }
 
                         effDelay = Math.Max(fDelay, effDelay);
@@ -345,7 +344,7 @@ namespace WzComparerR2.Avatar
                     if (frame.Delay != 0)
                     {
                         //绘制角色主动作
-                        var bone = canvas.CreateFrame(frame, null, null);
+                        var bone = canvas.CreateFrame(frame, null, null, null);
                         var bmp = canvas.DrawFrame(bone);
                         GifFrame f = new GifFrame(bmp.Bitmap, bmp.Origin, Math.Abs(frame.Delay));
                         actLayer.Frames.Add(f);
@@ -385,7 +384,7 @@ namespace WzComparerR2.Avatar
 
                 for (int i = 1; ; i++)
                 {
-                    Wz_Node effNode = ChairNode.FindNodeByPath("effect"+( i > 1 ? i.ToString() : ""));
+                    Wz_Node effNode = ChairNode.FindNodeByPath("effect" + ( i > 1 ? i.ToString() : ""));
                     if (effNode == null)
                         break;
                     var gif = Gif.CreateFromNode(effNode, PluginManager.FindWz);
@@ -427,7 +426,7 @@ namespace WzComparerR2.Avatar
                     if (frame.Delay != 0)
                     {
                         //绘制角色主动作
-                        var bone = canvas.CreateFrame(frame, faceFrames[0], null);
+                        var bone = canvas.CreateFrame(frame, faceFrames[0], null, null);
                         bone.Position = bodyMove;
                         var bmp = canvas.DrawFrame(bone);
                         
