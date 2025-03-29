@@ -12,17 +12,21 @@ namespace WzComparerR2.Rendering
     public static class MonogameUtils
     {
         internal const SharpDX.DXGI.Format DXGI_FORMAT_B4G4R4A4_UNORM = (SharpDX.DXGI.Format)115;
-
         public static Color ToXnaColor(this GdipColor color)
         {
             return new Color(color.R, color.G, color.B, color.A);
         }
 
+        public static Color ToXnaColor(int argbPackedValue)
+        {
+            var bgra = BitConverter.GetBytes(argbPackedValue);
+            return new Color(bgra[2], bgra[1], bgra[0], bgra[3]);
+        }
+
         public static Color GetXnaColor(this Wz_Node node)
         {
             var argbColor = node.GetValueEx<int>(0);
-            var bgra = BitConverter.GetBytes(argbColor);
-            return new Color(bgra[2], bgra[1], bgra[0], bgra[3]);
+            return ToXnaColor(argbColor);
         }
 
         public static Texture2D CreateMosaic(GraphicsDevice device, Color c0, Color c1, int blockSize)

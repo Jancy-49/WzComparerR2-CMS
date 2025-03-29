@@ -13,10 +13,20 @@ namespace WzComparerR2.Config
     {
         public WcR2Config()
         {
-            this.MainStyle = DevComponents.DotNetBar.eStyle.Metro;
+            this.MainStyle = DevComponents.DotNetBar.eStyle.Office2016;
             this.MainStyleColor = Color.DimGray;
             this.SortWzOnOpened = true;
             this.AutoDetectExtFiles = true;
+            this.NoPatcherPrompt = false;
+            this.WzVersionVerifyMode = WzLib.WzVersionVerifyMode.Fast;
+            this.PreferredLayout = 0;
+            this.DesiredLanguage = "ja";
+            this.MozhiBackend = "https://mozhi.aryak.me";
+            this.DetectCurrency = "auto";
+            this.DesiredCurrency = "none";
+            this.OpenAIExtraOption = false;
+            this.LMTemperature = 0.7;
+            this.MaximumToken = -1;
         }
 
         /// <summary>
@@ -59,6 +69,125 @@ namespace WzComparerR2.Config
             get { return (ConfigItem<string>)this["nxOpenAPIKey"]; }
             set { this["nxOpenAPIKey"] = value; }
         }
+
+        /// <summary>
+        /// Mozhi Backend Configuration
+        /// </summary>
+        [ConfigurationProperty("MozhiBackend")]
+        [ConfigurationCollection(typeof(ConfigArrayList<string>.ItemElement))]
+        public ConfigItem<string> MozhiBackend
+        {
+            get { return (ConfigItem<string>)this["MozhiBackend"]; }
+            set { this["MozhiBackend"] = value; }
+        }
+
+        /// <summary>
+        /// Language Model Configuration
+        /// </summary>
+        [ConfigurationProperty("LanguageModel")]
+        [ConfigurationCollection(typeof(ConfigArrayList<string>.ItemElement))]
+        public ConfigItem<string> LanguageModel
+        {
+            get { return (ConfigItem<string>)this["LanguageModel"]; }
+            set { this["LanguageModel"] = value; }
+        }
+
+        /// <summary>
+        /// OpenAI Backend Configuration
+        /// </summary>
+        [ConfigurationProperty("OpenAIBackend")]
+        [ConfigurationCollection(typeof(ConfigArrayList<string>.ItemElement))]
+        public ConfigItem<string> OpenAIBackend
+        {
+            get { return (ConfigItem<string>)this["OpenAIBackend"]; }
+            set { this["OpenAIBackend"] = value; }
+        }
+
+        /// <summary>
+        /// Enable Open AI Extra Option Configuration
+        /// </summary>
+        [ConfigurationProperty("OpenAIExtraOption")]
+        public ConfigItem<bool> OpenAIExtraOption
+        {
+            get { return (ConfigItem<bool>)this["OpenAIExtraOption"]; }
+            set { this["OpenAIExtraOption"] = value; }
+        }
+
+        /// <summary>
+        /// Language Model Temperature Configuration
+        /// </summary>
+        [ConfigurationProperty("LMTemperature")]
+        [ConfigurationCollection(typeof(ConfigArrayList<double>.ItemElement))]
+        public ConfigItem<double> LMTemperature
+        {
+            get { return (ConfigItem<double>)this["LMTemperature"]; }
+            set { this["LMTemperature"] = value; }
+        }
+
+        /// <summary>
+        /// Language Model Maximum Token Configuration
+        /// </summary>
+        [ConfigurationProperty("MaximumToken")]
+        [ConfigurationCollection(typeof(ConfigArrayList<int>.ItemElement))]
+        public ConfigItem<int> MaximumToken
+        {
+            get { return (ConfigItem<int>)this["MaximumToken"]; }
+            set { this["MaximumToken"] = value; }
+        }
+
+        /// <summary>
+        /// Desired Language Configuration
+        /// </summary>
+        [ConfigurationProperty("DesiredLanguage")]
+        [ConfigurationCollection(typeof(ConfigArrayList<string>.ItemElement))]
+        public ConfigItem<string> DesiredLanguage
+        {
+            get { return (ConfigItem<string>)this["DesiredLanguage"]; }
+            set { this["DesiredLanguage"] = value; }
+        }
+
+        /// <summary>
+        /// Preferred Translate Engine Configuration
+        /// </summary>
+        [ConfigurationProperty("PreferredTranslateEngine")]
+        public ConfigItem<int> PreferredTranslateEngine
+        {
+            get { return (ConfigItem<int>)this["PreferredTranslateEngine"]; }
+            set { this["PreferredTranslateEngine"] = value; }
+        }
+
+        /// <summary>
+        /// Preferred Layout Configuration
+        /// </summary>
+        [ConfigurationProperty("PreferredLayout")]
+        public ConfigItem<int> PreferredLayout
+        {
+            get { return (ConfigItem<int>)this["PreferredLayout"]; }
+            set { this["PreferredLayout"] = value; }
+        }
+
+        /// <summary>
+        /// Detect Currency Configuration
+        /// </summary>
+        [ConfigurationProperty("DetectCurrency")]
+        [ConfigurationCollection(typeof(ConfigArrayList<string>.ItemElement))]
+        public ConfigItem<string> DetectCurrency
+        {
+            get { return (ConfigItem<string>)this["DetectCurrency"]; }
+            set { this["DetectCurrency"] = value; }
+        }
+
+        /// <summary>
+        /// Desired Currency Configuration
+        /// </summary>
+        [ConfigurationProperty("DesiredCurrency")]
+        [ConfigurationCollection(typeof(ConfigArrayList<string>.ItemElement))]
+        public ConfigItem<string> DesiredCurrency
+        {
+            get { return (ConfigItem<string>)this["DesiredCurrency"]; }
+            set { this["DesiredCurrency"] = value; }
+        }
+
         /// <summary>
         /// NXSecretKey Configuration
         /// </summary>
@@ -69,6 +198,7 @@ namespace WzComparerR2.Config
             get { return (ConfigItem<string>)this["nxSecretKey"]; }
             set { this["nxSecretKey"] = value; }
         }
+
         /// <summary>
         /// 获取或设置Wz对比报告默认输出文件夹。
         /// </summary>
@@ -119,6 +249,15 @@ namespace WzComparerR2.Config
             set { this["autoDetectExtFiles"] = value; }
         }
 
+        /// <summary>
+        /// 获取或设置一个值，指示是否不再提示游戏更新器通知。
+        /// </summary>
+        [ConfigurationProperty("noPatcherPrompt")]
+        public ConfigItem<bool> NoPatcherPrompt
+        {
+            get { return (ConfigItem<bool>)this["noPatcherPrompt"]; }
+            set { this["noPatcherPrompt"] = value; }
+        }
         /// <summary>
         /// 获取或设置一个值，指示读取wz是否跳过img检测。
         /// </summary>

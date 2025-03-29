@@ -11,6 +11,6 @@ namespace WzComparerR2.CharaSim
         Consume = 2,
         Install = 3,
         Etc = 4,
-        Cash = 5
+        Cash = 5,
     }
 }

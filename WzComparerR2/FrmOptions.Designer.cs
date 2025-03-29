@@ -32,8 +32,14 @@
             this.buttonX2 = new DevComponents.DotNetBar.ButtonX();
             this.buttonX1 = new DevComponents.DotNetBar.ButtonX();
             this.txtAPIkey = new DevComponents.DotNetBar.Controls.TextBoxX();
+            this.txtLMTemperature = new DevComponents.Editors.DoubleInput();
+            this.txtMaximumToken = new DevComponents.Editors.IntegerInput();
+            this.txtOpenAIBackend = new DevComponents.DotNetBar.Controls.TextBoxX();
+            this.txtGCloudTranslateAPIkey = new DevComponents.DotNetBar.Controls.TextBoxX();
             this.txtSecretkey = new DevComponents.DotNetBar.Controls.TextBoxX();
             this.buttonXCheck = new DevComponents.DotNetBar.ButtonX();
+            this.buttonXCheck2 = new DevComponents.DotNetBar.ButtonX();
+            this.buttonXCheck3 = new DevComponents.DotNetBar.ButtonX();
             this.superTabControl1 = new DevComponents.DotNetBar.SuperTabControl();
             this.superTabControlPanel1 = new DevComponents.DotNetBar.SuperTabControlPanel();
             this.cmbWzVersionVerifyMode = new DevComponents.DotNetBar.Controls.ComboBoxEx();
@@ -41,6 +47,15 @@
             this.chkImgCheckDisabled = new DevComponents.DotNetBar.Controls.CheckBoxX();
             this.chkWzSortByImgID = new DevComponents.DotNetBar.Controls.CheckBoxX();
             this.chkAutoCheckExtFiles = new DevComponents.DotNetBar.Controls.CheckBoxX();
+            this.chkOpenAIExtraOption = new DevComponents.DotNetBar.Controls.CheckBoxX();
+            this.chkEnableTranslate = new DevComponents.DotNetBar.Controls.CheckBoxX();
+            this.cmbDesiredLanguage = new DevComponents.DotNetBar.Controls.ComboBoxEx();
+            this.cmbMozhiBackend = new DevComponents.DotNetBar.Controls.ComboBoxEx();
+            this.cmbLanguageModel = new DevComponents.DotNetBar.Controls.ComboBoxEx();
+            this.cmbDetectCurrency = new DevComponents.DotNetBar.Controls.ComboBoxEx();
+            this.cmbDesiredCurrency = new DevComponents.DotNetBar.Controls.ComboBoxEx();
+            this.cmbPreferredLayout = new DevComponents.DotNetBar.Controls.ComboBoxEx();
+            this.cmbPreferredTranslateEngine = new DevComponents.DotNetBar.Controls.ComboBoxEx();
             this.cmbWzEncoding = new DevComponents.DotNetBar.Controls.ComboBoxEx();
             this.labelX1 = new DevComponents.DotNetBar.LabelX();
             this.chkWzAutoSort = new DevComponents.DotNetBar.Controls.CheckBoxX();
@@ -50,13 +65,26 @@
             this.superTabItem2 = new DevComponents.DotNetBar.SuperTabItem();
             this.superTabControlPanel3 = new DevComponents.DotNetBar.SuperTabControlPanel();
             this.labelX4 = new DevComponents.DotNetBar.LabelX();
+            this.labelX5 = new DevComponents.DotNetBar.LabelX();
+            this.labelX6 = new DevComponents.DotNetBar.LabelX();
+            this.labelX7 = new DevComponents.DotNetBar.LabelX();
+            this.labelX8 = new DevComponents.DotNetBar.LabelX();
+            this.labelX9 = new DevComponents.DotNetBar.LabelX();
+            this.labelX10 = new DevComponents.DotNetBar.LabelX();
+            this.labelX11 = new DevComponents.DotNetBar.LabelX();
+            this.labelX12 = new DevComponents.DotNetBar.LabelX();
+            this.labelX13 = new DevComponents.DotNetBar.LabelX();
+            this.labelX14 = new DevComponents.DotNetBar.LabelX();
+            this.superTabControlPanel4 = new DevComponents.DotNetBar.SuperTabControlPanel();
             this.superTabItem3 = new DevComponents.DotNetBar.SuperTabItem();
+            this.superTabItem4 = new DevComponents.DotNetBar.SuperTabItem();
             this.panelEx1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.superTabControl1)).BeginInit();
             this.superTabControl1.SuspendLayout();
             this.superTabControlPanel1.SuspendLayout();
             this.superTabControlPanel2.SuspendLayout();
             this.superTabControlPanel3.SuspendLayout();
+            this.superTabControlPanel4.SuspendLayout();
             this.SuspendLayout();
             // 
             // panelEx1
@@ -117,18 +145,118 @@
             this.txtAPIkey.Size = new System.Drawing.Size(180, 23);
             this.txtAPIkey.TabIndex = 10;
             // 
+            // txtOpenAIBackend
+            // 
+            // 
+            // 
+            // 
+            this.txtOpenAIBackend.Border.Class = "TextBoxBorder";
+            this.txtOpenAIBackend.Border.CornerType = DevComponents.DotNetBar.eCornerType.Square;
+            this.txtOpenAIBackend.Location = new System.Drawing.Point(140, 13);
+            this.txtOpenAIBackend.Name = "txtOpenAIBackend";
+            this.txtOpenAIBackend.Size = new System.Drawing.Size(178, 23);
+            this.txtOpenAIBackend.TabIndex = 10;
+            this.txtOpenAIBackend.WatermarkText = "https://api.openai.com/v1";
+            // 
+            // chkOpenAIExtraOption
+            // 
+            this.chkOpenAIExtraOption.AutoSize = true;
+            this.chkOpenAIExtraOption.BackColor = System.Drawing.Color.Transparent;
+            // 
+            // 
+            // 
+            this.chkOpenAIExtraOption.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
+            this.chkOpenAIExtraOption.Location = new System.Drawing.Point(14, 40);
+            this.chkOpenAIExtraOption.Name = "chkOpenAIExtraOption";
+            this.chkOpenAIExtraOption.Size = new System.Drawing.Size(212, 16);
+            this.chkOpenAIExtraOption.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
+            this.chkOpenAIExtraOption.TabIndex = 11;
+            this.chkOpenAIExtraOption.Text = "使用以下参数";
+            this.chkOpenAIExtraOption.CheckedChanged += new System.EventHandler(this.chkOpenAIExtraOption_CheckedChanged);
+            //
+            // txtLMTemperature
+            //
+            //
+            //
+            this.txtLMTemperature.BackgroundStyle.Class = "DateTimeInputBackground";
+            this.txtLMTemperature.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
+            this.txtLMTemperature.ButtonFreeText.Shortcut = DevComponents.DotNetBar.eShortcut.F2;
+            this.txtLMTemperature.ForeColor = System.Drawing.SystemColors.ControlText;
+            this.txtLMTemperature.Location = new System.Drawing.Point(140, 67);
+            this.txtLMTemperature.MinValue = 0;
+            this.txtLMTemperature.MaxValue = 2;
+            this.txtLMTemperature.Increment = 0.1;
+            this.txtLMTemperature.DisplayFormat = "0.0";
+            this.txtLMTemperature.Name = "txtLMTemperature";
+            this.txtLMTemperature.ShowUpDown = true;
+            this.txtLMTemperature.Size = new System.Drawing.Size(70, 21);
+            this.txtLMTemperature.TabIndex = 14;
+            //
+            // txtMaximumToken
+            //
+            //
+            //
+            this.txtMaximumToken.BackgroundStyle.Class = "DateTimeInputBackground";
+            this.txtMaximumToken.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
+            this.txtMaximumToken.ButtonFreeText.Shortcut = DevComponents.DotNetBar.eShortcut.F2;
+            this.txtMaximumToken.ForeColor = System.Drawing.SystemColors.ControlText;
+            this.txtMaximumToken.Location = new System.Drawing.Point(140, 96);
+            this.txtMaximumToken.MinValue = -1;
+            this.txtMaximumToken.Name = "txtMaximumToken";
+            this.txtMaximumToken.ShowUpDown = true;
+            this.txtMaximumToken.Size = new System.Drawing.Size(70, 21);
+            this.txtMaximumToken.TabIndex = 15;
+            // 
+            // txtGCloudTranslateAPIkey
+            // 
+            // 
+            // 
+            // 
+            this.txtGCloudTranslateAPIkey.Border.Class = "TextBoxBorder";
+            this.txtGCloudTranslateAPIkey.Border.CornerType = DevComponents.DotNetBar.eCornerType.Square;
+            this.txtGCloudTranslateAPIkey.Location = new System.Drawing.Point(110, 40);
+            this.txtGCloudTranslateAPIkey.Name = "txtGCloudTranslateAPIkey";
+            this.txtGCloudTranslateAPIkey.Size = new System.Drawing.Size(148, 23);
+            this.txtGCloudTranslateAPIkey.TabIndex = 10;
+            // 
             // buttonXCheck
             // 
             this.buttonXCheck.AccessibleRole = System.Windows.Forms.AccessibleRole.PushButton;
             this.buttonXCheck.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.buttonXCheck.ColorTable = DevComponents.DotNetBar.eButtonColor.OrangeWithBackground;
-            this.buttonXCheck.Location = new System.Drawing.Point(288, 13);
+            this.buttonXCheck.Location = new System.Drawing.Point(263, 13);
             this.buttonXCheck.Name = "buttonXCheck";
             this.buttonXCheck.Size = new System.Drawing.Size(55, 19);
             this.buttonXCheck.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
             this.buttonXCheck.TabIndex = 4;
             this.buttonXCheck.Text = "检查";
             this.buttonXCheck.Click += new System.EventHandler(this.buttonXCheck_Click);
+            // 
+            // buttonXCheck2
+            // 
+            this.buttonXCheck2.AccessibleRole = System.Windows.Forms.AccessibleRole.PushButton;
+            this.buttonXCheck2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.buttonXCheck2.ColorTable = DevComponents.DotNetBar.eButtonColor.OrangeWithBackground;
+            this.buttonXCheck2.Location = new System.Drawing.Point(288, 13);
+            this.buttonXCheck2.Name = "buttonXCheck2";
+            this.buttonXCheck2.Size = new System.Drawing.Size(55, 19);
+            this.buttonXCheck2.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
+            this.buttonXCheck2.TabIndex = 4;
+            this.buttonXCheck2.Text = "检查";
+            this.buttonXCheck2.Click += new System.EventHandler(this.buttonXCheck2_Click);
+            // 
+            // buttonXCheck3
+            // 
+            this.buttonXCheck3.AccessibleRole = System.Windows.Forms.AccessibleRole.PushButton;
+            this.buttonXCheck3.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.buttonXCheck3.ColorTable = DevComponents.DotNetBar.eButtonColor.OrangeWithBackground;
+            this.buttonXCheck3.Location = new System.Drawing.Point(263, 40);
+            this.buttonXCheck3.Name = "buttonXCheck3";
+            this.buttonXCheck3.Size = new System.Drawing.Size(55, 19);
+            this.buttonXCheck3.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
+            this.buttonXCheck3.TabIndex = 4;
+            this.buttonXCheck3.Text = "检查";
+            this.buttonXCheck3.Click += new System.EventHandler(this.buttonXCheck3_Click);
             // 
             // superTabControl1
             // 
@@ -151,6 +279,7 @@
             this.superTabControl1.Controls.Add(this.superTabControlPanel1);
             this.superTabControl1.Controls.Add(this.superTabControlPanel2);
             this.superTabControl1.Controls.Add(this.superTabControlPanel3);
+            this.superTabControl1.Controls.Add(this.superTabControlPanel4);
             this.superTabControl1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.superTabControl1.Location = new System.Drawing.Point(0, 0);
             this.superTabControl1.Name = "superTabControl1";
@@ -164,7 +293,8 @@
             this.superTabControl1.Tabs.AddRange(new DevComponents.DotNetBar.BaseItem[] {
             this.superTabItem1,
             this.superTabItem2,
-            this.superTabItem3});
+            this.superTabItem3,
+            this.superTabItem4});
             this.superTabControl1.Text = "superTabControl1";
             // 
             // superTabControlPanel1
@@ -307,9 +437,22 @@
             // 
             // superTabControlPanel2
             // 
-            this.superTabControlPanel2.Controls.Add(this.labelX3);
-            this.superTabControlPanel2.Controls.Add(this.txtAPIkey);
-            this.superTabControlPanel2.Controls.Add(this.buttonXCheck);
+            this.superTabControlPanel2.Controls.Add(this.labelX5);
+            this.superTabControlPanel2.Controls.Add(this.buttonXCheck2);
+            this.superTabControlPanel2.Controls.Add(this.chkEnableTranslate);
+            this.superTabControlPanel2.Controls.Add(this.cmbMozhiBackend);
+            this.superTabControlPanel2.Controls.Add(this.cmbLanguageModel);
+            this.superTabControlPanel2.Controls.Add(this.labelX6);
+            this.superTabControlPanel2.Controls.Add(this.cmbDesiredLanguage);
+            this.superTabControlPanel2.Controls.Add(this.labelX7);
+            this.superTabControlPanel2.Controls.Add(this.labelX8);
+            this.superTabControlPanel2.Controls.Add(this.cmbPreferredTranslateEngine);
+            this.superTabControlPanel2.Controls.Add(this.cmbPreferredLayout);
+            this.superTabControlPanel2.Controls.Add(this.labelX9);
+            this.superTabControlPanel2.Controls.Add(this.cmbDetectCurrency);
+            this.superTabControlPanel2.Controls.Add(this.labelX10);
+            this.superTabControlPanel2.Controls.Add(this.labelX11);
+            this.superTabControlPanel2.Controls.Add(this.cmbDesiredCurrency);
             this.superTabControlPanel2.Dock = System.Windows.Forms.DockStyle.Fill;
             this.superTabControlPanel2.Location = new System.Drawing.Point(49, 0);
             this.superTabControlPanel2.Name = "superTabControlPanel2";
@@ -331,16 +474,269 @@
             this.labelX3.TabIndex = 9;
             this.labelX3.Text = "API密钥";
             // 
+            // labelX5
+            // 
+            this.labelX5.AutoSize = true;
+            this.labelX5.BackColor = System.Drawing.Color.Transparent;
+            // 
+            // 
+            // 
+            this.labelX5.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
+            this.labelX5.Location = new System.Drawing.Point(14, 15);
+            this.labelX5.Name = "labelX5";
+            this.labelX5.TabIndex = 9;
+            this.labelX5.Text = "Mozhi服务";
+            // 
+            // labelX7
+            // 
+            this.labelX7.AutoSize = true;
+            this.labelX7.BackColor = System.Drawing.Color.Transparent;
+            // 
+            // 
+            // 
+            this.labelX7.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
+            this.labelX7.Location = new System.Drawing.Point(14, 42);
+            this.labelX7.Name = "labelX7";
+            this.labelX7.TabIndex = 9;
+            this.labelX7.Text = "翻译引擎";
+            // 
+            // labelX8
+            // 
+            this.labelX8.AutoSize = true;
+            this.labelX8.BackColor = System.Drawing.Color.Transparent;
+            // 
+            // 
+            // 
+            this.labelX8.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
+            this.labelX8.Location = new System.Drawing.Point(14, 69);
+            this.labelX8.Name = "labelX8";
+            this.labelX8.TabIndex = 9;
+            this.labelX8.Text = "译文表示";
+            // 
+            // labelX6
+            // 
+            this.labelX6.AutoSize = true;
+            this.labelX6.BackColor = System.Drawing.Color.Transparent;
+            // 
+            // 
+            // 
+            this.labelX6.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
+            this.labelX6.Location = new System.Drawing.Point(14, 96);
+            this.labelX6.Name = "labelX6";
+            this.labelX6.Size = new System.Drawing.Size(138, 16);
+            this.labelX6.TabIndex = 7;
+            this.labelX6.Text = "目标语言";
+            // 
+            // labelX9
+            // 
+            this.labelX9.AutoSize = true;
+            this.labelX9.BackColor = System.Drawing.Color.Transparent;
+            // 
+            // 
+            // 
+            this.labelX9.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
+            this.labelX9.Location = new System.Drawing.Point(14, 123);
+            this.labelX9.Name = "labelX9";
+            this.labelX9.TabIndex = 9;
+            this.labelX9.Text = "货币单位";
+            // 
+            // labelX10
+            // 
+            this.labelX10.AutoSize = true;
+            this.labelX10.BackColor = System.Drawing.Color.Transparent;
+            // 
+            // 
+            // 
+            this.labelX10.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
+            this.labelX10.Location = new System.Drawing.Point(14, 150);
+            this.labelX10.Name = "labelX10";
+            this.labelX10.TabIndex = 9;
+            this.labelX10.Text = "目标单位";
+            // 
+            // labelX11
+            // 
+            this.labelX11.AutoSize = true;
+            this.labelX11.BackColor = System.Drawing.Color.Transparent;
+            // 
+            // 
+            // 
+            this.labelX11.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
+            this.labelX11.Location = new System.Drawing.Point(14, 15);
+            this.labelX11.Name = "labelX11";
+            this.labelX11.TabIndex = 9;
+            this.labelX11.Text = "语言模型";
+            this.labelX11.Visible = false;
+            // 
+            // labelX12
+            // 
+            this.labelX12.AutoSize = true;
+            this.labelX12.BackColor = System.Drawing.Color.Transparent;
+            // 
+            // 
+            // 
+            this.labelX12.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
+            this.labelX12.Location = new System.Drawing.Point(14, 15);
+            this.labelX12.Name = "labelX12";
+            this.labelX12.TabIndex = 9;
+            this.labelX12.Text = "后端地址";
+            // 
+            // labelX13
+            // 
+            this.labelX13.AutoSize = true;
+            this.labelX13.BackColor = System.Drawing.Color.Transparent;
+            // 
+            // 
+            // 
+            this.labelX13.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
+            this.labelX13.Location = new System.Drawing.Point(14, 69);
+            this.labelX13.Name = "labelX13";
+            this.labelX13.TabIndex = 9;
+            this.labelX13.Text = "语言模型温度值";
+            // 
+            // labelX14
+            // 
+            this.labelX14.AutoSize = true;
+            this.labelX14.BackColor = System.Drawing.Color.Transparent;
+            // 
+            // 
+            // 
+            this.labelX14.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
+            this.labelX14.Location = new System.Drawing.Point(14, 96);
+            this.labelX14.Name = "labelX14";
+            this.labelX14.TabIndex = 9;
+            this.labelX14.Text = "Token最大值";
+            // 
+            // cmbDesiredLanguage
+            // 
+            this.cmbDesiredLanguage.DisplayMember = "Text";
+            this.cmbDesiredLanguage.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed;
+            this.cmbDesiredLanguage.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cmbDesiredLanguage.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.cmbDesiredLanguage.FormattingEnabled = true;
+            this.cmbDesiredLanguage.ItemHeight = 13;
+            this.cmbDesiredLanguage.Width = 148;
+            this.cmbDesiredLanguage.Location = new System.Drawing.Point(110, 94);
+            this.cmbDesiredLanguage.Name = "cmbDesiredLanguage";
+            this.cmbDesiredLanguage.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
+            this.cmbDesiredLanguage.TabIndex = 8;
+            // 
+            // cmbMozhiBackend
+            // 
+            this.cmbMozhiBackend.DisplayMember = "Text";
+            this.cmbMozhiBackend.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed;
+            this.cmbMozhiBackend.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cmbMozhiBackend.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.cmbMozhiBackend.FormattingEnabled = true;
+            this.cmbMozhiBackend.ItemHeight = 13;
+            this.cmbMozhiBackend.Width = 148;
+            this.cmbMozhiBackend.Location = new System.Drawing.Point(110, 13);
+            this.cmbMozhiBackend.Name = "cmbMozhiBackend";
+            this.cmbMozhiBackend.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
+            this.cmbMozhiBackend.TabIndex = 12;
+            // 
+            // cmbLanguageModel
+            // 
+            this.cmbLanguageModel.DisplayMember = "Text";
+            this.cmbLanguageModel.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed;
+            this.cmbLanguageModel.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cmbLanguageModel.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.cmbLanguageModel.FormattingEnabled = true;
+            this.cmbLanguageModel.ItemHeight = 13;
+            this.cmbLanguageModel.Width = 148;
+            this.cmbLanguageModel.Location = new System.Drawing.Point(110, 13);
+            this.cmbLanguageModel.Name = "cmbLanguageModel";
+            this.cmbLanguageModel.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
+            this.cmbLanguageModel.TabIndex = 12;
+            this.cmbLanguageModel.Visible = false;
+            // 
+            // cmbPreferredTranslateEngine
+            // 
+            this.cmbPreferredTranslateEngine.DisplayMember = "Text";
+            this.cmbPreferredTranslateEngine.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed;
+            this.cmbPreferredTranslateEngine.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cmbPreferredTranslateEngine.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.cmbPreferredTranslateEngine.FormattingEnabled = true;
+            this.cmbPreferredTranslateEngine.ItemHeight = 13;
+            this.cmbPreferredTranslateEngine.Width = 148;
+            this.cmbPreferredTranslateEngine.Location = new System.Drawing.Point(110, 40);
+            this.cmbPreferredTranslateEngine.Name = "cmbPreferredTranslateEngine";
+            this.cmbPreferredTranslateEngine.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
+            this.cmbPreferredTranslateEngine.TabIndex = 13;
+            this.cmbPreferredTranslateEngine.SelectedIndexChanged += cmbPreferredTranslateEngine_SelectedIndexChanged;
+            // 
+            // cmbPreferredLayout
+            // 
+            this.cmbPreferredLayout.DisplayMember = "Text";
+            this.cmbPreferredLayout.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed;
+            this.cmbPreferredLayout.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cmbPreferredLayout.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.cmbPreferredLayout.FormattingEnabled = true;
+            this.cmbPreferredLayout.ItemHeight = 13;
+            this.cmbPreferredLayout.Width = 148;
+            this.cmbPreferredLayout.Location = new System.Drawing.Point(110, 67);
+            this.cmbPreferredLayout.Name = "cmbPreferredLayout";
+            this.cmbPreferredLayout.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
+            this.cmbPreferredLayout.TabIndex = 15;
+            // 
+            // cmbDetectCurrency
+            // 
+            this.cmbDetectCurrency.DisplayMember = "Text";
+            this.cmbDetectCurrency.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed;
+            this.cmbDetectCurrency.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cmbDetectCurrency.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.cmbDetectCurrency.FormattingEnabled = true;
+            this.cmbDetectCurrency.ItemHeight = 13;
+            this.cmbDetectCurrency.Width = 148;
+            this.cmbDetectCurrency.Location = new System.Drawing.Point(110, 121);
+            this.cmbDetectCurrency.Name = "cmbDetectCurrency";
+            this.cmbDetectCurrency.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
+            this.cmbDetectCurrency.TabIndex = 25;
+            // 
+            // cmbDesiredCurrency
+            // 
+            this.cmbDesiredCurrency.DisplayMember = "Text";
+            this.cmbDesiredCurrency.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed;
+            this.cmbDesiredCurrency.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cmbDesiredCurrency.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.cmbDesiredCurrency.FormattingEnabled = true;
+            this.cmbDesiredCurrency.ItemHeight = 13;
+            this.cmbDesiredCurrency.Width = 148;
+            this.cmbDesiredCurrency.Location = new System.Drawing.Point(110, 148);
+            this.cmbDesiredCurrency.Name = "cmbDesiredCurrency";
+            this.cmbDesiredCurrency.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
+            this.cmbDesiredCurrency.TabIndex = 26;
+            // 
             // superTabItem2
             // 
             this.superTabItem2.AttachedControl = this.superTabControlPanel2;
             this.superTabItem2.GlobalItem = false;
             this.superTabItem2.Name = "superTabItem2";
-            this.superTabItem2.Text = "NX OpenAPI";
+            this.superTabItem2.Text = "翻译功能";
+            // 
+            // superTabControlPanel4
+            // 
+            this.superTabControlPanel4.Controls.Add(this.labelX12);
+            this.superTabControlPanel4.Controls.Add(this.labelX13);
+            this.superTabControlPanel4.Controls.Add(this.labelX14);
+            this.superTabControlPanel4.Controls.Add(this.txtOpenAIBackend);
+            this.superTabControlPanel4.Controls.Add(this.txtLMTemperature);
+            this.superTabControlPanel4.Controls.Add(this.txtMaximumToken);
+            this.superTabControlPanel4.Controls.Add(this.chkOpenAIExtraOption);
+            this.superTabControlPanel4.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.superTabControlPanel4.Location = new System.Drawing.Point(39, 0);
+            this.superTabControlPanel4.Name = "superTabControlPanel4";
+            this.superTabControlPanel4.Size = new System.Drawing.Size(351, 171);
+            this.superTabControlPanel4.TabIndex = 1;
+            this.superTabControlPanel4.TabItem = this.superTabItem4;
+            this.superTabControlPanel4.Visible = false;
             // 
             // superTabControlPanel3
             // 
+            this.superTabControlPanel3.Controls.Add(this.labelX3);
             this.superTabControlPanel3.Controls.Add(this.labelX4);
+            this.superTabControlPanel3.Controls.Add(this.buttonXCheck);
+            this.superTabControlPanel3.Controls.Add(this.buttonXCheck3);
+            this.superTabControlPanel3.Controls.Add(this.txtAPIkey);
             this.superTabControlPanel3.Controls.Add(this.txtSecretkey);
             this.superTabControlPanel3.Dock = System.Windows.Forms.DockStyle.Fill;
             this.superTabControlPanel3.Location = new System.Drawing.Point(52, 0);
@@ -358,18 +754,21 @@
             // 
             // 
             this.labelX4.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
-            this.labelX4.Location = new System.Drawing.Point(14, 15);
+            this.labelX4.Location = new System.Drawing.Point(14, 42);
             this.labelX4.Name = "labelX4";
             this.labelX4.TabIndex = 9;
-            this.labelX4.Text = "私钥";
+            this.labelX4.Text = "翻译API密钥（JSON形式）";
             // 
             // txtSecretkey
             // 
             this.txtSecretkey.Border.Class = "TextBoxBorder";
             this.txtSecretkey.Border.CornerType = DevComponents.DotNetBar.eCornerType.Square;
-            this.txtSecretkey.Location = new System.Drawing.Point(70, 13);
+            this.txtSecretkey.Location = new System.Drawing.Point(14, 67);
             this.txtSecretkey.Name = "txtSecretkey";
-            this.txtSecretkey.Size = new System.Drawing.Size(180, 23);
+            this.txtSecretkey.Multiline = true;
+            this.txtSecretkey.Font = new System.Drawing.Font("宋体", 9F);
+            this.txtSecretkey.ScrollBars = System.Windows.Forms.ScrollBars.Both;
+            this.txtSecretkey.Size = new System.Drawing.Size(306, 90);
             this.txtSecretkey.TabIndex = 10;
             // 
             // superTabItem3
@@ -377,7 +776,14 @@
             this.superTabItem3.AttachedControl = this.superTabControlPanel3;
             this.superTabItem3.GlobalItem = false;
             this.superTabItem3.Name = "superTabItem3";
-            this.superTabItem3.Text = "私钥";
+            this.superTabItem3.Text = "API密钥";
+            // 
+            // superTabItem4
+            // 
+            this.superTabItem4.AttachedControl = this.superTabControlPanel4;
+            this.superTabItem4.GlobalItem = false;
+            this.superTabItem4.Name = "superTabItem4";
+            this.superTabItem4.Text = "OpenAI";
             // 
             // FrmOptions
             // 
@@ -408,26 +814,54 @@
 
         private DevComponents.DotNetBar.PanelEx panelEx1;
         private DevComponents.DotNetBar.Controls.TextBoxX txtAPIkey;
+        private DevComponents.DotNetBar.Controls.TextBoxX txtNxAPIkey;
+        private DevComponents.DotNetBar.Controls.TextBoxX txtOpenAIBackend;
         private DevComponents.DotNetBar.Controls.TextBoxX txtSecretkey;
+        private DevComponents.Editors.DoubleInput txtLMTemperature;
+        private DevComponents.Editors.IntegerInput txtMaximumToken;
+        private DevComponents.DotNetBar.Controls.TextBoxX txtGCloudTranslateAPIkey;
         private DevComponents.DotNetBar.SuperTabControl superTabControl1;
         private DevComponents.DotNetBar.SuperTabControlPanel superTabControlPanel1;
         private DevComponents.DotNetBar.SuperTabControlPanel superTabControlPanel2;
         private DevComponents.DotNetBar.SuperTabControlPanel superTabControlPanel3;
+        private DevComponents.DotNetBar.SuperTabControlPanel superTabControlPanel4;
         private DevComponents.DotNetBar.SuperTabItem superTabItem1;
         private DevComponents.DotNetBar.SuperTabItem superTabItem2;
         private DevComponents.DotNetBar.SuperTabItem superTabItem3;
+        private DevComponents.DotNetBar.SuperTabItem superTabItem4;
         private DevComponents.DotNetBar.ButtonX buttonX2;
         private DevComponents.DotNetBar.ButtonX buttonX1;
         private DevComponents.DotNetBar.ButtonX buttonXCheck;
+        private DevComponents.DotNetBar.ButtonX buttonXCheck2;
+        private DevComponents.DotNetBar.ButtonX buttonXCheck3;
         private DevComponents.DotNetBar.Controls.CheckBoxX chkWzAutoSort;
         private DevComponents.DotNetBar.LabelX labelX1;
         private DevComponents.DotNetBar.Controls.ComboBoxEx cmbWzEncoding;
         private DevComponents.DotNetBar.Controls.CheckBoxX chkAutoCheckExtFiles;
         private DevComponents.DotNetBar.Controls.CheckBoxX chkWzSortByImgID;
         private DevComponents.DotNetBar.Controls.CheckBoxX chkImgCheckDisabled;
+        private DevComponents.DotNetBar.Controls.CheckBoxX chkOpenAIExtraOption;
+        private DevComponents.DotNetBar.Controls.CheckBoxX chkEnableTranslate;
         private DevComponents.DotNetBar.Controls.ComboBoxEx cmbWzVersionVerifyMode;
+        private DevComponents.DotNetBar.Controls.ComboBoxEx cmbDesiredLanguage;
+        private DevComponents.DotNetBar.Controls.ComboBoxEx cmbMozhiBackend;
+        private DevComponents.DotNetBar.Controls.ComboBoxEx cmbLanguageModel;
+        private DevComponents.DotNetBar.Controls.ComboBoxEx cmbDetectCurrency;
+        private DevComponents.DotNetBar.Controls.ComboBoxEx cmbDesiredCurrency;
+        private DevComponents.DotNetBar.Controls.ComboBoxEx cmbPreferredLayout;
+        private DevComponents.DotNetBar.Controls.ComboBoxEx cmbPreferredTranslateEngine;
         private DevComponents.DotNetBar.LabelX labelX2;
         private DevComponents.DotNetBar.LabelX labelX3;
         private DevComponents.DotNetBar.LabelX labelX4;
+        private DevComponents.DotNetBar.LabelX labelX5;
+        private DevComponents.DotNetBar.LabelX labelX6;
+        private DevComponents.DotNetBar.LabelX labelX7;
+        private DevComponents.DotNetBar.LabelX labelX8;
+        private DevComponents.DotNetBar.LabelX labelX9;
+        private DevComponents.DotNetBar.LabelX labelX10;
+        private DevComponents.DotNetBar.LabelX labelX11;
+        private DevComponents.DotNetBar.LabelX labelX12;
+        private DevComponents.DotNetBar.LabelX labelX13;
+        private DevComponents.DotNetBar.LabelX labelX14;
     }
 }

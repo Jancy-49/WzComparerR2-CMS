@@ -24,6 +24,9 @@
     <!-- upgrade indirect dependency of SharpDX to prevent too many runtime libraries -->
     <PackageReference Include="Microsoft.NETCore.App" Version="2.1.30" />
   </ItemGroup>
+	<ItemGroup Condition="'$(TargetFramework)' == 'net48'">
+		<Reference Include="System.Net.Http" />
+	</ItemGroup>
   <ItemGroup Condition="$(DotnetEdition) == 'framework'">
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -41,6 +44,7 @@
     <ProjectReference Include="..\WzComparerR2.WzLib\WzComparerR2.WzLib.csproj" />
     <ProjectReference Include="..\WzComparerR2.PluginBase\WzComparerR2.PluginBase.csproj" />
     <ProjectReference Include="..\CharaSimResource\CharaSimResource.csproj" />
+    <PackageReference Include="HtmlAgilityPack" Version="1.11.71" />
     <PackageReference Include="MonoGame.Framework.WindowsDX" Version="$(MonogameFrameworkVersion)" />
     <PackageReference Include="SharpDX" Version="$(SharpDXVersion)" />
     <PackageReference Include="ManagedBass" Version="3.1.1" />

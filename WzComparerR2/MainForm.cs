@@ -27,6 +27,13 @@ using WzComparerR2.Rendering;
 using WzComparerR2.Config;
 using WzComparerR2.Animation;
 using static Microsoft.Xna.Framework.MathHelper;
+using System.Net.Http;
+using HtmlAgilityPack;
+//using Microsoft.Xna.Framework.Input;
+using Newtonsoft.Json;
+using System.Net;
+using Newtonsoft.Json.Linq;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace WzComparerR2
 {
@@ -48,6 +55,7 @@ namespace WzComparerR2
             createStyleItems();
             initFields();
             loadUIState();
+            textBoxAPIKey.Text = Properties.Settings.Default.APIKey;
         }
 
         List<Wz_Structure> openedWz;
@@ -93,8 +101,10 @@ namespace WzComparerR2
             charaSimCtrl.UIStat.VisibleChanged += new EventHandler(afrm_VisibleChanged);
             charaSimCtrl.UIEquip.Visible = false;
             charaSimCtrl.UIEquip.VisibleChanged += new EventHandler(afrm_VisibleChanged);
+            charaSimCtrl.UIUnion.Visible = false;
+            charaSimCtrl.UIUnion.VisibleChanged += new EventHandler(afrm_VisibleChanged);
 
-            string[] images = new string[] { "dir", "mp3", "num", "png", "str", "uol", "vector", "img", "rawdata", "convex" };
+            string[] images = new string[] { "dir", "mp3", "num", "png", "str", "uol", "vector", "img", "rawdata", "convex", "video" };
             foreach (string img in images)
             {
                 imageList1.Images.Add(img, (Image)Properties.Resources.ResourceManager.GetObject(img));
@@ -123,6 +133,9 @@ namespace WzComparerR2
         {
             base.OnFormClosing(e);
             saveUIState();
+            // 保存 APIKey 值
+            Properties.Settings.Default.APIKey = textBoxAPIKey.Text;
+            Properties.Settings.Default.Save();
         }
 
         private void saveUIState()
@@ -203,6 +216,8 @@ namespace WzComparerR2
             UpdateCharaSimSettings();
             //wz加载配置
             UpdateWzLoadingSettings();
+            //Translator Configuration Load
+            UpdateTranslateSettings();
 
             //杂项配置
             labelItemAutoSaveFolder.Text = ImageHandlerConfig.Default.AutoSavePictureFolder;
@@ -259,6 +274,25 @@ namespace WzComparerR2
             Wz_Structure.DefaultWzVersionVerifyMode = config.WzVersionVerifyMode;
         }
 
+        void UpdateTranslateSettings()
+        {
+            var config = WcR2Config.Default;
+            Translator.DefaultDesiredLanguage = config.DesiredLanguage;
+            Translator.DefaultMozhiBackend = config.MozhiBackend;
+            Translator.DefaultLanguageModel = config.LanguageModel;
+            Translator.OAITranslateBaseURL = config.OpenAIBackend;
+            Translator.DefaultPreferredTranslateEngine = config.PreferredTranslateEngine;
+            Translator.DefaultTranslateAPIKey = config.NxSecretKey;
+            Translator.DefaultPreferredLayout = config.PreferredLayout;
+            Translator.IsTranslateEnabled = (config.PreferredLayout > 0);
+            Translator.DefaultDetectCurrency = config.DetectCurrency;
+            Translator.DefaultDesiredCurrency = config.DesiredCurrency;
+            Translator.DefaultLMTemperature = config.LMTemperature;
+            Translator.DefaultMaximumToken = config.MaximumToken;
+            Translator.IsExtraParamEnabled = config.OpenAIExtraOption;
+            Translator.ExchangeTable = null;
+        }
+
         void CharaSimLoader_WzFileFinding(object sender, FindWzEventArgs e)
         {
             string[] fullPath = null;
@@ -282,6 +316,10 @@ namespace WzComparerR2
                     {
                         if (wz_f.Type == e.WzType)
                         {
+                            if (e.HasChildNodes && wz_f.Node.Nodes.Count <= 0)
+                            {
+                                continue;
+                            }
                             preSearch.Add(wz_f.Node);
                             find = true;
                             //e.WzFile = wz_f;
@@ -1305,6 +1343,9 @@ namespace WzComparerR2
                 case Wz_Convex convex:
                     return $"convex [{convex.Points.Length}]";
 
+                case Wz_Video video:
+                    return $"video {video.Length}";
+
                 default:
                     string cellVal = Convert.ToString(value);
                     if (cellVal != null && cellVal.Length > 50)
@@ -1328,6 +1369,7 @@ namespace WzComparerR2
                 Wz_Image => "img",
                 Wz_RawData => "rawdata",
                 Wz_Convex => "convex",
+                Wz_Video => "video",
                 _ => null
             };
         }
@@ -1423,6 +1465,11 @@ namespace WzComparerR2
                 case Wz_RawData rawData:
                     textBoxX1.Text = "dataLength: " + rawData.Length + " bytes\r\n" +
                         "offset: " + rawData.Offset;
+                    break;
+
+                case Wz_Video video:
+                    textBoxX1.Text = "dataLength: " + video.Length + " bytes\r\n" +
+                        "offset: " + video.Offset;
                     break;
 
                 default:
@@ -2249,7 +2296,7 @@ namespace WzComparerR2
             {
                 foreach (Wz_File file in wz.wz_files)
                 {
-                    if (file.Type == Wz_Type.String)
+                    if (file.Type == Wz_Type.String && file.Node.Nodes.Count > 0)
                     {
                         return file;
                     }
@@ -2264,7 +2311,7 @@ namespace WzComparerR2
             {
                 foreach (Wz_File file in wz.wz_files)
                 {
-                    if (file.Type == Wz_Type.Item)
+                    if (file.Type == Wz_Type.Item && file.Node.Nodes.Count > 0)
                     {
                         return file;
                     }
@@ -2279,7 +2326,7 @@ namespace WzComparerR2
             {
                 foreach (Wz_File file in wz.wz_files)
                 {
-                    if (file.Type == Wz_Type.Etc)
+                    if (file.Type == Wz_Type.Etc && file.Node.Nodes.Count > 0)
                     {
                         return file;
                     }
@@ -2879,7 +2926,7 @@ namespace WzComparerR2
             tsmi2HandleUol.Visible = false;
             if (node != null)
             {
-                if (node.Value is Wz_Sound || node.Value is Wz_Png || node.Value is string || node.Value is Wz_RawData)
+                if (node.Value is Wz_Sound || node.Value is Wz_Png || node.Value is string || node.Value is Wz_RawData || node.Value is Wz_Video)
                 {
                     tsmi2SaveAs.Visible = true;
                     tsmi2SaveAs.Enabled = true;
@@ -3189,6 +3236,19 @@ namespace WzComparerR2
             {
                 buttonItemCharaStat.Checked = ((AfrmStat)sender).Visible;
             }
+            else if (sender is AfrmUnion)
+            {
+                btnMapleUnion.Checked = ((AfrmUnion)sender).Visible;
+            }
+        }
+
+        private void btnPreview_CheckedChanged(object sender, EventArgs e)
+        {
+            if (btnPreview.Checked)
+            {
+                this.charaSimCtrl.UIStat.Refresh();
+            }
+            this.charaSimCtrl.UIStat.Visible = btnPreview.Checked;
         }
 
         private void buttonItemCharaStat_CheckedChanged(object sender, EventArgs e)
@@ -3215,6 +3275,15 @@ namespace WzComparerR2
                     UpdateCharaSimSettings();
                 }
             }
+        }
+
+        private void btnMapleUnion_CheckedChanged(object sender, EventArgs e)
+        {
+            if (btnMapleUnion.Checked)
+            {
+                this.charaSimCtrl.UIUnion.Refresh();
+            }
+            this.charaSimCtrl.UIUnion.Visible = btnMapleUnion.Checked;
         }
         #endregion
 
@@ -3392,6 +3461,7 @@ namespace WzComparerR2
                     comparer.saveEqpTooltip = chkSaveEqpTooltip.Checked;
                     comparer.saveMobTooltip = chkSaveMobTooltip.Checked;
                     comparer.saveNpcTooltip = chkSaveNpcTooltip.Checked;
+                    comparer.saveCashTooltip = chkSaveCashTooltip.Checked;
                     comparer.HashPngFileName = chkHashPngFileName.Checked;
                     comparer.StateInfoChanged += new EventHandler(comparer_StateInfoChanged);
                     comparer.StateDetailChanged += new EventHandler(comparer_StateDetailChanged);
@@ -3509,6 +3579,109 @@ namespace WzComparerR2
             }
         }
 
+        private async void btnLoadNotice_Click(object sender, EventArgs e)
+        {
+            string url = "https://jancy-49.github.io/Papulatus-Daily/index.html";
+            try
+            {
+                using (var httpClient = new HttpClient())
+                {
+                    var html = await httpClient.GetStringAsync(url);
+                    var doc = new HtmlAgilityPack.HtmlDocument();
+                    doc.LoadHtml(html);
+                    var newsDivs = doc.DocumentNode.SelectNodes("//div[@class='news']");
+                    if (newsDivs != null)
+                    {
+                        listViewExNotice.Items.Clear();
+                        foreach (var newsDiv in newsDivs)
+                        {
+                            string server = newsDiv.SelectSingleNode(".//p[@class='tag']").InnerText;
+                            string title = newsDiv.SelectSingleNode(".//p[@class='title']").InnerText;
+                            string taskid = newsDiv.GetAttributeValue("id", string.Empty);
+                            string detecttime = newsDiv.SelectSingleNode(".//p[@class='time']").InnerText;
+                            string link = newsDiv.SelectSingleNode(".//p/a").GetAttributeValue("href", string.Empty);
+                            var listViewItem = new ListViewItem(new[] { server, title, taskid, detecttime});
+                            listViewItem.Tag = link;
+                            listViewExNotice.Items.Add(listViewItem);
+                        }
+                        labelItemStatus.Text = "公告导入完毕";
+                    }
+                    else
+                    {
+                        labelItemStatus.Text = "未查询到公告";
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBoxEx.Show("加载公告失败\r\n" + ex.ToString(), "错误");
+            }
+        }
+
+        private void listViewExNotice_MouseDoubleClick(object sender, MouseEventArgs e)
+        {
+            if (listViewExNotice.SelectedItems.Count > 0)
+            {
+                var selectedItem = listViewExNotice.SelectedItems[0];
+                string link = selectedItem.Tag as string; 
+                if (!string.IsNullOrEmpty(link))
+                {
+                    string message = $"是否要访问该公告？";
+                    DialogResult result = MessageBoxEx.Show(message, "确认", MessageBoxButtons.OKCancel, MessageBoxIcon.Information);
+                    if (result == DialogResult.OK)
+                    {
+                        Process.Start(new ProcessStartInfo
+                        {
+                            FileName = link,
+                            UseShellExecute = true
+                        });
+                    }
+                }
+            }
+        }
+
+        private void listViewResult_MouseDoubleClick(object sender, MouseEventArgs e)
+        {
+            if (listViewResult.SelectedItems.Count > 0) 
+            {
+                var selectedItem = listViewResult.SelectedItems[0];
+                if (cmbSearchContent.Text == "排名" && cmbCharInfo.Text == "综合排名")
+                {
+                    this.cmbSearchContent.Text = "角色";
+                    this.textBoxIGN.Text = selectedItem.SubItems[3].Text;
+                    this.btnIGN.PerformClick();
+                }
+                else if (cmbSearchContent.Text == "排名" && cmbCharInfo.Text == "联盟排名")
+                {
+                    this.textBoxDate.Text = DateTime.Today.AddDays(-1).ToString("yyyy-MM-dd");
+                    this.cmbSearchContent.Text = "角色";
+                    this.textBoxIGN.Text = selectedItem.SubItems[2].Text;
+                    this.btnIGN.PerformClick();
+                    this.cmbCharInfo.Text = "联盟";
+                    this.btnExecute.PerformClick();
+                    this.cmbCharInfo.Text = "联盟突袭者";
+                    this.btnExecute.PerformClick();
+                    this.cmbCharInfo.Text = "联盟神器";
+                    this.btnExecute.PerformClick();
+                    AfrmUnion afrmUnion = this.charaSimCtrl.UIUnion;
+                    afrmUnion.union_attackpower = selectedItem.SubItems[7].Text;
+                    this.btnMapleUnion.Checked = true;
+                }
+                else if (cmbSearchContent.Text == "排名" && Regex.IsMatch(cmbCharInfo.Text, "武陵道场排名|起源之塔排名|成就排名"))
+                {
+                    this.cmbSearchContent.Text = "角色";
+                    this.textBoxIGN.Text = selectedItem.SubItems[4].Text;
+                    this.btnIGN.PerformClick();
+                }
+                else if (cmbSearchContent.Text == "公告" && Regex.IsMatch(cmbCharInfo.Text, "公告|更新公告|活动公告|现金商城公告"))
+                {
+                    this.cmbCharInfo.Text = cmbCharInfo.Text + "详情";
+                    this.cmbNoticeid.Text = selectedItem.SubItems[2].Text;
+                    this.btnExecute.PerformClick();
+                }
+            }
+        }
+
         private void buttonItemAutoQuickView_Click(object sender, EventArgs e)
         {
             ConfigManager.Reload();
@@ -3560,6 +3733,19 @@ namespace WzComparerR2
             Process.Start("https://github.com/Jancy-49/WzComparerR2-CMS");
 #endif
         }
+        
+        private void buttonPapulatus_Click(object sender, EventArgs e)
+        {
+#if NET6_0_OR_GREATER
+            Process.Start(new ProcessStartInfo
+            {
+                UseShellExecute = true,
+                FileName = "https://jancy-49.github.io/Papulatus-Daily/index.html",
+            });
+#else
+            Process.Start("https://jancy-49.github.io/Papulatus-Daily/index.html");
+#endif
+        }
 
         private void btnItemOptions_Click(object sender, System.EventArgs e)
         {
@@ -3571,7 +3757,769 @@ namespace WzComparerR2
                 frm.Save(WcR2Config.Default);
                 ConfigManager.Save();
                 UpdateWzLoadingSettings();
+                UpdateTranslateSettings();
             }
+        }
+
+        private void btnSkillName_Click(object sender, System.EventArgs e)
+        {
+#if NET6_0_OR_GREATER
+            Process.Start(new ProcessStartInfo
+            {
+                UseShellExecute = true,
+                FileName = "https://jancy-49.github.io/Papulatus-Daily/translate/Skill.html",
+            });
+#else
+            Process.Start("https://jancy-49.github.io/Papulatus-Daily/translate/Skill.html");
+#endif
+        }
+
+        private void btnQuestName_Click(object sender, System.EventArgs e)
+        {
+#if NET6_0_OR_GREATER
+            Process.Start(new ProcessStartInfo
+            {
+                UseShellExecute = true,
+                FileName = "https://jancy-49.github.io/Papulatus-Daily/translate/Quest.html",
+            });
+#else
+            Process.Start("https://jancy-49.github.io/Papulatus-Daily/translate/Quest.html");
+#endif
+        }
+
+        private void btnAchievementName_Click(object sender, System.EventArgs e)
+        {
+#if NET6_0_OR_GREATER
+            Process.Start(new ProcessStartInfo
+            {
+                UseShellExecute = true,
+                FileName = "https://jancy-49.github.io/Papulatus-Daily/translate/Achievement.html",
+            });
+#else
+            Process.Start("https://jancy-49.github.io/Papulatus-Daily/translate/Achievement.html");
+#endif
+        }
+
+        private void btnMapName_Click(object sender, System.EventArgs e)
+        {
+#if NET6_0_OR_GREATER
+            Process.Start(new ProcessStartInfo
+            {
+                UseShellExecute = true,
+                FileName = "https://jancy-49.github.io/Papulatus-Daily/translate/Map.html",
+            });
+#else
+            Process.Start("https://jancy-49.github.io/Papulatus-Daily/translate/Map.html");
+#endif
+        }
+
+        private void btnMobName_Click(object sender, System.EventArgs e)
+        {
+#if NET6_0_OR_GREATER
+            Process.Start(new ProcessStartInfo
+            {
+                UseShellExecute = true,
+                FileName = "https://jancy-49.github.io/Papulatus-Daily/translate/Mob.html",
+            });
+#else
+            Process.Start("https://jancy-49.github.io/Papulatus-Daily/translate/Mob.html");
+#endif
+        }
+
+        private void btnNpcName_Click(object sender, System.EventArgs e)
+        {
+#if NET6_0_OR_GREATER
+            Process.Start(new ProcessStartInfo
+            {
+                UseShellExecute = true,
+                FileName = "https://jancy-49.github.io/Papulatus-Daily/translate/NPC.html",
+            });
+#else
+            Process.Start("https://jancy-49.github.io/Papulatus-Daily/translate/NPC.html");
+#endif
+        }
+        private void btnEqpName_Click(object sender, System.EventArgs e)
+        {
+#if NET6_0_OR_GREATER
+            Process.Start(new ProcessStartInfo
+            {
+                UseShellExecute = true,
+                FileName = "https://jancy-49.github.io/Papulatus-Daily/translate/Eqp.html",
+            });
+#else
+            Process.Start("https://jancy-49.github.io/Papulatus-Daily/translate/Eqp.html");
+#endif
+        }
+
+        private void btnConsumeName_Click(object sender, System.EventArgs e)
+        {
+#if NET6_0_OR_GREATER
+            Process.Start(new ProcessStartInfo
+            {
+                UseShellExecute = true,
+                FileName = "https://jancy-49.github.io/Papulatus-Daily/translate/Consume.html",
+            });
+#else
+            Process.Start("https://jancy-49.github.io/Papulatus-Daily/translate/Consume.html");
+#endif
+        }
+
+        private void btnEtcName_Click(object sender, System.EventArgs e)
+        {
+#if NET6_0_OR_GREATER
+            Process.Start(new ProcessStartInfo
+            {
+                UseShellExecute = true,
+                FileName = "https://jancy-49.github.io/Papulatus-Daily/translate/Etc.html",
+            });
+#else
+            Process.Start("https://jancy-49.github.io/Papulatus-Daily/translate/Etc.html");
+#endif
+        }
+
+        private void btnInstallName_Click(object sender, System.EventArgs e)
+        {
+#if NET6_0_OR_GREATER
+            Process.Start(new ProcessStartInfo
+            {
+                UseShellExecute = true,
+                FileName = "https://jancy-49.github.io/Papulatus-Daily/translate/Ins.html",
+            });
+#else
+            Process.Start("https://jancy-49.github.io/Papulatus-Daily/translate/Ins.html");
+#endif
+        }
+
+        private void btnCashName_Click(object sender, System.EventArgs e)
+        {
+#if NET6_0_OR_GREATER
+            Process.Start(new ProcessStartInfo
+            {
+                UseShellExecute = true,
+                FileName = "https://jancy-49.github.io/Papulatus-Daily/translate/Cash.html",
+            });
+#else
+            Process.Start("https://jancy-49.github.io/Papulatus-Daily/translate/Cash.html");
+#endif
+        }
+
+        private void btnPetName_Click(object sender, System.EventArgs e)
+        {
+#if NET6_0_OR_GREATER
+            Process.Start(new ProcessStartInfo
+            {
+                UseShellExecute = true,
+                FileName = "https://jancy-49.github.io/Papulatus-Daily/translate/Pet.html",
+            });
+#else
+            Process.Start("https://jancy-49.github.io/Papulatus-Daily/translate/Pet.html");
+#endif
+        }
+
+        private async void btnSearchString_Click(object sender, System.EventArgs e)
+        {
+            string searchType = cmbSearchItem.Text;
+            string searchValue = cmbSearchValue.Text;
+            string searchString = textBoxX2.Text;
+            string url = $"https://jancy-49.github.io/Papulatus-Daily/translate/{searchType}.html";
+            try
+            {
+                using (var httpClient = new HttpClient())
+                {
+                    var html = await httpClient.GetStringAsync(url);
+                    var doc = new HtmlAgilityPack.HtmlDocument();
+                    doc.LoadHtml(html);
+
+                    var dataDivs = doc.DocumentNode.SelectNodes("//div[@class='data']");
+                    if (dataDivs != null)
+                    {
+                        bool found = false;
+                        string finalResult = string.Empty;
+
+                        foreach (var dataDiv in dataDivs)
+                        {
+                            var targetDiv = dataDiv.SelectSingleNode($"./div[@class='{searchValue}']");
+                            if (targetDiv != null && targetDiv.InnerText.Contains(searchString))
+                            {
+                                found = true;
+                                finalResult = $"";
+                                var classNames = new[] { "code", "KMS", "MSEA", "GMS", "JMS", "TMS", "CMS", "MSN" };
+                                foreach (var className in classNames)
+                                {
+                                    var div = dataDiv.SelectSingleNode($"./div[@class='{className}']");
+                                    if (div != null)
+                                    {
+                                        finalResult += $"[{className}] {div.InnerText}\n";
+                                    }
+                                }
+                                break;
+                            }
+                        }
+
+                        if (found)
+                        {
+                            labelX2.Text = finalResult;
+                        }
+                        else
+                        {
+                            labelX2.Text = "未查询到文本";
+                        }
+                    }
+                    else
+                    {
+                        labelX2.Text = "未查询到文本";
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                labelX2.Text = $"网络请求失败: {ex.Message}";
+            }
+        }
+
+        private void btnIGN_Click(object sender, System.EventArgs e)
+        {
+            string x_nxopen_api_key = textBoxAPIKey.Text;
+            string charName = textBoxIGN.Text;
+            string url = $"https://open.api.nexon.com/maplestory/v1/id?character_name={charName}";
+            WebRequest request = WebRequest.Create(url);
+            request.Headers.Add("x-nxopen-api-key", x_nxopen_api_key);
+            try
+            {
+                using (WebResponse response = request.GetResponse())
+                {
+                    // 将WebResponse转换为HttpWebResponse
+                    HttpWebResponse httpResponse = response as HttpWebResponse;
+                    if (httpResponse.StatusCode == HttpStatusCode.OK)
+                    {
+                        using (StreamReader reader = new StreamReader(response.GetResponseStream()))
+                        {
+                            string responseText = reader.ReadToEnd();
+                            var jsonResponse = JsonConvert.DeserializeObject<Dictionary<string, string>>(responseText);
+                            string ocid = jsonResponse["ocid"];
+                            textBoxocid.Text = ocid;
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBoxEx.Show(ex.Message, "错误");
+            }
+        }
+
+        private void btnExecute_Click(object sender, System.EventArgs e)
+        {
+            string x_nxopen_api_key = textBoxAPIKey.Text;
+            string ocid = textBoxocid.Text;
+            string count = textBoxcount.Text;
+            string Date = textBoxDate.Text;
+            string Category = cmbSearchContent.Text;
+            string InfoType = cmbCharInfo.Text;
+            string SkillGrade = cmbSkillGrade.Text;
+            string GuildName = textBoxGuildName.Text;
+            string WorldName = cmbWorldName.Text;
+            string oguild_id = textBoxGuildid.Text;
+            string notice_id = cmbNoticeid.Text;
+            string ranking_type = cmbRankingType.Text;
+            string difficulty = cmbDifficulty.Text;
+            string page = textBoxPage.Text;
+            Dictionary<string, string> urls = new Dictionary<string, string>
+            {
+                { "基础信息", $"https://open.api.nexon.com/maplestory/v1/character/basic?ocid={ocid}&date={Date}" },
+                { "角色列表", $"https://open.api.nexon.com/maplestory/v1/character/list?ocid={ocid}" },
+                { "人气度", $"https://open.api.nexon.com/maplestory/v1/character/popularity?ocid={ocid}&date={Date}" },
+                { "角色属性", $"https://open.api.nexon.com/maplestory/v1/character/stat?ocid={ocid}&date={Date}" },
+                { "超级属性", $"https://open.api.nexon.com/maplestory/v1/character/hyper-stat?ocid={ocid}&date={Date}" },
+                { "倾向值", $"https://open.api.nexon.com/maplestory/v1/character/propensity?ocid={ocid}&date={Date}" },
+                { "内在能力", $"https://open.api.nexon.com/maplestory/v1/character/ability?ocid={ocid}&date={Date}" },
+                { "道具装备", $"https://open.api.nexon.com/maplestory/v1/character/item-equipment?ocid={ocid}&date={Date}" },
+                { "现金装备", $"https://open.api.nexon.com/maplestory/v1/character/cashitem-equipment?ocid={ocid}&date={Date}" },
+                { "徽章装备", $"https://open.api.nexon.com/maplestory/v1/character/symbol-equipment?ocid={ocid}&date={Date}" },
+                { "套装效果", $"https://open.api.nexon.com/maplestory/v1/character/set-effect?ocid={ocid}&date={Date}" },
+                { "美容装备", $"https://open.api.nexon.com/maplestory/v1/character/beauty-equipment?ocid={ocid}&date={Date}" },
+                { "机器人装备", $"https://open.api.nexon.com/maplestory/v1/character/android-equipment?ocid={ocid}&date={Date}" },
+                { "宠物装备", $"https://open.api.nexon.com/maplestory/v1/character/pet-equipment?ocid={ocid}&date={Date}" },
+                { "技能", $"https://open.api.nexon.com/maplestory/v1/character/skill?ocid={ocid}&date={Date}&character_skill_grade={SkillGrade}" },
+                { "链接技能", $"https://open.api.nexon.com/maplestory/v1/character/link-skill?ocid={ocid}&date={Date}" },
+                { "V矩阵", $"https://open.api.nexon.com/maplestory/v1/character/vmatrix?ocid={ocid}&date={Date}" },
+                { "HEXA矩阵", $"https://open.api.nexon.com/maplestory/v1/character/hexamatrix?ocid={ocid}&date={Date}" },
+                { "HEXA属性", $"https://open.api.nexon.com/maplestory/v1/character/hexamatrix-stat?ocid={ocid}&date={Date}" },
+                { "武陵道场", $"https://open.api.nexon.com/maplestory/v1/character/dojang?ocid={ocid}&date={Date}" },
+                { "联盟", $"https://open.api.nexon.com/maplestory/v1/user/union?ocid={ocid}&date={Date}" },
+                { "联盟突袭者", $"https://open.api.nexon.com/maplestory/v1/user/union-raider?ocid={ocid}&date={Date}" },
+                { "联盟神器", $"https://open.api.nexon.com/maplestory/v1/user/union-artifact?ocid={ocid}&date={Date}" },
+                { "联盟冠军", $"https://open.api.nexon.com/maplestory/v1/user/union-champion?ocid={ocid}&date={Date}" },
+                { "OUID", $"https://open.api.nexon.com/maplestory/v1/ouid" },
+                { "星之力", $"https://open.api.nexon.com/maplestory/v1/history/starforce?count={count}" },
+                { "潜在能力", $"https://open.api.nexon.com/maplestory/v1/history/potential?count={count}" },
+                { "魔方", $"https://open.api.nexon.com/maplestory/v1/history/cube?count={count}" },
+                { "公会ID", $"https://open.api.nexon.com/maplestory/v1/guild/id?guild_name={GuildName}&world_name={WorldName}" },
+                { "公会信息", $"https://open.api.nexon.com/maplestory/v1/guild/basic?oguild_id={oguild_id}" },
+                { "综合排名", $"https://open.api.nexon.com/maplestory/v1/ranking/overall?date={Date}" },
+                { "联盟排名", $"https://open.api.nexon.com/maplestory/v1/ranking/union?date={Date}" },
+                { "公会排名", $"https://open.api.nexon.com/maplestory/v1/ranking/guild?date={Date}&ranking_type={ranking_type}" },
+                { "武陵道场排名", $"https://open.api.nexon.com/maplestory/v1/ranking/dojang?date={Date}&difficulty={difficulty}&page={page}" },
+                { "起源之塔排名", $"https://open.api.nexon.com/maplestory/v1/ranking/theseed?date={Date}" },
+                { "成就排名", $"https://open.api.nexon.com/maplestory/v1/ranking/achievement?date={Date}" },
+                { "公告", $"https://open.api.nexon.com/maplestory/v1/notice" },
+                { "公告详情", $"https://open.api.nexon.com/maplestory/v1/notice/detail?notice_id={notice_id}" },
+                { "更新公告", $"https://open.api.nexon.com/maplestory/v1/notice-update" },
+                { "更新公告详情", $"https://open.api.nexon.com/maplestory/v1/notice-update/detail?notice_id={notice_id}" },
+                { "活动公告", $"https://open.api.nexon.com/maplestory/v1/notice-event" },
+                { "活动公告详情", $"https://open.api.nexon.com/maplestory/v1/notice-event/detail?notice_id={notice_id}" },
+                { "现金商城公告", $"https://open.api.nexon.com/maplestory/v1/notice-cashshop" },
+                { "现金商城公告详情", $"https://open.api.nexon.com/maplestory/v1/notice-cashshop/detail?notice_id={notice_id}" },
+            };
+            string url = urls[InfoType];
+            WebRequest request = WebRequest.Create(url);
+            request.Headers.Add("x-nxopen-api-key", x_nxopen_api_key);
+            try
+            {
+                using (WebResponse response = request.GetResponse())
+                {
+                    // 将WebResponse转换为HttpWebResponse
+                    HttpWebResponse httpResponse = response as HttpWebResponse;
+                    if (httpResponse.StatusCode == HttpStatusCode.OK)
+                    {
+                        using (StreamReader reader = new StreamReader(response.GetResponseStream()))
+                        {
+                            string responseText = reader.ReadToEnd();
+                            if (InfoType == "OUID")
+                            {
+                                var json = JsonConvert.DeserializeObject<Dictionary<string, string>>(responseText);
+                                textBoxouid.Text = json["ouid"];
+                            }
+                            else if (InfoType == "公会ID")
+                            {
+                                var json = JsonConvert.DeserializeObject<Dictionary<string, string>>(responseText);
+                                textBoxGuildid.Text = json["oguild_id"];
+                            }
+                            else if (InfoType == "公告" || InfoType == "更新公告" || InfoType == "活动公告" || InfoType == "现金商城公告")
+                            {
+                                textBoxResult.Text = responseText;
+                                JObject jsonResponse = JObject.Parse(responseText);
+                                JArray notices = null;
+                                JArray resultArray = null;
+                                switch (InfoType)
+                                {
+                                    case "公告": resultArray = (JArray)jsonResponse["notice"]; notices = jsonResponse["notice"].Value<JArray>(); break;
+                                    case "更新公告": resultArray = (JArray)jsonResponse["update_notice"]; notices = jsonResponse["update_notice"].Value<JArray>(); break;
+                                    case "活动公告": resultArray = (JArray)jsonResponse["event_notice"]; notices = jsonResponse["event_notice"].Value<JArray>(); break;
+                                    case "现金商城公告": resultArray = (JArray)jsonResponse["cashshop_notice"]; notices = jsonResponse["cashshop_notice"].Value<JArray>(); break;
+                                    default: break;
+                                }
+                                cmbNoticeid.Items.Clear();
+                                foreach (JObject notice in notices)
+                                {
+                                    string noticeId = notice.Value<string>("notice_id");
+                                    cmbNoticeid.Items.Add(noticeId);
+                                }
+                                listViewResult.Items.Clear();
+                                listViewResult.Columns.Clear();
+                                if (resultArray.Count > 0)
+                                {
+                                    var keys = resultArray[0].ToObject<Dictionary<string, object>>().Keys;
+                                    foreach (var key in keys)
+                                    {
+                                        listViewResult.Columns.Add(key);
+                                    }
+                                    foreach (var item in resultArray)
+                                    {
+                                        var values = item.ToObject<Dictionary<string, object>>().Values.Select(v => v?.ToString() ?? "").ToArray();
+                                        ListViewItem listViewItem = new ListViewItem(values.First().ToString());
+                                        listViewItem.SubItems.AddRange(values.Skip(1).Select(v => v.ToString()).ToArray());
+                                        listViewResult.Items.Add(listViewItem);
+                                    }
+                                }
+                            }
+                            else if (InfoType == "联盟" || InfoType == "联盟突袭者" || InfoType == "联盟神器" || InfoType == "联盟冠军")
+                            {
+                                textBoxResult.Text = responseText;
+                                AfrmUnion afrmUnion = this.charaSimCtrl.UIUnion;
+                                switch (InfoType)
+                                {
+                                    case "联盟":
+                                        var union = JsonConvert.DeserializeObject<JObject>(responseText);
+                                        afrmUnion.union_level = union["union_level"].ToString(); 
+                                        afrmUnion.union_grade = union["union_grade"].ToString(); 
+                                        afrmUnion.union_artifact_level = union["union_artifact_level"].Value<int>(); 
+                                        afrmUnion.union_artifact_exp = union["union_artifact_exp"].Value<int>(); 
+                                        afrmUnion.union_artifact_point = union["union_artifact_point"].ToString(); 
+                                        break;
+                                    case "联盟突袭者":
+                                        JObject jsonAttacker = JObject.Parse(responseText);
+                                        string use_preset_no = jsonAttacker["use_preset_no"].ToString();
+                                        afrmUnion.resultJson = jsonAttacker;
+                                        afrmUnion.union_preset = jsonAttacker["use_preset_no"].Value<int>();
+                                        break;
+                                    case "联盟神器":
+                                        JObject jsonArtifact = JObject.Parse(responseText);
+                                        afrmUnion.artifact_ap = jsonArtifact["union_artifact_remain_ap"].ToString();
+                                        break;
+                                    case "联盟冠军":
+                                        JObject jsonChampion = JObject.Parse(responseText);
+                                        break;
+                                    default: break;
+                                }
+                            }
+                            else if (Category == "排名")
+                            {
+                                JObject jsonResponse = JObject.Parse(responseText);
+                                JArray resultArray = (JArray)jsonResponse["ranking"];
+                                listViewResult.Items.Clear();
+                                listViewResult.Columns.Clear();
+                                if (resultArray.Count > 0)
+                                {
+                                    var keys = resultArray[0].ToObject<Dictionary<string, object>>().Keys;
+                                    foreach (var key in keys)
+                                    {
+                                        listViewResult.Columns.Add(key);
+                                    }
+                                    foreach (var item in resultArray)
+                                    {
+                                        var values = item.ToObject<Dictionary<string, object>>().Values.Select(v => v?.ToString() ?? "").ToArray();
+                                        ListViewItem listViewItem = new ListViewItem(values.First().ToString());
+                                        listViewItem.SubItems.AddRange(values.Skip(1).Select(v => v.ToString()).ToArray());
+                                        listViewResult.Items.Add(listViewItem);
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                textBoxResult.Text = responseText;
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBoxEx.Show(ex.Message, "错误");
+            }
+        }
+
+        private void cmbCharInfo_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (cmbSearchContent.SelectedItem.ToString() == "角色" && this.cmbCharInfo.SelectedItem.ToString() == "技能")
+            {
+                this.labelSkillGrade.Visible = true;
+                this.cmbSkillGrade.Visible = true;
+                this.btnExecute.Location = new System.Drawing.Point(546, 53);
+                this.btnPreview.Location = new System.Drawing.Point(606, 53);
+            }
+            else if (cmbSearchContent.SelectedItem.ToString() == "排名" && this.cmbCharInfo.SelectedItem.ToString() == "公会排名")
+            {
+                this.labelRankingType.Visible = true;
+                this.cmbRankingType.Visible = true;
+                this.labelDifficulty.Visible = false;
+                this.cmbDifficulty.Visible = false;
+                this.labelPage.Visible = false;
+                this.textBoxPage.Visible = false;
+            }
+            else if (cmbSearchContent.SelectedItem.ToString() == "排名" && this.cmbCharInfo.SelectedItem.ToString() == "武陵道场排名")
+            {
+                this.labelRankingType.Visible = false;
+                this.cmbRankingType.Visible = false;
+                this.labelDifficulty.Visible = true;
+                this.cmbDifficulty.Visible = true;
+                this.labelPage.Visible = true;
+                this.textBoxPage.Visible = true;
+            }
+            else
+            {
+                this.labelRankingType.Visible = false;
+                this.cmbRankingType.Visible = false;
+                this.labelDifficulty.Visible = false;
+                this.cmbDifficulty.Visible = false;
+                this.labelPage.Visible = false;
+                this.textBoxPage.Visible = false;
+                this.labelSkillGrade.Visible = false;
+                this.cmbSkillGrade.Visible = false;
+                this.btnExecute.Location = new System.Drawing.Point(366, 53);
+                this.btnPreview.Location = new System.Drawing.Point(426, 53);
+            }
+        }
+
+        private void cmbSearchContent_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            this.cmbCharInfo.Items.Clear();
+            switch (cmbSearchContent.SelectedItem)
+            {
+                case "角色":
+                    this.cmbCharInfo.Items.Add("基础信息");
+                    this.cmbCharInfo.Items.Add("人气度");
+                    this.cmbCharInfo.Items.Add("角色属性");
+                    this.cmbCharInfo.Items.Add("超级属性");
+                    this.cmbCharInfo.Items.Add("倾向值");
+                    this.cmbCharInfo.Items.Add("内在能力");
+                    this.cmbCharInfo.Items.Add("道具装备");
+                    this.cmbCharInfo.Items.Add("现金装备");
+                    this.cmbCharInfo.Items.Add("徽章装备");
+                    this.cmbCharInfo.Items.Add("套装效果");
+                    this.cmbCharInfo.Items.Add("美容装备");
+                    this.cmbCharInfo.Items.Add("机器人装备");
+                    this.cmbCharInfo.Items.Add("宠物装备");
+                    this.cmbCharInfo.Items.Add("宠物装备");
+                    this.cmbCharInfo.Items.Add("技能");
+                    this.cmbCharInfo.Items.Add("链接技能");
+                    this.cmbCharInfo.Items.Add("V矩阵");
+                    this.cmbCharInfo.Items.Add("HEXA矩阵");
+                    this.cmbCharInfo.Items.Add("HEXA属性");
+                    this.cmbCharInfo.Items.Add("武陵道场");
+                    this.cmbCharInfo.Items.Add("联盟");
+                    this.cmbCharInfo.Items.Add("联盟突袭者");
+                    this.cmbCharInfo.Items.Add("联盟神器");
+                    this.cmbCharInfo.Items.Add("联盟冠军");
+                    this.labelSearchContent.Visible = true;
+                    this.cmbCharInfo.Visible = true;
+                    this.btnExecute.Visible = true;
+                    this.btnPreview.Visible = true;
+                    this.labelIGN.Visible = true;
+                    this.btnIGN.Visible = true;
+                    this.textBoxIGN.Visible = true;
+                    this.labelocid.Visible = true;
+                    this.textBoxocid.Visible = true;
+                    this.labelDate.Location = new System.Drawing.Point(516, 96);
+                    this.labelDate.Visible = true;
+                    this.textBoxDate.Location = new System.Drawing.Point(576, 96);
+                    this.textBoxDate.Visible = true;
+                    this.labelouid.Visible = false;
+                    this.textBoxouid.Visible = false;
+                    this.labelcount.Visible = false;
+                    this.textBoxcount.Visible = false;
+                    this.textBoxGuildid.Visible = false;
+                    this.labelGuildid.Visible = false;
+                    this.textBoxGuildName.Visible = false;
+                    this.labelGuildName.Visible = false;
+                    this.labelWorldName.Visible = false;
+                    this.cmbWorldName.Visible = false;
+                    this.labelRankingType.Visible = false;
+                    this.cmbRankingType.Visible = false;
+                    this.labelPage.Visible = false;
+                    this.cmbDifficulty.Visible = false;
+                    this.labelnoticeid.Visible = false;
+                    this.cmbNoticeid.Visible = false;
+                    this.textBoxResult.Visible = true;
+                    break;
+                case "个人":
+                    this.cmbCharInfo.Items.Add("角色列表");
+                    this.cmbCharInfo.Items.Add("OUID");
+                    this.cmbCharInfo.Items.Add("星之力");
+                    this.cmbCharInfo.Items.Add("潜在能力");
+                    this.cmbCharInfo.Items.Add("魔方");
+                    this.labelSearchContent.Visible = true;
+                    this.cmbCharInfo.Visible = true;
+                    this.btnExecute.Visible = true;
+                    this.btnPreview.Visible = false;
+                    this.labelouid.Visible = true;
+                    this.labelcount.Visible = true;
+                    this.textBoxcount.Visible = true;
+                    this.textBoxouid.Visible = true;
+                    this.labelIGN.Visible = false;
+                    this.btnIGN.Visible = false;
+                    this.textBoxIGN.Visible = false;
+                    this.labelocid.Visible = false;
+                    this.textBoxocid.Visible = false;
+                    this.labelDate.Visible = false;
+                    this.textBoxDate.Visible = false;
+                    this.textBoxGuildid.Visible = false;
+                    this.labelGuildid.Visible = false;
+                    this.textBoxGuildName.Visible = false;
+                    this.labelGuildName.Visible = false;
+                    this.labelWorldName.Visible = false;
+                    this.cmbWorldName.Visible = false;
+                    this.labelRankingType.Visible = false;
+                    this.cmbRankingType.Visible = false;
+                    this.labelPage.Visible = false;
+                    this.textBoxPage.Visible = false;
+                    this.cmbDifficulty.Visible = false;
+                    this.labelnoticeid.Visible = false;
+                    this.cmbNoticeid.Visible = false;
+                    this.textBoxResult.Visible = true;
+                    break;
+                case "公会":
+                    this.cmbCharInfo.Items.Add("公会ID");
+                    this.cmbCharInfo.Items.Add("公会信息");
+                    this.labelSearchContent.Visible = true;
+                    this.cmbCharInfo.Visible = true;
+                    this.btnExecute.Visible = true;
+                    this.btnPreview.Visible = false;
+                    this.textBoxGuildid.Visible = true;
+                    this.labelGuildid.Visible = true;
+                    this.textBoxGuildName.Visible = true;
+                    this.labelGuildName.Visible = true;
+                    this.labelWorldName.Visible = true;
+                    this.cmbWorldName.Visible = true;
+                    this.labelIGN.Visible = false;
+                    this.btnIGN.Visible = false;
+                    this.textBoxIGN.Visible = false;
+                    this.labelocid.Visible = false;
+                    this.textBoxocid.Visible = false;
+                    this.labelDate.Visible = false;
+                    this.textBoxDate.Visible = false;
+                    this.labelouid.Visible = false;
+                    this.textBoxouid.Visible = false;
+                    this.labelcount.Visible = false;
+                    this.textBoxcount.Visible = false;
+                    this.labelRankingType.Visible = false;
+                    this.cmbRankingType.Visible = false;
+                    this.labelPage.Visible = false;
+                    this.textBoxPage.Visible = false;
+                    this.cmbDifficulty.Visible = false;
+                    this.labelnoticeid.Visible = false;
+                    this.cmbNoticeid.Visible = false;
+                    this.textBoxResult.Visible = true;
+                    break;
+                case "排名":
+                    this.cmbCharInfo.Items.Add("综合排名");
+                    this.cmbCharInfo.Items.Add("联盟排名");
+                    this.cmbCharInfo.Items.Add("公会排名");
+                    this.cmbCharInfo.Items.Add("武陵道场排名");
+                    this.cmbCharInfo.Items.Add("起源之塔排名");
+                    this.cmbCharInfo.Items.Add("成就排名");
+                    this.labelDate.Location = new System.Drawing.Point(426, 53);
+                    this.labelDate.Visible = true;
+                    this.textBoxDate.Location = new System.Drawing.Point(476, 53);
+                    this.textBoxDate.Visible = true;
+                    this.labelSearchContent.Visible = true;
+                    this.cmbCharInfo.Visible = true;
+                    this.btnExecute.Visible = true;
+                    this.btnPreview.Visible = false;
+                    this.labelIGN.Visible = false;
+                    this.btnIGN.Visible = false;
+                    this.textBoxIGN.Visible = false;
+                    this.labelocid.Visible = false;
+                    this.textBoxocid.Visible = false;
+                    this.labelouid.Visible = false;
+                    this.textBoxouid.Visible = false;
+                    this.labelcount.Visible = false;
+                    this.textBoxcount.Visible = false;
+                    this.textBoxGuildid.Visible = false;
+                    this.labelGuildid.Visible = false;
+                    this.textBoxGuildName.Visible = false;
+                    this.labelGuildName.Visible = false;
+                    this.labelWorldName.Visible = false;
+                    this.cmbWorldName.Visible = false;
+                    this.labelnoticeid.Visible = false;
+                    this.cmbNoticeid.Visible = false;
+                    this.textBoxResult.Visible = false;
+                    break;
+                case "公告":
+                    this.cmbCharInfo.Items.Add("公告");
+                    this.cmbCharInfo.Items.Add("公告详情");
+                    this.cmbCharInfo.Items.Add("更新公告");
+                    this.cmbCharInfo.Items.Add("更新公告详情");
+                    this.cmbCharInfo.Items.Add("活动公告");
+                    this.cmbCharInfo.Items.Add("活动公告详情");
+                    this.cmbCharInfo.Items.Add("现金商城公告");
+                    this.cmbCharInfo.Items.Add("现金商城公告详情");
+                    this.labelSearchContent.Visible = true;
+                    this.cmbCharInfo.Visible = true;
+                    this.btnExecute.Visible = true;
+                    this.labelnoticeid.Visible = true;
+                    this.cmbNoticeid.Visible = true;
+                    this.btnPreview.Visible = false;
+                    this.labelIGN.Visible = false;
+                    this.btnIGN.Visible = false;
+                    this.textBoxIGN.Visible = false;
+                    this.labelocid.Visible = false;
+                    this.textBoxocid.Visible = false;
+                    this.labelDate.Visible = false;
+                    this.textBoxDate.Visible = false;
+                    this.labelouid.Visible = false;
+                    this.textBoxouid.Visible = false;
+                    this.labelcount.Visible = false;
+                    this.textBoxcount.Visible = false;
+                    this.textBoxGuildid.Visible = false;
+                    this.labelGuildid.Visible = false;
+                    this.textBoxGuildName.Visible = false;
+                    this.labelGuildName.Visible = false;
+                    this.labelWorldName.Visible = false;
+                    this.cmbWorldName.Visible = false;
+                    this.labelRankingType.Visible = false;
+                    this.cmbRankingType.Visible = false;
+                    this.textBoxGuildName.Visible = false;
+                    this.labelGuildName.Visible = false;
+                    this.labelPage.Visible = false;
+                    this.textBoxPage.Visible = false;
+                    this.cmbDifficulty.Visible = false;
+                    this.textBoxResult.Visible = true;
+                    break;
+            }
+        }
+
+        private async void btnLoadDojo_Click(object sender, EventArgs e)
+        {
+            string url = "https://jancy-49.github.io/Papulatus-Daily/Dojo/bestrecord.html";
+            try
+            {
+                using (var httpClient = new HttpClient())
+                {
+                    var html = await httpClient.GetStringAsync(url);
+                    var doc = new HtmlAgilityPack.HtmlDocument();
+                    doc.LoadHtml(html);
+                    var dojoRecords = doc.DocumentNode.SelectNodes("//div[@class='dojorecord']");
+                    if (dojoRecords != null)
+                    {
+                        listViewResult.Columns.Clear();
+                        listViewResult.Columns.Add("排名", 50);
+                        listViewResult.Columns.Add("职业", 150); 
+                        listViewResult.Columns.Add("角色名", 100); 
+                        listViewResult.Columns.Add("层数", 50); 
+                        listViewResult.Columns.Add("用时", 100); 
+                        listViewResult.Columns.Add("等级", 50);
+                        listViewResult.Columns.Add("记录时间", 100);
+                        listViewResult.Items.Clear();
+                        foreach (var info in dojoRecords)
+                        {
+                            string order = info.SelectSingleNode(".//div[@class='order']").InnerText;
+                            string Job = info.SelectSingleNode(".//div[@class='Job']").InnerText;
+                            string charname = info.SelectSingleNode(".//div[@class='charname']").InnerText;
+                            string Floor = info.SelectSingleNode(".//div[@class='Floor']").InnerText;
+                            string Dojotime = info.SelectSingleNode(".//div[@class='Dojotime']").InnerText;
+                            string Level = info.SelectSingleNode(".//div[@class='Level']").InnerText;
+                            string recorddate = info.SelectSingleNode(".//div[@class='recorddate']").InnerText;
+                            var listViewItem = new ListViewItem(new[] { order, Job, charname, Floor, Dojotime, Level, recorddate });
+                            listViewResult.Items.Add(listViewItem);
+                        }
+                        labelItemStatus.Text = "武陵道场最佳记录加载完毕";
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                labelItemStatus.Text = "武陵道场最佳记录加载失败";
+                MessageBoxEx.Show("加载武陵道场最佳记录失败\r\n" + ex.ToString(), "错误");
+            }
+        }
+
+        private void btnLoadDaily_Click(object sender, EventArgs e)
+        {
+            if (dailyReportForm.ShowDialog() == DialogResult.OK)
+            {
+                DateTime selectedDate = dateTimePickerDailyReport.Value;
+                LoadDailyReport(selectedDate);
+            }
+        }
+
+        private void btnConfirmDailyReport_Click(object sender, EventArgs e)
+        {
+            dailyReportForm.DialogResult = DialogResult.OK;
+            dailyReportForm.Close();
+        }
+
+        private void LoadDailyReport(DateTime date)
+        {
+#if NET6_0_OR_GREATER
+            Process.Start(new ProcessStartInfo
+            {
+                UseShellExecute = true,
+                FileName = $"https://jancy-49.github.io/Papulatus-Daily/Daily/Papulatus_Daily({date:yyyy-MM-dd}).html",
+            });
+#else
+            Process.Start($"https://jancy-49.github.io/Papulatus-Daily/Daily/Papulatus_Daily({date:yyyy-MM-dd}).html");
+#endif
         }
     }
 

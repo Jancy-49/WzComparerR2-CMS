@@ -372,7 +372,7 @@
             this.superTabItem1.AttachedControl = this.superTabControlPanel1;
             this.superTabItem1.GlobalItem = false;
             this.superTabItem1.Name = "superTabItem1";
-            this.superTabItem1.Text = "Skill";
+            this.superTabItem1.Text = "技能";
             // 
             // superTabControlPanel2
             // 
@@ -535,7 +535,7 @@
             this.superTabItem3.AttachedControl = this.superTabControlPanel3;
             this.superTabItem3.GlobalItem = false;
             this.superTabItem3.Name = "superTabItem3";
-            this.superTabItem3.Text = "Item";
+            this.superTabItem3.Text = "道具";
             // 
             // superTabControlPanel4
             // 
@@ -568,7 +568,7 @@
             this.superTabItem4.AttachedControl = this.superTabControlPanel4;
             this.superTabItem4.GlobalItem = false;
             this.superTabItem4.Name = "superTabItem4";
-            this.superTabItem4.Text = "Recipe";
+            this.superTabItem4.Text = "配方";
             // 
             // panelEx1
             // 

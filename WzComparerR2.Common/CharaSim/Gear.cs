@@ -42,6 +42,8 @@ namespace WzComparerR2.CharaSim
         public string EpicHs { get; internal set; }
 
         public bool FixLevel { get; internal set; }
+        public bool AdditionHideDesc { get; set; }
+
         public List<GearLevelInfo> Levels { get; internal set; }
         public List<GearSealedInfo> Seals { get; internal set; }
 
@@ -85,7 +87,7 @@ namespace WzComparerR2.CharaSim
             }
         }
 
-        public int GetMaxStar()
+        public int GetMaxStar(bool isPostNEXTClient = false)
         {
             if (!this.HasTuc)
             {
@@ -107,15 +109,32 @@ namespace WzComparerR2.CharaSim
             int reqLevel;
             this.Props.TryGetValue(GearPropType.reqLevel, out reqLevel);
             int[] data = null;
-            foreach (int[] item in starData)
+            if (isPostNEXTClient)
             {
-                if (reqLevel >= item[0])
+                foreach (int[] item in starDataPostNEXT)
                 {
-                    data = item;
+                    if (reqLevel >= item[0])
+                    {
+                        data = item;
+                    }
+                    else
+                    {
+                        break;
+                    }
                 }
-                else
+            }
+            else
+            {
+                foreach (int[] item in starData)
                 {
-                    break;
+                    if (reqLevel >= item[0])
+                    {
+                        data = item;
+                    }
+                    else
+                    {
+                        break;
+                    }
                 }
             }
             if (data == null)
@@ -127,15 +146,21 @@ namespace WzComparerR2.CharaSim
         }
 
         private static readonly int[][] starData = new int[][] {
-            new[]{ 0, 5, 3 }, 
-            new[]{ 95, 8, 5 }, 
+            new[]{ 0, 5, 3 },
+            new[]{ 95, 8, 5 },
             new[]{ 108, 10, 8 },
-            //new[]{ 120, 12, 10 }, before GMS 25 Stars update
             new[]{ 118, 15, 10 },
-            //new[]{ 130, 13, 12 }, before GMS 25 Stars update
             new[]{ 128, 20, 12 },
-            //new[]{ 140, 15, 15 }, before GMS 25 Stars update
             new[]{ 138, 25, 15 },
+        };
+
+        private static readonly int[][] starDataPostNEXT = new int[][] {
+            new[]{ 0, 5, 3 },
+            new[]{ 95, 8, 5 },
+            new[]{ 108, 10, 8 },
+            new[]{ 118, 15, 10 },
+            new[]{ 128, 20, 12 },
+            new[]{ 138, 30, 15 },
         };
 
         public override object Clone()
@@ -202,6 +227,21 @@ namespace WzComparerR2.CharaSim
             if (this.Props.ContainsKey(GearPropType.tuc))
             {
                 this.Props[GearPropType.tuc] -= count;
+            }
+        }
+
+        public bool IsGenesisWeapon
+        {
+            get
+            {
+                // There's no better way to determine if a weapon is a Genesis weapon, the game itself also uses a hard-coded list to check it.
+                if (IsWeapon(this.type)
+                    && this.Props.TryGetValue(GearPropType.setItemID, out var setItemID)
+                    && 886 <= setItemID && setItemID <= 890)
+                {
+                    return true;
+                }
+                return false;
             }
         }
 
@@ -441,6 +481,7 @@ namespace WzComparerR2.CharaSim
                 case GearType.emblem:
                 case GearType.powerSource:
                 case GearType.bit:
+                case GearType.jewel:
                 case (GearType)3: //发型
                     return 2;
             }
@@ -639,9 +680,16 @@ namespace WzComparerR2.CharaSim
                         case "addition": //附加属性信息
                             foreach (Wz_Node addiNode in subNode.Nodes)
                             {
-                                Addition addi = Addition.CreateFromNode(addiNode);
-                                if (addi != null)
-                                    gear.Additions.Add(addi);
+                                if (addiNode.Text == "hideDesc")
+                                {
+                                    gear.AdditionHideDesc = true;
+                                }
+                                else
+                                {
+                                    Addition addi = Addition.CreateFromNode(addiNode);
+                                    if (addi != null)
+                                        gear.Additions.Add(addi);
+                                }
                             }
                             gear.Additions.Sort((add1, add2) => (int)add1.Type - (int)add2.Type);
                             break;
@@ -964,7 +1012,7 @@ namespace WzComparerR2.CharaSim
 
             if (gear.Props.TryGetValue(GearPropType.incCHUC, out value))
             {
-                gear.Star = value;
+                //gear.Star = value;
             }
 
             return gear;

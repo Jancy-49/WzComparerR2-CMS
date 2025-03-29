@@ -15,17 +15,17 @@ namespace WzComparerR2.CharaSim
             this.totalMax = totalMax;
         }
 
-        private int baseVal; //基础值
+        private long baseVal; //基础值
         private int gearAdd; //装备附加值
         private int buffAdd; //技能buff增加值
         private int eBuffAdd; //技能增加的enhance值
         private int rate; //装备潜能百分比
         private int aBuffRate; //主动buff百分比 如骰子
         private int pBuffRate; //被动buff百分比 如盾防精通
-        private int totalMax;
+        private long totalMax;
         private bool smart; //当前的技能buff增加值是否为smart
         
-        public int BaseVal
+        public long BaseVal
         {
             get { return baseVal; }
             set { baseVal = value; }
@@ -73,22 +73,22 @@ namespace WzComparerR2.CharaSim
             set { smart = value; }
         }
 
-        public int TotalMax
+        public long TotalMax
         {
             get { return totalMax; }
             set { totalMax = value; }
         }
 
-        public int GetSum()
+        public long GetSum()
         {
-            int origSum = (baseVal + gearAdd + buffAdd + eBuffAdd) * (100 + rate + aBuffRate + pBuffRate) / 100;
+            long origSum = (baseVal + gearAdd + buffAdd + eBuffAdd) * (100 + rate + aBuffRate + pBuffRate) / 100;
             return this.totalMax > 0 ? Math.Min(this.totalMax, origSum) : origSum;
         }
 
-        public int GetGearReqSum()
+        public long GetGearReqSum()
         {
-            int origSum = (baseVal + gearAdd + buffAdd) * (100 + rate + aBuffRate + pBuffRate) / 100;
-            return this.totalMax > 0 ? Math.Min(this.totalMax, origSum) : origSum;
+            long origSum = (long)(baseVal + gearAdd + buffAdd) * (100 + rate + aBuffRate + pBuffRate) / 100;
+            return this.totalMax > 0 ? (long)Math.Min(this.totalMax, origSum) : (long)origSum;
         }
 
         public void ResetAdd()
@@ -110,15 +110,15 @@ namespace WzComparerR2.CharaSim
 
         public override string ToString()
         {
-            int sum = GetSum();
+            long sum = GetSum();
             return baseVal == sum ? baseVal.ToString() :
                 string.Format("{0} ({1}+{2})", sum, baseVal, sum - baseVal);
         }
 
         public string ToStringDetail(out int red)
         {
-            int sum = GetSum();
-            int baseSum = (baseVal + gearAdd) +
+            long sum = GetSum();
+            long baseSum = (baseVal + gearAdd) +
                 (baseVal + gearAdd + buffAdd + eBuffAdd) * (rate + aBuffRate) / 100;
             if (buffAdd == 0 && eBuffAdd == 0 && pBuffRate == 0 && baseSum <= sum)
             {
