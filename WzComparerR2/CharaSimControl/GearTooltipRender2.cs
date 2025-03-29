@@ -57,8 +57,11 @@ namespace WzComparerR2.CharaSimControl
         public bool AutoTitleWrap { get; set; }
         private bool isCurrencyConversionEnabled = (Translator.DefaultDesiredCurrency != "none");
         private string titleLanguage = "";
+<<<<<<< HEAD
 
         private bool isPostNEXTClient;
+=======
+>>>>>>> 7e9cc6786fcad07de1db367547c62c87f3fd5fe4
 
         public TooltipRender SetItemRender { get; set; }
 

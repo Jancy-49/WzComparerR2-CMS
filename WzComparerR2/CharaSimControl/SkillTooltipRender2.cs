@@ -42,7 +42,10 @@ namespace WzComparerR2.CharaSimControl
         {
             return Render(false);
         }
+<<<<<<< HEAD
 
+=======
+>>>>>>> 7e9cc6786fcad07de1db367547c62c87f3fd5fe4
         public Bitmap Render(bool doHighlight)
         {
             if (this.Skill == null)
@@ -286,6 +289,7 @@ namespace WzComparerR2.CharaSimControl
                 {
                     GearGraphics.DrawString(g, "#c可登记宠物自动增益技能#", GearGraphics.ItemDetailFont2, v6SkillSummaryFontColorTable, Skill.Icon.Bitmap == null ? region.LevelDescLeft : region.SkillDescLeft, region.TextRight, ref picH, 16);
                 }
+<<<<<<< HEAD
             }
             if (Skill.IsSequenceOn)
             {
@@ -297,6 +301,8 @@ namespace WzComparerR2.CharaSimControl
                 {
                     GearGraphics.DrawString(g, "#c可登记技能序列#", GearGraphics.ItemDetailFont2, v6SkillSummaryFontColorTable, Skill.Icon.Bitmap == null ? region.LevelDescLeft : region.SkillDescLeft, region.TextRight, ref picH, 16);
                 }
+=======
+>>>>>>> 7e9cc6786fcad07de1db367547c62c87f3fd5fe4
             }
             if (Skill.reqGuildLv > 0)
             {
@@ -338,7 +344,10 @@ namespace WzComparerR2.CharaSimControl
                     }
                 }
                 string hStr = SummaryParser.GetSkillSummary(Skill, Skill.Level, sr, SummaryParams.Default, skillSummaryOptions, doHighlight, skillIDstr, this.DiffSkillTags);
+<<<<<<< HEAD
 
+=======
+>>>>>>> 7e9cc6786fcad07de1db367547c62c87f3fd5fe4
                 GearGraphics.DrawString(g, "[现在等级 " + Skill.Level + "]", GearGraphics.ItemDetailFont, region.LevelDescLeft, region.TextRight, ref picH, 16);
                 if (Skill.SkillID / 10000 / 1000 == 10 && Skill.Level == 1 && Skill.ReqLevel > 0)
                 {

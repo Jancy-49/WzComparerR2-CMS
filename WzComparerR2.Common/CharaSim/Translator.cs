@@ -3,12 +3,19 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
+<<<<<<< HEAD
 using System.Text.RegularExpressions;
+=======
+>>>>>>> 7e9cc6786fcad07de1db367547c62c87f3fd5fe4
 using WzComparerR2.Config;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Net;
 using System.IO;
+<<<<<<< HEAD
+=======
+using DevComponents.DotNetBar;
+>>>>>>> 7e9cc6786fcad07de1db367547c62c87f3fd5fe4
 using System.Globalization;
 using System.Threading;
 using static System.Net.Mime.MediaTypeNames;
@@ -36,6 +43,7 @@ namespace WzComparerR2.CharaSim
             { "sgd", "en" }
         };
 
+<<<<<<< HEAD
         // Language Model Expression
         private static Dictionary<string, string> dictL2LM = new Dictionary<string, string>()
         {
@@ -61,11 +69,30 @@ namespace WzComparerR2.CharaSim
             { "cad", "加元" },
             { "aud", "澳元" },
             { "myr", "马来西亚元" },
+=======
+        private static Dictionary<string, string> dictCurrencyName = new Dictionary<string, string>()
+        {
+            { "jpy", "��" },
+            { "krw", "������" },
+            { "cny", "Ԫ" },
+            { "usd", "�ɥ�" },
+            { "twd", "̨��ɥ�" },
+            { "hkd", "��ۥɥ�" },
+            { "mop", "�ޥ����ѥ���" },
+            { "sgd", "���󥬥ݩ`��ɥ�" },
+            { "eur", "��`��" },
+            { "cad", "���ʥ��ɥ�" },
+            { "aud", "���`���ȥ�ꥢ�ɥ�" },
+            { "myr", "�ޥ�`������󥮥å�" },
+>>>>>>> 7e9cc6786fcad07de1db367547c62c87f3fd5fe4
         };
 
         private static string GTranslateBaseURL = "https://translate.googleapis.com/translate_a/t";
         private static string NTranslateBaseURL = "https://naveropenapi.apigw.ntruss.com";
+<<<<<<< HEAD
         public static string OAITranslateBaseURL { get; set; }
+=======
+>>>>>>> 7e9cc6786fcad07de1db367547c62c87f3fd5fe4
 
         private static List<string> CurrencyBaseURL = new List<string>()
         {
@@ -97,6 +124,7 @@ namespace WzComparerR2.CharaSim
             }
         }
 
+<<<<<<< HEAD
         private static string OAITranslate(string text, string desiredLanguage, bool singleLine = false)
         {
             if (string.IsNullOrEmpty(OAITranslateBaseURL)) OAITranslateBaseURL = "https://api.openai.com/v1";
@@ -165,6 +193,8 @@ namespace WzComparerR2.CharaSim
             }
         }
 
+=======
+>>>>>>> 7e9cc6786fcad07de1db367547c62c87f3fd5fe4
         public static bool IsKoreanStringPresent(string checkString)
         {
             if (checkString == null) return false;
@@ -221,7 +251,11 @@ namespace WzComparerR2.CharaSim
             }
             catch
             {
+<<<<<<< HEAD
                 return JObject.Parse("{\"message\": {\"result\": {\"translatedText\": \"无效Naver API\"}}}");
+=======
+                return JObject.Parse("{\"message\": {\"result\": {\"translatedText\": \"�o����Naver API���`\"}}}");
+>>>>>>> 7e9cc6786fcad07de1db367547c62c87f3fd5fe4
             }
         }
 
@@ -290,8 +324,13 @@ namespace WzComparerR2.CharaSim
                 //0: Google (Non-Mozhi)
                 default:
                 case 0:
+<<<<<<< HEAD
                     JArray responseArr = GTranslate(ConvHashTagToHTMLTag(orgText), Translator.DefaultDesiredLanguage);
                     translatedText = responseArr[0][0].ToString().Replace("＃", "#");
+=======
+                    JArray responseArr = GTranslate(orgText.Replace("\\n", "\r\n"), Translator.DefaultDesiredLanguage);
+                    translatedText = responseArr[0][0].ToString().Replace("\r\n", "\\n").Replace("��", "#");
+>>>>>>> 7e9cc6786fcad07de1db367547c62c87f3fd5fe4
                     break;
                 //1: Google (Mozhi)
                 case 1:
@@ -327,6 +366,7 @@ namespace WzComparerR2.CharaSim
                 //6: Naver Papago (Non-Mozhi)
                 case 6:
                     if (targetLanguage == "yue") targetLanguage = "zh-TW";
+<<<<<<< HEAD
                     JObject responseObj = NTranslate(ConvHashTagToHTMLTag(orgText), Translator.DefaultDesiredLanguage);
                     translatedText = responseObj.SelectToken("message.result.translatedText").ToString();
                     break;
@@ -345,6 +385,16 @@ namespace WzComparerR2.CharaSim
             if (isMozhiUsed)
             {
                 translatedText = MTranslate(ConvHashTagToHTMLTag(orgText), mozhiEngine, sourceLanguage, targetLanguage).SelectToken("translated-text").ToString().Replace("＃", "#");
+=======
+                    JObject responseObj = NTranslate(orgText.Replace("\\n", "\r\n"), Translator.DefaultDesiredLanguage);
+                    translatedText = responseObj.SelectToken("message.result.translatedText").ToString();
+                    break;
+                    //7: iFlyTek (Non-Mozhi)
+            }
+            if (isMozhiUsed)
+            {
+                translatedText = MTranslate(orgText.Replace("\\n", "\r\n"), mozhiEngine, sourceLanguage, targetLanguage).SelectToken("translated-text").ToString().Replace("\r\n", "\\n").Replace("��", "#");
+>>>>>>> 7e9cc6786fcad07de1db367547c62c87f3fd5fe4
             }
             if (titleCase && targetLanguage == "en")
             {
@@ -352,6 +402,7 @@ namespace WzComparerR2.CharaSim
                 TextInfo textInfo = cultureInfo.TextInfo;
                 translatedText = textInfo.ToTitleCase(translatedText);
             }
+<<<<<<< HEAD
             translatedText = ConvHTMLTagToHashTag(translatedText);
             return translatedText;
         }
@@ -388,6 +439,11 @@ namespace WzComparerR2.CharaSim
             }
         }
 
+=======
+            return translatedText;
+        }
+
+>>>>>>> 7e9cc6786fcad07de1db367547c62c87f3fd5fe4
         public static string GetLanguage(string orgText)
         {
             if (string.IsNullOrEmpty(orgText) || orgText == "(null)") return "ja";
@@ -401,7 +457,11 @@ namespace WzComparerR2.CharaSim
                 //0: Google (Non-Mozhi)
                 default:
                 case 0:
+<<<<<<< HEAD
                     JArray responseArr = GTranslate(orgText, Translator.DefaultDesiredLanguage);
+=======
+                    JArray responseArr = GTranslate(orgText.Replace("\\n", "\r\n"), Translator.DefaultDesiredLanguage);
+>>>>>>> 7e9cc6786fcad07de1db367547c62c87f3fd5fe4
                     orgLanguage = responseArr[0][1].ToString();
                     break;
                 //1: Google (Mozhi)
@@ -438,14 +498,22 @@ namespace WzComparerR2.CharaSim
                 //6: Naver Papago (Non-Mozhi)
                 case 6:
                     if (targetLanguage == "yue") targetLanguage = "zh-TW";
+<<<<<<< HEAD
                     JObject responseObj = NTranslate(orgText, Translator.DefaultDesiredLanguage);
+=======
+                    JObject responseObj = NTranslate(orgText.Replace("\\n", "\r\n"), Translator.DefaultDesiredLanguage);
+>>>>>>> 7e9cc6786fcad07de1db367547c62c87f3fd5fe4
                     orgLanguage = responseObj.SelectToken("message.result.srcLangType").ToString();
                     break;
                     //7: iFlyTek (Non-Mozhi)
             }
             if (isMozhiUsed)
             {
+<<<<<<< HEAD
                 orgLanguage = MTranslate(orgText, mozhiEngine, sourceLanguage, targetLanguage).SelectToken("detected").ToString();
+=======
+                orgLanguage = MTranslate(orgText.Replace("\\n", "\r\n"), mozhiEngine, sourceLanguage, targetLanguage).SelectToken("detected").ToString();
+>>>>>>> 7e9cc6786fcad07de1db367547c62c87f3fd5fe4
             }
             return orgLanguage;
         }
@@ -466,9 +534,15 @@ namespace WzComparerR2.CharaSim
             switch (sourceLanguage)
             {
                 case "zh-CN":
+<<<<<<< HEAD
                     irlPrice = pointValue / 100.00; break; // CMSでは100ポイントあたり1元
                 case "en":
                     irlPrice = pointValue / 1000.00; break; // GMSでは1000ポイントあたり1ドル
+=======
+                    irlPrice = pointValue / 100.00 * 0.98; break; // CMS�Ǥ�100�ݥ���Ȥ�����0.98Ԫ
+                case "en":
+                    irlPrice = pointValue / 1000.00; break; // GMS�Ǥ�1000�ݥ���Ȥ�����1�ɥ�
+>>>>>>> 7e9cc6786fcad07de1db367547c62c87f3fd5fe4
                 default:
                     irlPrice = pointValue; break;
             }
@@ -484,7 +558,11 @@ namespace WzComparerR2.CharaSim
             double exchangeMultipler = 1;
             double.TryParse(exTable.SelectToken(DefaultDesiredCurrency + "." + sourceCurrency).ToString(), out exchangeMultipler);
             double convertedPrice = irlPrice / exchangeMultipler;
+<<<<<<< HEAD
             return "約" + convertedPrice.ToString("0.##") + dictCurrencyName[DefaultDesiredCurrency];
+=======
+            return "�s" + convertedPrice.ToString("0.##") + dictCurrencyName[DefaultDesiredCurrency];
+>>>>>>> 7e9cc6786fcad07de1db367547c62c87f3fd5fe4
         }
 
         public static string ConvertCurrencyToLang(string currency)
@@ -534,16 +612,22 @@ namespace WzComparerR2.CharaSim
         public static string ExchangeTable { get; set; }
         public static string DefaultDesiredLanguage { get; set; }
         public static string DefaultMozhiBackend { get; set; }
+<<<<<<< HEAD
         public static string DefaultLanguageModel { get; set; }
+=======
+>>>>>>> 7e9cc6786fcad07de1db367547c62c87f3fd5fe4
         public static string DefaultTranslateAPIKey { get; set; }
         public static int DefaultPreferredLayout { get; set; }
         public static int DefaultPreferredTranslateEngine { get; set; }
         public static bool IsTranslateEnabled { get; set; }
         public static string DefaultDetectCurrency { get; set; }
         public static string DefaultDesiredCurrency { get; set; }
+<<<<<<< HEAD
         public static double DefaultLMTemperature { get; set; }
         public static int DefaultMaximumToken { get; set; }
         public static bool IsExtraParamEnabled { get; set; }
+=======
+>>>>>>> 7e9cc6786fcad07de1db367547c62c87f3fd5fe4
         #endregion
     }
 

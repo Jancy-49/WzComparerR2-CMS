@@ -279,17 +279,23 @@ namespace WzComparerR2
             var config = WcR2Config.Default;
             Translator.DefaultDesiredLanguage = config.DesiredLanguage;
             Translator.DefaultMozhiBackend = config.MozhiBackend;
+<<<<<<< HEAD
             Translator.DefaultLanguageModel = config.LanguageModel;
             Translator.OAITranslateBaseURL = config.OpenAIBackend;
+=======
+>>>>>>> 7e9cc6786fcad07de1db367547c62c87f3fd5fe4
             Translator.DefaultPreferredTranslateEngine = config.PreferredTranslateEngine;
             Translator.DefaultTranslateAPIKey = config.NxSecretKey;
             Translator.DefaultPreferredLayout = config.PreferredLayout;
             Translator.IsTranslateEnabled = (config.PreferredLayout > 0);
             Translator.DefaultDetectCurrency = config.DetectCurrency;
             Translator.DefaultDesiredCurrency = config.DesiredCurrency;
+<<<<<<< HEAD
             Translator.DefaultLMTemperature = config.LMTemperature;
             Translator.DefaultMaximumToken = config.MaximumToken;
             Translator.IsExtraParamEnabled = config.OpenAIExtraOption;
+=======
+>>>>>>> 7e9cc6786fcad07de1db367547c62c87f3fd5fe4
             Translator.ExchangeTable = null;
         }
 

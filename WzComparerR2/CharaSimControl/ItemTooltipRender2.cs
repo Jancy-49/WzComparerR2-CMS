@@ -11,9 +11,13 @@ using WzComparerR2.PluginBase;
 using WzComparerR2.WzLib;
 using WzComparerR2.Common;
 using WzComparerR2.CharaSim;
+<<<<<<< HEAD
 using WzComparerR2.AvatarCommon;
 using DevComponents.DotNetBar;
 using Newtonsoft.Json.Linq;
+=======
+using DevComponents.DotNetBar;
+>>>>>>> 7e9cc6786fcad07de1db367547c62c87f3fd5fe4
 
 namespace WzComparerR2.CharaSimControl
 {
@@ -56,7 +60,10 @@ namespace WzComparerR2.CharaSimControl
         public TooltipRender LinkRecipeItemRender { get; set; }
         public TooltipRender SetItemRender { get; set; }
         public TooltipRender CashPackageRender { get; set; }
+<<<<<<< HEAD
         private AvatarCanvasManager avatar { get; set; }
+=======
+>>>>>>> 7e9cc6786fcad07de1db367547c62c87f3fd5fe4
         private bool isCurrencyConversionEnabled = (Translator.DefaultDesiredCurrency != "none");
         private string titleLanguage = "";
 
@@ -1305,7 +1312,11 @@ namespace WzComparerR2.CharaSimControl
             return level;
         }
  
+<<<<<<< HEAD
         private bool TryGetNickResource(long nickTag, out Wz_Node resNode)
+=======
+        private bool TryGetNickResource(int nickTag, out Wz_Node resNode)
+>>>>>>> 7e9cc6786fcad07de1db367547c62c87f3fd5fe4
         {
             resNode = PluginBase.PluginManager.FindWz("UI/NameTag.img/nick/" + nickTag);
             return resNode != null;

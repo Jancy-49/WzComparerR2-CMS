@@ -32,14 +32,20 @@
             this.buttonX2 = new DevComponents.DotNetBar.ButtonX();
             this.buttonX1 = new DevComponents.DotNetBar.ButtonX();
             this.txtAPIkey = new DevComponents.DotNetBar.Controls.TextBoxX();
+<<<<<<< HEAD
             this.txtLMTemperature = new DevComponents.Editors.DoubleInput();
             this.txtMaximumToken = new DevComponents.Editors.IntegerInput();
             this.txtOpenAIBackend = new DevComponents.DotNetBar.Controls.TextBoxX();
+=======
+>>>>>>> 7e9cc6786fcad07de1db367547c62c87f3fd5fe4
             this.txtGCloudTranslateAPIkey = new DevComponents.DotNetBar.Controls.TextBoxX();
             this.txtSecretkey = new DevComponents.DotNetBar.Controls.TextBoxX();
             this.buttonXCheck = new DevComponents.DotNetBar.ButtonX();
             this.buttonXCheck2 = new DevComponents.DotNetBar.ButtonX();
+<<<<<<< HEAD
             this.buttonXCheck3 = new DevComponents.DotNetBar.ButtonX();
+=======
+>>>>>>> 7e9cc6786fcad07de1db367547c62c87f3fd5fe4
             this.superTabControl1 = new DevComponents.DotNetBar.SuperTabControl();
             this.superTabControlPanel1 = new DevComponents.DotNetBar.SuperTabControlPanel();
             this.cmbWzVersionVerifyMode = new DevComponents.DotNetBar.Controls.ComboBoxEx();
@@ -47,11 +53,17 @@
             this.chkImgCheckDisabled = new DevComponents.DotNetBar.Controls.CheckBoxX();
             this.chkWzSortByImgID = new DevComponents.DotNetBar.Controls.CheckBoxX();
             this.chkAutoCheckExtFiles = new DevComponents.DotNetBar.Controls.CheckBoxX();
+<<<<<<< HEAD
             this.chkOpenAIExtraOption = new DevComponents.DotNetBar.Controls.CheckBoxX();
             this.chkEnableTranslate = new DevComponents.DotNetBar.Controls.CheckBoxX();
             this.cmbDesiredLanguage = new DevComponents.DotNetBar.Controls.ComboBoxEx();
             this.cmbMozhiBackend = new DevComponents.DotNetBar.Controls.ComboBoxEx();
             this.cmbLanguageModel = new DevComponents.DotNetBar.Controls.ComboBoxEx();
+=======
+            this.chkEnableTranslate = new DevComponents.DotNetBar.Controls.CheckBoxX();
+            this.cmbDesiredLanguage = new DevComponents.DotNetBar.Controls.ComboBoxEx();
+            this.cmbMozhiBackend = new DevComponents.DotNetBar.Controls.ComboBoxEx();
+>>>>>>> 7e9cc6786fcad07de1db367547c62c87f3fd5fe4
             this.cmbDetectCurrency = new DevComponents.DotNetBar.Controls.ComboBoxEx();
             this.cmbDesiredCurrency = new DevComponents.DotNetBar.Controls.ComboBoxEx();
             this.cmbPreferredLayout = new DevComponents.DotNetBar.Controls.ComboBoxEx();
@@ -71,11 +83,14 @@
             this.labelX8 = new DevComponents.DotNetBar.LabelX();
             this.labelX9 = new DevComponents.DotNetBar.LabelX();
             this.labelX10 = new DevComponents.DotNetBar.LabelX();
+<<<<<<< HEAD
             this.labelX11 = new DevComponents.DotNetBar.LabelX();
             this.labelX12 = new DevComponents.DotNetBar.LabelX();
             this.labelX13 = new DevComponents.DotNetBar.LabelX();
             this.labelX14 = new DevComponents.DotNetBar.LabelX();
             this.superTabControlPanel4 = new DevComponents.DotNetBar.SuperTabControlPanel();
+=======
+>>>>>>> 7e9cc6786fcad07de1db367547c62c87f3fd5fe4
             this.superTabItem3 = new DevComponents.DotNetBar.SuperTabItem();
             this.superTabItem4 = new DevComponents.DotNetBar.SuperTabItem();
             this.panelEx1.SuspendLayout();
@@ -145,6 +160,7 @@
             this.txtAPIkey.Size = new System.Drawing.Size(180, 23);
             this.txtAPIkey.TabIndex = 10;
             // 
+<<<<<<< HEAD
             // txtOpenAIBackend
             // 
             // 
@@ -207,6 +223,8 @@
             this.txtMaximumToken.Size = new System.Drawing.Size(70, 21);
             this.txtMaximumToken.TabIndex = 15;
             // 
+=======
+>>>>>>> 7e9cc6786fcad07de1db367547c62c87f3fd5fe4
             // txtGCloudTranslateAPIkey
             // 
             // 
@@ -245,6 +263,7 @@
             this.buttonXCheck2.Text = "检查";
             this.buttonXCheck2.Click += new System.EventHandler(this.buttonXCheck2_Click);
             // 
+<<<<<<< HEAD
             // buttonXCheck3
             // 
             this.buttonXCheck3.AccessibleRole = System.Windows.Forms.AccessibleRole.PushButton;
@@ -258,6 +277,8 @@
             this.buttonXCheck3.Text = "检查";
             this.buttonXCheck3.Click += new System.EventHandler(this.buttonXCheck3_Click);
             // 
+=======
+>>>>>>> 7e9cc6786fcad07de1db367547c62c87f3fd5fe4
             // superTabControl1
             // 
             this.superTabControl1.AutoCloseTabs = false;
@@ -441,7 +462,10 @@
             this.superTabControlPanel2.Controls.Add(this.buttonXCheck2);
             this.superTabControlPanel2.Controls.Add(this.chkEnableTranslate);
             this.superTabControlPanel2.Controls.Add(this.cmbMozhiBackend);
+<<<<<<< HEAD
             this.superTabControlPanel2.Controls.Add(this.cmbLanguageModel);
+=======
+>>>>>>> 7e9cc6786fcad07de1db367547c62c87f3fd5fe4
             this.superTabControlPanel2.Controls.Add(this.labelX6);
             this.superTabControlPanel2.Controls.Add(this.cmbDesiredLanguage);
             this.superTabControlPanel2.Controls.Add(this.labelX7);
@@ -451,7 +475,10 @@
             this.superTabControlPanel2.Controls.Add(this.labelX9);
             this.superTabControlPanel2.Controls.Add(this.cmbDetectCurrency);
             this.superTabControlPanel2.Controls.Add(this.labelX10);
+<<<<<<< HEAD
             this.superTabControlPanel2.Controls.Add(this.labelX11);
+=======
+>>>>>>> 7e9cc6786fcad07de1db367547c62c87f3fd5fe4
             this.superTabControlPanel2.Controls.Add(this.cmbDesiredCurrency);
             this.superTabControlPanel2.Dock = System.Windows.Forms.DockStyle.Fill;
             this.superTabControlPanel2.Location = new System.Drawing.Point(49, 0);
@@ -553,6 +580,7 @@
             this.labelX10.TabIndex = 9;
             this.labelX10.Text = "目标单位";
             // 
+<<<<<<< HEAD
             // labelX11
             // 
             this.labelX11.AutoSize = true;
@@ -606,6 +634,8 @@
             this.labelX14.TabIndex = 9;
             this.labelX14.Text = "Token最大值";
             // 
+=======
+>>>>>>> 7e9cc6786fcad07de1db367547c62c87f3fd5fe4
             // cmbDesiredLanguage
             // 
             this.cmbDesiredLanguage.DisplayMember = "Text";
@@ -634,6 +664,7 @@
             this.cmbMozhiBackend.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
             this.cmbMozhiBackend.TabIndex = 12;
             // 
+<<<<<<< HEAD
             // cmbLanguageModel
             // 
             this.cmbLanguageModel.DisplayMember = "Text";
@@ -649,6 +680,8 @@
             this.cmbLanguageModel.TabIndex = 12;
             this.cmbLanguageModel.Visible = false;
             // 
+=======
+>>>>>>> 7e9cc6786fcad07de1db367547c62c87f3fd5fe4
             // cmbPreferredTranslateEngine
             // 
             this.cmbPreferredTranslateEngine.DisplayMember = "Text";
@@ -661,8 +694,12 @@
             this.cmbPreferredTranslateEngine.Location = new System.Drawing.Point(110, 40);
             this.cmbPreferredTranslateEngine.Name = "cmbPreferredTranslateEngine";
             this.cmbPreferredTranslateEngine.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
+<<<<<<< HEAD
             this.cmbPreferredTranslateEngine.TabIndex = 13;
             this.cmbPreferredTranslateEngine.SelectedIndexChanged += cmbPreferredTranslateEngine_SelectedIndexChanged;
+=======
+            this.cmbPreferredTranslateEngine.TabIndex = 12;
+>>>>>>> 7e9cc6786fcad07de1db367547c62c87f3fd5fe4
             // 
             // cmbPreferredLayout
             // 
@@ -712,6 +749,7 @@
             this.superTabItem2.GlobalItem = false;
             this.superTabItem2.Name = "superTabItem2";
             this.superTabItem2.Text = "翻译功能";
+<<<<<<< HEAD
             // 
             // superTabControlPanel4
             // 
@@ -729,13 +767,18 @@
             this.superTabControlPanel4.TabIndex = 1;
             this.superTabControlPanel4.TabItem = this.superTabItem4;
             this.superTabControlPanel4.Visible = false;
+=======
+>>>>>>> 7e9cc6786fcad07de1db367547c62c87f3fd5fe4
             // 
             // superTabControlPanel3
             // 
             this.superTabControlPanel3.Controls.Add(this.labelX3);
             this.superTabControlPanel3.Controls.Add(this.labelX4);
             this.superTabControlPanel3.Controls.Add(this.buttonXCheck);
+<<<<<<< HEAD
             this.superTabControlPanel3.Controls.Add(this.buttonXCheck3);
+=======
+>>>>>>> 7e9cc6786fcad07de1db367547c62c87f3fd5fe4
             this.superTabControlPanel3.Controls.Add(this.txtAPIkey);
             this.superTabControlPanel3.Controls.Add(this.txtSecretkey);
             this.superTabControlPanel3.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -777,6 +820,7 @@
             this.superTabItem3.GlobalItem = false;
             this.superTabItem3.Name = "superTabItem3";
             this.superTabItem3.Text = "API密钥";
+<<<<<<< HEAD
             // 
             // superTabItem4
             // 
@@ -784,6 +828,8 @@
             this.superTabItem4.GlobalItem = false;
             this.superTabItem4.Name = "superTabItem4";
             this.superTabItem4.Text = "OpenAI";
+=======
+>>>>>>> 7e9cc6786fcad07de1db367547c62c87f3fd5fe4
             // 
             // FrmOptions
             // 
@@ -817,8 +863,11 @@
         private DevComponents.DotNetBar.Controls.TextBoxX txtNxAPIkey;
         private DevComponents.DotNetBar.Controls.TextBoxX txtOpenAIBackend;
         private DevComponents.DotNetBar.Controls.TextBoxX txtSecretkey;
+<<<<<<< HEAD
         private DevComponents.Editors.DoubleInput txtLMTemperature;
         private DevComponents.Editors.IntegerInput txtMaximumToken;
+=======
+>>>>>>> 7e9cc6786fcad07de1db367547c62c87f3fd5fe4
         private DevComponents.DotNetBar.Controls.TextBoxX txtGCloudTranslateAPIkey;
         private DevComponents.DotNetBar.SuperTabControl superTabControl1;
         private DevComponents.DotNetBar.SuperTabControlPanel superTabControlPanel1;
@@ -833,19 +882,28 @@
         private DevComponents.DotNetBar.ButtonX buttonX1;
         private DevComponents.DotNetBar.ButtonX buttonXCheck;
         private DevComponents.DotNetBar.ButtonX buttonXCheck2;
+<<<<<<< HEAD
         private DevComponents.DotNetBar.ButtonX buttonXCheck3;
+=======
+>>>>>>> 7e9cc6786fcad07de1db367547c62c87f3fd5fe4
         private DevComponents.DotNetBar.Controls.CheckBoxX chkWzAutoSort;
         private DevComponents.DotNetBar.LabelX labelX1;
         private DevComponents.DotNetBar.Controls.ComboBoxEx cmbWzEncoding;
         private DevComponents.DotNetBar.Controls.CheckBoxX chkAutoCheckExtFiles;
         private DevComponents.DotNetBar.Controls.CheckBoxX chkWzSortByImgID;
         private DevComponents.DotNetBar.Controls.CheckBoxX chkImgCheckDisabled;
+<<<<<<< HEAD
         private DevComponents.DotNetBar.Controls.CheckBoxX chkOpenAIExtraOption;
+=======
+>>>>>>> 7e9cc6786fcad07de1db367547c62c87f3fd5fe4
         private DevComponents.DotNetBar.Controls.CheckBoxX chkEnableTranslate;
         private DevComponents.DotNetBar.Controls.ComboBoxEx cmbWzVersionVerifyMode;
         private DevComponents.DotNetBar.Controls.ComboBoxEx cmbDesiredLanguage;
         private DevComponents.DotNetBar.Controls.ComboBoxEx cmbMozhiBackend;
+<<<<<<< HEAD
         private DevComponents.DotNetBar.Controls.ComboBoxEx cmbLanguageModel;
+=======
+>>>>>>> 7e9cc6786fcad07de1db367547c62c87f3fd5fe4
         private DevComponents.DotNetBar.Controls.ComboBoxEx cmbDetectCurrency;
         private DevComponents.DotNetBar.Controls.ComboBoxEx cmbDesiredCurrency;
         private DevComponents.DotNetBar.Controls.ComboBoxEx cmbPreferredLayout;
@@ -859,9 +917,12 @@
         private DevComponents.DotNetBar.LabelX labelX8;
         private DevComponents.DotNetBar.LabelX labelX9;
         private DevComponents.DotNetBar.LabelX labelX10;
+<<<<<<< HEAD
         private DevComponents.DotNetBar.LabelX labelX11;
         private DevComponents.DotNetBar.LabelX labelX12;
         private DevComponents.DotNetBar.LabelX labelX13;
         private DevComponents.DotNetBar.LabelX labelX14;
+=======
+>>>>>>> 7e9cc6786fcad07de1db367547c62c87f3fd5fe4
     }
 }

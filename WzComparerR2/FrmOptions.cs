@@ -82,9 +82,12 @@ namespace WzComparerR2
                 new ComboItem("MyMemory"){ Value = 4 },
                 new ComboItem("Yandex"){ Value = 5 },
                 new ComboItem("Naver Papago (非Mozhi)"){ Value = 6 },
+<<<<<<< HEAD
                 //new ComboItem("ディープシークAPI"){ Value = 7 },
                 //new ComboItem("オラマLLM (ローカル)"){ Value = 8 },
                 new ComboItem("OpenAI互换"){ Value = 9 },
+=======
+>>>>>>> 7e9cc6786fcad07de1db367547c62c87f3fd5fe4
             });
 
             cmbPreferredLayout.Items.AddRange(new[]
@@ -122,10 +125,13 @@ namespace WzComparerR2
                 new ComboItem("马来西亚林吉特 (MYR)"){ Value = "myr" },
                 new ComboItem("欧元 (EUR)"){ Value = "eur" },
             });
+<<<<<<< HEAD
             cmbLanguageModel.Items.AddRange(new[]
 {
                 new ComboItem("不变化"){ Value = "none" },
             });
+=======
+>>>>>>> 7e9cc6786fcad07de1db367547c62c87f3fd5fe4
         }
 
         public bool SortWzOnOpened
@@ -179,11 +185,14 @@ namespace WzComparerR2
             set { txtGCloudTranslateAPIkey.Text = value; }
         }
 
+<<<<<<< HEAD
         public string OpenAIBackend
         {
             get { return txtOpenAIBackend.Text; }
             set { txtOpenAIBackend.Text = value; }
         }
+=======
+>>>>>>> 7e9cc6786fcad07de1db367547c62c87f3fd5fe4
         public string NxSecretKey
         {
             get { return txtSecretkey.Text; }
@@ -221,6 +230,7 @@ namespace WzComparerR2
             }
         }
 
+<<<<<<< HEAD
         public string LanguageModel
         {
             get
@@ -266,6 +276,8 @@ namespace WzComparerR2
             }
         }
 
+=======
+>>>>>>> 7e9cc6786fcad07de1db367547c62c87f3fd5fe4
         public string DetectCurrency
         {
             get
@@ -356,6 +368,7 @@ namespace WzComparerR2
 
         private void buttonXCheck2_Click(object sender, EventArgs e)
         {
+<<<<<<< HEAD
             ComboItem selectedItem = (ComboItem)cmbPreferredTranslateEngine.SelectedItem;
             string respText;
             HttpWebRequest req;
@@ -504,6 +517,34 @@ namespace WzComparerR2
             txtLMTemperature.Enabled = chkOpenAIExtraOption.Checked;
             txtMaximumToken.Enabled = chkOpenAIExtraOption.Checked;
         }
+=======
+            string respText;
+            var req = WebRequest.Create((cmbMozhiBackend.SelectedItem as ComboItem)?.Value + "/api/engines") as HttpWebRequest;
+            req.Timeout = 15000;
+            try
+            {
+                string respJson = new StreamReader(req.GetResponse().GetResponseStream(), Encoding.UTF8).ReadToEnd();
+                if (respJson.Contains("All Engines"))
+                {
+                    respText = "Mozhi服务有效。";
+                }
+                else
+                {
+                    respText = "Mozhi服务无效。";
+                }
+            }
+            catch (WebException ex)
+            {
+                string respJson = new StreamReader(ex.Response.GetResponseStream(), Encoding.UTF8).ReadToEnd();
+                respText = "Mozhi服务无效。";
+            }
+            catch (Exception ex)
+            {
+                respText = "发生未知错误：" + ex;
+            }
+            MessageBoxEx.Show(respText);
+        }
+>>>>>>> 7e9cc6786fcad07de1db367547c62c87f3fd5fe4
         public WzLib.WzVersionVerifyMode WzVersionVerifyMode
         {
             get { return ((cmbWzVersionVerifyMode.SelectedItem as ComboItem)?.Value as WzLib.WzVersionVerifyMode?) ?? default; }
@@ -527,11 +568,14 @@ namespace WzComparerR2
             this.NxOpenAPIKey = config.NxOpenAPIKey;
             this.NxSecretKey = config.NxSecretKey;
             this.MozhiBackend = config.MozhiBackend;
+<<<<<<< HEAD
             this.LanguageModel = config.LanguageModel;
             this.OpenAIBackend = config.OpenAIBackend;
             this.OpenAIExtraOption = config.OpenAIExtraOption;
             this.LMTemperature = config.LMTemperature;
             this.MaximumToken = config.MaximumToken;
+=======
+>>>>>>> 7e9cc6786fcad07de1db367547c62c87f3fd5fe4
             this.PreferredTranslateEngine = config.PreferredTranslateEngine;
             this.DesiredLanguage = config.DesiredLanguage;
             this.PreferredLayout = config.PreferredLayout;
@@ -550,11 +594,14 @@ namespace WzComparerR2
             config.NxOpenAPIKey = this.NxOpenAPIKey;
             config.NxSecretKey = this.NxSecretKey;
             config.MozhiBackend = this.MozhiBackend;
+<<<<<<< HEAD
             if (this.LanguageModel != "none") config.LanguageModel = this.LanguageModel;
             config.OpenAIBackend = this.OpenAIBackend;
             config.OpenAIExtraOption = this.OpenAIExtraOption;
             config.LMTemperature = this.LMTemperature;
             config.MaximumToken = this.MaximumToken;
+=======
+>>>>>>> 7e9cc6786fcad07de1db367547c62c87f3fd5fe4
             config.PreferredTranslateEngine = this.PreferredTranslateEngine;
             config.DesiredLanguage = this.DesiredLanguage;
             config.PreferredLayout = this.PreferredLayout;

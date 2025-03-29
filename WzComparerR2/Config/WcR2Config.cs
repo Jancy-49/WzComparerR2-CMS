@@ -13,13 +13,18 @@ namespace WzComparerR2.Config
     {
         public WcR2Config()
         {
+<<<<<<< HEAD
             this.MainStyle = DevComponents.DotNetBar.eStyle.Office2016;
+=======
+            this.MainStyle = DevComponents.DotNetBar.eStyle.Office2007VistaGlass;
+>>>>>>> 7e9cc6786fcad07de1db367547c62c87f3fd5fe4
             this.MainStyleColor = Color.DimGray;
             this.SortWzOnOpened = true;
             this.AutoDetectExtFiles = true;
             this.NoPatcherPrompt = false;
             this.WzVersionVerifyMode = WzLib.WzVersionVerifyMode.Fast;
             this.PreferredLayout = 0;
+<<<<<<< HEAD
             this.DesiredLanguage = "ja";
             this.MozhiBackend = "https://mozhi.aryak.me";
             this.DetectCurrency = "auto";
@@ -27,6 +32,12 @@ namespace WzComparerR2.Config
             this.OpenAIExtraOption = false;
             this.LMTemperature = 0.7;
             this.MaximumToken = -1;
+=======
+            this.DesiredLanguage = "zh-CN";
+            this.MozhiBackend = "https://mozhi.aryak.me";
+            this.DetectCurrency = "auto";
+            this.DesiredCurrency = "none";
+>>>>>>> 7e9cc6786fcad07de1db367547c62c87f3fd5fe4
         }
 
         /// <summary>
@@ -82,6 +93,7 @@ namespace WzComparerR2.Config
         }
 
         /// <summary>
+<<<<<<< HEAD
         /// Language Model Configuration
         /// </summary>
         [ConfigurationProperty("LanguageModel")]
@@ -136,6 +148,8 @@ namespace WzComparerR2.Config
         }
 
         /// <summary>
+=======
+>>>>>>> 7e9cc6786fcad07de1db367547c62c87f3fd5fe4
         /// Desired Language Configuration
         /// </summary>
         [ConfigurationProperty("DesiredLanguage")]
@@ -258,6 +272,10 @@ namespace WzComparerR2.Config
             get { return (ConfigItem<bool>)this["noPatcherPrompt"]; }
             set { this["noPatcherPrompt"] = value; }
         }
+<<<<<<< HEAD
+=======
+
+>>>>>>> 7e9cc6786fcad07de1db367547c62c87f3fd5fe4
         /// <summary>
         /// 获取或设置一个值，指示读取wz是否跳过img检测。
         /// </summary>
