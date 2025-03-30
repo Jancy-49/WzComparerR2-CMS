@@ -1261,7 +1261,15 @@ namespace WzComparerR2.Comparer
                 }
                 if (width == 0) continue;
                 // 变更前Tooltip图像生成
+<<<<<<< HEAD
                 CashPackage itemOld = CashPackage.CreateFromNode(PluginManager.FindWz(itemNodePath, wzOld?.GetNodeWzFile()), PluginBase.PluginManager.FindWz(string.Format(@"Etc\CashPackage.img\{0}", itemID)), PluginManager.FindWz);
+=======
+<<<<<<< HEAD
+                CashPackage itemOld = CashPackage.CreateFromNode(PluginManager.FindWz(itemNodePath, wzOld?.GetNodeWzFile()), PluginBase.PluginManager.FindWz(string.Format(@"Etc\CashPackage.img\{0}", itemID)), PluginManager.FindWz);
+=======
+                CashPackage itemOld = CashPackage.CreateFromNode(PluginManager.FindWz(itemNodePath, wzNew?.GetNodeWzFile()), PluginBase.PluginManager.FindWz(string.Format(@"Etc\CashPackage.img\{0}", itemID)), PluginManager.FindWz);
+>>>>>>> 7e9cc6786fcad07de1db367547c62c87f3fd5fe4
+>>>>>>> a85b27c1e063b5817109d5f7fd2c91dbb8ed93b4
                 if (itemOld != null)
                 {
                     cashRenderOld.CashPackage = itemOld;

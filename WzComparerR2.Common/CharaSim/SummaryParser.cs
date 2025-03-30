@@ -147,12 +147,21 @@ namespace WzComparerR2.CharaSim
                             idx += 3;
                         }
                     }
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> a85b27c1e063b5817109d5f7fd2c91dbb8ed93b4
                     else if (beginG)
                     {
                         beginG = false;
                         sb.Append(param.GEnd);
                         idx++;
                     }
+<<<<<<< HEAD
+=======
+=======
+>>>>>>> 7e9cc6786fcad07de1db367547c62c87f3fd5fe4
+>>>>>>> a85b27c1e063b5817109d5f7fd2c91dbb8ed93b4
                     else if (beginC)
                     {
                         beginC = false;
@@ -260,6 +269,10 @@ namespace WzComparerR2.CharaSim
                 {
                     h = sr.SkillH[0];
                 }
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> a85b27c1e063b5817109d5f7fd2c91dbb8ed93b4
                 if (String.IsNullOrEmpty(h))
                 {
                     try
@@ -271,6 +284,11 @@ namespace WzComparerR2.CharaSim
                         ;
                     }
                 }
+<<<<<<< HEAD
+=======
+=======
+>>>>>>> 7e9cc6786fcad07de1db367547c62c87f3fd5fe4
+>>>>>>> a85b27c1e063b5817109d5f7fd2c91dbb8ed93b4
                 var levelCommon = level <= skill.levelCommon.Count ? skill.levelCommon[level - 1] : skill.common;
 
                 if (doHighlight && DiffSkillTags != null && skillID != null)
@@ -292,6 +310,10 @@ namespace WzComparerR2.CharaSim
                 {
                     h = sr.SkillH[0];
                 }
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> a85b27c1e063b5817109d5f7fd2c91dbb8ed93b4
 
                 if (doHighlight && DiffSkillTags != null && skillID != null)
                 {
@@ -304,6 +326,22 @@ namespace WzComparerR2.CharaSim
                     }
                 }
 
+<<<<<<< HEAD
+=======
+=======
+                if (doHighlight && DiffSkillTags != null && skillID != null)
+                {
+                    if (DiffSkillTags.ContainsKey(skillID))
+                    {
+                        foreach (var tags in DiffSkillTags[skillID])
+                        {
+                            h = (h == null ? null : Regex.Replace(h, "#" + tags + @"([^a-zA-Z0-9])", @"#$g#" + tags + "#$1"));
+                        }
+                    }
+                }
+
+>>>>>>> 7e9cc6786fcad07de1db367547c62c87f3fd5fe4
+>>>>>>> a85b27c1e063b5817109d5f7fd2c91dbb8ed93b4
                 return GetSkillSummary(h, level, skill.Common, param, options);
             }
         }

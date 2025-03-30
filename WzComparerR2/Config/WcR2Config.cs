@@ -13,13 +13,25 @@ namespace WzComparerR2.Config
     {
         public WcR2Config()
         {
+<<<<<<< HEAD
             this.MainStyle = DevComponents.DotNetBar.eStyle.Office2016;
+=======
+<<<<<<< HEAD
+            this.MainStyle = DevComponents.DotNetBar.eStyle.Office2016;
+=======
+            this.MainStyle = DevComponents.DotNetBar.eStyle.Office2007VistaGlass;
+>>>>>>> 7e9cc6786fcad07de1db367547c62c87f3fd5fe4
+>>>>>>> a85b27c1e063b5817109d5f7fd2c91dbb8ed93b4
             this.MainStyleColor = Color.DimGray;
             this.SortWzOnOpened = true;
             this.AutoDetectExtFiles = true;
             this.NoPatcherPrompt = false;
             this.WzVersionVerifyMode = WzLib.WzVersionVerifyMode.Fast;
             this.PreferredLayout = 0;
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> a85b27c1e063b5817109d5f7fd2c91dbb8ed93b4
             this.DesiredLanguage = "ja";
             this.MozhiBackend = "https://mozhi.aryak.me";
             this.DetectCurrency = "auto";
@@ -27,6 +39,15 @@ namespace WzComparerR2.Config
             this.OpenAIExtraOption = false;
             this.LMTemperature = 0.7;
             this.MaximumToken = -1;
+<<<<<<< HEAD
+=======
+=======
+            this.DesiredLanguage = "zh-CN";
+            this.MozhiBackend = "https://mozhi.aryak.me";
+            this.DetectCurrency = "auto";
+            this.DesiredCurrency = "none";
+>>>>>>> 7e9cc6786fcad07de1db367547c62c87f3fd5fe4
+>>>>>>> a85b27c1e063b5817109d5f7fd2c91dbb8ed93b4
         }
 
         /// <summary>
@@ -82,6 +103,10 @@ namespace WzComparerR2.Config
         }
 
         /// <summary>
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> a85b27c1e063b5817109d5f7fd2c91dbb8ed93b4
         /// Language Model Configuration
         /// </summary>
         [ConfigurationProperty("LanguageModel")]
@@ -136,6 +161,11 @@ namespace WzComparerR2.Config
         }
 
         /// <summary>
+<<<<<<< HEAD
+=======
+=======
+>>>>>>> 7e9cc6786fcad07de1db367547c62c87f3fd5fe4
+>>>>>>> a85b27c1e063b5817109d5f7fd2c91dbb8ed93b4
         /// Desired Language Configuration
         /// </summary>
         [ConfigurationProperty("DesiredLanguage")]
@@ -258,6 +288,13 @@ namespace WzComparerR2.Config
             get { return (ConfigItem<bool>)this["noPatcherPrompt"]; }
             set { this["noPatcherPrompt"] = value; }
         }
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+
+>>>>>>> 7e9cc6786fcad07de1db367547c62c87f3fd5fe4
+>>>>>>> a85b27c1e063b5817109d5f7fd2c91dbb8ed93b4
         /// <summary>
         /// 获取或设置一个值，指示读取wz是否跳过img检测。
         /// </summary>
