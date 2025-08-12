@@ -33,7 +33,7 @@ namespace WzComparerR2.CharaSim
         public static void LoadSetItems()
         {
             //搜索setItemInfo.img
-            Wz_Node etcWz = PluginManager.FindWz(Wz_Type.Etc);
+            Wz_Node etcWz = PluginManager.FindWz(Wz_Type.Etc, true);
             if (etcWz == null)
                 return;
             Wz_Node setItemNode = etcWz.FindNodeByPath("SetItemInfo.img", true);
@@ -41,7 +41,7 @@ namespace WzComparerR2.CharaSim
                 return;
 
             //搜索ItemOption.img
-            Wz_Node itemWz = PluginManager.FindWz(Wz_Type.Item);
+            Wz_Node itemWz = PluginManager.FindWz(Wz_Type.Item, true);
             if (itemWz == null)
                 return;
             Wz_Node optionNode = itemWz.FindNodeByPath("ItemOption.img", true);
@@ -59,6 +59,39 @@ namespace WzComparerR2.CharaSim
                         LoadedSetItems[setItemIndex] = setItem;
                 }
             }
+        }
+
+        public static SetItem LoadSetItem(int setID, Wz_File sourceWzFile)
+        {
+            //搜索setItemInfo.img
+            Wz_Node etcWz = PluginManager.FindWz(Wz_Type.Etc, sourceWzFile);
+            if (etcWz == null)
+                return null;
+            Wz_Node setItemNode = etcWz.FindNodeByPath("SetItemInfo.img", true);
+            if (setItemNode == null)
+                return null;
+
+            //搜索ItemOption.img
+            Wz_Node itemWz = PluginManager.FindWz(Wz_Type.Item, sourceWzFile);
+            if (itemWz == null)
+                return null;
+            Wz_Node optionNode = itemWz.FindNodeByPath("ItemOption.img", true);
+            if (optionNode == null)
+                return null;
+
+            foreach (Wz_Node node in setItemNode.Nodes)
+            {
+                int setItemIndex;
+                if (Int32.TryParse(node.Text, out setItemIndex) && setItemIndex == setID)
+                {
+                    SetItem setItem = SetItem.CreateFromNode(node, optionNode);
+                    if (setItem != null)
+                        return setItem;
+                    else
+                        return null;
+                }
+            }
+            return null;
         }
 
         public static void LoadExclusiveEquipsIfEmpty()
@@ -132,7 +165,6 @@ namespace WzComparerR2.CharaSim
             {
                 return 0;
             }
-            // Wz_Node actionNode = PluginManager.FindWz("Character/00002000.img/" + actionName);
             Wz_Node actionNode = wzNode == null ? PluginManager.FindWz("Character/00002000.img/" + actionName) :
                 PluginManager.FindWz("Character/00002000.img/" + actionName, wzNode.GetNodeWzFile());
             if (actionNode == null)

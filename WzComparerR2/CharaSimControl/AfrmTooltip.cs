@@ -6,6 +6,10 @@ using System.Windows.Forms;
 using WzComparerR2.Common;
 using WzComparerR2.CharaSim;
 using WzComparerR2.Controls;
+using System.Linq;
+using System.Threading.Tasks;
+using System.Threading;
+using WzComparerR2.Properties;
 
 namespace WzComparerR2.CharaSimControl
 {
@@ -14,19 +18,21 @@ namespace WzComparerR2.CharaSimControl
         public AfrmTooltip()
         {
             this.menu = new ContextMenuStrip();
-            this.menu.Items.Add(new ToolStripMenuItem("复制(&C)", null, tsmiCopy_Click));
-            this.menu.Items.Add(new ToolStripMenuItem("导出(&S)", null, tsmiSave_Click)); 
-            this.menu.Items.Add(new ToolStripMenuItem("关闭(&Esc)", null));
+            this.InitMenu();
+            this.SaveSample = new ToolStripMenuItem("保存sample(&R)", null, tsmiSaveSample_Click);
             this.ContextMenuStrip = this.menu;
 
             this.Size = new Size(1, 1);
             this.HideOnHover = true;
             this.GearRender = new GearTooltipRender2();
+            this.GearRender22 = new GearTooltipRender22();
             this.ItemRender = new ItemTooltipRender2();
             this.SkillRender = new SkillTooltipRender2();
             this.RecipeRender = new RecipeTooltipRender();
+            this.MapRender = new MapTooltipRenderer();
             this.MobRender = new MobTooltipRenderer();
             this.NpcRender = new NpcTooltipRenderer();
+            this.QuestRender = new QuestTooltipRenderer();
             this.HelpRender = new HelpTooltipRender();
             this.SetItemRender = new SetItemTooltipRender();
             this.SizeChanged += AfrmTooltip_SizeChanged;
@@ -39,7 +45,11 @@ namespace WzComparerR2.CharaSimControl
         private ContextMenuStrip menu;
         private bool showMenu;
         private bool showID;
+        public bool Enable22AniStyle { get; set; }
 
+        private Bitmap AvatarBitmap;
+        private FrmWaiting WaitingForm = new FrmWaiting();
+        private static readonly SemaphoreSlim TranslateSemaphore = new SemaphoreSlim(1, 1);
         public Object TargetItem
         {
             get { return item; }
@@ -50,15 +60,33 @@ namespace WzComparerR2.CharaSimControl
         public Character Character { get; set; }
 
         public GearTooltipRender2 GearRender { get; private set; }
+        public GearTooltipRender22 GearRender22 { get; private set; }
         public ItemTooltipRender2 ItemRender { get; private set; }
         public SkillTooltipRender2 SkillRender { get; private set; }
         public RecipeTooltipRender RecipeRender { get; private set; }
+        public MapTooltipRenderer MapRender { get; private set; }
         public MobTooltipRenderer MobRender { get; private set; }
         public NpcTooltipRenderer NpcRender { get; private set; }
+        public QuestTooltipRenderer QuestRender { get; private set; }
         public HelpTooltipRender HelpRender { get; private set; }
         public SetItemTooltipRender SetItemRender { get; private set; }
+        public SetItemTooltipRender22 SetItemRender22 { get; private set; }
 
         public string ImageFileName { get; set; }
+        private ToolStripMenuItem SaveSample { get; set; }
+
+        public string NodeName { get; set; }
+        public string Desc { get; set; }
+        public string Pdesc { get; set; }
+        public string AutoDesc { get; set; }
+        public string Hdesc { get; set; }
+        public string DescLeftAlign { get; set; }
+        public int NodeID { get; set; }
+        public int PreferredStringCopyMethod { get; set; }
+        public bool CopyParsedSkillString { get; set; }
+
+        public event ObjectMouseEventHandler ObjectMouseMove;
+        public event EventHandler ObjectMouseLeave;
 
         public bool ShowID
         {
@@ -67,7 +95,9 @@ namespace WzComparerR2.CharaSimControl
             {
                 this.showID = value;
                 this.GearRender.ShowObjectID = value;
+                this.GearRender22.ShowObjectID = value;
                 this.ItemRender.ShowObjectID = value;
+                this.QuestRender.ShowObjectID = value;
                 this.SkillRender.ShowObjectID = value;
                 this.RecipeRender.ShowObjectID = value;
             }
@@ -79,14 +109,72 @@ namespace WzComparerR2.CharaSimControl
             set { showMenu = value; }
         }
 
-        public override void Refresh()
+        public async override void Refresh()
         {
             this.PreRender();
+            if (Translator.IsTranslateEnabled)
+            {
+                TranslateSemaphore.Wait();
+                Thread.Sleep(10);
+                TranslateSemaphore.Release();
+            }
             if (this.Bitmap != null)
             {
                 this.SetBitmap(Bitmap);
                 this.CaptionRectangle = new Rectangle(0, 0, Bitmap.Width, Bitmap.Height);
                 base.Refresh();
+            }
+
+            if (this.item != null)
+            {
+                if (this.item is Gear)
+                {
+                    if (Enable22AniStyle)
+                    {
+                        if (this.GearRender22.HasSamples())
+                        {
+                            this.SaveSample.Tag = new Dictionary<string, object>
+                            {
+                                ["type"] = "gear",
+                                ["renderer"] = this.GearRender22
+                            };
+                            this.menu.Items.Add(this.SaveSample);
+                        }
+                    }
+                }
+                else if (this.item is Item)
+                {
+                    if (this.ItemRender.HasSamples())
+                    {
+                        this.SaveSample.Tag = new Dictionary<string, object>
+                        {
+                            ["type"] = "item",
+                            ["renderer"] = this.ItemRender
+                        };
+                        this.menu.Items.Add(this.SaveSample);
+                    }
+                }
+            }
+        }
+
+        private void InitMenu()
+        {
+            this.menu.Items.Clear();
+            this.menu.Items.Add(new ToolStripMenuItem("复制(&C)", null, tsmiCopy_Click));
+            this.menu.Items.Add(new ToolStripMenuItem("导出(&S)", null, tsmiSave_Click));
+            this.menu.Items.Add(new ToolStripMenuItem("关闭(&Esc)", null));
+        }
+
+        public async void QuickRefresh()
+        {
+            if (this.Bitmap != null)
+            {
+                TranslateSemaphore.Wait();
+                Thread.Sleep(10);
+                this.SetBitmap(Bitmap);
+                this.CaptionRectangle = new Rectangle(0, 0, Bitmap.Width, Bitmap.Height);
+                base.Refresh();
+                TranslateSemaphore.Release();
             }
         }
 
@@ -103,8 +191,16 @@ namespace WzComparerR2.CharaSimControl
             }
             else if (item is Gear)
             {
-                renderer = GearRender;
-                GearRender.Gear = this.TargetItem as Gear;
+                if (Enable22AniStyle)
+                {
+                    renderer = GearRender22;
+                    GearRender22.Gear = this.TargetItem as Gear;
+                }
+                else
+                {
+                    renderer = GearRender;
+                    GearRender.Gear = this.TargetItem as Gear;
+                }
 
                 if (false)
                 {
@@ -155,6 +251,11 @@ namespace WzComparerR2.CharaSimControl
                 renderer = RecipeRender;
                 RecipeRender.Recipe = this.item as Recipe;
             }
+            else if (item is Map)
+            {
+                renderer = MapRender;
+                MapRender.Map = this.item as Map;
+            }
             else if (item is Mob)
             {
                 renderer = MobRender;
@@ -165,6 +266,11 @@ namespace WzComparerR2.CharaSimControl
                 renderer = NpcRender;
                 NpcRender.NpcInfo = this.item as Npc;
             }
+            else if (item is Quest)
+            {
+                renderer = QuestRender;
+                QuestRender.Quest = this.item as Quest;
+            }
             else if (item is TooltipHelp)
             {
                 renderer = HelpRender;
@@ -172,8 +278,25 @@ namespace WzComparerR2.CharaSimControl
             }
             else if (item is SetItem)
             {
-                renderer = SetItemRender;
-                SetItemRender.SetItem = this.item as SetItem;
+                if (Enable22AniStyle)
+                {
+                    if ((item as SetItem).ItemIDs.Parts.Any(p => p.Value.ItemIDs.Any(i => i.Key / 1000000 == 5)))
+                    {
+                        renderer = SetItemRender;
+                        SetItemRender.Enable22AniStyle = true;
+                        SetItemRender.SetItem = this.item as SetItem;
+                    }
+                    else
+                    {
+                        renderer = SetItemRender22;
+                        SetItemRender22.SetItem = this.item as SetItem;
+                    }
+                }
+                else
+                {
+                    renderer = SetItemRender;
+                    SetItemRender.SetItem = this.item as SetItem;
+                }
             }
             else
             {
@@ -193,6 +316,50 @@ namespace WzComparerR2.CharaSimControl
             }
         }
 
+        public object GetPairByPoint(Point point)
+        {
+            Point p = point;
+            switch (this.item)
+            {
+                case Quest:
+                    if ((this.QuestRender?.RewardRectnItems?.Count ?? 0) > 0)
+                    {
+                        foreach (var ri in this.QuestRender.RewardRectnItems)
+                        {
+                            if (ri.Item1.Contains(p))
+                            {
+                                return ri.Item2;
+                            }
+                        }
+                    }
+                    break;
+            }
+            return null;
+        }
+
+        protected override void OnMouseMove(MouseEventArgs e)
+        {
+            base.OnMouseMove(e);
+
+            object obj = GetPairByPoint(e.Location);
+            if (obj != null)
+                this.OnObjectMouseMove(new ObjectMouseEventArgs(e, obj));
+            else
+                this.OnObjectMouseLeave(EventArgs.Empty);
+        }
+
+        protected virtual void OnObjectMouseMove(ObjectMouseEventArgs e)
+        {
+            if (this.ObjectMouseMove != null)
+                this.ObjectMouseMove(this, e);
+        }
+
+        protected virtual void OnObjectMouseLeave(EventArgs e)
+        {
+            if (this.ObjectMouseLeave != null)
+                this.ObjectMouseLeave(this, e);
+        }
+
         void tsmiCopy_Click(object sender, EventArgs e)
         {
             if (this.Bitmap != null)
@@ -206,6 +373,114 @@ namespace WzComparerR2.CharaSimControl
                     dataObj.SetData(DataFormats.Dib, stream);
                     Clipboard.SetDataObject(dataObj, true);
                 }
+            }
+        }
+        void tsmiCopyText_Click(object sender, EventArgs e)
+        {
+            StringBuilder sb = new StringBuilder();
+            if (this.PreferredStringCopyMethod == 2) sb.AppendLine(this.NodeID.ToString());
+            if (!String.IsNullOrEmpty(this.NodeName)) sb.AppendLine(this.NodeName);
+            if (String.IsNullOrEmpty(this.Desc)) this.Desc = "";
+            if (String.IsNullOrEmpty(this.Pdesc)) this.Pdesc = "";
+            if (String.IsNullOrEmpty(this.AutoDesc)) this.AutoDesc = "";
+            if (String.IsNullOrEmpty(this.Hdesc)) this.Hdesc = "";
+            if (String.IsNullOrEmpty(this.DescLeftAlign)) this.DescLeftAlign = "";
+            if (this.CopyParsedSkillString && item is Skill) this.Hdesc = this.SkillRender.ParsedHdesc;
+            switch (this.PreferredStringCopyMethod)
+            {
+                default:
+                case 0:
+                    if (!String.IsNullOrEmpty(this.Desc)) sb.AppendLine(this.Desc);
+                    if (!String.IsNullOrEmpty(this.Pdesc)) sb.AppendLine(this.Pdesc);
+                    if (!String.IsNullOrEmpty(this.AutoDesc)) sb.AppendLine(this.AutoDesc);
+                    if (!String.IsNullOrEmpty(this.Hdesc)) sb.AppendLine(this.Hdesc);
+                    if (!String.IsNullOrEmpty(this.DescLeftAlign)) sb.AppendLine(this.DescLeftAlign);
+                    break;
+                case 1:
+                    if ((this.Desc + this.Pdesc + this.AutoDesc).Contains("\\n"))
+                    {
+                        foreach (string i in (this.Desc + this.Pdesc + this.AutoDesc).Split(new string[] { "\\n" }, StringSplitOptions.None))
+                        {
+                            sb.AppendLine(i.Replace("\\r", "").Replace("#c", "").Replace("#", ""));
+                        }
+                    }
+                    else
+                    {
+                        if (!String.IsNullOrEmpty(this.Desc)) sb.AppendLine(this.Desc);
+                        if (!String.IsNullOrEmpty(this.Pdesc)) sb.AppendLine(this.Pdesc);
+                        if (!String.IsNullOrEmpty(this.AutoDesc)) sb.AppendLine(this.AutoDesc);
+                    }
+                    if (this.Hdesc.Contains("\\n"))
+                    {
+                        foreach (string i in this.Hdesc.Split(new string[] { "\\n" }, StringSplitOptions.None))
+                        {
+                            if (this.CopyParsedSkillString)
+                            {
+                                sb.AppendLine(i.Replace("\\r", "").Replace("#c", "").Replace("#", ""));
+                            }
+                            else
+                            {
+                                sb.AppendLine(i.Replace("\\r", ""));
+                            }
+                        }
+                    }
+                    else
+                    {
+                        if (this.CopyParsedSkillString)
+                        {
+                            sb.AppendLine(this.Hdesc.Replace("#c", "").Replace("#", ""));
+                        }
+                        else
+                        {
+                            sb.AppendLine(this.Hdesc);
+                        }
+                    }
+                    break;
+                case 2:
+                    if (!String.IsNullOrEmpty(this.Desc)) sb.AppendLine(this.Desc.Replace("\\r", "").Replace("\\n", "<br />").Replace("#c", "<span class=\"darkorange-text\">").Replace("#", "</span>"));
+                    if (!String.IsNullOrEmpty(this.Pdesc)) sb.AppendLine(this.Pdesc.Replace("\\r", "").Replace("\\n", "<br />").Replace("#c", "<span class=\"darkorange-text\">").Replace("#", "</span>"));
+                    if (!String.IsNullOrEmpty(this.AutoDesc)) sb.AppendLine(this.AutoDesc.Replace("\\r", "").Replace("\\n", "<br />").Replace("#c", "<span class=\"darkorange-text\">").Replace("#", "</span>"));
+                    if (this.CopyParsedSkillString)
+                    {
+                        if (!String.IsNullOrEmpty(this.Hdesc)) sb.AppendLine(this.Hdesc.Replace("\\r", "").Replace("\\n", "<br />").Replace("#c", "<span class=\"darkorange-text\">").Replace("#", "</span>"));
+                    }
+                    else
+                    {
+                        if (!String.IsNullOrEmpty(this.Hdesc)) sb.AppendLine(this.Hdesc.Replace("\\r", "").Replace("\\n", "<br />"));
+                    }
+                    if (!String.IsNullOrEmpty(this.DescLeftAlign)) sb.AppendLine(this.DescLeftAlign.Replace("\\r", "").Replace("\\n", "<br />").Replace("#c", "<span class=\"darkorange-text\">").Replace("#", "</span>"));
+                    break;
+            }
+            Clipboard.SetText(sb.ToString());
+            sb.Clear();
+        }
+
+        void tsmiCopyTranslate_Click(object sender, EventArgs e)
+        {
+            StringBuilder sb = new StringBuilder();
+            if (this.PreferredStringCopyMethod == 2) sb.AppendLine(this.NodeID.ToString());
+            if (!String.IsNullOrEmpty(this.NodeName)) sb.AppendLine(this.NodeName);
+            if (String.IsNullOrEmpty(this.Desc)) this.Desc = "";
+            if (String.IsNullOrEmpty(this.Pdesc)) this.Pdesc = "";
+            if (String.IsNullOrEmpty(this.AutoDesc)) this.AutoDesc = "";
+            if (String.IsNullOrEmpty(this.Hdesc)) this.Hdesc = "";
+            if (String.IsNullOrEmpty(this.DescLeftAlign)) this.DescLeftAlign = "";
+            if (this.CopyParsedSkillString && item is Skill) this.Hdesc = this.SkillRender.ParsedHdesc;
+            if (!String.IsNullOrEmpty(this.NodeName)) sb.AppendLine("<name>" + this.NodeName + "</name>");
+            if (!String.IsNullOrEmpty(this.Desc)) sb.AppendLine("<desc>" + this.Desc + "</desc>");
+            if (!String.IsNullOrEmpty(this.Pdesc)) sb.AppendLine("<pdesc>" + this.Pdesc + "</pdesc>");
+            if (!String.IsNullOrEmpty(this.AutoDesc)) sb.AppendLine("<autodesc>" + this.AutoDesc + "</autodesc>");
+            if (!String.IsNullOrEmpty(this.Hdesc)) sb.AppendLine("<hdesc>" + this.Hdesc + "</hdesc>");
+            if (!String.IsNullOrEmpty(this.DescLeftAlign)) sb.AppendLine("<descleftalign>" + this.DescLeftAlign + "</descleftalign>");
+            Clipboard.SetText(Translator.TranslateString(sb.ToString()));
+            sb.Clear();
+        }
+
+        void tsmiClose_Click(object sender, EventArgs e)
+        {
+            if (this.Bitmap != null)
+            {
+                this.Close();
             }
         }
 
@@ -291,6 +566,46 @@ namespace WzComparerR2.CharaSimControl
                         this.Bitmap.Save(dlg.FileName, System.Drawing.Imaging.ImageFormat.Png);
                     }
                 }
+            }
+        }
+
+        void tsmiSaveSample_Click(object sender, EventArgs e)
+        {
+            if (this.Bitmap != null && this.item != null)
+            {
+                Bitmap bitmap;
+                var tag = (Dictionary<string, object>)(sender as ToolStripMenuItem).Tag;
+                switch (tag["type"])
+                {
+                    case "gear":
+                        if (this.Enable22AniStyle)
+                        {
+                            bitmap = (tag["renderer"] as GearTooltipRender22).GetSampleBitmap();
+                        }
+                        else return;
+                        break;
+
+                    case "item":
+                        bitmap = (tag["renderer"] as ItemTooltipRender2).GetSampleBitmap();
+                        break;
+
+                    default:
+                        return;
+                }
+
+                if (bitmap == null) return;
+
+                using (SaveFileDialog dlg = new SaveFileDialog())
+                {
+                    dlg.Filter = "PNG (*.png)|*.png|*.*|*.*";
+                    dlg.FileName = this.ImageFileName.Replace(@".png", @"_Sample.png");
+
+                    if (dlg.ShowDialog() == DialogResult.OK)
+                    {
+                        bitmap.Save(dlg.FileName, System.Drawing.Imaging.ImageFormat.Png);
+                    }
+                }
+                bitmap.Dispose();
             }
         }
 

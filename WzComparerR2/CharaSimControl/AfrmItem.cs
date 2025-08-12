@@ -99,7 +99,7 @@ namespace WzComparerR2.CharaSimControl
             }
             this.itemTabs[0].Selected = true;
 
-            this.vScroll = new ACtrlVScroll();  
+            this.vScroll = new ACtrlVScroll();  //小屏鼠标滑轮区域
 
             this.vScroll.PicBase.Normal = new BitmapOrigin(Resource.VScr9_enabled_base);
             this.vScroll.PicBase.Disabled = new BitmapOrigin(Resource.VScr9_disabled_base);
@@ -123,7 +123,7 @@ namespace WzComparerR2.CharaSimControl
             this.vScroll.BtnThumb.MouseOver = new BitmapOrigin(Resource.VScr9_enabled_thumb0);
             this.vScroll.BtnThumb.Size = this.vScroll.BtnThumb.Normal.Bitmap.Size;
 
-            this.vScroll.Location = new Point(176, 56);  //小屏鼠标滑轮区域
+            this.vScroll.Location = new Point(176, 56);  
             this.vScroll.Size = new Size(12, 244);
             this.vScroll.ScrollableLocation = new Point(10, 51);
             this.vScroll.ScrollableSize = new Size(153, 244);
@@ -445,7 +445,7 @@ namespace WzComparerR2.CharaSimControl
             }
 
             ItemBase[] itemArray = this.SelectedTab.Items;
-            int idxOffset = 10 * this.SelectedTab.ScrollValue;
+            int idxOffset = 4 * this.SelectedTab.ScrollValue;
             for (int i = 0; i < 24; i++)
             {
                 Point origin = getItemIconOrigin(i);
@@ -584,8 +584,7 @@ namespace WzComparerR2.CharaSimControl
                 Bitmap cashImg = null;
                 Point cashOrigin = new Point(12, 12);
 
-                int value;
-                if (item.Props.TryGetValue(ItemPropType.wonderGrade, out value) && value > 0)
+                if (item.Props.TryGetValue(ItemPropType.wonderGrade, out long value) && value > 0)
                 {
                     string resKey = $"CashShop_img_CashItem_label_{value + 3}";
                     cashImg = Resource.ResourceManager.GetObject(resKey) as Bitmap;

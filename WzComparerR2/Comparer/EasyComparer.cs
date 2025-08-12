@@ -16,6 +16,7 @@ using System.Windows.Forms.VisualStyles;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using System.Drawing.Imaging;
 using SharpDX.Direct3D11;
+using WzComparerR2.Config;
 
 namespace WzComparerR2.Comparer
 {
@@ -33,22 +34,41 @@ namespace WzComparerR2.Comparer
         private Wz_File npcWzNew { get; set; }
         private Wz_File eqpWzNew { get; set; }
         private Wz_File etcWzNew { get; set; }
+        private Wz_File questWzNew { get; set; }
         private Wz_File stringWzOld { get; set; }
         private Wz_File itemWzOld { get; set; }
         private Wz_File mobWzOld { get; set; }
         private Wz_File npcWzOld { get; set; }
         private Wz_File eqpWzOld { get; set; }
         private Wz_File etcWzOld { get; set; }
+        private Wz_File questWzOld { get; set; }
+        private Wz_Node[] WzNewOld { get; set; } = new Wz_Node[2];
+        private Wz_File[] WzFileNewOld { get; set; } = new Wz_File[2];
+        private Wz_File[] StringWzNewOld { get; set; } = new Wz_File[2];
+        private Wz_File[] ItemWzNewOld { get; set; } = new Wz_File[2];
+        private Wz_File[] EtcWzNewOld { get; set; } = new Wz_File[2];
+        private Wz_File[] QuestWzNewOld { get; set; } = new Wz_File[2];
         private List<string> TooltipInfo = new List<string>();
         private List<string> itemTooltipInfo = new List<string>();
         private List<string> eqpTooltipInfo = new List<string>();
         private List<string> mobTooltipInfo = new List<string>();
         private List<string> npcTooltipInfo = new List<string>();
+        private List<string> mapTooltipInfo = new List<string>();
+        private List<string> cashTooltipInfo = new List<string>();
+        private List<string> questTooltipInfo = new List<string>();
         private Dictionary<string, List<string>> diffSkillTags = new Dictionary<string, List<string>>();
         private Dictionary<string, List<string>> diffItemTags = new Dictionary<string, List<string>>();
         private Dictionary<string, List<string>> diffEqpTags = new Dictionary<string, List<string>>();
         private Dictionary<string, List<string>> diffMobTags = new Dictionary<string, List<string>>();
         private Dictionary<string, List<string>> diffNpcTags = new Dictionary<string, List<string>>();
+        private Dictionary<string, List<string>> diffCashTags = new Dictionary<string, List<string>>();
+        private Dictionary<string, List<string>> diffMapTags = new Dictionary<string, List<string>>();
+        private Dictionary<string, List<int>> KMSContentID = new Dictionary<string, List<int>>();
+        private Dictionary<string, List<string>> KMSComponentDict = new Dictionary<string, List<string>>();
+        private Dictionary<int, List<int>> FifthJobSkillToJobID = new Dictionary<int, List<int>>();
+        public Dictionary<string, string> FailToExportNodes = new Dictionary<string, string>();
+        private SortedSet<int> OutputMapTooltipIDs { get; set; } = new SortedSet<int>();
+
         public WzFileComparer Comparer { get; protected set; }
         private string stateInfo;
         private string stateDetail;
@@ -58,10 +78,19 @@ namespace WzComparerR2.Comparer
         public bool EnableDarkMode { get; set; }
         public bool saveSkillTooltip { get; set; }
         public bool saveItemTooltip { get; set; }
+        public bool saveCashTooltip { get; set; }
         public bool saveEqpTooltip { get; set; }
         public bool saveMobTooltip { get; set; }
         public bool saveNpcTooltip { get; set; }
+        public bool saveQuestTooltip { get; set; }
+        public bool saveMapTooltip { get; set; }
         public bool HashPngFileName { get; set; }
+        public bool ShowObjectID { get; set; }
+        public bool ShowChangeType { get; set; }
+        public bool ShowLinkedTamingMob { get; set; }
+        public bool SkipKMSContent { get; set; }
+        public bool DownloadKMSContentDB { get; set; }
+        public int QuestState { get; set; }
 
         public string StateInfo
         {
@@ -115,6 +144,147 @@ namespace WzComparerR2.Comparer
                 var virtualNodeOld = RebuildWzFile(fileOld);
                 WzFileComparer comparer = new WzFileComparer();
                 comparer.IgnoreWzFile = true;
+
+                if (saveCashTooltip || saveEqpTooltip || saveItemTooltip || saveMapTooltip || saveMobTooltip || saveNpcTooltip || saveSkillTooltip || saveQuestTooltip || SkipKMSContent)
+                {
+                    this.WzNewOld[0] = fileNew.Node;
+                    this.WzNewOld[1] = fileOld.Node;
+                    this.WzFileNewOld[0] = fileNew.Node.GetNodeWzFile();
+                    this.WzFileNewOld[1] = fileOld.Node.GetNodeWzFile();
+
+                    StateInfo = "正在初始化5转技能应用职业代码...";
+                    for (int i = 0; i < 2; i++)
+                    {
+                        Wz_Node vCoreData = PluginManager.FindWz("Etc\\VCore.img\\CoreData", WzFileNewOld[i]);
+                        if (vCoreData == null) break;
+
+                        foreach (Wz_Node data in vCoreData.Nodes)
+                        {
+                            Wz_Node connectSkill = data.FindNodeByPath("connectSkill").ResolveUol();
+                            Wz_Node jobIDValue = data.FindNodeByPath("job").ResolveUol();
+                            List<int> applicableJobID = new List<int>();
+                            foreach (Wz_Node jobID in jobIDValue.Nodes)
+                            {
+                                applicableJobID.Add(jobID.GetValueEx<int>(0));
+                            }
+                            if (connectSkill == null)
+                            {
+                                int skillIDValue = data.FindNodeByPath("spCoreOption\\effect\\skill_id").ResolveUol().GetValueEx<int>(0);
+                                if (!FifthJobSkillToJobID.ContainsKey(skillIDValue)) FifthJobSkillToJobID.Add(skillIDValue, [0]);
+                            }
+                            else
+                            {
+                                foreach (Wz_Node skillID in connectSkill.Nodes)
+                                {
+                                    int skillIDValue = skillID.GetValueEx<int>(0);
+                                    if (skillIDValue > 0 && !FifthJobSkillToJobID.ContainsKey(skillIDValue))
+                                    {
+                                        FifthJobSkillToJobID.Add(skillIDValue, applicableJobID);
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    if (SkipKMSContent)
+                    {
+                        KMSContentID["Skill"] = new List<int>();
+                        if (DownloadKMSContentDB)
+                        {
+                            foreach (string item in new string[] { "Item", "Map", "Mob", "Npc", "Skill" })
+                            {
+                                StateInfo = string.Format("正在导出{0}对应的KMS数据...", item);
+                                var request = (HttpWebRequest)WebRequest.Create(string.Format("https://raw.githubusercontent.com/HikariCalyx/KMSContent/refs/heads/main/{0}ID.txt", item));
+                                request.Method = "GET";
+                                request.UserAgent = "WzComparerR2-JMS/1.0";
+                                request.Timeout = 15000;
+                                try
+                                {
+                                    var response = (HttpWebResponse)request.GetResponse();
+                                    var responseString = new StreamReader(response.GetResponseStream(), Encoding.UTF8).ReadToEnd();
+                                    foreach (string line in responseString.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
+                                    {
+                                        if (line.StartsWith("#")) continue;
+                                        string[] parts = line.Split(new[] { ' ' }, 2);
+                                        if (parts.Length > 1) continue;
+                                        string id = parts[0];
+                                        if (int.TryParse(id, out int parsedID))
+                                        {
+                                            if (!KMSContentID.ContainsKey(item))
+                                            {
+                                                KMSContentID[item] = new List<int>();
+                                            }
+                                            if (!KMSContentID[item].Contains(parsedID))
+                                            {
+                                                KMSContentID[item].Add(parsedID);
+                                            }
+                                        }
+                                    }
+                                }
+                                catch
+                                {
+                                    if (!KMSContentID.ContainsKey(item))
+                                    {
+                                        KMSContentID[item] = new List<int>();
+                                    }
+                                }
+                            }
+                            foreach (string item in new string[] { "Effect", "MapBack", "MapObj", "MapTile", "MapWorldMap", "MobBossPattern" })
+                            {
+                                StateInfo = string.Format("正在导出{0}对应的KMS数据...", item);
+                                var request = (HttpWebRequest)WebRequest.Create(string.Format("https://raw.githubusercontent.com/HikariCalyx/KMSContent/refs/heads/main/{0}ImgList.txt", item));
+                                request.Method = "GET";
+                                request.UserAgent = "WzComparerR2-JMS/1.0";
+                                request.Timeout = 15000;
+                                try
+                                {
+                                    var response = (HttpWebResponse)request.GetResponse();
+                                    var responseString = new StreamReader(response.GetResponseStream(), Encoding.UTF8).ReadToEnd();
+                                    foreach (string line in responseString.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
+                                    {
+                                        if (line.StartsWith("#")) continue;
+                                        string[] parts = line.Split(new[] { ' ' }, 2);
+                                        if (parts.Length > 1) continue;
+                                        string img = parts[0];
+                                        if (!KMSComponentDict.ContainsKey(item))
+                                        {
+                                            KMSComponentDict[item] = new List<string>();
+                                        }
+                                        if (!KMSComponentDict[item].Contains(img))
+                                        {
+                                            KMSComponentDict[item].Add(img);
+                                        }
+                                    }
+                                }
+                                catch
+                                {
+                                    if (!KMSComponentDict.ContainsKey(item))
+                                    {
+                                        KMSComponentDict[item] = new List<string>();
+                                    }
+                                }
+                            }
+                        }
+                        else
+                        {
+                            foreach (string item in new string[] { "Item", "Map", "Mob", "Npc", "Skill" })
+                            {
+                                if (!KMSContentID.ContainsKey(item))
+                                {
+                                    KMSContentID[item] = new List<int>();
+                                }
+                            }
+                            foreach (string item in new string[] { "Effect", "MapBack", "MapObj", "MapTile", "MapWorldMap" })
+                            {
+                                if (!KMSComponentDict.ContainsKey(item))
+                                {
+                                    KMSComponentDict[item] = new List<string>();
+
+                                }
+                            }
+                        }
+                    }
+                }
 
                 this.wzNew = fileNew.Node;
                 this.wzOld = fileOld.Node;
@@ -369,8 +539,10 @@ namespace WzComparerR2.Comparer
             string skillTooltipPath = Path.Combine(outputDir, "SkillTooltip");
             string itemTooltipPath = Path.Combine(outputDir, "ItemTooltip");
             string eqpTooltipPath = Path.Combine(outputDir, "EqpTooltip");
+            string mapTooltipPath = Path.Combine(outputDir, "MapTooltip");
             string mobTooltipPath = Path.Combine(outputDir, "MobTooltip");
             string npcTooltipPath = Path.Combine(outputDir, "NpcTooltip");
+            string questTooltipPath = Path.Combine(outputDir, "QuestTooltip");
 
             FileStream htmlFile = null;
             StreamWriter sw = null;
@@ -586,6 +758,14 @@ namespace WzComparerR2.Comparer
                 }
                 saveTooltip3(eqpTooltipPath);
             }
+            if (saveMapTooltip && type.ToString() == "String" && mapTooltipInfo != null)
+            {
+                if (!Directory.Exists(mapTooltipPath))
+                {
+                    Directory.CreateDirectory(mapTooltipPath);
+                }
+                saveTooltip7(mapTooltipPath);
+            }
             if (saveMobTooltip && type.ToString() == "String" && mobTooltipInfo != null)
             {
                 if (!Directory.Exists(mobTooltipPath))
@@ -601,6 +781,22 @@ namespace WzComparerR2.Comparer
                     Directory.CreateDirectory(npcTooltipPath);
                 }
                 saveTooltip5(npcTooltipPath);
+            }
+            if (saveQuestTooltip && type.ToString() == "String" && questTooltipInfo != null)
+            {
+                if (!Directory.Exists(questTooltipPath))
+                {
+                    Directory.CreateDirectory(questTooltipPath);
+                }
+                saveTooltip8(questTooltipPath);
+            }
+            if (saveCashTooltip && type.ToString() == "String" && cashTooltipInfo != null)
+            {
+                if (!Directory.Exists(itemTooltipPath))
+                {
+                    Directory.CreateDirectory(itemTooltipPath);
+                }
+                saveTooltip6(itemTooltipPath);
             }
         }
 
@@ -618,26 +814,28 @@ namespace WzComparerR2.Comparer
             this.stringWzNew = wzNew?.FindNodeByPath("String").GetNodeWzFile();
             this.itemWzNew = wzNew?.FindNodeByPath("Item").GetNodeWzFile();
             this.etcWzNew = wzNew?.FindNodeByPath("Etc").GetNodeWzFile();
+            this.questWzNew = wzNew?.FindNodeByPath("Quest").GetNodeWzFile();
             this.stringWzOld = wzOld?.FindNodeByPath("String").GetNodeWzFile();
             this.itemWzOld = wzOld?.FindNodeByPath("Item").GetNodeWzFile();
             this.etcWzOld = wzOld?.FindNodeByPath("Etc").GetNodeWzFile();
+            this.questWzOld = wzOld?.FindNodeByPath("Quest").GetNodeWzFile();
 
-            slNew.Load(stringWzNew, itemWzNew, etcWzNew);
-            slOld.Load(stringWzOld, itemWzOld, etcWzOld);
+            slNew.Load(stringWzNew, itemWzNew, etcWzNew, questWzNew);
+            slOld.Load(stringWzOld, itemWzOld, etcWzOld, questWzOld);
             skillRenderNew.StringLinker = slNew;
             skillRenderOld.StringLinker = slOld;
             skillRenderNew.ShowObjectID = true;
             skillRenderOld.ShowObjectID = true;
             skillRenderNew.ShowDelay = true;
             skillRenderOld.ShowDelay = true;
-            skillRenderNew.DoSetDiffColor = true;
-            skillRenderOld.DoSetDiffColor = true;
             skillRenderNew.wzNode = wzNew;
             skillRenderOld.wzNode = wzOld;
-            skillRenderNew.diffSkillTags = this.diffSkillTags;
-            skillRenderOld.diffSkillTags = this.diffSkillTags;
+            skillRenderNew.DiffSkillTags = this.diffSkillTags;
+            skillRenderOld.DiffSkillTags = this.diffSkillTags;
             skillRenderNew.IgnoreEvalError = true;
             skillRenderOld.IgnoreEvalError = true;
+            skillRenderNew.Enable22AniStyle = CharaSimConfig.Default.Enable22AniStyle;
+            skillRenderOld.Enable22AniStyle = CharaSimConfig.Default.Enable22AniStyle;
 
             foreach (var skillID in TooltipInfo)
             {
@@ -719,8 +917,6 @@ namespace WzComparerR2.Comparer
             StringLinker slOld = new StringLinker();
             ItemTooltipRender2 itemRenderNew = new ItemTooltipRender2();
             ItemTooltipRender2 itemRenderOld = new ItemTooltipRender2();
-            CashPackageTooltipRender cashRenderNew = new CashPackageTooltipRender();
-            CashPackageTooltipRender cashRenderOld = new CashPackageTooltipRender();
             int count2 = 0;
             int allCount2 = itemTooltipInfo.Count;
             var itemTypeFont = new Font("宋体", 11f, GraphicsUnit.Pixel);
@@ -728,20 +924,22 @@ namespace WzComparerR2.Comparer
             this.stringWzNew = wzNew?.FindNodeByPath("String").GetNodeWzFile();
             this.itemWzNew = wzNew?.FindNodeByPath("Item").GetNodeWzFile();
             this.etcWzNew = wzNew?.FindNodeByPath("Etc").GetNodeWzFile();
+            this.questWzNew = wzNew?.FindNodeByPath("Quest").GetNodeWzFile();
             this.stringWzOld = wzOld?.FindNodeByPath("String").GetNodeWzFile();
             this.itemWzOld = wzOld?.FindNodeByPath("Item").GetNodeWzFile();
             this.etcWzOld = wzOld?.FindNodeByPath("Etc").GetNodeWzFile();
+            this.questWzOld = wzOld?.FindNodeByPath("Quest").GetNodeWzFile();
 
-            slNew.Load(stringWzNew, itemWzNew, etcWzNew);
-            slOld.Load(stringWzOld, itemWzOld, etcWzOld);
+            slNew.Load(stringWzNew, itemWzNew, etcWzNew, questWzNew);
+            slOld.Load(stringWzOld, itemWzOld, etcWzOld, questWzOld);
             itemRenderNew.StringLinker = slNew;
             itemRenderOld.StringLinker = slOld;
-            cashRenderNew.StringLinker = slNew;
-            cashRenderOld.StringLinker = slOld;
             itemRenderNew.ShowObjectID = true;
             itemRenderOld.ShowObjectID = true;
-            cashRenderNew.ShowObjectID = true;
-            cashRenderOld.ShowObjectID = true;
+            itemRenderNew.CompareMode = true;
+            itemRenderOld.CompareMode = true;
+            itemRenderNew.Enable22AniStyle = CharaSimConfig.Default.Enable22AniStyle;
+            itemRenderOld.Enable22AniStyle = CharaSimConfig.Default.Enable22AniStyle;
 
             foreach (var itemID in itemTooltipInfo)
             {
@@ -781,22 +979,14 @@ namespace WzComparerR2.Comparer
                 {
                     itemNodePath = String.Format(@"Item\Cash\0{0:D}.img\{1:D}", int.Parse(itemID) / 10000, itemID);
                 }
-                else if (itemID.StartsWith("09")) // 判断第1位是否是09
-                {
-                    itemNodePath = String.Format(@"Item\Special\0{0:D}.img\{1:D}", int.Parse(itemID) / 10000, itemID);
-                }
                 int heightNew = 0, heightOld = 0;
                 int width = 0;
                 // 变更后Tooltip图像生成
                 Item itemNew = Item.CreateFromNode(PluginManager.FindWz(itemNodePath, wzNew?.GetNodeWzFile()), PluginManager.FindWz);
-                //if (itemID.StartsWith("09"))
-                //{
-                //    CashPackage itemNew = CashPackage.CreateFromNode(PluginManager.FindWz(itemNodePath, wzNew?.GetNodeWzFile()), PluginManager.FindWz);
-                //}
                 if (itemNew != null)
                 {
-                    itemRenderNew.Item = itemNew;
-                    itemImageNew = itemRenderNew.Render();
+                    itemRenderNew.Item = itemNew;  // 使用 itemRenderNew 渲染 Item 类型
+                    itemImageNew = itemRenderNew.Render(); // 渲染图像
                     width += itemImageNew.Width;
                     heightNew = itemImageNew.Height;
                 }
@@ -805,8 +995,8 @@ namespace WzComparerR2.Comparer
                 Item itemOld = Item.CreateFromNode(PluginManager.FindWz(itemNodePath, wzOld?.GetNodeWzFile()), PluginManager.FindWz);
                 if (itemOld != null)
                 {
-                    itemRenderOld.Item = itemOld;
-                    itemImageOld = itemRenderOld.Render();
+                    itemRenderOld.Item = itemOld;  // 使用 itemRenderNew 渲染 Item 类型
+                    itemImageOld = itemRenderOld.Render(); // 渲染图像
                     width += itemImageOld.Width;
                     heightOld = itemImageOld.Height;
                 }
@@ -851,8 +1041,8 @@ namespace WzComparerR2.Comparer
         {
             StringLinker slNew = new StringLinker();
             StringLinker slOld = new StringLinker();
-            GearTooltipRender2 eqpRenderNew = new GearTooltipRender2();
-            GearTooltipRender2 eqpRenderOld = new GearTooltipRender2();
+            GearTooltipRender22 eqpRenderNew = new GearTooltipRender22();
+            GearTooltipRender22 eqpRenderOld = new GearTooltipRender22();
             int count3 = 0;
             int allCount3 = eqpTooltipInfo.Count;
             var eqpTypeFont = new Font("宋体", 11f, GraphicsUnit.Pixel);
@@ -860,16 +1050,20 @@ namespace WzComparerR2.Comparer
             this.stringWzNew = wzNew?.FindNodeByPath("String").GetNodeWzFile();
             this.itemWzNew = wzNew?.FindNodeByPath("Item").GetNodeWzFile();
             this.etcWzNew = wzNew?.FindNodeByPath("Etc").GetNodeWzFile();
+            this.questWzNew = wzNew?.FindNodeByPath("Quest").GetNodeWzFile();
             this.stringWzOld = wzOld?.FindNodeByPath("String").GetNodeWzFile();
             this.itemWzOld = wzOld?.FindNodeByPath("Item").GetNodeWzFile();
             this.etcWzOld = wzOld?.FindNodeByPath("Etc").GetNodeWzFile();
+            this.questWzOld = wzOld?.FindNodeByPath("Quest").GetNodeWzFile();
 
-            slNew.Load(stringWzNew, itemWzNew, etcWzNew);
-            slOld.Load(stringWzOld, itemWzOld, etcWzOld);
+            slNew.Load(stringWzNew, itemWzNew, etcWzNew, questWzNew);
+            slOld.Load(stringWzOld, itemWzOld, etcWzOld, questWzOld);
             eqpRenderNew.StringLinker = slNew;
             eqpRenderOld.StringLinker = slOld;
             eqpRenderNew.ShowObjectID = true;
             eqpRenderOld.ShowObjectID = true;
+            //eqpRenderNew.Enable22AniStyle = CharaSimConfig.Default.Enable22AniStyle;
+            //eqpRenderOld.Enable22AniStyle = CharaSimConfig.Default.Enable22AniStyle;
             foreach (var eqpID in eqpTooltipInfo)
             {
                 count3++;
@@ -946,6 +1140,10 @@ namespace WzComparerR2.Comparer
                 else if (Regex.IsMatch(eqpID, "^01713|^01714")) // 判断开头是否是01713或01714
                 {
                     eqpNodePath = String.Format(@"Character\AuthenticForce\{0:D}.img", eqpID);
+                }
+                else if (Regex.IsMatch(eqpID, "^0179"))  // 判断开头是否是0179
+                {
+                    eqpNodePath = String.Format(@"Character\NT_Beauty\{0:D}.img", eqpID);
                 }
                 else if (eqpID.StartsWith("018")) // 判断开头是否是018
                 {
@@ -1038,16 +1236,20 @@ namespace WzComparerR2.Comparer
             this.stringWzNew = wzNew?.FindNodeByPath("String").GetNodeWzFile();
             this.itemWzNew = wzNew?.FindNodeByPath("Item").GetNodeWzFile();
             this.etcWzNew = wzNew?.FindNodeByPath("Etc").GetNodeWzFile();
+            this.questWzNew = wzNew?.FindNodeByPath("Quest").GetNodeWzFile();
             this.stringWzOld = wzOld?.FindNodeByPath("String").GetNodeWzFile();
             this.itemWzOld = wzOld?.FindNodeByPath("Item").GetNodeWzFile();
             this.etcWzOld = wzOld?.FindNodeByPath("Etc").GetNodeWzFile();
+            this.questWzOld = wzOld?.FindNodeByPath("Quest").GetNodeWzFile();
 
-            slNew.Load(stringWzNew, itemWzNew, etcWzNew);
-            slOld.Load(stringWzOld, itemWzOld, etcWzOld);
+            slNew.Load(stringWzNew, itemWzNew, etcWzNew, questWzNew);
+            slOld.Load(stringWzOld, itemWzOld, etcWzOld, questWzOld);
             mobRenderNew.StringLinker = slNew;
             mobRenderOld.StringLinker = slOld;
             mobRenderNew.ShowObjectID = true;
             mobRenderOld.ShowObjectID = true;
+            //mobRenderNew.Enable22AniStyle = CharaSimConfig.Default.Enable22AniStyle;
+            //mobRenderOld.Enable22AniStyle = CharaSimConfig.Default.Enable22AniStyle;
             foreach (var mobID in mobTooltipInfo)
             {
                 count4++;
@@ -1129,16 +1331,20 @@ namespace WzComparerR2.Comparer
             this.stringWzNew = wzNew?.FindNodeByPath("String").GetNodeWzFile();
             this.itemWzNew = wzNew?.FindNodeByPath("Item").GetNodeWzFile();
             this.etcWzNew = wzNew?.FindNodeByPath("Etc").GetNodeWzFile();
+            this.questWzNew = wzNew?.FindNodeByPath("Quest").GetNodeWzFile();
             this.stringWzOld = wzOld?.FindNodeByPath("String").GetNodeWzFile();
             this.itemWzOld = wzOld?.FindNodeByPath("Item").GetNodeWzFile();
             this.etcWzOld = wzOld?.FindNodeByPath("Etc").GetNodeWzFile();
+            this.questWzOld = wzOld?.FindNodeByPath("Quest").GetNodeWzFile();
 
-            slNew.Load(stringWzNew, itemWzNew, etcWzNew);
-            slOld.Load(stringWzOld, itemWzOld, etcWzOld);
+            slNew.Load(stringWzNew, itemWzNew, etcWzNew, questWzNew);
+            slOld.Load(stringWzOld, itemWzOld, etcWzOld, questWzOld);
             npcRenderNew.StringLinker = slNew;
             npcRenderOld.StringLinker = slOld;
             npcRenderNew.ShowObjectID = true;
             npcRenderOld.ShowObjectID = true;
+            //npcRenderNew.Enable22AniStyle = CharaSimConfig.Default.Enable22AniStyle;
+            //npcRenderOld.Enable22AniStyle = CharaSimConfig.Default.Enable22AniStyle;
             foreach (var npcID in npcTooltipInfo)
             {
                 count5++;
@@ -1207,6 +1413,372 @@ namespace WzComparerR2.Comparer
             diffNpcTags.Clear();
         }
 
+        private void saveTooltip6(string itemTooltipPath)
+        {
+            StringLinker slNew = new StringLinker();
+            StringLinker slOld = new StringLinker();
+            CashPackageTooltipRender cashRenderNew = new CashPackageTooltipRender();
+            CashPackageTooltipRender cashRenderOld = new CashPackageTooltipRender();
+            int count6 = 0;
+            int allCount6 = cashTooltipInfo.Count;
+            var itemTypeFont = new Font("宋体", 11f, GraphicsUnit.Pixel);
+
+            this.stringWzNew = wzNew?.FindNodeByPath("String").GetNodeWzFile();
+            this.itemWzNew = wzNew?.FindNodeByPath("Item").GetNodeWzFile();
+            this.etcWzNew = wzNew?.FindNodeByPath("Etc").GetNodeWzFile();
+            this.questWzNew = wzNew?.FindNodeByPath("Quest").GetNodeWzFile();
+            this.stringWzOld = wzOld?.FindNodeByPath("String").GetNodeWzFile();
+            this.itemWzOld = wzOld?.FindNodeByPath("Item").GetNodeWzFile();
+            this.etcWzOld = wzOld?.FindNodeByPath("Etc").GetNodeWzFile();
+            this.questWzOld = wzOld?.FindNodeByPath("Quest").GetNodeWzFile();
+
+            slNew.Load(stringWzNew, itemWzNew, etcWzNew, questWzNew);
+            slOld.Load(stringWzOld, itemWzOld, etcWzOld, questWzOld);
+            cashRenderNew.StringLinker = slNew;
+            cashRenderOld.StringLinker = slOld;
+            cashRenderNew.ShowObjectID = true;
+            cashRenderOld.ShowObjectID = true;
+            //cashRenderNew.Enable22AniStyle = CharaSimConfig.Default.Enable22AniStyle;
+            //cashRenderOld.Enable22AniStyle = CharaSimConfig.Default.Enable22AniStyle;
+            foreach (var itemID in cashTooltipInfo)
+            {
+                count6++;
+                StateInfo = string.Format("{0}/{1} 礼包: {2}", count6, allCount6, itemID);
+                StateDetail = "正在以Tooltip图像处理礼包变更点...";
+
+                Bitmap itemImageNew = null;
+                Bitmap itemImageOld = null;
+                string itemType = "删除";
+                string itemNodePath = null;
+                if (itemID.StartsWith("9")) // 判断第1位是否是09
+                {
+                    itemNodePath = String.Format(@"Item\Special\0{0:D}.img\{1:D}", int.Parse(itemID) / 10000, itemID);
+                }
+                int heightNew = 0, heightOld = 0;
+                int width = 0;
+                // 变更后Tooltip图像生成
+                CashPackage itemNew = CashPackage.CreateFromNode(PluginManager.FindWz(itemNodePath, wzNew?.GetNodeWzFile()), PluginBase.PluginManager.FindWz(string.Format(@"Etc\CashPackage.img\{0}", itemID)), PluginManager.FindWz);
+                if (itemNew != null)
+                {
+                    cashRenderNew.CashPackage = itemNew;
+                    itemImageNew = cashRenderNew.Render();
+                    width += itemImageNew.Width;
+                    heightNew = itemImageNew.Height;
+                }
+                if (width == 0) continue;
+                // 变更前Tooltip图像生成
+                CashPackage itemOld = CashPackage.CreateFromNode(PluginManager.FindWz(itemNodePath, wzOld?.GetNodeWzFile()), PluginBase.PluginManager.FindWz(string.Format(@"Etc\CashPackage.img\{0}", itemID)), PluginManager.FindWz);
+                if (itemOld != null)
+                {
+                    cashRenderOld.CashPackage = itemOld;
+                    itemImageOld = cashRenderOld.Render();
+                    width += itemImageOld.Width;
+                    heightOld = itemImageOld.Height;
+                }
+                if (width == 0) continue;
+                // Tooltip图像合成
+                Bitmap resultImage = new Bitmap(width, Math.Max(heightNew, heightOld));
+                Graphics g = Graphics.FromImage(resultImage);
+                if (itemImageOld != null)
+                {
+                    if (itemImageNew != null)
+                    {
+                        g.DrawImage(itemImageNew, itemImageOld.Width, 0);
+                        itemImageNew.Dispose();
+                        itemType = "变更";
+                    }
+                    g.DrawImage(itemImageOld, 0, 0);
+                    itemImageOld.Dispose();
+                }
+                else
+                {
+                    g.DrawImage(itemImageNew, 0, 0);
+                    itemImageNew.Dispose();
+                    itemType = "新增";
+                }
+                var itemTypeTextInfo = g.MeasureString(itemType, GearGraphics.ItemDetailFont2);
+                int picH = 13;
+                GearGraphics.DrawPlainText(g, itemType, itemTypeFont, Color.FromArgb(255, 255, 255), 2, (int)Math.Ceiling(itemTypeTextInfo.Width) + 2, ref picH, 10);
+
+                string imageName = Path.Combine(itemTooltipPath, "Item_" + itemID + "_" + itemType + ".png");
+                if (!File.Exists(imageName))
+                {
+                    resultImage.Save(imageName, System.Drawing.Imaging.ImageFormat.Png);
+                }
+                resultImage.Dispose();
+                g.Dispose();
+            }
+            cashTooltipInfo.Clear();
+            diffCashTags.Clear();
+        }
+
+        private void saveTooltip7(string mapTooltipPath)
+        {
+            StringLinker slNew = new StringLinker();
+            StringLinker slOld = new StringLinker();
+            MapTooltipRenderer mapRenderNew = new MapTooltipRenderer();
+            MapTooltipRenderer mapRenderOld = new MapTooltipRenderer();
+            int count7 = 0;
+            int allCount7 = cashTooltipInfo.Count;
+            var mapTypeFont = new Font("宋体", 11f, GraphicsUnit.Pixel);
+
+            this.stringWzNew = wzNew?.FindNodeByPath("String").GetNodeWzFile();
+            this.itemWzNew = wzNew?.FindNodeByPath("Item").GetNodeWzFile();
+            this.etcWzNew = wzNew?.FindNodeByPath("Etc").GetNodeWzFile();
+            this.questWzNew = wzNew?.FindNodeByPath("Quest").GetNodeWzFile();
+            this.stringWzOld = wzOld?.FindNodeByPath("String").GetNodeWzFile();
+            this.itemWzOld = wzOld?.FindNodeByPath("Item").GetNodeWzFile();
+            this.etcWzOld = wzOld?.FindNodeByPath("Etc").GetNodeWzFile();
+            this.questWzOld = wzOld?.FindNodeByPath("Quest").GetNodeWzFile();
+
+            slNew.Load(stringWzNew, itemWzNew, etcWzNew, questWzNew);
+            slOld.Load(stringWzOld, itemWzOld, etcWzOld, questWzOld);
+            mapRenderNew.StringLinker = slNew;
+            mapRenderOld.StringLinker = slOld;
+            mapRenderNew.ShowObjectID = true;
+            mapRenderOld.ShowObjectID = true;
+            mapRenderNew.ShowMiniMap = true;
+            mapRenderOld.ShowMiniMap = true;
+            mapRenderNew.ShowMiniMapMob = true;
+            mapRenderOld.ShowMiniMapMob = true;
+            mapRenderNew.ShowMiniMapNpc = true;
+            mapRenderOld.ShowMiniMapNpc = true;
+            mapRenderNew.ShowMiniMapPortal = true;
+            mapRenderOld.ShowMiniMapPortal = true;
+            mapRenderNew.ShowBgmName = true;
+            mapRenderOld.ShowBgmName = true;
+            mapRenderNew.ShowMobNpcObjectID = true;
+            mapRenderOld.ShowMobNpcObjectID = true;
+
+            foreach (var mapID in mapTooltipInfo)
+            {
+                count7++;
+                StateInfo = string.Format("{0}/{1} 地图: {2}", count7, allCount7, mapID);
+                StateDetail = "正在以Tooltip图像处理地图变更点...";
+
+                Bitmap mapImageNew = null;
+                Bitmap mapImageOld = null;
+                string mapType = "删除";
+                string mapNodePath = string.Format(@"Map\Map\Map{0}\{1:D9}.img", int.Parse(mapID) / 100000000, int.Parse(mapID));
+                int heightNew = 0, heightOld = 0;
+                int width = 0;
+                // 变更后Tooltip图像生成
+                Map mapNew = Map.CreateFromNode(PluginManager.FindWz(mapNodePath, wzNew?.GetNodeWzFile()), PluginManager.FindWz);
+                if (mapNew != null)
+                {
+                    mapRenderNew.Map = mapNew;
+                    mapImageNew = mapRenderNew.Render();
+                    width += mapImageNew.Width;
+                    heightNew = mapImageNew.Height;
+                }
+                if (width == 0) continue;
+                // 变更前Tooltip图像生成
+                Map mapOld = Map.CreateFromNode(PluginManager.FindWz(mapNodePath, wzOld?.GetNodeWzFile()), PluginManager.FindWz);
+                if (mapOld != null)
+                {
+                    mapRenderOld.Map = mapOld;
+                    mapImageOld = mapRenderOld.Render();
+                    width += mapImageOld.Width;
+                    heightOld = mapImageOld.Height;
+                }
+                if (width == 0) continue;
+                // Tooltip图像合成
+                Bitmap resultImage = new Bitmap(width, Math.Max(heightNew, heightOld));
+                Graphics g = Graphics.FromImage(resultImage);
+                if (mapImageOld != null)
+                {
+                    if (mapImageNew != null)
+                    {
+                        g.DrawImage(mapImageNew, mapImageOld.Width, 0);
+                        mapImageNew.Dispose();
+                        mapType = "变更";
+                    }
+                    g.DrawImage(mapImageOld, 0, 0);
+                    mapImageOld.Dispose();
+                }
+                else
+                {
+                    g.DrawImage(mapImageNew, 0, 0);
+                    mapImageNew.Dispose();
+                    mapType = "新增";
+                }
+                var npcTypeTextInfo = g.MeasureString(mapType, GearGraphics.EquipDetailFont2);
+                //int picH = 13;
+                //GearGraphics.DrawPlainText(g, mapType, mapTypeFont, Color.FromArgb(255, 255, 255), 2, (int)Math.Ceiling(mapTypeTextInfo.Width) + 2, ref picH, 10);
+
+                string imageName = Path.Combine(mapTooltipPath, "Map_" + mapID + "_" + mapType + ".png");
+                if (!File.Exists(imageName))
+                {
+                    resultImage.Save(imageName, System.Drawing.Imaging.ImageFormat.Png);
+                }
+                resultImage.Dispose();
+                g.Dispose();
+            }
+            mapTooltipInfo.Clear();
+            diffMapTags.Clear();
+        }
+
+        private void saveTooltip8(string questTooltipPath)
+        {
+            QuestTooltipRenderer[] questRenderNewOld = new QuestTooltipRenderer[2];
+            bool[] isQuestNull = new bool[2] { false, false };
+            int count = 0;
+            int allCount = questTooltipInfo.Count;
+            var questTypeFont = new Font("宋体", 11f, GraphicsUnit.Pixel);
+
+            for (int i = 0; i < 2; i++) // 0: New, 1: Old
+            {
+                this.StringWzNewOld[i] = WzNewOld[i]?.FindNodeByPath("String").GetNodeWzFile();
+                this.ItemWzNewOld[i] = WzNewOld[i]?.FindNodeByPath("Item").GetNodeWzFile();
+                this.EtcWzNewOld[i] = WzNewOld[i]?.FindNodeByPath("Etc").GetNodeWzFile();
+                this.QuestWzNewOld[i] = WzNewOld[i]?.FindNodeByPath("Quest").GetNodeWzFile();
+
+                questRenderNewOld[i] = new QuestTooltipRenderer();
+                questRenderNewOld[i].StringLinker = new StringLinker();
+                questRenderNewOld[i].StringLinker.Load(StringWzNewOld[i], ItemWzNewOld[i], EtcWzNewOld[i], QuestWzNewOld[i]);
+                questRenderNewOld[i].ShowObjectID = this.ShowObjectID;
+                questRenderNewOld[i].DefaultState = this.QuestState;
+                questRenderNewOld[i].CompareMode = true;
+            }
+
+            foreach (var questID in questTooltipInfo)
+            {
+                if (!int.TryParse(questID, out _)) continue;
+                StateInfo = string.Format("{0}/{1} 任务: {2}", ++count, allCount, questID);
+                StateDetail = "正在以Tooltip图像处理任务变更点...";
+                string questType = "";
+                string questNodePath = String.Format(@"Quest\QuestData\{0:D}.img", questID);
+                string questNodePathLegacy = String.Format(@"Quest\QuestInfo.img\{0:D}", questID);
+
+                StringResult sr;
+                string QuestName;
+                if (questRenderNewOld[1].StringLinker == null || !questRenderNewOld[1].StringLinker.StringQuest.TryGetValue(int.Parse(questID), out sr))
+                {
+                    sr = new StringResult();
+                    sr.Name = "未知任务";
+                }
+                QuestName = sr.Name;
+                if (questRenderNewOld[0].StringLinker == null || !questRenderNewOld[0].StringLinker.StringQuest.TryGetValue(int.Parse(questID), out sr))
+                {
+                    sr = new StringResult();
+                    sr.Name = "未知任务";
+                }
+                if (QuestName != sr.Name && QuestName != "未知任务" && sr.Name != "未知任务")
+                {
+                    QuestName += "_" + sr.Name;
+                }
+                else if (QuestName == "未知任务")
+                {
+                    QuestName = sr.Name;
+                }
+                if (String.IsNullOrEmpty(QuestName)) QuestName = "未知任务";
+                QuestName = RemoveInvalidFileNameChars(QuestName);
+                int nullQuestIdx = 0;
+
+                // 变更前后Tooltip图像生成
+                for (int i = 0; i < 2; i++) // 0: New, 1: Old
+                {
+                    Quest quest = Quest.CreateFromNode(PluginManager.FindWz(questNodePath, WzFileNewOld[i]), PluginManager.FindWz, PluginManager.FindWz) ?? Quest.CreateFromNode(PluginManager.FindWz(questNodePathLegacy, WzFileNewOld[i]), PluginManager.FindWz, PluginManager.FindWz, fromInfoNode: int.Parse(questID));
+
+                    if (quest != null)
+                    {
+                        questRenderNewOld[i].Quest = quest;
+                    }
+                    else
+                    {
+                        quest = Quest.CreateFromNode(PluginManager.FindWz(questNodePathLegacy, WzFileNewOld[i]), PluginManager.FindWz, PluginManager.FindWz);
+                        if (quest == null)
+                        {
+                            isQuestNull[i] = true;
+                            nullQuestIdx = i + 1;
+                        }
+                        else
+                        {
+                            questRenderNewOld[i].Quest = quest;
+                        }
+                    }
+                }
+
+                // Tooltip图像合成
+                Bitmap resultImage = null;
+                Graphics g = null;
+
+                switch (nullQuestIdx)
+                {
+                    case 0: // change
+                        questType = "变更";
+
+                        Bitmap ImageNew = questRenderNewOld[0].Render();
+                        Bitmap ImageOld = questRenderNewOld[1].Render();
+                        if (GetBitmapHash(ImageNew) == GetBitmapHash(ImageOld)) continue;
+                        if (ShowChangeType)
+                        {
+                            int picHchange = ShowObjectID ? 25 : 1;
+                            Graphics[] gNewOld = new Graphics[] { Graphics.FromImage(ImageNew), Graphics.FromImage(ImageOld) };
+                            picHchange += questRenderNewOld[1].Margin_top;
+                            GearGraphics.DrawPlainText(gNewOld[1], "变更前", questTypeFont, Color.FromArgb(255, 255, 255), 2, 64, ref picHchange, 10);
+                            picHchange = ShowObjectID ? 25 : 1;
+                            picHchange += questRenderNewOld[0].Margin_top;
+                            GearGraphics.DrawPlainText(gNewOld[0], "变更后", questTypeFont, Color.FromArgb(255, 255, 255), 2, 64, ref picHchange, 10);
+                        }
+                        resultImage = new Bitmap(ImageNew.Width + ImageOld.Width, Math.Max(ImageNew.Height, ImageOld.Height));
+                        g = Graphics.FromImage(resultImage);
+
+                        g.DrawImage(ImageOld, 0, 0);
+                        g.DrawImage(ImageNew, ImageOld.Width, 0);
+                        break;
+
+                    case 1: // delete
+                        questType = "删除";
+                        if (isQuestNull[1]) continue;
+                        resultImage = questRenderNewOld[1].Render();
+                        if (resultImage == null) continue;
+                        g = Graphics.FromImage(resultImage);
+                        break;
+
+                    case 2: // add
+                        questType = "新增";
+                        if (isQuestNull[0]) continue;
+                        resultImage = questRenderNewOld[0].Render();
+                        if (resultImage == null) continue;
+                        g = Graphics.FromImage(resultImage);
+                        break;
+
+                    default:
+                        break;
+                }
+
+                if (resultImage == null || g == null)
+                {
+                    continue;
+                }
+
+                var questTypeTextInfo = g.MeasureString(questType, GearGraphics.ItemDetailFont);
+                int picH = ShowObjectID ? 25 : 1;
+                switch (nullQuestIdx)
+                {
+                    case 1:
+                        picH += questRenderNewOld[1].Margin_top;
+                        break;
+                    case 2:
+                        picH += questRenderNewOld[0].Margin_top;
+                        break;
+                    default:
+                        break;
+                }
+                if (ShowChangeType && nullQuestIdx != 0) GearGraphics.DrawPlainText(g, questType, questTypeFont, Color.FromArgb(255, 255, 255), 2, (int)Math.Ceiling(questTypeTextInfo.Width) + 2, ref picH, 10);
+
+                string imageName = Path.Combine(questTooltipPath, "Quest_" + questID + "_" + questType + ".png");
+                if (!File.Exists(imageName))
+                {
+                    resultImage.Save(imageName, System.Drawing.Imaging.ImageFormat.Png);
+                }
+                resultImage.Dispose();
+                g.Dispose();
+            }
+            questTooltipInfo.Clear();
+        }
+
         // 从Skill不同节点获取SkillID
         private void getIDFromSkill(Wz_Node node)
         {
@@ -1235,10 +1807,10 @@ namespace WzComparerR2.Comparer
         private void getIDFromItem(Wz_Node node)
         {
             var tag = node.Text;
-            Match match2 = Regex.Match(node.FullPathToFile, @"^Item\\(Cash|Consume|Etc|Install|Special)\\\d+.img\\(\d+)\\.*");
-            if (match2.Success)
+            Match match = Regex.Match(node.FullPathToFile, @"^Item\\(Cash|Consume|Etc|Install)\\\d+.img\\(\d+)\\.*");
+            if (match.Success)
             {
-                string itemID = match2.Groups[2].ToString();
+                string itemID = match.Groups[2].ToString();
                 if (!itemTooltipInfo.Contains(itemID) && itemID != null)
                 {
                     itemTooltipInfo.Add(itemID);
@@ -1250,6 +1822,30 @@ namespace WzComparerR2.Comparer
                     if (!diffItemTags[itemID].Contains(tag))
                     {
                         diffItemTags[itemID].Add(tag);
+                    }
+                }
+            }
+        }
+
+        //从Item/Special不同节点获取CashID
+        private void getIDFromCash(Wz_Node node)
+        {
+            var tag = node.Text;
+            Match match = Regex.Match(node.FullPathToFile, @"^Item\\Special\\\d+.img\\(\d+)\\.*");
+            if (match.Success)
+            {
+                string cashID = match.Groups[1].ToString();
+                if (!cashTooltipInfo.Contains(cashID) && cashID != null)
+                {
+                    cashTooltipInfo.Add(cashID);
+                    diffCashTags[cashID] = new List<string>();
+                    diffCashTags[cashID].Add(tag);
+                }
+                else if (cashTooltipInfo.Contains(cashID) && cashID != null)
+                {
+                    if (!diffCashTags[cashID].Contains(tag))
+                    {
+                        diffCashTags[cashID].Add(tag);
                     }
                 }
             }
@@ -1327,6 +1923,48 @@ namespace WzComparerR2.Comparer
             }
         }
 
+        // 노드에서 맵 ID 얻기
+        private void GetIDFromMap(Wz_Node node, bool change)
+        {
+            if (node == null) return;
+
+            Match match = Regex.Match(node.FullPathToFile, @"^String\\Map.img\\.+?\\(\d+)\\(streetName|mapName).*"); // 스트링 확인
+
+            if (!match.Success)
+            {
+                match = Regex.Match(node.FullPathToFile, @"^Map\\Map\\Map\d\\(\d+).img\\info\\(barrier|barrierArc|barrierAut).*"); // 변경점 중 툴팁 출력할 것들
+            }
+
+            if (change && !match.Success)
+            {
+                match = Regex.Match(node.FullPathToFile, @"^Map\\Map\\Map\d\\_Canvas\\(\d+).img\\miniMap\\(canvas)$"); // 아이콘 변경 체크
+            }
+
+            if (!match.Success)
+            {
+                match = Regex.Match(node.FullPathToFile, @"^Map\\Map\\Map\d\\(\d+).img$"); // 추가/삭제 확인
+            }
+
+            if (!match.Success)
+            {
+                match = Regex.Match(node.FullPathToFile, @"^Etc\\MapObjectInfo.img\\(\d+)\\.*"); // 위치 확인
+            }
+
+            if (match.Success)
+            {
+                string mapID = match.Groups[1].ToString();
+
+                if (mapID != null)
+                {
+                    var id = int.Parse(mapID);
+                    if (!OutputMapTooltipIDs.Contains(id))
+                    {
+                        OutputMapTooltipIDs.Add(id);
+                    }
+                }
+            }
+        }
+
         // 从String不同节点获取SkillID
         private void getIDFromString(Wz_Node node)
         {
@@ -1344,14 +1982,13 @@ namespace WzComparerR2.Comparer
         // 从String不同节点获取ItemID
         private void getIDFromString2(Wz_Node node)
         {
-            Match match2 = Regex.Match(node.FullPathToFile, @"^String\\(Cash.img|Consume.img|Etc.img\\Etc|Ins.img|Pet.img)\\(\d+).*");
-            if (match2.Success)
+            Match match = Regex.Match(node.FullPathToFile, @"^String\\(Cash.img|Consume.img|Etc.img\\Etc|Ins.img|Pet.img)\\(\d+).*");
+            if (match.Success)
             {
-                string ItemID = match2.Groups[2].ToString();
+                string ItemID = match.Groups[2].ToString();
                 if (!ItemID.StartsWith("500"))
                 {
-                    // 如果不是以500开头，则补齐8位数
-                    ItemID = ItemID.PadLeft(8, '0');
+                    ItemID = ItemID.PadLeft(8, '0'); // 如果不是以500或910开头，则补齐8位数
                 }
                 if (!itemTooltipInfo.Contains(ItemID) && ItemID != null)
                 {
@@ -1398,6 +2035,66 @@ namespace WzComparerR2.Comparer
                 if (!npcTooltipInfo.Contains(NpcID) && NpcID != null)
                 {
                     npcTooltipInfo.Add(NpcID);
+                }
+            }
+        }
+
+        // 从String不同节点获取NpcID
+        private void getIDFromString6(Wz_Node node)
+        {
+            Match match6 = Regex.Match(node.FullPathToFile, @"^Item\\Special.img\\0910.img\\(\d+)\\name");
+            if (match6.Success)
+            {
+                string cashID = match6.Groups[1].ToString();
+                if (!cashTooltipInfo.Contains(cashID) && cashID != null)
+                {
+                    cashTooltipInfo.Add(cashID);
+                }
+            }
+        }
+
+        //从String不同节点获取MapID
+        private void getIDFromString7(Wz_Node node)
+        {
+            Match match7 = Regex.Match(node.FullPathToFile, @"^String\\Map.img\\.*\\(\d+)\\(streetName|mapName|mapDesc|help\d*)");
+            if (match7.Success)
+            {
+                string mapID = match7.Groups[1].ToString();
+                if (!mapTooltipInfo.Contains(mapID) && mapID != null)
+                {
+                    mapTooltipInfo.Add(mapID);
+                }
+            }
+        }
+
+        private void getIDFromString8(Wz_Node node)
+        {
+            if (node == null) return; // 변경은 확인하지 않음 // 추가,삭제만 확인
+            Match match8 = Regex.Match(node.FullPathToFile, @"^Quest\\QuestInfo.img\\(\d+).*\\.*");
+            if (!match8.Success)
+            {
+                match8 = Regex.Match(node.FullPathToFile, @"^Quest\\QuestInfo.img\\(\d+)$");
+            }
+
+            if (!match8.Success)
+            {
+                match8 = Regex.Match(node.FullPathToFile, @"^Quest\\QuestData\\(\d+).img\\(QuestInfo|Check|Act)\\.*");
+            }
+
+            if (!match8.Success)
+            {
+                match8 = Regex.Match(node.FullPathToFile, @"^Quest\\QuestData\\(\d+).img$");
+            }
+            if (match8.Success)
+            {
+                var questID = match8.Groups[1].Value;
+
+                if (questID != null)
+                {
+                    if (!questTooltipInfo.Contains(questID))
+                    {
+                        questTooltipInfo.Add(questID);
+                    }
                 }
             }
         }
@@ -1507,6 +2204,29 @@ namespace WzComparerR2.Comparer
                         getIDFromString3(diff.NodeOld);
                     }
                 }
+                //变更的地图Tooltip处理
+                if (saveMapTooltip && outputDir.Contains("Map"))
+                {
+                    if (diff.NodeNew != null)
+                    {
+                        GetIDFromMap(diff.NodeNew, true);
+                    }
+                    if (diff.NodeOld != null)
+                    {
+                        GetIDFromMap(diff.NodeOld, false);
+                    }
+                }
+                if (saveMapTooltip && outputDir.Contains("String"))
+                {
+                    if (diff.NodeNew != null)
+                    {
+                        getIDFromString7(diff.NodeNew);
+                    }
+                    if (diff.NodeOld != null)
+                    {
+                        getIDFromString7(diff.NodeOld);
+                    }
+                }
                 // 变更的怪物Tooltip处理
                 if (saveMobTooltip && outputDir.Contains("Mob"))
                 {
@@ -1551,6 +2271,41 @@ namespace WzComparerR2.Comparer
                     if (diff.NodeOld != null)
                     {
                         getIDFromString5(diff.NodeOld);
+                    }
+                }
+                // 变更的礼包Tooltip处理
+                if (saveCashTooltip && outputDir.Contains("Item"))
+                {
+                    if (diff.NodeNew != null)
+                    {
+                        getIDFromCash(diff.NodeNew);
+                    }
+                    if (diff.NodeOld != null)
+                    {
+                        getIDFromCash(diff.NodeOld);
+                    }
+                }
+                if (saveCashTooltip && outputDir.Contains("String"))
+                {
+                    if (diff.NodeNew != null)
+                    {
+                        getIDFromString6(diff.NodeNew);
+                    }
+                    if (diff.NodeOld != null)
+                    {
+                        getIDFromString6(diff.NodeOld);
+                    }
+                }
+                // 变更的任务Tooltip处理
+                if (saveQuestTooltip && (outputDir.Contains("Quest")))
+                {
+                    if (diff.NodeNew != null)
+                    {
+                        getIDFromString8(diff.NodeNew);
+                    }
+                    if (diff.NodeOld != null)
+                    {
+                        getIDFromString8(diff.NodeOld);
                     }
                 }
             }
@@ -1610,13 +2365,21 @@ namespace WzComparerR2.Comparer
                     {
                         getIDFromChar(node);
                     }
-                    if (saveEqpTooltip && outputDir.Contains("Mob")) // 变更装备Tooltip处理
+                    if (saveMapTooltip && outputDir.Contains("Map")) // 变更地图Tooltip处理
+                    {
+                        GetIDFromMap(node, idx == 0 ? true : false);
+                    }
+                    if (saveMobTooltip && outputDir.Contains("Mob")) // 变更装备Tooltip处理
                     {
                         getIDFromMob(node);
                     }
                     if (saveNpcTooltip && outputDir.Contains("Npc")) // 变更Npc Tooltip处理
                     {
                         getIDFromNpc(node);
+                    }
+                    if (saveCashTooltip && outputDir.Contains("Item")) // 变更礼包Tooltip处理
+                    {
+                        getIDFromItem(node);
                     }
 
                     if (node.Nodes.Count > 0)
@@ -1657,26 +2420,50 @@ namespace WzComparerR2.Comparer
                         char[] invalidChars = Path.GetInvalidFileNameChars();
                         string colName = col == 0 ? "new" : (col == 1 ? "old" : col.ToString());
                         string fileName = fullPath.Replace('\\', '.');
+                        string suffix = "_" + colName + ".png";
+                        string canvas = "_Canvas";
 
-                        if (this.HashPngFileName)
+                        for (int i = 0; i < invalidChars.Length; i++)
                         {
-                            fileName = ToHexString(MD5Hash(fileName));
-                            // TODO: save file name mapping to another file? 
+                            fileName = fileName.Replace(invalidChars[i], '_');
                         }
-                        else
+                        if (outputDir.Length + fileName.Length > 240)
                         {
-                            for (int i = 0; i < invalidChars.Length; i++)
+                            fileName = fileName.Substring(0, 40) + "_" + ToHexString(MD5Hash(fileName)).Substring(0, 8);
+                        }
+
+                        fileName = fileName + suffix;
+                        string outputDirName = new DirectoryInfo(outputDir).Name;
+                        bool isCanvas = fileName.Contains(canvas);
+                        if (isCanvas)
+                        {
+                            if (this.Comparer.ResolvePngLink)
                             {
-                                fileName = fileName.Replace(invalidChars[i], '_');
+                                fileName = fileName.Replace(canvas + ".", string.Empty);
+                            }
+                            else
+                            {
+                                outputDir = Path.Combine(outputDir, canvas);
+                                if (!Directory.Exists(outputDir))
+                                {
+                                    Directory.CreateDirectory(outputDir);
+                                }
                             }
                         }
-
-                        fileName = fileName + "_" + colName + ".png";
-                        using (Bitmap bmp = png.ExtractPng())
+                        // Skip unparseable content
+                        try
                         {
-                            bmp.Save(Path.Combine(outputDir, fileName), System.Drawing.Imaging.ImageFormat.Png);
+                            using (Bitmap bmp = png.ExtractPng())
+                            {
+                                bmp.Save(Path.Combine(outputDir, fileName), System.Drawing.Imaging.ImageFormat.Png);
+                            }
                         }
-                        return string.Format("<img src=\"{0}/{1}\" />", new DirectoryInfo(outputDir).Name, WebUtility.UrlEncode(fileName));
+                        catch (Exception ex)
+                        {
+                            FailToExportNodes.Add(colName + ": " + fullPath.Replace('\\', '/'), ex.Message);
+                            return string.Format("无法解析的PNG数据 {0} bytes", png.DataLength);
+                        }
+                        return string.Format("<img src=\"{0}/{1}\" />", (isCanvas && !this.Comparer.ResolvePngLink) ? Path.Combine(outputDirName, canvas) : outputDirName, WebUtility.UrlEncode(fileName));
                     }
                     else
                     {
@@ -1701,25 +2488,43 @@ namespace WzComparerR2.Comparer
                             filePath = filePath.Replace(invalidChars[i].ToString(), null);
                         }
 
-                        byte[] mp3 = sound.ExtractSound();
-                        if (mp3 != null)
+                        try
                         {
-                            FileStream fileStream = new FileStream(Path.Combine(outputDir, filePath), FileMode.Create, FileAccess.Write);
-                            fileStream.Write(mp3, 0, mp3.Length);
-                            fileStream.Close();
+                            byte[] mp3 = sound.ExtractSound();
+                            if (mp3 != null)
+                            {
+                                FileStream fileStream = new FileStream(Path.Combine(outputDir, filePath), FileMode.Create, FileAccess.Write);
+                                fileStream.Write(mp3, 0, mp3.Length);
+                                fileStream.Close();
+                            }
                         }
-                        return string.Format("<audio controls src=\"{0}\" type=\"audio/mpeg\">Audio {1}ms\n</audio>", Path.Combine(new DirectoryInfo(outputDir).Name, filePath), sound.Ms);
+                        catch (Exception ex)
+                        {
+                            FailToExportNodes.Add(colName + ": " + fullPath.Replace('\\', '/'), ex.ToString());
+                            return string.Format("无法解析的音频数据 {0} bytes", sound.DataLength);
+                        }
+                        return string.Format("<audio controls src=\"{0}\" type=\"audio/mpeg\">audio {1} ms\n</audio>", Path.Combine(new DirectoryInfo(outputDir).Name, filePath), sound.Ms);
                     }
                     else
                     {
                         return string.Format("Audio {0}ms", sound.Ms);
                     }
 
-                case Wz_Image _:
-                    return "(img)";
-            }
+                case Wz_Convex convex:
+                    return string.Format("convex {0}", string.Join(" ", convex.Points.Select(vec => $"({vec.X},{vec.Y})")));
 
-            return WebUtility.HtmlEncode(Convert.ToString(value.Value));
+                case Wz_RawData rawData:
+                    return string.Format("rawdata {0} bytes", rawData.Length);
+
+                case Wz_Video video:
+                    return string.Format("video {0} bytes", video.Length);
+
+                case Wz_Image _:
+                    return "{ img }";
+
+                default:
+                    return string.Format("<span title=\"{0}\">{1}</span>", value.GetType().Name, WebUtility.HtmlEncode(Convert.ToString(value.Value)));
+            }
         }
 
         // 输出style.css
@@ -1784,6 +2589,349 @@ namespace WzComparerR2.Comparer
                 hex.AppendFormat("{0:x2}", b);
             }
             return hex.ToString();
+        }
+
+        private static string RemoveInvalidFileNameChars(string fileName)
+        {
+            string invalidChars = new string(System.IO.Path.GetInvalidFileNameChars());
+            string regexPattern = $"[{Regex.Escape(invalidChars)}]";
+            return Regex.Replace(fileName, regexPattern, "_");
+        }
+
+        private static string GetBitmapHash(Bitmap bitmap)
+        {
+            using (SHA256 sha256 = SHA256.Create())
+            {
+                // Lock bits for direct memory access
+                BitmapData bmpData = bitmap.LockBits(
+                    new Rectangle(0, 0, bitmap.Width, bitmap.Height),
+                    ImageLockMode.ReadOnly,
+                    bitmap.PixelFormat);
+
+                try
+                {
+                    // Get the raw pixel data
+                    int byteCount = Math.Abs(bmpData.Stride) * bitmap.Height;
+                    byte[] pixelBuffer = new byte[byteCount];
+                    System.Runtime.InteropServices.Marshal.Copy(bmpData.Scan0, pixelBuffer, 0, byteCount);
+
+                    // Compute the hash from pixel data
+                    byte[] hashBytes = sha256.ComputeHash(pixelBuffer);
+
+                    // Convert hash to string
+                    return BitConverter.ToString(hashBytes).Replace("-", string.Empty);
+                }
+                finally
+                {
+                    // Unlock bits
+                    bitmap.UnlockBits(bmpData);
+                }
+            }
+        }
+
+        private bool isKMSNode(Wz_Node node)
+        {
+            if (node == null)
+                return false;
+            if (node.FullPathToFile.StartsWith("Character"))
+            {
+                string[] gearNodePath = node.FullPathToFile.Split('\\');
+                string gearImgStr = gearNodePath.LastOrDefault(part => part.EndsWith(".img"));
+                if (gearImgStr == null)
+                {
+                    return false;
+                }
+                else
+                {
+                    if (Int32.TryParse(gearImgStr.Replace(".img", ""), out int gearID))
+                    {
+                        if (KMSContentID.ContainsKey("Item"))
+                        {
+                            return KMSContentID["Item"].Contains(gearID);
+                        }
+                        else
+                        {
+                            return false;
+                        }
+                    }
+                    else
+                    {
+                        return false;
+                    }
+                }
+            }
+            else if (node.FullPathToFile.StartsWith("Effect"))
+            {
+                string[] effectNodePath = node.FullPathToFile.Split('\\');
+                string effectImgStr = effectNodePath.LastOrDefault(part => part.EndsWith(".img"));
+                if (KMSComponentDict.ContainsKey("Effect"))
+                {
+                    return KMSComponentDict["Effect"].Contains(effectImgStr);
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            else if (node.FullPathToFile.StartsWith("Item"))
+            {
+                string[] itemNodePath = node.FullPathToFile.Split('\\');
+                int itemBaseImgIndex = Array.FindIndex(itemNodePath, s => s.EndsWith(".img"));
+                if (itemBaseImgIndex != -1 && itemBaseImgIndex < itemNodePath.Length - 1)
+                {
+                    if (Int32.TryParse(itemNodePath[itemBaseImgIndex + 1], out int itemID))
+                    {
+                        if (KMSContentID.ContainsKey("Item"))
+                        {
+                            return KMSContentID["Item"].Contains(itemID);
+                        }
+                        else
+                        {
+                            return false;
+                        }
+                    }
+                    else
+                    {
+                        return false;
+                    }
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            else if (node.FullPathToFile.StartsWith("Map"))
+            {
+                string[] mapNodePath = node.FullPathToFile.Split('\\');
+                string mapImgStr = mapNodePath.LastOrDefault(part => part.EndsWith(".img"));
+                if (mapImgStr == null)
+                {
+                    return false;
+                }
+                else
+                {
+                    if (Int32.TryParse(mapImgStr.Replace(".img", ""), out int mapID))
+                    {
+                        if (KMSContentID.ContainsKey("Map"))
+                        {
+                            return KMSContentID["Map"].Contains(mapID);
+                        }
+                        else
+                        {
+                            return false;
+                        }
+                    }
+                    else
+                    {
+                        if (mapNodePath.Length > 2)
+                        {
+                            switch (mapNodePath[1])
+                            {
+                                case "Back":
+                                    if (KMSComponentDict.ContainsKey("MapBack"))
+                                    {
+                                        return KMSComponentDict["MapBack"].Contains(mapImgStr);
+                                    }
+                                    break;
+                                case "Obj":
+                                    if (KMSComponentDict.ContainsKey("MapObj"))
+                                    {
+                                        return KMSComponentDict["MapObj"].Contains(mapImgStr);
+                                    }
+                                    break;
+                                case "Tile":
+                                    if (KMSComponentDict.ContainsKey("MapTile"))
+                                    {
+                                        return KMSComponentDict["MapTile"].Contains(mapImgStr);
+                                    }
+                                    break;
+                                case "WorldMap":
+                                    if (KMSComponentDict.ContainsKey("MapWorldMap"))
+                                    {
+                                        return KMSComponentDict["MapWorldMap"].Contains(mapImgStr);
+                                    }
+                                    break;
+                            }
+                        }
+                        return false;
+                    }
+                }
+            }
+            else if (node.FullPathToFile.StartsWith("Mob"))
+            {
+                string[] mobNodePath = node.FullPathToFile.Split('\\');
+                if (mobNodePath.Contains("BossPattern"))
+                {
+                    string bossPatternImgStr = mobNodePath.LastOrDefault(part => part.EndsWith(".img"));
+                    if (bossPatternImgStr == null)
+                    {
+                        return false;
+                    }
+                    else
+                    {
+                        if (KMSComponentDict.ContainsKey("MobBossPattern"))
+                        {
+                            return KMSComponentDict["MobBossPattern"].Contains(bossPatternImgStr);
+                        }
+                        else
+                        {
+                            return false;
+                        }
+                    }
+                }
+                string mobImgStr = mobNodePath.LastOrDefault(part => part.EndsWith(".img"));
+                if (mobImgStr == null)
+                {
+                    return false;
+                }
+                else
+                {
+                    if (Int32.TryParse(mobImgStr.Replace(".img", ""), out int mobID))
+                    {
+                        if (KMSContentID.ContainsKey("Mob"))
+                        {
+                            return KMSContentID["Mob"].Contains(mobID);
+                        }
+                        else
+                        {
+                            return false;
+                        }
+                    }
+                    else
+                    {
+                        return false;
+                    }
+                }
+            }
+            else if (node.FullPathToFile.StartsWith("Npc"))
+            {
+                string[] npcNodePath = node.FullPathToFile.Split('\\');
+                string npcImgStr = npcNodePath.LastOrDefault(part => part.EndsWith(".img"));
+                if (npcImgStr == null)
+                {
+                    return false;
+                }
+                else
+                {
+                    if (Int32.TryParse(npcImgStr.Replace(".img", ""), out int npcID))
+                    {
+                        if (KMSContentID.ContainsKey("Npc"))
+                        {
+                            return KMSContentID["Npc"].Contains(npcID);
+                        }
+                        else
+                        {
+                            return false;
+                        }
+                    }
+                    else
+                    {
+                        return false;
+                    }
+                }
+            }
+            else if (node.FullPathToFile.StartsWith("Skill"))
+            {
+                string skillNodePath = node.FullPathToFile.Replace("_Canvas\\", "");
+                Match SkillMatch1 = Regex.Match(skillNodePath, @"^Skill\\\d+\\\d+\.img\\(\d+)$");
+                if (SkillMatch1.Success)
+                {
+                    return false;
+                }
+                else
+                {
+                    string baseSkillID = skillNodePath.Split('\\')[1].Replace(".img", "");
+                    if (Int32.TryParse(baseSkillID, out int baseSkillIDInt))
+                    {
+                        switch (baseSkillIDInt / 1000)
+                        {
+                            case 0:
+                                return !(new int[] { 508, 570, 571, 572 }.Contains(baseSkillIDInt)); // ジェット
+                            case 4: // 暁の陣
+                            case 11: // ビーストテイマー
+                            case 12: // アニメコラボ
+                            case 17: // 江湖
+                            case 18: // Shine
+                                return false;
+                            case 40: // 5次スキル
+                            case 50: // 6次強化コア
+                            case 800: // イベントスキル
+                                if (skillNodePath.Split('\\').Length < 4)
+                                {
+                                    return false;
+                                }
+                                else
+                                {
+                                    if (Int32.TryParse(skillNodePath.Split('\\')[3], out int skillID))
+                                    {
+                                        return isKMSSkillID(skillID);
+                                    }
+                                    else
+                                    {
+                                        return false;
+                                    }
+                                }
+                            default:
+                                return true;
+                        }
+                    }
+                    else if (baseSkillID == "Dragon")
+                    {
+                        return true;
+                    }
+                    else
+                    {
+                        return false;
+                    }
+                }
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        private bool isKMSSkillID(int skillID)
+        {
+            switch (skillID / 10000000)
+            {
+                case 0:
+                    return !(new int[] { 508, 570, 571, 572 }.Contains((int)skillID / 10000)); // ジェット
+                case 4: // 晓之阵
+                case 11: // ビーストテイマー
+                case 12: // 动漫合作
+                case 17: // 江湖
+                case 18: // Shine
+                    return false;
+                case 40: // 5转技能
+                case 50: // 6转强化核心
+                    if (FifthJobSkillToJobID.ContainsKey(skillID))
+                    {
+                        bool KMSClassOnly = true;
+                        foreach (int jobID in FifthJobSkillToJobID[skillID])
+                        {
+                            KMSClassOnly = KMSClassOnly &&
+                                           !(jobID == 572 || jobID / 1000 == 4 || jobID / 1000 == 11 ||
+                                            jobID / 1000 == 12 || jobID / 1000 == 17 || jobID / 1000 == 18);
+                        }
+                        return KMSClassOnly;
+                    }
+                    else
+                    {
+                        return KMSContentID["Skill"].Contains(skillID);
+                    }
+                case 8:
+                    if (KMSContentID.ContainsKey("Skill"))
+                    {
+                        return KMSContentID["Skill"].Contains(skillID);
+                    }
+                    else
+                    {
+                        return false;
+                    }
+                default:
+                    return true;
+            }
         }
     }
 }

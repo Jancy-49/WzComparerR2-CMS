@@ -11,11 +11,21 @@ using WzComparerR2.PluginBase;
 using WzComparerR2.WzLib;
 using WzComparerR2.Common;
 using WzComparerR2.CharaSim;
+using WzComparerR2.AvatarCommon;
+using DevComponents.DotNetBar;
+using Newtonsoft.Json.Linq;
 
 namespace WzComparerR2.CharaSimControl
 {
     public class ItemTooltipRender2 : TooltipRender
     {
+        static ItemTooltipRender2()
+        {
+            res = new Dictionary<string, TextureBrush>();
+            res["line"] = new TextureBrush(Resource.UIToolTipNew_img_Item_Common_frame_fixed_line, WrapMode.Clamp);
+        }
+        private static Dictionary<string, TextureBrush> res;
+
         public ItemTooltipRender2()
         {
         }
@@ -27,7 +37,6 @@ namespace WzComparerR2.CharaSimControl
             get { return item; }
             set { item = value; }
         }
-
         public override object TargetItem
         {
             get
@@ -45,12 +54,23 @@ namespace WzComparerR2.CharaSimControl
         public bool LinkRecipeItem { get; set; }
         public bool ShowLevelOrSealed { get; set; }
         public bool ShowNickTag { get; set; }
+        public bool CompareMode { get; set; } = false;
+        public bool ShowCashPurchasePrice { get; set; }
+        public bool Enable22AniStyle { get; set; }
+        private bool WillDrawNickTag { get; set; }
+        private Wz_Node NickResNode { get; set; }
+        private Bitmap ItemSample { get; set; }
+
+        public CashPackage CashPackage { get; set; }
 
         public TooltipRender LinkRecipeInfoRender { get; set; }
         public TooltipRender LinkRecipeGearRender { get; set; }
         public TooltipRender LinkRecipeItemRender { get; set; }
         public TooltipRender SetItemRender { get; set; }
         public TooltipRender CashPackageRender { get; set; }
+        private AvatarCanvasManager avatar { get; set; }
+        private bool isCurrencyConversionEnabled = (Translator.DefaultDesiredCurrency != "none");
+        private string titleLanguage = "";
 
         public override Bitmap Render()
         {
@@ -62,7 +82,8 @@ namespace WzComparerR2.CharaSimControl
             int picHeight;
             Bitmap itemBmp = RenderItem(out picHeight);
             Bitmap recipeInfoBmp = null;
-            List<Bitmap> recipeItemBmps = new List<Bitmap>();
+            List<Bitmap> recipeItemBmps = new();
+            List<Bitmap> recipeInfoBmps = new();
             Bitmap setItemBmp = null;
             Bitmap levelBmp = null;
             int levelHeight = 0;
@@ -97,7 +118,7 @@ namespace WzComparerR2.CharaSimControl
                                 if (gear != null)
                                 {
                                     gear.Props[GearPropType.timeLimited] = 0;
-                                    int tuc, tucCnt;
+                                    long tuc, tucCnt;
                                     if (Item.Props.TryGetValue(ItemPropType.addTooltip_tuc, out tuc) && Item.Props.TryGetValue(ItemPropType.addTooltip_tucCnt, out tucCnt))
                                     {
                                         Wz_Node itemWz = PluginManager.FindWz(Wz_Type.Item);
@@ -109,7 +130,7 @@ namespace WzComparerR2.CharaSimControl
                                                 Wz_Node infoNode = node1.FindNodeByPath(imgClass, true);
                                                 if (infoNode != null)
                                                 {
-                                                    gear.Upgrade(infoNode, tucCnt);
+                                                    gear.Upgrade(infoNode, (int)tucCnt);
 
                                                     break;
                                                 }
@@ -150,43 +171,45 @@ namespace WzComparerR2.CharaSimControl
             };
 
             //图纸相关
-            int recipeID;
-            if (this.item.Specs.TryGetValue(ItemSpecType.recipe, out recipeID))
+            if (this.item.Recipes.Count > 0)
             {
-                int recipeSkillID = recipeID / 10000;
-                Recipe recipe = null;
-                //寻找配方
-                Wz_Node recipeNode = PluginBase.PluginManager.FindWz(string.Format(@"Skill\Recipe_{0}.img\{1}", recipeSkillID, recipeID));
-                if (recipeNode != null)
+                foreach (int recipeID in this.item.Recipes)
                 {
-                    recipe = Recipe.CreateFromNode(recipeNode);
-                }
-                //生成配方图像
-                if (recipe != null)
-                {
-                    if (this.LinkRecipeInfo)
+                    int recipeSkillID = recipeID / 10000;
+                    Recipe recipe = null;
+                    //寻找配方
+                    Wz_Node recipeNode = PluginBase.PluginManager.FindWz(string.Format(@"Skill\Recipe_{0}.img\{1}", recipeSkillID, recipeID));
+                    if (recipeNode != null)
                     {
-                        recipeInfoBmp = RenderLinkRecipeInfo(recipe);
+                        recipe = Recipe.CreateFromNode(recipeNode);
                     }
-
-                    if (this.LinkRecipeItem)
+                    //生成配方图像
+                    if (recipe != null)
                     {
-                        int itemID = recipe.MainTargetItemID;
-                        AppendGearOrItem(itemID);
+                        if (this.LinkRecipeInfo)
+                        {
+                            recipeInfoBmps.Add(RenderLinkRecipeInfo(recipe));
+                        }
+
+                        if (this.LinkRecipeItem)
+                        {
+                            int itemID = recipe.MainTargetItemID;
+                            AppendGearOrItem(itemID);
+                        }
                     }
                 }
             }
 
-            int value;
+            long value;
             if (this.item.Props.TryGetValue(ItemPropType.dressUpgrade, out value))
             {
-                int itemID = value;
-                AppendGearOrItem(itemID);
+                long itemID = value;
+                AppendGearOrItem((int)itemID);
             }
             if (this.item.Props.TryGetValue(ItemPropType.tamingMob, out value))
             {
-                int itemID = value;
-                AppendGearOrItem(itemID);
+                long itemID = value;
+                AppendGearOrItem((int)itemID);
             }
 
             if (this.item.AddTooltips.Count > 0)
@@ -197,11 +220,16 @@ namespace WzComparerR2.CharaSimControl
                 }
             }
 
-            int setID;
-            if (this.item.Props.TryGetValue(ItemPropType.setItemID, out setID))
+            if (this.item.Props.TryGetValue(ItemPropType.setItemID, out long setID))
             {
                 SetItem setItem;
-                if (CharaSimLoader.LoadedSetItems.TryGetValue(setID, out setItem))
+                if (CompareMode)
+                {
+                    setItem = CharaSimLoader.LoadSetItem((int)setID, this.SourceWzFile);
+                    if (setItem != null)
+                        setItemBmp = RenderSetItem(setItem);
+                }
+                else if (CharaSimLoader.LoadedSetItems.TryGetValue((int)setID, out setItem))
                 {
                     setItemBmp = RenderSetItem(setItem);
                 }
@@ -210,35 +238,35 @@ namespace WzComparerR2.CharaSimControl
             //计算布局
             Size totalSize = new Size(itemBmp.Width, picHeight);
             Point recipeInfoOrigin = Point.Empty;
-            List<Point> recipeItemOrigins = new List<Point>();
+            Point recipeItemOrigin = Point.Empty;
             Point setItemOrigin = Point.Empty;
             Point levelOrigin = Point.Empty;
 
             if (recipeItemBmps.Count > 0)
             {
-                if (recipeInfoBmp != null)
+                // layout:
+                //   item        |  recipeItem
+                //   recipeInfo  |
+                recipeItemOrigin.X = totalSize.Width;
+                totalSize.Width += recipeItemBmps.Max(bmp => bmp.Width);
+
+                if (recipeInfoBmps.Count > 0)
                 {
-                    recipeItemOrigins.Add(new Point(totalSize.Width, 0));
-                    recipeInfoOrigin.X = itemBmp.Width - recipeInfoBmp.Width;
+                    recipeInfoOrigin.X = itemBmp.Width - recipeInfoBmps.Max(bmp => bmp.Width);
                     recipeInfoOrigin.Y = picHeight;
-                    totalSize.Width += recipeItemBmps[0].Width;
-                    totalSize.Height = Math.Max(picHeight + recipeInfoBmp.Height, recipeItemBmps[0].Height);
+                    totalSize.Height = Math.Max(picHeight + recipeInfoBmps.Sum(bmp => bmp.Height), recipeItemBmps.Sum(bmp => bmp.Height));
                 }
                 else
                 {
-                    int itemCnt = recipeItemBmps.Count;
-                    for (int i = 0; i < itemCnt; ++i)
-                    {
-                        recipeItemOrigins.Add(new Point(totalSize.Width, 0));
-                        totalSize.Width += recipeItemBmps[i].Width;
-                        totalSize.Height = Math.Max(picHeight, recipeItemBmps[i].Height);
-                    }
+                    totalSize.Height = Math.Max(picHeight, recipeItemBmps.Sum(bmp => bmp.Height));
                 }
             }
-            else if (recipeInfoBmp != null)
+            else if (recipeInfoBmps.Count > 0)
             {
-                totalSize.Width += recipeInfoBmp.Width;
-                totalSize.Height = Math.Max(picHeight, recipeInfoBmp.Height);
+                // layout:
+                //   item  |  recipeInfo
+                totalSize.Width += recipeInfoBmps.Max(bmp => bmp.Width);
+                totalSize.Height = Math.Max(picHeight, recipeInfoBmps.Sum(bmp => bmp.Height));
                 recipeInfoOrigin.X = itemBmp.Width;
             }
             if (setItemBmp != null)
@@ -265,7 +293,7 @@ namespace WzComparerR2.CharaSimControl
                 //复制图像
                 g.DrawImage(itemBmp, 0, 0, new Rectangle(0, 0, itemBmp.Width, picHeight), GraphicsUnit.Pixel);
                 //左上角
-                g.DrawImage(Resource.UIToolTip_img_Item_Frame2_cover, 3, 3);
+                if (!Enable22AniStyle) g.DrawImage(Resource.UIToolTip_img_Item_Frame2_cover, 3, 3);
 
                 if (this.ShowObjectID)
                 {
@@ -283,11 +311,11 @@ namespace WzComparerR2.CharaSimControl
             //绘制产出道具
             if (recipeItemBmps.Count > 0)
             {
-                int itemCnt = recipeItemBmps.Count;
-                for (int i = 0; i < itemCnt; ++i)
+                for (int i = 0, y = recipeItemOrigin.Y; i < recipeItemBmps.Count; i++)
                 {
-                    g.DrawImage(recipeItemBmps[i], recipeItemOrigins[i].X, recipeItemOrigins[i].Y,
+                    g.DrawImage(recipeItemBmps[i], recipeItemOrigin.X, y,
                         new Rectangle(Point.Empty, recipeItemBmps[i].Size), GraphicsUnit.Pixel);
+                    y += recipeItemBmps[i].Height;
                 }
             }
 
@@ -311,8 +339,7 @@ namespace WzComparerR2.CharaSimControl
             if (recipeInfoBmp != null)
                 recipeInfoBmp.Dispose();
             if (recipeItemBmps.Count > 0)
-                foreach (Bitmap recipeItemBmp in recipeItemBmps)
-                    recipeItemBmp.Dispose();
+                recipeItemBmps.ForEach(bmp => bmp.Dispose());
             if (setItemBmp != null)
                 setItemBmp.Dispose();
             if (levelBmp != null)
@@ -325,10 +352,12 @@ namespace WzComparerR2.CharaSimControl
 
         private Bitmap RenderItem(out int picH)
         {
+            bool isTranslateRequired = Translator.IsTranslateEnabled;
             Bitmap tooltip = new Bitmap(290, DefaultPicHeight);
             Graphics g = Graphics.FromImage(tooltip);
             StringFormat format = (StringFormat)StringFormat.GenericDefault.Clone();
-            int value;
+            long value;
+            int intvalue;
 
             picH = 10;
             //物品标题
@@ -344,10 +373,32 @@ namespace WzComparerR2.CharaSimControl
             {
                 itemName += " (" + nameAdd + ")";
             }
-
+            if (isCurrencyConversionEnabled)
+            {
+                if (Translator.DefaultDetectCurrency == "auto")
+                {
+                    titleLanguage = Translator.GetLanguage(itemName);
+                }
+                else
+                {
+                    titleLanguage = Translator.ConvertCurrencyToLang(Translator.DefaultDetectCurrency);
+                }
+            }
+            if (isTranslateRequired)
+            {
+                string translatedItemName = Translator.MergeString(itemName, Translator.TranslateString(itemName, true), 0, false, true);
+                if (translatedItemName == itemName)
+                {
+                    // isTranslateRequired = false;
+                }
+                else
+                {
+                    itemName = translatedItemName;
+                }
+            }
             //SizeF titleSize = TextRenderer.MeasureText(g, sr.Name.Replace(Environment.NewLine, ""), GearGraphics.ItemNameFont2, new Size(int.MaxValue, int.MaxValue), TextFormatFlags.NoPrefix);
             SizeF titleSize;
-            if (IsKoreanStringPresent(itemName))
+            if (Translator.IsKoreanStringPresent(itemName))
             {
                 titleSize = TextRenderer.MeasureText(g, itemName, GearGraphics.KMSItemNameFont, new Size(int.MaxValue, int.MaxValue), TextFormatFlags.NoPrefix);
             }
@@ -380,7 +431,7 @@ namespace WzComparerR2.CharaSimControl
             //绘制标题
             bool hasPart2 = false;
             format.Alignment = StringAlignment.Center;
-            if (IsKoreanStringPresent(sr.Name))
+            if (Translator.IsKoreanStringPresent(sr.Name))
             {
                 g.DrawString(sr.Name, GearGraphics.KMSItemNameFont, Brushes.White, tooltip.Width / 2, picH, format);
             }
@@ -530,7 +581,14 @@ namespace WzComparerR2.CharaSimControl
             //绘制图标
             int iconY = picH;
             int iconX = 10;
-            g.DrawImage(Resource.UIToolTip_img_Item_ItemIcon_base, iconX, picH);
+            if (this.Enable22AniStyle)
+            {
+                g.DrawImage(Resource.UIToolTipNew_img_Item_Common_ItemIcon_base, iconX, picH);
+            }
+            else
+            {
+                g.DrawImage(Resource.UIToolTip_img_Item_ItemIcon_base, iconX, picH);
+            }
             if (item.Icon.Bitmap != null)
             {
                 g.DrawImage(GearGraphics.EnlargeBitmap(item.Icon.Bitmap),
@@ -567,8 +625,11 @@ namespace WzComparerR2.CharaSimControl
                     iconX + 6 + 68 - cashOrigin.X * 2 - 2,
                     picH + 6 + 68 - cashOrigin.Y * 2 - 2);
             }
-            g.DrawImage(Resource.UIToolTip_img_Item_ItemIcon_new, iconX + 7, picH + 7);
-            g.DrawImage(Resource.UIToolTip_img_Item_ItemIcon_cover, iconX + 4, picH + 4); //绘制左上角cover
+            if (!this.Enable22AniStyle)
+            {
+                g.DrawImage(Resource.UIToolTip_img_Item_ItemIcon_new, iconX + 7, picH + 7);
+                g.DrawImage(Resource.UIToolTip_img_Item_ItemIcon_cover, iconX + 4, picH + 4); //绘制左上角cover
+            }
 
             value = 0;
             if (item.Props.TryGetValue(ItemPropType.reqLevel, out value) || item.ItemID / 10000 == 301 || item.ItemID / 1000 == 5204)
@@ -595,11 +656,10 @@ namespace WzComparerR2.CharaSimControl
             {
                 if (item.Props.TryGetValue(ItemPropType.wonderGrade, out value) && value > 0)
                 {
-                    int setID;
-                    if (item.Props.TryGetValue(ItemPropType.setItemID, out setID))
+                    if (item.Props.TryGetValue(ItemPropType.setItemID, out long setID))
                     {
                         SetItem setItem;
-                        if (CharaSimLoader.LoadedSetItems.TryGetValue(setID, out setItem))
+                        if ((!CompareMode && CharaSimLoader.LoadedSetItems.TryGetValue((int)setID, out setItem)) || (CompareMode && (setItem = CharaSimLoader.LoadSetItem((int)setID, this.SourceWzFile)) != null))
                         {
                             string wonderGradeString = null;
                             string setItemName = setItem.SetItemName;
@@ -681,7 +741,7 @@ namespace WzComparerR2.CharaSimControl
             }
             if (!string.IsNullOrEmpty(desc))
             {
-                if (IsKoreanStringPresent(desc))
+                if (Translator.IsKoreanStringPresent(desc))
                 {
                     GearGraphics.DrawString(g, desc, GearGraphics.KMSItemDetailFont, 100, right, ref picH, 16);
                 }
@@ -692,7 +752,14 @@ namespace WzComparerR2.CharaSimControl
             }
             if (!string.IsNullOrEmpty(sr.AutoDesc))
             {
-                GearGraphics.DrawString(g, sr.AutoDesc, GearGraphics.ItemDetailFont, 100, right, ref picH, 16);
+                if (Translator.IsKoreanStringPresent(sr.AutoDesc))
+                {
+                    GearGraphics.DrawString(g, sr.AutoDesc, GearGraphics.KMSItemDetailFont, 100, right, ref picH, 16);
+                }
+                else
+                {
+                    GearGraphics.DrawString(g, sr.AutoDesc, GearGraphics.ItemDetailFont, 100, right, ref picH, 16);
+                }
             }
             if (item.Props.TryGetValue(ItemPropType.tradeAvailable, out value) && value > 0)
             {
@@ -707,11 +774,11 @@ namespace WzComparerR2.CharaSimControl
             }
             if (item.Specs.TryGetValue(ItemSpecType.recipeValidDay, out value) && value > 0)
             {
-                GearGraphics.DrawString(g, "( 可制作时间 : " + value + "日 )", GearGraphics.ItemDetailFont, 100, right, ref picH, 16);
+                GearGraphics.DrawString(g, "(可制作时间 : " + value + "天)", GearGraphics.ItemDetailFont, 100, right, ref picH, 16);
             }
             if (item.Specs.TryGetValue(ItemSpecType.recipeUseCount, out value) && value > 0)
             {
-                GearGraphics.DrawString(g, "( 可制作次数 : " + value + "次 )", GearGraphics.ItemDetailFont, 100, right, ref picH, 16);
+                GearGraphics.DrawString(g, "(可制作次数 : " + value + "次)", GearGraphics.ItemDetailFont, 100, right, ref picH, 16);
             }
             if (item.ItemID / 1000 == 5533)
             {
@@ -768,7 +835,15 @@ namespace WzComparerR2.CharaSimControl
                 GearGraphics.DrawString(g, "[可使用命令]", GearGraphics.ItemDetailFont, 100, right, ref picH, 16);
                 foreach (int l0 in commandLev.Values.OrderBy(i => i).Distinct())
                 {
-                    GearGraphics.DrawString(g, l0 + "级以上 : " + string.Join(", ", commandLev.Where(i => i.Value == l0).Select(i => i.Key).OrderBy(s => s)), GearGraphics.ItemDetailFont, 100, right, ref picH, 16);
+                    string text = l0 + "级以上 : " + string.Join(", ", commandLev.Where(i => i.Value == l0).Select(i => i.Key).OrderBy(s => s));
+                    if (Translator.IsKoreanStringPresent(text))
+                    {
+                        GearGraphics.DrawString(g, text, GearGraphics.KMSItemDetailFont, 100, right, ref picH, 16);
+                    }
+                    else
+                    {
+                        GearGraphics.DrawString(g, text, GearGraphics.ItemDetailFont, 100, right, ref picH, 16);
+                    }
                 }
                 GearGraphics.DrawString(g, "Tip. 宠物达到15级时可特定说话。", GearGraphics.ItemDetailFont, 100, right, ref picH, 16);
                 GearGraphics.DrawString(g, "#c例) /宠物 [说话]#", GearGraphics.ItemDetailFont, new Dictionary<string, Color>() { { "c", ((SolidBrush)GearGraphics.OrangeBrush4).Color } }, 100, right, ref picH, 16);
@@ -806,10 +881,10 @@ namespace WzComparerR2.CharaSimControl
                 && this.Item.Props.TryGetValue(ItemPropType.nickTag, out value)
                 && this.TryGetNickResource(value, out nickResNode);
             string descLeftAlign = sr["desc_leftalign"];
-            int minLev = 0, maxLev = 0;
+            long minLev = 0, maxLev = 0;
             bool willDrawExp = item.Props.TryGetValue(ItemPropType.exp_minLev, out minLev) && item.Props.TryGetValue(ItemPropType.exp_maxLev, out maxLev);
 
-            if (!string.IsNullOrEmpty(descLeftAlign) || item.CoreSpecs.Count > 0 || item.Sample.Bitmap != null || item.SamplePath != null || willDrawNickTag || willDrawExp)
+            if (!string.IsNullOrEmpty(descLeftAlign) || item.CoreSpecs.Count > 0 || item.Sample.Bitmap != null || item.SamplePath != null || item.ShowCosmetic || willDrawNickTag || willDrawExp)
             {
                 if (picH < iconY + 84)
                 {
@@ -818,7 +893,7 @@ namespace WzComparerR2.CharaSimControl
                 if (!string.IsNullOrEmpty(descLeftAlign))
                 {
                     picH += 12;
-                    if (IsKoreanStringPresent(descLeftAlign))
+                    if (Translator.IsKoreanStringPresent(descLeftAlign))
                     {
                         GearGraphics.DrawString(g, descLeftAlign, GearGraphics.KMSItemDetailFont, 14, right, ref picH, 16);
                     }
@@ -834,6 +909,7 @@ namespace WzComparerR2.CharaSimControl
                     foreach (KeyValuePair<ItemCoreSpecType, Wz_Node> p in item.CoreSpecs)
                     {
                         string coreSpec;
+                        intvalue = 0;
                         switch (p.Key)
                         {
                             case ItemCoreSpecType.Ctrl_addMob:
@@ -845,12 +921,12 @@ namespace WzComparerR2.CharaSimControl
                                 }
                                 foreach (Wz_Node addMobNode in p.Value.Nodes)
                                 {
-                                    if (int.TryParse(addMobNode.Text, out value))
+                                    if (int.TryParse(addMobNode.Text, out intvalue))
                                     {
                                         break;
                                     }
                                 }
-                                coreSpec = ItemStringHelper.GetItemCoreSpecString(ItemCoreSpecType.Ctrl_addMob, value, srMob.Name);
+                                coreSpec = ItemStringHelper.GetItemCoreSpecString(ItemCoreSpecType.Ctrl_addMob, intvalue, srMob.Name);
                                 break;
 
                             default:
@@ -872,43 +948,68 @@ namespace WzComparerR2.CharaSimControl
                     picH += item.Sample.Bitmap.Height;
                     picH += 2;
                 }
+                if (this.item.Specs.TryGetValue(ItemSpecType.cosmetic, out value) && value > 0)
+                {
+                    if (this.avatar == null)
+                    {
+                        this.avatar = new AvatarCanvasManager();
+                    }
+
+                    if (value < 1000)
+                    {
+                        this.avatar.AddBodyFromSkin3((int)value);
+                    }
+                    else
+                    {
+                        this.avatar.AddBodyFromSkin4(2015);
+                        this.avatar.AddHairOrFace((int)value);
+                    }
+
+                    this.avatar.AddGears([1042194, 1062153]);
+
+                    var frame = this.avatar.GetBitmapOrigin();
+                    if (frame.Bitmap != null)
+                    {
+                        g.DrawImage(frame.Bitmap, (tooltip.Width - frame.Bitmap.Width) / 2, picH);
+                        picH += frame.Bitmap.Height;
+                        picH += 2;
+                    }
+
+                    this.avatar.ClearCanvas();
+                }
                 if (item.SamplePath != null)
                 {
                     Wz_Node sampleNode = PluginManager.FindWz(item.SamplePath);
                     int sampleW = 15;
-                    for (int i = 1; ; i++)
+                    if (sampleNode == null && item.SamplePath.Contains("ChatEmoticon.img"))
                     {
-                        Wz_Node effectNode = sampleNode.FindNodeByPath(string.Format("{0}{1:D4}\\effect\\0", sampleNode.Text, i));
-                        if (effectNode == null)
-                        {
-                            break;
-                        }
-
-                        BitmapOrigin effect = BitmapOrigin.CreateFromNode(effectNode, PluginManager.FindWz);
-                        if (sampleW + 87 >= tooltip.Width)
-                        {
-                            picH += 62;
-                            sampleW = 15;
-                        }
-                        g.DrawImage(effect.Bitmap, sampleW + (85 - effect.Bitmap.Width - 1) / 2, picH + (62 - effect.Bitmap.Height - 1) / 2);
-                        sampleW += 87;
+                        sampleNode = PluginManager.FindWz(item.SamplePath.Replace("ChatEmoticon.img/", "ChatEmoticon.img/Emoticon/"));
                     }
-                    picH += 62;
+                    if (sampleNode != null)
+                    {
+                        for (int i = 1; ; i++)
+                        {
+                            Wz_Node effectNode = sampleNode.FindNodeByPath(string.Format("{0}{1:D4}\\effect\\0", sampleNode.Text, i));
+                            if (effectNode == null)
+                            {
+                                break;
+                            }
+                            BitmapOrigin effect = BitmapOrigin.CreateFromNode(effectNode, PluginManager.FindWz);
+                            if (sampleW + 87 >= tooltip.Width)
+                            {
+                                picH += 62;
+                                sampleW = 15;
+                            }
+                            g.DrawImage(effect.Bitmap, sampleW + (85 - effect.Bitmap.Width - 1) / 2, picH + (62 - effect.Bitmap.Height - 1) / 2);
+                            sampleW += 87;
+                        }
+                        picH += 62;
+                    }
                 }
                 if (nickResNode != null)
                 {
                     //获取称号名称
-                    string nickName;
-                    string nickWithQR = sr["nickWithQR"];
-                    if (nickWithQR != null)
-                    {
-                        string qrDefault = sr["qrDefault"] ?? string.Empty;
-                        nickName = Regex.Replace(nickWithQR, "#qr.*?#", qrDefault);
-                    }
-                    else
-                    {
-                        nickName = sr.Name;
-                    }
+                    string nickName = GearGraphics.GetNameTagString(sr);
                     GearGraphics.DrawNameTag(g, nickResNode, nickName, tooltip.Width, ref picH);
                     picH += 4; // value is either 4 or 14 (it was 14 in previous iteration)
                 }
@@ -916,7 +1017,7 @@ namespace WzComparerR2.CharaSimControl
                 {
                     long totalExp = 0;
 
-                    for (int i = minLev; i < maxLev; i++)
+                    for (int i = (int)minLev; i < maxLev; i++)
                         totalExp += Character.ExpToNextLevel(i);
 
                     g.DrawLine(Pens.White, 6, picH, tooltip.Width - 7, picH);
@@ -957,7 +1058,7 @@ namespace WzComparerR2.CharaSimControl
             //绘制配方需求
             if (item.Specs.TryGetValue(ItemSpecType.recipe, out value))
             {
-                int reqSkill, reqSkillLevel;
+                long reqSkill, reqSkillLevel;
                 if (!item.Specs.TryGetValue(ItemSpecType.reqSkill, out reqSkill))
                 {
                     reqSkill = value / 10000 * 10000;
@@ -975,15 +1076,15 @@ namespace WzComparerR2.CharaSimControl
                 picH += 17;
 
                 //技能标题
-                if (StringLinker == null || !StringLinker.StringSkill.TryGetValue(reqSkill, out sr))
+                if (StringLinker == null || !StringLinker.StringSkill.TryGetValue((int)reqSkill, out sr))
                 {
                     sr = new StringResult();
                     sr.Name = "- (null)";
                 }
                 switch (sr.Name)
                 {
-                    case "装备制作": sr.Name = "装备制作"; break;
-                    case "饰品制作": sr.Name = "饰品制作"; break;
+                    case "장비제작": sr.Name = "装备制作"; break;
+                    case "장신구제작": sr.Name = "饰品制作"; break;
                 }
                 TextRenderer.DrawText(g, string.Format("- {0} Lv {1}", sr.Name, reqSkillLevel), GearGraphics.ItemDetailFont, new Point(13, picH), ((SolidBrush)GearGraphics.SetItemNameBrush).Color, TextFormatFlags.NoPadding | TextFormatFlags.NoPrefix);
                 picH += 16;
@@ -996,7 +1097,7 @@ namespace WzComparerR2.CharaSimControl
 
         private List<string> GetItemAttributeString()
         {
-            int value, value2;
+            long value, value2;
             List<string> tags = new List<string>();
 
             if (item.Props.TryGetValue(ItemPropType.quest, out value) && value != 0)
@@ -1054,6 +1155,10 @@ namespace WzComparerR2.CharaSimControl
             {
                 tags.Add(ItemStringHelper.GetItemPropString(ItemPropType.multiPet, 0));
             }
+            if (item.Props.TryGetValue(ItemPropType.mintable, out value))
+            {
+                tags.Add(ItemStringHelper.GetItemPropString(ItemPropType.mintable, value));
+            }
 
             return tags;
         }
@@ -1065,7 +1170,8 @@ namespace WzComparerR2.CharaSimControl
             {
                 RecipeTooltipRender defaultRenderer = new RecipeTooltipRender();
                 defaultRenderer.StringLinker = this.StringLinker;
-                defaultRenderer.ShowObjectID = false;
+                defaultRenderer.ShowObjectID = true;
+                defaultRenderer.Enable22AniStyle = this.Enable22AniStyle;
                 renderer = defaultRenderer;
             }
 
@@ -1078,10 +1184,20 @@ namespace WzComparerR2.CharaSimControl
             TooltipRender renderer = this.LinkRecipeGearRender;
             if (renderer == null)
             {
-                GearTooltipRender2 defaultRenderer = new GearTooltipRender2();
-                defaultRenderer.StringLinker = this.StringLinker;
-                defaultRenderer.ShowObjectID = false;
-                renderer = defaultRenderer;
+                if (this.Enable22AniStyle)
+                {
+                    GearTooltipRender22 defaultRenderer = new GearTooltipRender22();
+                    defaultRenderer.StringLinker = this.StringLinker;
+                    defaultRenderer.ShowObjectID = false;
+                    renderer = defaultRenderer;
+                }
+                else
+                {
+                    GearTooltipRender2 defaultRenderer = new GearTooltipRender2();
+                    defaultRenderer.StringLinker = this.StringLinker;
+                    defaultRenderer.ShowObjectID = false;
+                    renderer = defaultRenderer;
+                }
             }
 
             renderer.TargetItem = gear;
@@ -1096,6 +1212,7 @@ namespace WzComparerR2.CharaSimControl
                 ItemTooltipRender2 defaultRenderer = new ItemTooltipRender2();
                 defaultRenderer.StringLinker = this.StringLinker;
                 defaultRenderer.ShowObjectID = false;
+                defaultRenderer.Enable22AniStyle = this.Enable22AniStyle;
                 renderer = defaultRenderer;
             }
 
@@ -1111,6 +1228,10 @@ namespace WzComparerR2.CharaSimControl
                 var defaultRenderer = new SetItemTooltipRender();
                 defaultRenderer.StringLinker = this.StringLinker;
                 defaultRenderer.ShowObjectID = false;
+                if (this.Enable22AniStyle)
+                {
+                    defaultRenderer.Enable22AniStyle = true;
+                }
                 renderer = defaultRenderer;
             }
 
@@ -1232,14 +1353,56 @@ namespace WzComparerR2.CharaSimControl
             }
             return level;
         }
-        private bool IsKoreanStringPresent(string checkString)
-        {
-            return checkString.Any(c => (c >= '\uAC00' && c <= '\uD7A3'));
-        }
-        private bool TryGetNickResource(int nickTag, out Wz_Node resNode)
+ 
+        private bool TryGetNickResource(long nickTag, out Wz_Node resNode)
         {
             resNode = PluginBase.PluginManager.FindWz("UI/NameTag.img/nick/" + nickTag);
             return resNode != null;
+        }
+
+        public bool HasSamples()
+        {
+            return this.Item.Sample.Bitmap != null || (this.NickResNode != null && this.ShowNickTag) || this.ItemSample != null;
+        }
+
+        public Bitmap GetSampleBitmap()
+        {
+            if (this.WillDrawNickTag && this.ShowNickTag)
+            {
+                Rectangle rect = new Rectangle();
+                int block = 300;
+                using Bitmap tempBitmap = new Bitmap(block, block);
+                using Graphics tempG = Graphics.FromImage(tempBitmap);
+                tempG.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
+
+                int h = block / 2;
+
+                StringResult sr;
+                if (StringLinker == null || !StringLinker.StringItem.TryGetValue(item.ItemID, out sr))
+                {
+                    sr = new StringResult();
+                    sr.Name = "(null)";
+                }
+
+                string nickName = GearGraphics.GetNameTagString(sr);
+                GearGraphics.DrawNameTag(tempG, this.NickResNode, nickName, tempBitmap.Width, out rect, ref h);
+
+                Bitmap resBitmap = new Bitmap(rect.Width, rect.Height);
+                using Graphics g = Graphics.FromImage(resBitmap);
+                g.DrawImage(tempBitmap, 0, 0, rect, GraphicsUnit.Pixel);
+
+                return resBitmap;
+            }
+            else if (this.Item.Sample.Bitmap != null)
+            {
+                return new Bitmap(this.Item.Sample.Bitmap);
+            }
+            else if (this.ItemSample != null)
+            {
+                return new Bitmap(this.ItemSample);
+            }
+
+            return null;
         }
     }
 }

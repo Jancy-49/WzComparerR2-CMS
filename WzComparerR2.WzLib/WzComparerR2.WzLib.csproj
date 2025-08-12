@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>net48;net6.0</TargetFrameworks>
+    <TargetFrameworks>net48;net6.0;net8.0</TargetFrameworks>
     <AssemblyName>WzComparerR2.WzLib</AssemblyName>
     <RootNamespace>WzComparerR2.WzLib</RootNamespace>
     <IsPublishable>false</IsPublishable>
@@ -8,6 +8,7 @@
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <LangVersion>latest</LangVersion>
     <Nullable>disable</Nullable>
+	<Platforms>AnyCPU;ARM64</Platforms>
   </PropertyGroup>
   <Import Project="$(ProjectDir)..\Build\Common.props" />
   <PropertyGroup Condition="$(DotnetEdition) == 'core'">

@@ -17,21 +17,38 @@ namespace WzComparerR2.Avatar
             this.LoadInfo();
             this.LoadMixNodes();
             this.MixColor = this.BaseColor;
+            this.forceAction = false;
         }
 
-        public AvatarPart(Wz_Node node, BitmapOrigin forceIcon, int forceID, bool isSkill) : this (node)
+        public AvatarPart(Wz_Node node, BitmapOrigin forceIcon, int forceID, bool isSkill) : this(node)
         {
             this.Icon = forceIcon;
             this.ID = forceID;
             this.IsSkill = isSkill;
         }
 
+        public AvatarPart(Wz_Node node, BitmapOrigin forceIcon, int forceID, Wz_Vector brm, bool forceAct)
+        {
+            this.Node = node;
+            this.Visible = true;
+            this.LoadInfo();
+            this.LoadMixNodes();
+            this.MixColor = -1;
+            this.Icon = forceIcon;
+            this.ID = forceID;
+            this.bodyRelMove = brm;
+            this.forceAction = forceAct;
+        }
+
         public Wz_Node Node { get; private set; }
         public string ISlot { get; private set; }
+        public string VSlot { get; private set; }
         public BitmapOrigin Icon { get; private set; }
         public bool Visible { get; set; }
         public int? ID { get; private set; }
         public bool IsSkill { get; private set; }
+        public Wz_Vector bodyRelMove { get; private set; }
+        public bool forceAction { get; set; }
         public Wz_Node[] MixNodes { get; set; }
         public int BaseColor
         {
@@ -52,6 +69,13 @@ namespace WzComparerR2.Avatar
         public int MixColor { get; set; }
         public int MixOpacity { get; set; }
         public bool IsMixing { get { return BaseColor != -1 && BaseColor != MixColor && MixOpacity > 0; } }
+        public Wz_Node effectNode
+        {
+            get
+            {
+                return PluginBase.PluginManager.FindWz("Effect/ItemEff.img/" + this.ID + "/effect");
+            }
+        }
 
         private void LoadInfo()
         {
@@ -88,6 +112,10 @@ namespace WzComparerR2.Avatar
                         this.ISlot = node.GetValue<string>();
                         break;
 
+                    case "vslot":
+                        this.VSlot = node.GetValue<string>();
+                        break;
+
                     case "icon":
                         this.Icon = BitmapOrigin.CreateFromNode(node, PluginBase.PluginManager.FindWz);
                         break;
@@ -102,6 +130,11 @@ namespace WzComparerR2.Avatar
             string dir;
             int baseID;
             int multiplier;
+
+            if (bodyRelMove == null)
+            {
+                return;
+            }
 
             GearType type = Gear.GetGearType(this.ID.Value);
             if (Gear.IsFace(type))

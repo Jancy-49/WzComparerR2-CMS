@@ -15,6 +15,7 @@ namespace WzComparerR2.CharaSim
             Props = new Dictionary<GearPropType, int>();
             VariableStat = new Dictionary<GearPropType, float>();
             AbilityTimeLimited = new Dictionary<GearPropType, int>();
+            ReqSpecJobs = new List<int>();
             Options = new Potential[3];
             AdditionalOptions = new Potential[3];
             Additions = new List<Addition>();
@@ -40,8 +41,11 @@ namespace WzComparerR2.CharaSim
         public int PlatinumHammer { get; set; }
         public bool CanPotential { get; internal set; }
         public string EpicHs { get; internal set; }
+        public BitmapOrigin ToolTIpPreview { get; set; }
 
         public bool FixLevel { get; internal set; }
+        public bool AdditionHideDesc { get; set; }
+
         public List<GearLevelInfo> Levels { get; internal set; }
         public List<GearSealedInfo> Seals { get; internal set; }
 
@@ -49,6 +53,7 @@ namespace WzComparerR2.CharaSim
         public Dictionary<GearPropType, int> Props { get; private set; }
         public Dictionary<GearPropType, float> VariableStat { get; private set; }
         public Dictionary<GearPropType, int> AbilityTimeLimited { get; private set; }
+        public List<int> ReqSpecJobs { get; private set; }
 
         /// <summary>
         /// 获取或设置装备的标准属性。
@@ -85,7 +90,7 @@ namespace WzComparerR2.CharaSim
             }
         }
 
-        public int GetMaxStar()
+        public int GetMaxStar(bool isPostNEXTClient = false)
         {
             if (!this.HasTuc)
             {
@@ -107,15 +112,32 @@ namespace WzComparerR2.CharaSim
             int reqLevel;
             this.Props.TryGetValue(GearPropType.reqLevel, out reqLevel);
             int[] data = null;
-            foreach (int[] item in starData)
+            if (isPostNEXTClient)
             {
-                if (reqLevel >= item[0])
+                foreach (int[] item in starDataPostNEXT)
                 {
-                    data = item;
+                    if (reqLevel >= item[0])
+                    {
+                        data = item;
+                    }
+                    else
+                    {
+                        break;
+                    }
                 }
-                else
+            }
+            else
+            {
+                foreach (int[] item in starData)
                 {
-                    break;
+                    if (reqLevel >= item[0])
+                    {
+                        data = item;
+                    }
+                    else
+                    {
+                        break;
+                    }
                 }
             }
             if (data == null)
@@ -127,15 +149,21 @@ namespace WzComparerR2.CharaSim
         }
 
         private static readonly int[][] starData = new int[][] {
-            new[]{ 0, 5, 3 }, 
-            new[]{ 95, 8, 5 }, 
+            new[]{ 0, 5, 3 },
+            new[]{ 95, 8, 5 },
             new[]{ 108, 10, 8 },
-            //new[]{ 120, 12, 10 }, before GMS 25 Stars update
             new[]{ 118, 15, 10 },
-            //new[]{ 130, 13, 12 }, before GMS 25 Stars update
             new[]{ 128, 20, 12 },
-            //new[]{ 140, 15, 15 }, before GMS 25 Stars update
             new[]{ 138, 25, 15 },
+        };
+
+        private static readonly int[][] starDataPostNEXT = new int[][] {
+            new[]{ 0, 5, 3 },
+            new[]{ 95, 8, 5 },
+            new[]{ 108, 10, 8 },
+            new[]{ 118, 15, 10 },
+            new[]{ 128, 20, 12 },
+            new[]{ 138, 30, 15 },
         };
 
         public override object Clone()
@@ -175,6 +203,20 @@ namespace WzComparerR2.CharaSim
             }
         }
 
+        public bool IsDestinyWeapon
+        {
+            get
+            {
+                if (IsGenesisWeapon &&
+                    this.Props.TryGetValue(GearPropType.reqLevel, out var equipLevel)
+                    && equipLevel == 250)
+                {
+                    return true;
+                }
+                return false;
+            }
+        }
+
         public void Upgrade(Wz_Node infoNode, int count)
         {
             this.ScrollUp += count;
@@ -205,6 +247,21 @@ namespace WzComparerR2.CharaSim
             }
         }
 
+        public bool IsGenesisWeapon
+        {
+            get
+            {
+                // There's no better way to determine if a weapon is a Genesis weapon, the game itself also uses a hard-coded list to check it.
+                if (IsWeapon(this.type)
+                    && this.Props.TryGetValue(GearPropType.setItemID, out var setItemID)
+                    && 886 <= setItemID && setItemID <= 890)
+                {
+                    return true;
+                }
+                return false;
+            }
+        }
+
         public static bool IsFace(GearType type)
         {
             string gearTypeName = Enum.GetName(typeof(GearType), type);
@@ -221,6 +278,11 @@ namespace WzComparerR2.CharaSim
         {
             return IsLeftWeapon(type)
                 || IsDoubleHandWeapon(type);
+        }
+
+        public static bool IsCashWeapon(GearType type)
+        {
+            return type == GearType.cashWeapon;
         }
 
         /// <summary>
@@ -250,6 +312,97 @@ namespace WzComparerR2.CharaSim
                         return true;
                     }
                     return false;
+            }
+        }
+
+        public static bool IsEmblem(GearType type)
+        {
+            if (type == GearType.emblem || type == GearType.powerSource)
+            {
+                return true;
+            }
+            return false;
+        }
+
+        public static bool IsArmor(GearType type)
+        {
+            switch (type)
+            {
+                case GearType.cap:
+                case GearType.coat:
+                case GearType.longcoat:
+                case GearType.pants:
+                case GearType.shoes:
+                case GearType.glove:
+                case GearType.cape:
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        public static bool IsAccessory(GearType type)
+        {
+            switch (type)
+            {
+                case GearType.faceAccessory:
+                case GearType.eyeAccessory:
+                case GearType.earrings:
+                case GearType.ring:
+                case GearType.pendant:
+                case GearType.belt:
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        public static bool IsEnhanceable(GearType type)
+        {
+            switch (type)
+            {
+                case GearType.body:
+                case GearType.head:
+                case GearType.face:
+                case GearType.hair:
+                case GearType.hair2:
+                case GearType.face2:
+                case GearType.hair3:
+                case GearType.medal:
+                case GearType.android:
+                case GearType.shovel:
+                case GearType.pickaxe:
+                case GearType.arcaneSymbol:
+                case GearType.authenticSymbol:
+                case GearType.grandAuthenticSymbol:
+                case GearType.petEquip:
+                    return false;
+                default:
+                    return true;
+            }
+        }
+
+        public static bool CanEnhanceBonusStat(GearType type)
+        {
+            switch (type)
+            {
+                case GearType.faceAccessory:
+                case GearType.eyeAccessory:
+                case GearType.earrings:
+                case GearType.pendant:
+                case GearType.belt:
+                case GearType.cap:
+                case GearType.cape:
+                case GearType.coat:
+                case GearType.glove:
+                case GearType.longcoat:
+                case GearType.pocket:
+                case GearType.pants:
+                case GearType.shoes:
+                case GearType.totem:
+                    return true;
+                default:
+                    return IsWeapon(type) ? true : false;
             }
         }
 
@@ -399,6 +552,8 @@ namespace WzComparerR2.CharaSim
                     return GearType.tuner;
                 case 1214:
                     return GearType.breathShooter;
+                case 1215:
+                    return GearType.longSword;
                 case 1252:
                     return GearType.memorialStaff;
                 case 1259:
@@ -407,6 +562,12 @@ namespace WzComparerR2.CharaSim
                     return GearType.boxingCannon;
                 case 1404:
                     return GearType.chakram;
+                case 1712:
+                    return GearType.arcaneSymbol;
+                case 1713:
+                    return GearType.authenticSymbol;
+                case 1714:
+                    return GearType.grandAuthenticSymbol;
             }
             if (code / 10000 == 135)
             {
@@ -430,6 +591,20 @@ namespace WzComparerR2.CharaSim
                         return (GearType)(code / 10);
                 }
             }
+            // MSN support
+            if (code / 10000 == 179)
+            {
+                switch (code / 1000)
+                {
+                    case 1790:
+                    case 1791:
+                    case 1792:
+                    case 1793:
+                        return (GearType)(code / 1000);
+                    default:
+                        return (GearType)(code / 100 * 10);
+                }
+            }
             return (GearType)(code / 10000);
         }
 
@@ -441,12 +616,66 @@ namespace WzComparerR2.CharaSim
                 case GearType.emblem:
                 case GearType.powerSource:
                 case GearType.bit:
+                case GearType.jewel:
                 case (GearType)3: //发型
                     return 2;
             }
 
             return code / 1000 % 10;
         }
+
+        public static int GetCosmeticGender(int code)
+        {
+            var check = code / 1000;
+
+            switch (check / 10)
+            {
+                case 2: // face
+                case 5:
+                    switch (check % 10)
+                    {
+                        case 0:
+                        case 3:
+                        case 5:
+                        case 7:
+                            return 1; // 男
+
+                        case 1:
+                        case 4:
+                        case 6:
+                        case 8:
+                            return 2; // 女
+
+                        default:
+                            return 3; // 通用
+                    }
+
+                case 3: // hair
+                case 4:
+                case 6:
+                    switch (check % 10)
+                    {
+                        case 0:
+                        case 3:
+                        case 5:
+                        case 6:
+                            return 1; // 男
+
+                        case 1:
+                        case 4:
+                        case 7:
+                        case 8:
+                            return 2; // 女
+
+                        default:
+                            return 3; // 通用
+                    }
+
+                default:
+                    return 3; // 通用
+            }
+        }
+
 
         public static bool SpecialCanPotential(GearType type)
         {
@@ -636,12 +865,26 @@ namespace WzComparerR2.CharaSim
                             }
                             break;
 
+                        case "toolTipPreview":
+                            if (subNode.Value is Wz_Uol || subNode.Value is Wz_Png)
+                            {
+                                gear.ToolTIpPreview = BitmapOrigin.CreateFromNode(subNode, findNode);
+                            }
+                            break;
+
                         case "addition": //附加属性信息
                             foreach (Wz_Node addiNode in subNode.Nodes)
                             {
-                                Addition addi = Addition.CreateFromNode(addiNode);
-                                if (addi != null)
-                                    gear.Additions.Add(addi);
+                                if (addiNode.Text == "hideDesc")
+                                {
+                                    gear.AdditionHideDesc = true;
+                                }
+                                else
+                                {
+                                    Addition addi = Addition.CreateFromNode(addiNode);
+                                    if (addi != null)
+                                        gear.Additions.Add(addi);
+                                }
                             }
                             gear.Additions.Sort((add1, add2) => (int)add1.Type - (int)add2.Type);
                             break;
@@ -841,6 +1084,13 @@ namespace WzComparerR2.CharaSim
                             }
                             break;
 
+                        case "reqSpecJobs":
+                            foreach (Wz_Node jobNode in subNode.Nodes)
+                            {
+                                gear.ReqSpecJobs.Add(jobNode.GetValue<int>());
+                            }
+                            break;
+
                         default:
                             {
                                 GearPropType type;
@@ -964,7 +1214,7 @@ namespace WzComparerR2.CharaSim
 
             if (gear.Props.TryGetValue(GearPropType.incCHUC, out value))
             {
-                gear.Star = value;
+                //gear.Star = value;
             }
 
             return gear;

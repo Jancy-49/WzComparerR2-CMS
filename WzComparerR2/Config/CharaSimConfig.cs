@@ -9,6 +9,11 @@ namespace WzComparerR2.Config
     [SectionName("WcR2.CharaSim")]
     public sealed class CharaSimConfig : ConfigSectionBase<CharaSimConfig>
     {
+        public CharaSimConfig()
+        {
+            this.Enable22AniStyle = true;
+            this.CopyParsedSkillString = true;
+        }
         [ConfigurationProperty("selectedFontIndex")]
         public ConfigItem<int> SelectedFontIndex
         {
@@ -47,6 +52,12 @@ namespace WzComparerR2.Config
             get { return (CharaSimRecipeConfig)this["recipe"]; }
         }
 
+        [ConfigurationProperty("map")]
+        public CharaSimMapConfig Map
+        {
+            get { return (CharaSimMapConfig)this["map"]; }
+        }
+
         [ConfigurationProperty("mob")]
         public CharaSimMobConfig Mob
         {
@@ -57,6 +68,33 @@ namespace WzComparerR2.Config
         public CharaSimNpcConfig Npc
         {
             get { return (CharaSimNpcConfig)this["npc"]; }
+        }
+
+        [ConfigurationProperty("PreferredStringCopyMethod")]
+        public ConfigItem<int> PreferredStringCopyMethod
+        {
+            get { return (ConfigItem<int>)this["PreferredStringCopyMethod"]; }
+            set { this["PreferredStringCopyMethod"] = value; }
+        }
+
+        [ConfigurationProperty("CopyParsedSkillString")]
+        public ConfigItem<bool> CopyParsedSkillString
+        {
+            get { return (ConfigItem<bool>)this["CopyParsedSkillString"]; }
+            set { this["CopyParsedSkillString"] = value; }
+        }
+
+        [ConfigurationProperty("Enable22AniStyle")]
+        public ConfigItem<bool> Enable22AniStyle
+        {
+            get { return (ConfigItem<bool>)this["Enable22AniStyle"]; }
+            set { this["Enable22AniStyle"] = value; }
+        }
+
+        [ConfigurationProperty("Quest")]
+        public CharaSimQuestConfig Quest
+        {
+            get { return (CharaSimQuestConfig)this["Quest"]; }
         }
     }
 }
