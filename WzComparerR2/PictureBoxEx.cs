@@ -90,7 +90,6 @@ namespace WzComparerR2
             if (!detectionResult.Success)
                 return null;
             var textureLoader = new WzSpineTextureLoader(detectionResult.SourceNode.ParentNode, this.GraphicsDevice, PluginBase.PluginManager.FindWz);
-            textureLoader.EnableTextureMissingFallback = true;
             if (detectionResult.Version == SpineVersion.V2)
                 return SpineAnimationDataV2.Create(detectionResult, textureLoader);
             else if (detectionResult.Version == SpineVersion.V4)

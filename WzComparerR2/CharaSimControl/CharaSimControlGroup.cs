@@ -22,7 +22,6 @@ namespace WzComparerR2.CharaSimControl
         private AfrmItem frmItem;
         private AfrmStat frmStat;
         private AfrmEquip frmEquip;
-        private AfrmUnion frmUnion;
         private Character character;
         private StringLinker stringLinker;
 
@@ -78,20 +77,6 @@ namespace WzComparerR2.CharaSimControl
             }
         }
 
-        public AfrmUnion UIUnion
-        {
-            get
-            {
-                if (frmUnion == null)
-                {
-                    frmUnion = new AfrmUnion();
-                    frmUnion.KeyDown += new KeyEventHandler(afrm_KeyDown);
-                    frmUnion.Character = this.character;
-                }
-                return frmUnion;
-            }
-        }
-
         public Character Character
         {
             get { return character; }
@@ -105,8 +90,6 @@ namespace WzComparerR2.CharaSimControl
                     this.frmStat.Character = value;
                 if (frmEquip != null)
                     this.frmEquip.Character = value;
-                if (frmUnion != null)
-                    this.frmUnion.Character = value;
             }
         }
 

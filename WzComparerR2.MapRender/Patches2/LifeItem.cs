@@ -1,10 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using System.Text;
-using Microsoft.Xna.Framework;
-using WzComparerR2.Rendering;
 using WzComparerR2.WzLib;
 
 namespace WzComparerR2.MapRender.Patches2
@@ -28,8 +25,6 @@ namespace WzComparerR2.MapRender.Patches2
         public ItemView View { get; set; }
 
         public LifeInfo LifeInfo { get; set; }
-        public bool HideName { get; set; }
-        public CustomFontFunc CustomFont { get; set; }
 
         public static LifeItem LoadFromNode(Wz_Node node)
         {
@@ -79,21 +74,6 @@ namespace WzComparerR2.MapRender.Patches2
             return item;
         }
 
-        public static CustomFontFunc LoadCustomFontFunc(Wz_Node node)
-        {
-            var customFontFunc = new CustomFontFunc()
-            {
-                Font = node.Nodes["font"].GetValueEx<string>(null),
-                FontSize = node.Nodes["fontSize"]?.GetValue<int>(),
-            };
-            string fontColor = node.Nodes["fontColor"].GetValueEx<string>(null);
-            if (fontColor != null && int.TryParse(fontColor, NumberStyles.HexNumber, CultureInfo.InvariantCulture, out int argbColor))
-            {
-                customFontFunc.FontColor = MonogameUtils.ToXnaColor(argbColor);
-            }
-            return customFontFunc;
-        }
-
         private static LifeType ParseLifeType(string text)
         {
             switch (text)
@@ -124,11 +104,5 @@ namespace WzComparerR2.MapRender.Patches2
             Npc = 2
         }
 
-        public class CustomFontFunc
-        {
-            public string Font { get; set; }
-            public Color? FontColor { get; set; }
-            public int? FontSize { get; set; }
-        }
     }
 }

@@ -22,7 +22,6 @@ namespace WzComparerR2.CharaSim
             int idx = 0;
             StringBuilder sb = new StringBuilder();
             bool beginC = false;
-            bool beginG = false;
             while (idx < H.Length)
             {
                 if (H[idx] == '#')
@@ -138,30 +137,6 @@ namespace WzComparerR2.CharaSim
                         sb.Append(param.CStart);
                         idx += 2;
                     }
-                    else if (idx + 1 < H.Length && H[idx + 1] == '$')
-                    {
-                        if (idx + 2 < H.Length && H[idx + 2] == 'g')
-                        {
-                            beginG = true;
-                            sb.Append(param.GStart);
-                            idx += 3;
-                        }
-                    }
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
->>>>>>> a85b27c1e063b5817109d5f7fd2c91dbb8ed93b4
-                    else if (beginG)
-                    {
-                        beginG = false;
-                        sb.Append(param.GEnd);
-                        idx++;
-                    }
-<<<<<<< HEAD
-=======
-=======
->>>>>>> 7e9cc6786fcad07de1db367547c62c87f3fd5fe4
->>>>>>> a85b27c1e063b5817109d5f7fd2c91dbb8ed93b4
                     else if (beginC)
                     {
                         beginC = false;
@@ -174,7 +149,7 @@ namespace WzComparerR2.CharaSim
                         sb.Append(param.CStart);
                         idx++;
                     }
-                    else if (len > 0)//无法匹配 取最长的common段
+                    else //无法匹配 取最长的common段
                     {
                         string key = H.Substring(idx + 1, len);
                         if (Regex.IsMatch(key, @"^\d+$"))
@@ -186,10 +161,6 @@ namespace WzComparerR2.CharaSim
                             //sb.Append(0);//默认值
                         }
                         idx += len + 1;
-                    }
-                    else // skip last #
-                    {
-                        idx++;
                     }
                 }
                 else if (H[idx] == '\\')
@@ -231,7 +202,7 @@ namespace WzComparerR2.CharaSim
             //bool find = false;
             foreach (var kv in dict)
             {
-                if (kv.Key.Equals(key, StringComparison.OrdinalIgnoreCase))
+                if (kv.Key.Equals(key, StringComparison.CurrentCulture))//'CurrentCultureIgnoreCase' bugged #cR variable etc.
                 {
                     value = kv.Value;
                     return true;
@@ -248,7 +219,7 @@ namespace WzComparerR2.CharaSim
             return GetSkillSummary(skill, skill.Level, sr, param);
         }
 
-        public static string GetSkillSummary(Skill skill, int level, StringResult sr, SummaryParams param, SkillSummaryOptions options = default, bool doHighlight = false, string skillID = null, Dictionary<string, List<string>> DiffSkillTags = null)
+        public static string GetSkillSummary(Skill skill, int level, StringResult sr, SummaryParams param, SkillSummaryOptions options = default)
         {
             if (skill == null || sr == null)
                 return null;
@@ -265,44 +236,6 @@ namespace WzComparerR2.CharaSim
                 {
                     h = sr.SkillH[level - 1];
                 }
-                else if (sr.SkillH.Count == 1)
-                {
-                    h = sr.SkillH[0];
-                }
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
->>>>>>> a85b27c1e063b5817109d5f7fd2c91dbb8ed93b4
-                if (String.IsNullOrEmpty(h))
-                {
-                    try
-                    {
-                        h = sr.SkillH[0];
-                    }
-                    catch
-                    {
-                        ;
-                    }
-                }
-<<<<<<< HEAD
-=======
-=======
->>>>>>> 7e9cc6786fcad07de1db367547c62c87f3fd5fe4
->>>>>>> a85b27c1e063b5817109d5f7fd2c91dbb8ed93b4
-                var levelCommon = level <= skill.levelCommon.Count ? skill.levelCommon[level - 1] : skill.common;
-
-                if (doHighlight && DiffSkillTags != null && skillID != null)
-                {
-                    if (DiffSkillTags.ContainsKey(skillID))
-                    {
-                        foreach (var tags in DiffSkillTags[skillID])
-                        {
-                            h = (h == null ? null : Regex.Replace(h, "#" + tags + @"([^a-zA-Z0-9])", @"#$g#" + tags + "#$1"));
-                        }
-                    }
-                }
-
-                return GetSkillSummary(h, level, levelCommon, param, options);
             }
             else
             {
@@ -310,40 +243,9 @@ namespace WzComparerR2.CharaSim
                 {
                     h = sr.SkillH[0];
                 }
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
->>>>>>> a85b27c1e063b5817109d5f7fd2c91dbb8ed93b4
-
-                if (doHighlight && DiffSkillTags != null && skillID != null)
-                {
-                    if (DiffSkillTags.ContainsKey(skillID))
-                    {
-                        foreach (var tags in DiffSkillTags[skillID])
-                        {
-                            h = (h == null ? null : Regex.Replace(h, "#" + tags + @"([^a-zA-Z0-9])", @"#$g#" + tags + "#$1"));
-                        }
-                    }
-                }
-
-<<<<<<< HEAD
-=======
-=======
-                if (doHighlight && DiffSkillTags != null && skillID != null)
-                {
-                    if (DiffSkillTags.ContainsKey(skillID))
-                    {
-                        foreach (var tags in DiffSkillTags[skillID])
-                        {
-                            h = (h == null ? null : Regex.Replace(h, "#" + tags + @"([^a-zA-Z0-9])", @"#$g#" + tags + "#$1"));
-                        }
-                    }
-                }
-
->>>>>>> 7e9cc6786fcad07de1db367547c62c87f3fd5fe4
->>>>>>> a85b27c1e063b5817109d5f7fd2c91dbb8ed93b4
-                return GetSkillSummary(h, level, skill.Common, param, options);
             }
+
+            return GetSkillSummary(h, level, skill.Common, param, options);
         }
 
         public static Dictionary<string, string> GlobalVariableMapping { get; private set; }

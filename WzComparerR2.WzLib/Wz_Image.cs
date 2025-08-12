@@ -349,13 +349,6 @@ namespace WzComparerR2.WzLib
                     reader.SkipBytes(rawDataLen);
                     break;
 
-                case "Canvas#Video": // introduced in KMST v1181
-                    reader.SkipBytes(3);
-                    int videoLen = reader.ReadCompressedInt32();
-                    parent.Value = new Wz_Video((uint)reader.BaseStream.Position, videoLen, this);
-                    reader.SkipBytes(videoLen);
-                    break;
-
                 default:
                     throw new Exception("unknown wz tag: " + tag);
             }

@@ -10,7 +10,7 @@ namespace WzComparerR2.CharaSim
         {
             this.Name = "光卡的拉羊羊";
             this.status = new CharacterStatus();
-            this.status.Job = 16214;
+            this.status.Job = 4200;
             this.status.Level = 281;
             this.status.MaxHP.BaseVal = 65588;
             this.status.HP = 65588;
@@ -26,10 +26,10 @@ namespace WzComparerR2.CharaSim
             this.status.DojoFloor = 54;
 
             this.status.CriticalRate.BaseVal = 104;
-            this.status.CriticalDamage.BaseVal = 90;
+            this.status.MoveSpeed.BaseVal = 155;
+            this.status.Jump.BaseVal = 123;
+            this.status.CriticalDamage.BaseVal = 72;
 
-            this.status.combatPower.BaseVal = 49999999;
-            this.status.attackRange.BaseVal = 49999999;
             this.status.PADamage.BaseVal = 1082;
             this.status.MADamage.BaseVal = 3095;
 
@@ -41,19 +41,12 @@ namespace WzComparerR2.CharaSim
             this.status.BuffDurationIncR.BaseVal = 65;
             this.status.TamingMobDurationIncR.BaseVal = 20;
             
-            this.status.MesoGainR.BaseVal = 10;
-            this.status.DropGainR.BaseVal = 100;
-            this.status.ExpGainR = 120.00;
+            this.status.MesoGainR.BaseVal = 0;
+            this.status.DropGainR.BaseVal = 0;
+            this.status.ExpGainR = 12.50;
             this.status.StarForce.BaseVal = 281;
             this.status.ArcaneForce.BaseVal = 1320;
             this.status.AuthenticForce.BaseVal = 450;
-
-            this.status.Defense.BaseVal = 99999;
-            this.status.StatusResistance.BaseVal = 100;
-            this.status.MoveSpeed.BaseVal = 155;
-            this.status.Jump.BaseVal = 123;
-            this.status.Stance.BaseVal = 100;
-            this.status.attackSpeed.BaseVal = 7;
 
             this.itemSlots = new ItemBase[5][];
             for (int i = 0; i < this.itemSlots.Length; i++)
@@ -130,7 +123,7 @@ namespace WzComparerR2.CharaSim
             status.Jump.ResetAdd();
             status.CriticalRate.ResetAdd();
             status.CriticalDamage.ResetAdd();
-            status.DamageRate.ResetAdd();
+            status.DamageRate.ResetAll();
 
             //foreach (Buff buff in buffs)
             //{
@@ -197,7 +190,7 @@ namespace WzComparerR2.CharaSim
                 }
             }
 
-            long[] sum = new long[4] { status.Strength.GetSum(),
+            int[] sum = new int[4] { status.Strength.GetSum(),
                 status.Dexterity.GetSum(),
                 status.Intelligence.GetSum(),
                 status.Luck.GetSum() };
@@ -493,7 +486,7 @@ namespace WzComparerR2.CharaSim
                 && checkGearJobReq(gear.Props, gear.type);
         }
 
-        private bool checkGearPropReq(Dictionary<GearPropType, int> props, GearPropType prop, long value)
+        private bool checkGearPropReq(Dictionary<GearPropType, int> props, GearPropType prop, int value)
         {
             int v;
             if (!props.TryGetValue(prop, out v) || value >= v)
@@ -599,7 +592,7 @@ namespace WzComparerR2.CharaSim
             sign = 0;
         }
 
-        public static double CalcAttack(long str, long dex, long inte, long luk, long pad, long mad,
+        public static double CalcAttack(int str, int dex, int inte, int luk, int pad, int mad,
             GearType WeaponType, FormulaVersion version)
         {
             switch (WeaponType)

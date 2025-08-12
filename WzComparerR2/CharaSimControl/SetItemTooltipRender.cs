@@ -70,7 +70,10 @@ namespace WzComparerR2.CharaSimControl
             g.Dispose();
             return tooltip;
         }
-
+        private bool IsKoreanStringPresent(string checkString)
+        {
+            return checkString.Any(c => (c >= '\uAC00' && c <= '\uD7A3'));
+        }
         private bool isSpecialPet(int itemID)
         {
             if (itemID / 1000000 != 5)
@@ -81,7 +84,8 @@ namespace WzComparerR2.CharaSimControl
             if (itemNode != null)
             {
                 var item = Item.CreateFromNode(itemNode, PluginManager.FindWz);
-                return item.Props.TryGetValue(ItemPropType.wonderGrade, out long value) && (value == 1 || value == 4 || value == 5 || value == 6);
+                int value;
+                return item.Props.TryGetValue(ItemPropType.wonderGrade, out value) && (value == 1 || value == 4 || value == 5 || value == 6);
             }
             return false;
         }
@@ -102,7 +106,7 @@ namespace WzComparerR2.CharaSimControl
             var fmtItemType = new StringFormat() { Alignment = StringAlignment.Far };
 
             picHeight = 10;
-            if (Translator.IsKoreanStringPresent(this.SetItem.SetItemName))
+            if (IsKoreanStringPresent(this.SetItem.SetItemName))
             {
                 TextRenderer.DrawText(g, this.SetItem.SetItemName, GearGraphics.KMSItemDetailFont2, new Point(261, 10), ((SolidBrush)GearGraphics.GreenBrush2).Color, TextFormatFlags.HorizontalCenter);
             }
@@ -216,7 +220,7 @@ namespace WzComparerR2.CharaSimControl
                     }
 
                     itemName = itemName ?? string.Empty;
-                    typeName = typeName ?? "装备";
+                    typeName = typeName ?? "Equip";
 
                     if (!Regex.IsMatch(typeName, @"^(\(.*\)|（.*）|\[.*\])$"))
                     {
@@ -241,7 +245,7 @@ namespace WzComparerR2.CharaSimControl
                             //picHeight += 18;
                             int typeWidth = TextRenderer.MeasureText(g, typeName, GearGraphics.EquipDetailFont2, new Size(int.MaxValue, int.MaxValue), TextFormatFlags.NoPadding).Width;
                             TextRenderer.DrawText(g, typeName, GearGraphics.EquipDetailFont2, new Point(261 - 10 - typeWidth, picHeight), ((SolidBrush)brush).Color, TextFormatFlags.NoPadding);
-                            if (Translator.IsKoreanStringPresent(itemName))
+                            if (IsKoreanStringPresent(itemName))
                             {
                                 TextRenderer.DrawText(g, Compact(g, itemName, 261 - 12 - typeWidth - 10), GearGraphics.KMSItemDetailFont2, new Point(10, picHeight), ((SolidBrush)brush).Color, TextFormatFlags.NoPadding);
                             }
@@ -265,7 +269,7 @@ namespace WzComparerR2.CharaSimControl
                             //TextRenderer.DrawText(g, typeName, GearGraphics.EquipDetailFont2, new Point(261 - 10 - TextRenderer.MeasureText(g, typeName, GearGraphics.EquipDetailFont2, new Size(int.MaxValue, int.MaxValue), TextFormatFlags.NoPadding).Width, picHeight), ((SolidBrush)brush).Color, TextFormatFlags.NoPadding);
                             int typeWidth = TextRenderer.MeasureText(g, typeName, GearGraphics.EquipDetailFont2, new Size(int.MaxValue, int.MaxValue), TextFormatFlags.NoPadding).Width;
                             TextRenderer.DrawText(g, typeName, GearGraphics.EquipDetailFont2, new Point(261 - 10 - typeWidth, picHeight), ((SolidBrush)brush).Color, TextFormatFlags.NoPadding);
-                            if (Translator.IsKoreanStringPresent(itemName))
+                            if (IsKoreanStringPresent(itemName))
                             {
                                 TextRenderer.DrawText(g, Compact(g, itemName, 261 - 10 - typeWidth - 52), GearGraphics.KMSItemDetailFont2, new Point(10, picHeight), ((SolidBrush)brush).Color, TextFormatFlags.NoPadding);
                             }
@@ -421,7 +425,7 @@ namespace WzComparerR2.CharaSimControl
                         List<Potential> ops = (List<Potential>)prop.Value;
                         foreach (Potential p in ops)
                         {
-                            if (Translator.IsKoreanStringPresent(p.ConvertSummary()))
+                            if (IsKoreanStringPresent(p.ConvertSummary()))
                             {
                                 GearGraphics.DrawString(g, p.ConvertSummary(), GearGraphics.KMSItemDetailFont2, new Dictionary<string, Color>() { { string.Empty, color } }, 10, 244, ref picHeight, 15);
                             }
@@ -451,16 +455,8 @@ namespace WzComparerR2.CharaSimControl
                                 sr.Name = p.SkillID.ToString();
                             }
                             //string summary = "<" + sr.Name.Replace(Environment.NewLine, "") + "> Skill Available";
-                            if (Translator.IsKoreanStringPresent(sr.Name))
-                            {
-                                string summary = $"可使用<{sr.Name.Replace(Environment.NewLine, "")}>技能";
-                                GearGraphics.DrawPlainText(g, summary, GearGraphics.KMSItemDetailFont2, color, 10, 244, ref picHeight, 15);
-                            }
-                            else
-                            {
-                                string summary = $"可使用<{sr.Name.Replace(Environment.NewLine, "")}>技能";
-                                GearGraphics.DrawPlainText(g, summary, GearGraphics.EquipDetailFont2, color, 10, 244, ref picHeight, 15);
-                            }
+                            string summary = $"可使用<{sr.Name.Replace(Environment.NewLine, "")}>技能";
+                            GearGraphics.DrawPlainText(g, summary, GearGraphics.EquipDetailFont2, color, 10, 244, ref picHeight, 15);
                         }
                     }
                     else if (prop.Key == GearPropType.bonusByTime)

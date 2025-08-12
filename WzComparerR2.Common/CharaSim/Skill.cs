@@ -120,7 +120,6 @@ namespace WzComparerR2.CharaSim
         public bool footholdInstallSummoned { get; set; }
         public bool addAttackCoolTime { get; set; }
         public Tuple<int, int> RelationSkill { get; set; }
-        public bool IsSequenceOn { get; set; }
         public bool IsPetAutoBuff { get; set; }
         public bool DisableNextLevelInfo { get; set; }
         public bool petPassive { get; set; }
@@ -323,9 +322,6 @@ namespace WzComparerR2.CharaSim
                         break;
                     case "relationSkill":
                         skill.RelationSkill = Tuple.Create(childNode.Nodes["skillID"].GetValueEx<int>(0), childNode.Nodes["periodMin"].GetValueEx<int>(0));
-                        break;
-                    case "isSequenceOn":
-                        skill.IsSequenceOn = childNode.GetValue<int>() != 0;
                         break;
                     case "isPetAutoBuff":
                         skill.IsPetAutoBuff = childNode.GetValue<int>() != 0;
@@ -544,7 +540,8 @@ namespace WzComparerR2.CharaSim
             skill.PreBBSkill = false;
             if (skill.levelCommon.Count > 0)
             {
-                if (skill.common.Count <= 0 || skill.common.ContainsKey("maxLevel"))
+                if (skill.common.Count <= 0
+                    || (skill.common.Count == 1 && skill.common.ContainsKey("maxLevel")))
                 {
                     skill.PreBBSkill = true;
                 }

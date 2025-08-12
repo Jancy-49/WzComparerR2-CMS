@@ -250,10 +250,6 @@ namespace WzComparerR2.CharaSim
         price,
         notSale,
         scissorAmount_wz2,
-        //MSN exclusive stats
-        blockUpgradeStarforce,
-        blockUpgradeExtraOption,
-        mintable,
 
         gatherTool_incSkillLevel = 2000,
         gatherTool_incSpeed,

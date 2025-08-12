@@ -70,8 +70,7 @@ namespace WzComparerR2.Text
                             }
                             strPos++;
                         }
-                        else if (strPos < format.Length && format[strPos] == '$'
-                            && strPos + 1 < format.Length)//遇到#$(自定义) 更换为自定义颜色表
+                        else if (strPos < format.Length && format[strPos] == 'e')//遇到#e(自定义) 换紫蓝刷子并flush
                         {
                             flushRun();
                             colorStack.Push("e");
@@ -80,8 +79,14 @@ namespace WzComparerR2.Text
                         else if (strPos < format.Length && format[strPos] == 'g')//遇到#g(自定义) 换绿刷子并flush
                         {
                             flushRun();
-                            colorStack.Push(format.Substring(strPos, 2));
-                            strPos += 2;
+                            colorStack.Push("g");
+                            strPos++;
+                        }
+                        else if (strPos < format.Length && format[strPos] == '$')//遇到#$(自定义) 换青色刷子并flush
+                        {
+                            flushRun();
+                            colorStack.Push("$");
+                            strPos++;
                         }
                         else if (colorStack.Count == 1) //同#c
                         {
