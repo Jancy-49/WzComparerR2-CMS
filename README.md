@@ -3,7 +3,7 @@
 - 与其他客户端合作，例如 KMS、GMS、CMS。
 
 # Tooltip
-- EasyCompare可输出Skilltooltip、Itemtooltip、Eqptooltip、MapTooltip、Mobtooltip和Npctooltip
+- EasyCompare可输出Skilltooltip、Itemtooltip、Eqptooltip、MapTooltip、Mobtooltip、Npctooltip、QuestTooltip和SetTooltip
 
 # Modules
 - **WzComparerR2** 主程序
