@@ -6,7 +6,7 @@ using WzComparerR2.WzLib;
 
 namespace WzComparerR2.CharaSim
 {
-    public class Mob
+    public class Mob : IDisposable
     {
         public Mob()
         {
@@ -72,6 +72,7 @@ namespace WzComparerR2.CharaSim
         public bool PartyBonusMob { get; set; }
         public int WP { get; set; }
         public MobElemAttr ElemAttr { get; set; }
+        public long AttackPower { get; set; }
 
         public int? Link { get; set; }
         public bool Skeleton { get; set; }
@@ -81,8 +82,14 @@ namespace WzComparerR2.CharaSim
 
         public BitmapOrigin Default { get; set; }
         //public LifeAnimateCollection Animates { get; private set; }
-
-
+        public Wz_Node AvatarLook { get; set; }
+        public bool IsAvatarLook
+        {
+            get
+            {
+                return this.AvatarLook != null;
+            }
+        }
         public static Mob CreateFromNode(Wz_Node node, GlobalFindNodeFunction findNode)
         {
             int mobID;
@@ -157,6 +164,7 @@ namespace WzComparerR2.CharaSim
                         case "link": mobInfo.Link = propNode.GetValueEx<int>(0); break;
                         case "skeleton": mobInfo.Skeleton = propNode.GetValueEx<int>(0) != 0; break;
                         case "jsonLoad": mobInfo.JsonLoad = propNode.GetValueEx<int>(0) != 0; break;
+                        case "avatarLook": mobInfo.AvatarLook = propNode; break;
 
                         //case "skill": LoadSkill(mobInfo, propNode); break;
                         //case "attack": LoadAttack(mobInfo, propNode); break;
@@ -172,6 +180,7 @@ namespace WzComparerR2.CharaSim
                                 mobInfo.Revive.Add(reviveNode.GetValue<int>());
                             }
                             break;
+                        case "attackPower": mobInfo.AttackPower = propNode.GetValueEx<long>(0) * 10000; break;
                     }
                 }
             }
@@ -207,6 +216,12 @@ namespace WzComparerR2.CharaSim
             }
 
             return mobInfo;
+        }
+
+        public void Dispose()
+        {
+            if (this.Default.Bitmap != null)
+                this.Default.Bitmap.Dispose();
         }
     }
 }

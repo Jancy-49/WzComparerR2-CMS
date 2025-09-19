@@ -5,6 +5,7 @@ using System.Text;
 using WzComparerR2.WzLib;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using System.Buffers;
 
 namespace WzComparerR2.Rendering
 {
@@ -12,7 +13,12 @@ namespace WzComparerR2.Rendering
     {
         public static Texture2D ToTexture(this Wz_Png png, GraphicsDevice graphicsDevice)
         {
-            var format = GetTextureFormatOfPng(png.Form);
+            return ToTexture(png, 0, graphicsDevice);
+        }
+
+        public static Texture2D ToTexture(this Wz_Png png, int page, GraphicsDevice graphicsDevice)
+        {
+            var format = GetTextureFormatOfPng(png.Format);
             if (format == SurfaceFormat.Bgra4444)
             {
                 //检测是否支持 pre-win8
@@ -38,12 +44,20 @@ namespace WzComparerR2.Rendering
                 }
             }
 
-            var t2d = new Texture2D(graphicsDevice, png.Width, png.Height, false, format);
-            png.ToTexture(t2d, Point.Zero);
+            Texture2D t2d;
+            if (format == SurfaceFormatEx.BC7)
+            {
+                t2d = Texture2DEx.Create_BC7(graphicsDevice, png.Width, png.Height);
+            }
+            else
+            {
+                t2d = new Texture2D(graphicsDevice, png.Width, png.Height, false, format);
+            }
+            png.ToTexture(page, t2d, Point.Zero);
             return t2d;
         }
 
-        public static void ToTexture(this Wz_Png png, Texture2D texture, Point origin)
+        public static void ToTexture(this Wz_Png png, int page, Texture2D texture, Point origin)
         {
             Rectangle rect = new Rectangle(origin, new Point(png.Width, png.Height));
 
@@ -53,26 +67,26 @@ namespace WzComparerR2.Rendering
                 throw new ArgumentException("Png rectangle is out of bounds.");
             }
 
-            //检查像素格式
-            var format = GetTextureFormatOfPng(png.Form);
-
-            if (texture.Format == SurfaceFormat.Bgra32)
+            if (texture.Format == SurfaceFormat.Bgra32 && png.Format != Wz_TextureFormat.ARGB8888)
             {
+                // soft decoding
                 using (var bmp = png.ExtractPng())
                 {
                     bmp.ToTexture(texture, origin);
                 }
             }
-            else if (texture.Format != format)
+            else if (texture.Format != GetTextureFormatOfPng(png.Format))
             {
                 throw new ArgumentException($"Texture format({texture.Format}) does not fit the png form({png.Form}).");
             }
             else
             {
-                byte[] plainData = png.GetRawData();
-                if (plainData == null)
+                int bufferSize = png.GetRawDataSizePerPage();
+                byte[] plainData = ArrayPool<byte>.Shared.Rent(bufferSize);
+                int actualBytes = png.GetRawData(bufferSize * page, plainData.AsSpan(0, bufferSize));
+                if (actualBytes != bufferSize)
                 {
-                    throw new Exception("png decoding failed.");
+                    throw new ArgumentException($"Not enough bytes have been read. (actual:{actualBytes}, expected:{bufferSize})");
                 }
 
                 switch (png.Form)
@@ -83,7 +97,8 @@ namespace WzComparerR2.Rendering
                     case 513:
                     case 1026:
                     case 2050:
-                        texture.SetData(0, 0, rect, plainData, 0, plainData.Length);
+                    case 2562:
+                        texture.SetData(0, 0, rect, plainData, 0, bufferSize);
                         break;
 
                     case 3:
@@ -96,28 +111,37 @@ namespace WzComparerR2.Rendering
                         texture.SetData(0, 0, rect, pixel, 0, pixel.Length);
                         break;
 
+                    case 4098:
+                        texture.SetDataBC7(plainData.AsSpan(0, bufferSize));
+                        break;
+
                     default:
                         throw new Exception($"unknown png form ({png.Form}).");
                 }
+
+                ArrayPool<byte>.Shared.Return(plainData);
             }
         }
 
-        public static SurfaceFormat GetTextureFormatOfPng(int pngform)
+        public static SurfaceFormat GetTextureFormatOfPng(Wz_TextureFormat textureFormat)
         {
-            switch (pngform)
+            switch (textureFormat)
             {
-                case 1: return SurfaceFormat.Bgra4444;
-                case 2:
-                case 3: return SurfaceFormat.Bgra32;
-                case 257: return SurfaceFormat.Bgra5551;
-                case 513:
-                case 517: return SurfaceFormat.Bgr565;
-                case 1026: return SurfaceFormat.Dxt3;
-                case 2050: return SurfaceFormat.Dxt5;
+                case Wz_TextureFormat.ARGB4444: return SurfaceFormat.Bgra4444;
+                case Wz_TextureFormat.ARGB8888: return SurfaceFormat.Bgra32;
+                case Wz_TextureFormat.ARGB1555: return SurfaceFormat.Bgra5551;
+                case Wz_TextureFormat.RGB565: return SurfaceFormat.Bgr565;
+                case Wz_TextureFormat.DXT3: return SurfaceFormat.Dxt3;
+                case Wz_TextureFormat.DXT5: return SurfaceFormat.Dxt5;
+                case Wz_TextureFormat.A8: return SurfaceFormat.Alpha8;
+                case Wz_TextureFormat.RGBA1010102: return SurfaceFormat.Rgba1010102;
+                case Wz_TextureFormat.DXT1: return SurfaceFormat.Dxt1;
+                case Wz_TextureFormat.BC7: return SurfaceFormatEx.BC7;
+                case Wz_TextureFormat.RGBA32Float: return SurfaceFormat.Vector4;
+
                 default: return SurfaceFormat.Bgra32;
             }
         }
-
 
         public static Point ToPoint(this Wz_Vector vector)
         {

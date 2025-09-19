@@ -57,6 +57,13 @@ namespace WzComparerR2.Config
             set { this["ignoreEvalError"] = value; }
         }
 
+        [ConfigurationProperty("showparemeters", DefaultValue = true)]
+        public bool ShowParameters
+        {
+            get { return (bool)this["showparemeters"]; }
+            set { this["showparemeters"] = value; }
+        }
+
         [ConfigurationProperty("defaultLevel", DefaultValue = DefaultLevel.LevelMax)]
         public DefaultLevel DefaultLevel
         {

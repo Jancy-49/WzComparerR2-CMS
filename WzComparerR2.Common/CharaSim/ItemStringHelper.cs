@@ -29,9 +29,14 @@ namespace WzComparerR2.CharaSim
             }
         }
 
-        public static string GetGearPropString(GearPropType propType, int value)
+        public static string GetGearPropString(GearPropType propType, long value)
         {
             return GetGearPropString(propType, value, 0);
+        }
+
+        public static string[] GetGearPropString22(GearPropType propType, long value)
+        {
+            return GetGearPropString22(propType, value, 0);
         }
 
         /// <summary>
@@ -40,7 +45,7 @@ namespace WzComparerR2.CharaSim
         /// <param Name="propType">表示装备属性枚举GearPropType。</param>
         /// <param Name="Value">表示propType属性所对应的值。</param>
         /// <returns></returns>
-        public static string GetGearPropString(GearPropType propType, int value, int signFlag)
+        public static string GetGearPropString(GearPropType propType, long value, int signFlag)
         {
 
             string sign;
@@ -75,7 +80,7 @@ namespace WzComparerR2.CharaSim
                 case GearPropType.incMHPr: return "最大血量 : " + sign + value + "%";
                 case GearPropType.incMMP: return "最大魔量 : " + sign + value;
                 case GearPropType.incMMPr: return "最大魔量 : " + sign + value + "%";
-                case GearPropType.incMDF: return "MaxDF : " + sign + value;
+                case GearPropType.incMDF: return "最大精气 : " + sign + value;
                 case GearPropType.incPAD: return "攻击力 : " + sign + value;
                 case GearPropType.incPADr: return "攻击力 : " + sign + value + "%";
                 case GearPropType.incMAD: return "魔法攻击力 : " + sign + value;
@@ -109,12 +114,13 @@ namespace WzComparerR2.CharaSim
 
                 case GearPropType.only: return value == 0 ? null : "固有道具";
                 case GearPropType.tradeBlock: return value == 0 ? null : "不可交换";
-                case GearPropType.equipTradeBlock: return value == 0 ? null : "佩戴后不可交换";
-                case GearPropType.accountSharable: return value == 0 ? null : "只有世界内我的角色间可移动";
+                case GearPropType.equipTradeBlock: return value == 0 ? null : "装备后不可交换";
+                case GearPropType.accountSharable: return value == 0 ? null : "服务器内只有我的角色之间可以移动";
                 case GearPropType.sharableOnce: return value == 0 ? null : "世界内我的角色间可移动1次\n(移动后不可交换)";
-                case GearPropType.onlyEquip: return value == 0 ? null : "固有佩戴装备";
+                case GearPropType.onlyEquip: return value == 0 ? null : "固有装备物品";
                 case GearPropType.notExtend: return value == 0 ? null : "有效时间不可延长";
                 case GearPropType.accountSharableAfterExchange: return value == 0 ? null : "可交易1次\n(交易后只能在世界内我的角色之间移动)";
+                case GearPropType.mintable: return value == 0 ? null : "可铸造";
                 case GearPropType.tradeAvailable:
                     switch (value)
                     {
@@ -158,6 +164,391 @@ namespace WzComparerR2.CharaSim
             }
         }
 
+        public static string GetGearPropString2(GearPropType propType, long value, int signFlag)
+        {
+            string sign;
+            switch (signFlag)
+            {
+                default:
+                case 0: //默认处理符号
+                    sign = value > 0 ? "+" : null;
+                    break;
+
+                case 1: //固定加号
+                    sign = "+";
+                    break;
+
+                case 2: //无特别符号
+                    sign = "";
+                    break;
+            }
+            switch (propType)
+            {
+                case GearPropType.incSTR: return "力量";
+                case GearPropType.incSTRr: return "力量";
+                case GearPropType.incDEX: return "敏捷";
+                case GearPropType.incDEXr: return "敏捷";
+                case GearPropType.incINT: return "智力";
+                case GearPropType.incINTr: return "智力";
+                case GearPropType.incLUK: return "运气";
+                case GearPropType.incLUKr: return "运气";
+                case GearPropType.incAllStat: return "全属性";
+                case GearPropType.statR: return "全属性";
+                case GearPropType.incMHP: return "最大血量";
+                case GearPropType.incMHPr: return "最大血量";
+                case GearPropType.incMMP: return "最大魔量";
+                case GearPropType.incMMPr: return "最大魔量";
+                case GearPropType.incMDF: return "最大精气";
+                case GearPropType.incPAD: return "攻击力";
+                case GearPropType.incPADr: return "攻击力";
+                case GearPropType.incMAD: return "魔法攻击力";
+                case GearPropType.incMADr: return "魔法攻击力";
+                case GearPropType.incPDD: return "防御力";
+                case GearPropType.incPDDr: return "防御力";
+                //case GearPropType.incMDD: return "MAGIC DEF.";
+                //case GearPropType.incMDDr: return "MAGIC DEF.";
+                //case GearPropType.incACC: return "ACCURACY";
+                //case GearPropType.incACCr: return "ACCURACY";
+                //case GearPropType.incEVA: return "AVOIDABILITY";
+                //case GearPropType.incEVAr: return "AVOIDABILITY";
+                case GearPropType.incSpeed: return "移动速度";
+                case GearPropType.incJump: return "跳跃力";
+                case GearPropType.incCraft: return "手技";
+                case GearPropType.damR:
+                case GearPropType.incDAMr: return "伤害";
+                case GearPropType.incCr: return "爆击率";
+                case GearPropType.incCDr: return "暴击伤害";
+                case GearPropType.knockback: return "直接攻击时" + value + "的比率发生后退现象。";
+                case GearPropType.incPVPDamage: return "大乱斗时追加攻击力";
+                case GearPropType.incPQEXPr: return "组队任务经验值";
+                case GearPropType.incEXPr: return "经验值增加" + value + "%";
+                case GearPropType.incBDR:
+                case GearPropType.bdR: return "首领怪攻击力";
+                case GearPropType.incIMDR:
+                case GearPropType.imdR: return "无视防御力";
+                case GearPropType.limitBreak: return "伤害上限突破至" + ToChineseNumberExpr(value) + "。";
+                case GearPropType.reduceReq: return "减少佩戴等级 : - " + value;
+                case GearPropType.nbdR: return "普通怪物伤害";
+
+                case GearPropType.only: return value == 0 ? null : "固有道具";
+                case GearPropType.tradeBlock: return value == 0 ? null : "不可交换";
+                case GearPropType.equipTradeBlock: return value == 0 ? null : "佩戴后不可交换";
+                case GearPropType.accountSharable: return value == 0 ? null : "服务器内只有我的角色之间可以移动";
+                case GearPropType.sharableOnce: return value == 0 ? null : "世界内我的角色间可移动1次\n(移动后不可交换)";
+                case GearPropType.onlyEquip: return value == 0 ? null : "固有装备物品";
+                case GearPropType.notExtend: return value == 0 ? null : "有效时间不可延长";
+                case GearPropType.accountSharableAfterExchange: return value == 0 ? null : "可交易1次\n(交易后只能在世界内我的角色之间移动)";
+                case GearPropType.mintable: return value == 0 ? null : "可铸造";
+                case GearPropType.tradeAvailable:
+                    switch (value)
+                    {
+                        case 1: return " #c使用宿命剪刀，可以使物品交易1次。#";
+                        case 2: return " #c使用白金宿命剪刀，可以使物品交易1次。#";
+                        default: return null;
+                    }
+                case GearPropType.accountShareTag:
+                    switch (value)
+                    {
+                        case 1: return " #c使用物品共享牌，可以在同一账号内的角色间移动1次。#";
+                        default: return null;
+                    }
+                case GearPropType.noPotential: return value == 0 ? null : "不可设置潜能";
+                case GearPropType.fixedPotential: return value == 0 ? null : "不可重置潜能";
+                case GearPropType.superiorEqp: return value == 0 ? null : "道具强化成功时，可以获得更高的效果。";
+                case GearPropType.nActivatedSocket: return value == 0 ? null : "#c可以镶嵌星岩#";
+                case GearPropType.jokerToSetItem: return value == 0 ? null : " #c当前装备3个以上的所有套装道具中包含的幸运物品！#";
+                //case GearPropType.plusToSetItem: return value == 0 ? null : "#c装備すると、アイテムセットは2つ装備したものとしてカウントされます。#";
+                case GearPropType.abilityTimeLimited: return value == 0 ? null : "限期能力值";
+                case GearPropType.blockGoldHammer: return value == 0 ? null : "无法使用黄金锤";
+                case GearPropType.colorvar: return value == 0 ? null : "#c该装备可通过染色颜料来变更颜色.#";
+                case GearPropType.cantRepair: return value == 0 ? null : "无法修复";
+                case GearPropType.noLookChange: return value == 0 ? null : "不可使用勋章神秘铁砧";
+
+                case GearPropType.incAllStat_incMHP25: return "全属性" + sign + value + ", 最大血量 : " + sign + (value * 25);
+                case GearPropType.incAllStat_incMHP50_incMMP50: return "全属性: " + sign + value + ", 最大血量/最大魔量 : " + sign + (value * 50);
+                case GearPropType.incMHP_incMMP: return "最大血量/最大魔量";
+                case GearPropType.incMHPr_incMMPr: return "最大血量/最大魔量" + "%";
+                case GearPropType.incPAD_incMAD:
+                case GearPropType.incAD: return "攻击力/魔法攻击力";
+                case GearPropType.incPDD_incMDD: return "防御力";
+                //case GearPropType.incACC_incEVA: return "ACC/AVO :" + sign + value;
+
+                case GearPropType.incARC: return "神秘之力";
+                case GearPropType.incAUT: return "原初之力";
+
+                case GearPropType.Etuc: return "可进行卓越强化。(最多 : " + value + "次)";
+                case GearPropType.CuttableCount: return "可使用剪刀次数 : " + value + "次";
+                default: return null;
+            }
+        }
+
+        public static string[] GetGearPropString22(GearPropType propType, long value, int signFlag)
+        {
+            string[] res = new string[2];
+            string sign;
+            switch (signFlag)
+            {
+                default:
+                case 0: //默认处理符号
+                    sign = value > 0 ? "+" : null;
+                    break;
+
+                case 1: //固定加号
+                    sign = "+";
+                    break;
+
+                case 2: //无特别符号
+                    sign = "";
+                    break;
+            }
+            switch (propType)
+            {
+                case GearPropType.incSTR:
+                    res[0] = "力量";
+                    res[1] = sign + value;
+                    return res;
+                case GearPropType.incSTRr:
+                    res[0] = "力量";
+                    res[1] = sign + value + "%";
+                    return res;
+                case GearPropType.incDEX:
+                    res[0] = "敏捷";
+                    res[1] = sign + value;
+                    return res;
+                case GearPropType.incDEXr:
+                    res[0] = "敏捷";
+                    res[1] = sign + value + "%";
+                    return res;
+                case GearPropType.incINT:
+                    res[0] = "智力";
+                    res[1] = sign + value;
+                    return res;
+                case GearPropType.incINTr:
+                    res[0] = "智力";
+                    res[1] = sign + value + "%";
+                    return res;
+                case GearPropType.incLUK:
+                    res[0] = "运气";
+                    res[1] = sign + value;
+                    return res;
+                case GearPropType.incLUKr:
+                    res[0] = "运气";
+                    res[1] = sign + value + "%";
+                    return res;
+                case GearPropType.incAllStat:
+                    res[0] = "全属性";
+                    res[1] = sign + value;
+                    return res;
+                case GearPropType.statR:
+                    res[0] = "全属性";
+                    res[1] = sign + value + "%";
+                    return res;
+                case GearPropType.incMHP:
+                    res[0] = "最大血量";
+                    res[1] = sign + value;
+                    return res;
+                case GearPropType.incMHPr:
+                    res[0] = "最大血量";
+                    res[1] = sign + value + "%";
+                    return res;
+                case GearPropType.incMMP:
+                    res[0] = "最大魔量";
+                    res[1] = sign + value;
+                    return res;
+                case GearPropType.incMMPr:
+                    res[0] = "最大魔量";
+                    res[1] = sign + value + "%";
+                    return res;
+                case GearPropType.incMDF:
+                    res[0] = "最大精气";
+                    res[1] = sign + value;
+                    return res;
+                case GearPropType.incPAD:
+                    res[0] = "攻击力";
+                    res[1] = sign + value;
+                    return res;
+                case GearPropType.incPADr:
+                    res[0] = "攻击力";
+                    res[1] = sign + value + "%";
+                    return res;
+                case GearPropType.incMAD:
+                    res[0] = "魔法攻击力";
+                    res[1] = sign + value;
+                    return res;
+                case GearPropType.incMADr:
+                    res[0] = "魔法攻击力";
+                    res[1] = sign + value + "%";
+                    return res;
+                case GearPropType.incPDD:
+                    res[0] = "防御力";
+                    res[1] = sign + value;
+                    return res;
+                case GearPropType.incPDDr:
+                    res[0] = "防御力";
+                    res[1] = sign + value + "%";
+                    return res;
+                case GearPropType.incSpeed:
+                    res[0] = "移动速度";
+                    res[1] = sign + value;
+                    return res;
+                case GearPropType.incJump:
+                    res[0] = "跳跃力";
+                    res[1] = sign + value;
+                    return res;
+                case GearPropType.incCraft:
+                    res[0] = "手技";
+                    res[1] = sign + value;
+                    return res;
+                case GearPropType.damR:
+                case GearPropType.incDAMr:
+                    res[0] = "伤害";
+                    res[1] = sign + value + "%";
+                    return res;
+                case GearPropType.incCr:
+                    res[0] = "爆击率";
+                    res[1] = sign + value + "%";
+                    return res;
+                case GearPropType.incCDr:
+                    res[0] = "暴击伤害";
+                    res[1] = sign + value + "%";
+                    return res;
+                case GearPropType.knockback:
+                    res[0] = "直接攻击时" + value + "的比率发生后退现象。";
+                    return res;
+                case GearPropType.incPQEXPr:
+                    res[0] = "组队任务经验值";
+                    res[1] = "+" + value + "%";
+                    return res;
+                case GearPropType.incBDR:
+                case GearPropType.bdR:
+                    res[0] = "首领怪攻击力";
+                    res[1] = "+" + value + "%";
+                    return res;
+                case GearPropType.incIMDR:
+                case GearPropType.imdR:
+                    res[0] = "无视防御力";
+                    res[1] = "+" + value + "%";
+                    return res;
+                /*
+            case GearPropType.attackSpeed:
+                if (2 <= value && value <= 9)
+                {
+                    res[0] = "공격 속도";
+                    res[1] = $"{10 - value}단계";
+                }
+                return res;
+                */
+                case GearPropType.nbdR:
+                    res[0] = "普通怪物伤害";
+                    res[1] = "+" + value + "%";
+                    return res;
+                case GearPropType.incARC:
+                    res[0] = "神秘力量";
+                    res[1] = sign + value;
+                    return res;
+                case GearPropType.incAUT:
+                    res[0] = "原初力量";
+                    res[1] = sign + value;
+                    return res;
+                case GearPropType.incCHUC:
+                    res[0] = "星之力";
+                    res[1] = sign + value;
+                    return res;
+
+                case GearPropType.tradeBlock:
+                    res[0] = value == 0 ? null : "#$r不可交换#";
+                    return res;
+                case GearPropType.accountSharable:
+                    res[0] = value == 0 ? null : "#$r服务器内只有我的角色之间可以移动#";
+                    return res;
+                case GearPropType.sharableOnce:
+                    res[0] = value == 0 ? null : "#$r世界内我的角色间可移动1次(移动后不可交换)#";
+                    return res;
+                case GearPropType.only:
+                    res[0] = value == 0 ? null : "#$r固有道具#";
+                    return res;
+                case GearPropType.onlyEquip:
+                    res[0] = value == 0 ? null : "#$r固有装备物品#";
+                    return res;
+                case GearPropType.equipTradeBlock:
+                    res[0] = value == 0 ? null : "#$r装备后不可交换#";
+                    return res;
+                case GearPropType.notExtend:
+                    res[0] = value == 0 ? null : " (不可延长)";
+                    return res;
+                case GearPropType.accountSharableAfterExchange:
+                    res[0] = value == 0 ? null : "#$r可交易1次(交易后只能在世界内我的角色之间移动)#";
+                    return res;
+                case GearPropType.timeLimited:
+                    res[0] = value == 0 ? null : "有效时间";
+                    return res;
+                case GearPropType.abilityTimeLimited:
+                    res[0] = value == 0 ? null : "能力值有效时间";
+                    return res;
+                case GearPropType.noLookChange:
+                    res[0] = value == 0 ? null : "#$r不可使用勋章神秘铁砧#";
+                    return res;
+                case GearPropType.mintable:
+                    res[0] = value == 0 ? null : "#$r可铸造#";
+                    return res;
+                case GearPropType.tradeAvailable:
+                    switch (value)
+                    {
+                        case 1:
+                            res[0] = "#$g使用宿命剪刀，可以使物品交易1次。#";
+                            return res;
+                        case 2:
+                            res[0] = "#$g使用白金宿命剪刀，可以使物品交易1次。#";
+                            return res;
+                        default: return res;
+                    }
+                case GearPropType.accountShareTag:
+                    switch (value)
+                    {
+                        case 1:
+                            res[0] = "#$g使用物品共享牌，可以在同一账号内的角色间移动1次。#";
+                            return res;
+                        default: return res;
+                    }
+                //case GearPropType.noPotential: return value == 0 ? null : "잠재능력 설정 불가";
+                //case GearPropType.fixedPotential: return value == 0 ? null : "잠재능력 재설정 불가";
+                case GearPropType.superiorEqp:
+                    res[0] = value == 0 ? null : "道具强化成功时，可以获得更高的效果。";
+                    return res;
+                //case GearPropType.jokerToSetItem: return value == 0 ? null : "#c3개 이상 착용하고 있는 모든 세트 아이템에 포함되는 럭키 아이템! (단, 2개 이상의 럭키 아이템 착용 시 1개만 효과 적용.)#";
+                //case GearPropType.cantRepair: return value == 0 ? null : "수리 불가";
+
+                case GearPropType.incAllStat_incMHP25:
+                    res[0] = "全属性  " + sign + value + ", 最大血量  " + sign + (value * 25);
+                    return res;
+                case GearPropType.incAllStat_incMHP50_incMMP50:
+                    res[0] = "全属性  " + sign + value + ", 最大血量/最大魔量  " + sign + (value * 50);
+                    return res;
+                case GearPropType.incMHP_incMMP:
+                    res[0] = "最大血量/最大魔量  " + sign + value;
+                    return res;
+                case GearPropType.incMHPr_incMMPr:
+                    res[0] = "最大血量/最大魔量  " + sign + value + "%";
+                    return res;
+                case GearPropType.incPAD_incMAD:
+                case GearPropType.incAD:
+                    res[0] = "攻击力/魔法攻击力  " + sign + " " + value;
+                    return res;
+                case GearPropType.incPDD_incMDD:
+                    res[0] = "防御力  " + sign + value;
+                    return res;
+
+                case GearPropType.Etuc:
+                    res[0] = $"#$d卓越强化 : 无 (最多{value}次)#";
+                    return res;
+                case GearPropType.CuttableCount:
+                    res[0] = $" #$r(可使用剪刀次数：{value} / {value})#";
+                    return res;
+
+                case GearPropType.incEXPr:
+                default: return res;
+            }
+        }
 
         public static string GetGearPropDiffString(GearPropType propType, int value, int standardValue)
         {
@@ -183,7 +574,7 @@ namespace WzComparerR2.CharaSim
                     case GearPropType.incMDD:
                     case GearPropType.incSpeed:
                     case GearPropType.incJump:
-                        subfix = $"({standardValue} #e+{value - standardValue}#)"; break;
+                        subfix = $"({standardValue} #$e+{value - standardValue}#)"; break;
                     case GearPropType.bdR:
                     case GearPropType.incBDR:
                     case GearPropType.imdR:
@@ -191,7 +582,7 @@ namespace WzComparerR2.CharaSim
                     case GearPropType.damR:
                     case GearPropType.incDAMr:
                     case GearPropType.statR:
-                        subfix = $"({standardValue}% #e+{value - standardValue}%#)"; break;
+                        subfix = $"({standardValue}% #$y+{value - standardValue}%#)"; break;
 
                     case GearPropType.addSTR:
                     case GearPropType.addDEX:
@@ -205,13 +596,13 @@ namespace WzComparerR2.CharaSim
                     case GearPropType.addSpeed:
                     case GearPropType.addJump:
                     case GearPropType.addLvlDec:
-                        openAPISubfix += $"#g+{value - standardValue}#"; break;
+                        openAPISubfix += $"#$g+{value - standardValue}#"; break;
 
 
                     case GearPropType.addBDR:
                     case GearPropType.addDamR:
                     case GearPropType.addAllStatR:
-                        openAPISubfix += $"#g+{value - standardValue}%#"; break;
+                        openAPISubfix += $"#$g+{value - standardValue}%#"; break;
 
                     case GearPropType.scrollSTR:
                     case GearPropType.scrollDEX:
@@ -224,7 +615,7 @@ namespace WzComparerR2.CharaSim
                     case GearPropType.scrollDEF:
                     case GearPropType.scrollSpeed:
                     case GearPropType.scrollJump:
-                        openAPISubfix += $" #e+{value - standardValue}#"; break;
+                        openAPISubfix += $" #$e+{value - standardValue}#"; break;
 
                     case GearPropType.starSTR:
                     case GearPropType.starDEX:
@@ -244,9 +635,52 @@ namespace WzComparerR2.CharaSim
                 {
                     openAPISubfix = $"({standardValue}" + openAPISubfix + ")";
                 }
-                propStr = "#$" + propStr + "# " + subfix + openAPISubfix;
+                propStr = "#$y" + propStr + "# " + subfix + openAPISubfix;
             }
             return propStr;
+        }
+
+        public static string[] GetGearPropDiffString22(GearPropType propType, int value, int standardValue)
+        {
+            string[] res = new string[3];
+
+            var propStr = GetGearPropString22(propType, value, 0);
+            res[0] = propStr[0];
+            res[1] = propStr[1];
+
+            if (value > standardValue)
+            {
+                string suffix = null;
+                switch (propType)
+                {
+                    case GearPropType.incSTR:
+                    case GearPropType.incDEX:
+                    case GearPropType.incINT:
+                    case GearPropType.incLUK:
+                    case GearPropType.incMHP:
+                    case GearPropType.incMMP:
+                    case GearPropType.incMDF:
+                    case GearPropType.incARC:
+                    case GearPropType.incAUT:
+                    case GearPropType.incPAD:
+                    case GearPropType.incMAD:
+                    case GearPropType.incPDD:
+                    case GearPropType.incMDD:
+                    case GearPropType.incSpeed:
+                    case GearPropType.incJump:
+                        suffix = $"({standardValue} #$e+{value - standardValue}#)"; break;
+                    case GearPropType.bdR:
+                    case GearPropType.incBDR:
+                    case GearPropType.imdR:
+                    case GearPropType.incIMDR:
+                    case GearPropType.damR:
+                    case GearPropType.incDAMr:
+                    case GearPropType.statR:
+                        suffix = $"({standardValue}% #$e+{value - standardValue}%#)"; break;
+                }
+                res[2] = suffix;
+            }
+            return res;
         }
 
         /// <summary>
@@ -268,6 +702,20 @@ namespace WzComparerR2.CharaSim
             }
         }
 
+        public static string GetGearGradeString2(GearGrade rank)
+        {
+            switch (rank)
+            {
+                //case GearGrade.C: return "C级(一般物品)";
+                case GearGrade.B: return "B级";
+                case GearGrade.A: return "A级";
+                case GearGrade.S: return "S级";
+                case GearGrade.SS: return "SS级";
+                case GearGrade.Special: return "特殊";
+                default: return "-";
+            }
+        }
+
         /// <summary>
         /// 获取gearType所对应的字符串。
         /// </summary>
@@ -278,12 +726,16 @@ namespace WzComparerR2.CharaSim
             switch (type)
             {
                 //case GearType.body: return "Avatar (Body)";
-                case GearType.head: return "皮肤";
+                case GearType.head:
+                case GearType.head_n: return "皮肤";
                 case GearType.face:
-                case GearType.face2: return "脸型";
+                case GearType.face2:
+                case GearType.face_n: return "脸型";
                 case GearType.hair:
                 case GearType.hair2:
-                case GearType.hair3: return "发型";
+                case GearType.hair3:
+                case GearType.hair_n:
+                case GearType.hair2_n: return "发型";
                 case GearType.faceAccessory: return "脸饰";
                 case GearType.eyeAccessory: return "眼饰";
                 case GearType.earrings: return "耳环";
@@ -341,7 +793,7 @@ namespace WzComparerR2.CharaSim
                 case GearType.pickaxe: return "采矿工具";
                 case GearType.shovel: return "采药工具";
                 case GearType.pocket: return "口袋道具";
-                case GearType.dualBow: return "双刀";
+                case GearType.dualBow: return "双弩枪";
                 case GearType.handCannon: return "手炮";
                 case GearType.badge: return "徽章";
                 case GearType.emblem: return "纹章";
@@ -412,6 +864,7 @@ namespace WzComparerR2.CharaSim
 
                 case GearType.boxingCannon: return "拳封";
                 case GearType.boxingSky: return "拳天";
+                case GearType.jewel: return "宝玉";
 
                 case GearType.breathShooter: return "龙息臂箭";
                 case GearType.weaponBelt: return "武器腰带";
@@ -420,6 +873,18 @@ namespace WzComparerR2.CharaSim
 
                 case GearType.chakram: return "环刃";
                 case GearType.hexSeeker: return "索魂器";
+
+                case GearType.longSword: return "长剑";
+                case GearType.yeouiGem: return "如意宝珠";
+                
+                case GearType.memorialStaff: return "记忆长杖";
+                
+                case GearType.celestialLight: return "星光权杖";
+                case GearType.compass: return "引航指针";
+
+                case GearType.arcaneSymbol: return "神秘徽章";
+                case GearType.authenticSymbol: return "原初徽章";
+                case GearType.grandAuthenticSymbol: return "豪华原初徽章";
                 default: return null;
             }
         }
@@ -563,6 +1028,10 @@ namespace WzComparerR2.CharaSim
                 case GearType.boxingSky: return GetExtraJobReqString(175);
 
                 case GearType.ornament: return GetExtraJobReqString(162);
+                case GearType.longSword:
+                case GearType.yeouiGem: return GetExtraJobReqString(161);
+                case GearType.celestialLight:
+                case GearType.compass: return GetExtraJobReqString(182);
                 default: return null;
             }
         }
@@ -601,10 +1070,12 @@ namespace WzComparerR2.CharaSim
                 case 152: return "圣晶使徒可佩戴";
                 case 154: return "飞刃沙士可佩戴";
                 case 155: return "影魂异人可佩戴";
+                case 161: return "莲可佩戴";
                 case 162: return "元素师可佩戴";
                 case 164: return "虎影可佩戴";
                 case 172: return "森林小主可佩戴";
                 case 175: return "墨玄可佩戴";
+                case 182: return "施亚可佩戴";
 
                 default: return null;
             }
@@ -627,7 +1098,68 @@ namespace WzComparerR2.CharaSim
             }
         }
 
-        public static string GetItemPropString(ItemPropType propType, int value)
+        public static string GetExtraJobReqStringList(IEnumerable<int> specJobs, bool isMsnMode)
+        {
+            List<string> extraJobNames = new List<string>();
+            if (isMsnMode)
+            {
+                if (string.Join(",", specJobs) == "11,12,13,14,15,51")
+                {
+                    return "希纳斯骑士团职业";
+                }
+                else
+                {
+                    int classBranch = 0;
+                    int count = 0;
+                    foreach (int job in specJobs)
+                    {
+                        classBranch += job / 10;
+                        count++;
+                    }
+                    classBranch = classBranch / count;
+                    switch (classBranch)
+                    {
+                        case 0: return "冒险家职业群";
+                        case 1: return "希纳斯骑士团职业群";
+                        case 2: return "英雄职业群";
+                        case 3: return "反抗者职业群";
+                        case 4: return "晓之阵职业群";
+                        case 6: return "诺巴职业群";
+                        case 12: return "动漫合作职业群";
+                        case 15: return "翼人职业群";
+                        case 16: return "阿尼玛职业群";
+                        case 17: return "江湖职业群";
+                        case 18: return "Shine职业群";
+
+                    }
+                }
+            }
+            else
+            {
+                foreach (int specJob in specJobs)
+                {
+                    switch (specJob)
+                    {
+                        case 1: extraJobNames.AddRange(new[] { "英雄", "圣骑士" }); break;
+                        case 2: extraJobNames.AddRange(new[] { "魔导师（冰/雷）", "魔导师（火/毒）", "主教" }); break;
+                        case 4: extraJobNames.Add("侠盗"); break;
+                        case 11: extraJobNames.Add("魂骑士"); break;
+                        case 12: extraJobNames.Add("炎术士"); break;
+                        case 22: extraJobNames.Add("龙神"); break;
+                        case 32: extraJobNames.Add("唤灵斗师"); break;
+                        case 172: extraJobNames.Add("琳"); break;
+                        default: extraJobNames.Add(specJob.ToString()); break;
+                    }
+                }
+            }
+            if (extraJobNames.Count == 0)
+            {
+                return null;
+            }
+            return string.Join("、", extraJobNames) + "可佩戴";
+        }
+
+        public static string GetItemPropString(ItemPropType propType, long value)
         {
             switch (propType)
             {
@@ -655,6 +1187,8 @@ namespace WzComparerR2.CharaSim
                     return value == 0 ? "普通宠物 (不可与其它普通宠物重复使用)" : "多重宠物 (最多可与其它3个宠物重复使用)";
                 case ItemPropType.permanent:
                     return value == 0 ? null : "可以一直使用魔法的神奇宠物。";
+                case ItemPropType.mintable:
+                    return GetGearPropString(GearPropType.mintable, value);
                 default:
                     return null;
             }
@@ -1029,6 +1563,12 @@ namespace WzComparerR2.CharaSim
 
                 case 16000: return "虎影";
                 case 16001: return "元素师";
+                case 16002: return "莲";
+                case 16100: return "莲(1转)";
+                case 16110: return "莲(2转)";
+                case 16111: return "莲(3转)";
+                case 16112: return "莲(4转)";
+                case 16114: return "莲(6转)";
                 case 16200: return "元素师(1转)";
                 case 16210: return "元素师(2转)";
                 case 16211: return "元素师(3转)";
@@ -1053,6 +1593,13 @@ namespace WzComparerR2.CharaSim
                 case 17512: return "墨玄(4转)";
                 case 17514: return "墨玄(6转)";
 
+                case 18000: return "施亚";
+                case 18200: return "施亚(1转)";
+                case 18210: return "施亚(2转)";
+                case 18211: return "施亚(3转)";
+                case 18212: return "施亚(4转)";
+                case 18214: return "施亚(6转)";
+
 
                 case 40000: return "5转";
                 case 40001: return "5转(战士)";
@@ -1067,7 +1614,7 @@ namespace WzComparerR2.CharaSim
             return null;
         }
 
-        private static string ToChineseNumberExpr(int value)
+        public static string ToChineseNumberExpr(long value)
         {
             var sb = new StringBuilder(16);
             bool firstPart = true;
@@ -1078,14 +1625,14 @@ namespace WzComparerR2.CharaSim
             }
             if (value >= 1_0000_0000)
             {
-                int part = value / 1_0000_0000;
+                long part = value / 1_0000_0000;
                 sb.AppendFormat("{0}亿", part);
                 value -= part * 1_0000_0000;
                 firstPart = false;
             }
             if (value >= 1_0000)
             {
-                int part = value / 1_0000;
+                long part = value / 1_0000;
                 sb.Append(firstPart ? null : " ");
                 sb.AppendFormat("{0}万", part);
                 value -= part * 1_0000;

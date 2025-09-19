@@ -30,8 +30,8 @@ namespace WzComparerR2.CharaSim
 
         private int job;
         private int level;
-        private int hp;
-        private int mp;
+        private long hp;
+        private long mp;
         private long exp;
         private int ap;
         private int pop;
@@ -60,6 +60,8 @@ namespace WzComparerR2.CharaSim
         private CharaProp jump = null;
         //private CharaProp critDamMax = null;
         //private CharaProp critDamMin = null;
+        private CharaProp attrange = null;
+        private CharaProp cprange = null;
         private CharaProp critDam = null;
         private CharaProp mastery = null;
         private CharaProp damR = null;
@@ -85,6 +87,10 @@ namespace WzComparerR2.CharaSim
         private CharaProp arcaneForce = null;
         private CharaProp authenticForce = null;
 
+        private CharaProp stance = null;
+        private CharaProp defense = null;
+        private CharaProp attackspeed = null;
+
         #region 基础属性
         /// <summary>
         /// 获取或设置角色的职业代码。
@@ -107,7 +113,7 @@ namespace WzComparerR2.CharaSim
         /// <summary>
         /// 获取或设置角色的当前HP。
         /// </summary>
-        public int HP
+        public long HP
         {
             get { hp = Math.Max(0, Math.Min(maxHP.GetSum(), hp)); return hp; }
             set { value = Math.Max(0, Math.Min(maxHP.GetSum(), value)); hp = value; }
@@ -132,7 +138,7 @@ namespace WzComparerR2.CharaSim
         /// <summary>
         /// 获取或设置角色的当前MP。
         /// </summary>
-        public int MP
+        public long MP
         {
             get { mp = Math.Max(0, Math.Min(maxMP.GetSum(), mp)); return mp; }
             set { value = Math.Max(0, Math.Min(maxMP.GetSum(), value)); mp = value; }
@@ -233,6 +239,20 @@ namespace WzComparerR2.CharaSim
         #endregion
 
         #region 扩展属性
+        /// <sumary>
+        /// 获取角色的攻击力范围
+        /// </sumary>
+        public CharaProp attackRange
+        {
+            get { return attrange; }
+        }
+        /// <sumary>
+        /// 获取角色的战斗力范围
+        /// </sumary>
+        public CharaProp combatPower
+        {
+            get { return cprange; }
+        }
         /// <summary>
         /// 获取角色的攻击力。
         /// </summary>
@@ -450,6 +470,21 @@ namespace WzComparerR2.CharaSim
         public CharaProp AuthenticForce
         {
             get { return authenticForce; }
+        }
+
+        public CharaProp Stance
+        {
+            get { return stance; }
+        }
+
+        public CharaProp Defense
+        {
+            get { return defense; }
+        }
+
+        public CharaProp attackSpeed
+        {
+            get { return attackspeed; }
         }
         #endregion
     }

@@ -17,6 +17,7 @@ using Res = CharaSimResource.Resource;
 using MRes = WzComparerR2.MapRender.Properties.Resources;
 using static WzComparerR2.MapRender.UI.TooltipHelper;
 using TextureBlock = WzComparerR2.MapRender.UI.UIGraphics.RenderBlock<Microsoft.Xna.Framework.Graphics.Texture2D>;
+using WzComparerR2.Config;
 
 namespace WzComparerR2.MapRender.UI
 {

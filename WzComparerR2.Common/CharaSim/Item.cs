@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 
@@ -11,24 +12,27 @@ namespace WzComparerR2.CharaSim
     {
         public Item()
         {
-            this.Props = new Dictionary<ItemPropType, int>();
-            this.Specs = new Dictionary<ItemSpecType, int>();
+            this.Props = new Dictionary<ItemPropType, long>();
+            this.Specs = new Dictionary<ItemSpecType, long>();
             this.CoreSpecs = new Dictionary<ItemCoreSpecType, Wz_Node>();
             this.AddTooltips = new List<int>();
+            this.Recipes = new List<int>();
         }
 
         public int Level { get; set; }
         public string ConsumableFrom { get; set; }
         public string EndUseDate { get; set; }
         public string SamplePath { get; set; }
+        public ItemType type { get; set; }
 
         public List<GearLevelInfo> Levels { get; internal set; }
 
-        public Dictionary<ItemPropType, int> Props { get; private set; }
-        public Dictionary<ItemSpecType, int> Specs { get; private set; }
+        public Dictionary<ItemPropType, long> Props { get; private set; }
+        public Dictionary<ItemSpecType, long> Specs { get; private set; }
         public Dictionary<ItemCoreSpecType, Wz_Node> CoreSpecs { get; private set; }
         public List<int> AddTooltips { get; internal set; } // Additional Tooltips
-
+        public List<int> Recipes { get; private set; }
+        public Bitmap AvatarBitmap { get; set; }
         public bool Cash
         {
             get { return GetBooleanValue(ItemPropType.cash); }
@@ -39,10 +43,38 @@ namespace WzComparerR2.CharaSim
             get { return GetBooleanValue(ItemPropType.timeLimited); }
         }
 
+        public bool ShowCosmetic
+        {
+            get { return this.Specs.TryGetValue(ItemSpecType.cosmetic, out long value) && value > 0; }
+        }
+
         public bool GetBooleanValue(ItemPropType type)
         {
-            int value;
-            return this.Props.TryGetValue(type, out value) && value != 0;
+            return this.Props.TryGetValue(type, out long value) && value != 0;
+        }
+
+        public bool IsPet
+        {
+            get { return this.type == ItemType.Pet; }
+        }
+
+        public static ItemType GetItemType(int code)
+        {
+            switch (code / 1000000)
+            {
+                case 2:
+                    return ItemType.Consume;
+                case 3:
+                    return ItemType.Install;
+                case 4:
+                    return ItemType.Etc;
+                case 5:
+                    if (code / 10000 != 500)
+                        return ItemType.Cash;
+                    return ItemType.Pet;
+                default:
+                    return ItemType.Unknown;
+            }
         }
 
         public static Item CreateFromNode(Wz_Node node, GlobalFindNodeFunction findNode)
@@ -56,6 +88,15 @@ namespace WzComparerR2.CharaSim
                 return null;
             }
             item.ItemID = value;
+
+            // in msn the node could be UOL.
+            if (node.Value is Wz_Uol)
+            {
+                if ((node = node.ResolveUol()) == null)
+                {
+                    return item;
+                }
+            }
 
             Wz_Node infoNode = node.FindNodeByPath("info");
             if (infoNode != null)
@@ -240,12 +281,25 @@ namespace WzComparerR2.CharaSim
             {
                 foreach (Wz_Node subNode in specNode.Nodes)
                 {
-                    ItemSpecType type;
-                    if (Enum.TryParse(subNode.Text, out type))
+                    if (subNode.Text == "recipe")
+                    {
+                        if (subNode.Value == null && subNode.Nodes.Count > 0)
+                        {
+                            foreach (var recipeNode in subNode.Nodes)
+                            {
+                                item.Recipes.Add(recipeNode.GetValue<int>());
+                            }
+                        }
+                        else
+                        {
+                            item.Recipes.Add(subNode.GetValue<int>());
+                        }
+                    }
+                    else if (Enum.TryParse(subNode.Text, out ItemSpecType type))
                     {
                         try
                         {
-                            item.Specs.Add(type, Convert.ToInt32(subNode.Value));
+                            item.Specs.Add(type, Convert.ToInt64(subNode.Value));
                         }
                         finally
                         {
@@ -275,8 +329,19 @@ namespace WzComparerR2.CharaSim
                     }
                 }
             }
+
+            item.type = GetItemType(item.ItemID);
             return item;
         }
 
+        public enum ItemType
+        {
+            Unknown = 0,
+            Consume = 200,
+            Install = 300,
+            Etc = 400,
+            Pet = 500,
+            Cash = 501,
+        }
     }
 }

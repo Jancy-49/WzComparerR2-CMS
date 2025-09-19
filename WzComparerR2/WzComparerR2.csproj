@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFrameworks>net48;net6.0-windows</TargetFrameworks>
+    <TargetFrameworks>net48;net6.0-windows;net8.0-windows</TargetFrameworks>
     <UseWindowsForms>true</UseWindowsForms>
     <AssemblyName>WzComparerR2</AssemblyName>
     <RootNamespace>WzComparerR2</RootNamespace>
@@ -12,6 +12,7 @@
     <Nullable>disable</Nullable>
     <ApplicationIcon>wcr2_256.ico</ApplicationIcon>
     <GenerateResourceUsePreserializedResources>true</GenerateResourceUsePreserializedResources>
+	<Platforms>AnyCPU;ARM64</Platforms>
   </PropertyGroup>
   <Import Project="$(ProjectDir)..\Build\Common.props" />
   <PropertyGroup Condition="$(DotnetEdition) == 'core'">
@@ -24,6 +25,9 @@
     <!-- upgrade indirect dependency of SharpDX to prevent too many runtime libraries -->
     <PackageReference Include="Microsoft.NETCore.App" Version="2.1.30" />
   </ItemGroup>
+	<ItemGroup Condition="'$(TargetFramework)' == 'net48'">
+		<Reference Include="System.Net.Http" />
+	</ItemGroup>
   <ItemGroup Condition="$(DotnetEdition) == 'framework'">
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -41,6 +45,7 @@
     <ProjectReference Include="..\WzComparerR2.WzLib\WzComparerR2.WzLib.csproj" />
     <ProjectReference Include="..\WzComparerR2.PluginBase\WzComparerR2.PluginBase.csproj" />
     <ProjectReference Include="..\CharaSimResource\CharaSimResource.csproj" />
+    <PackageReference Include="HtmlAgilityPack" Version="1.12.1" />
     <PackageReference Include="MonoGame.Framework.WindowsDX" Version="$(MonogameFrameworkVersion)" />
     <PackageReference Include="SharpDX" Version="$(SharpDXVersion)" />
     <PackageReference Include="ManagedBass" Version="3.1.1" />

@@ -27,6 +27,7 @@ namespace WzComparerR2.Animation
             this.Texture = atlasPage;
             this.AtlasRect = atlasRect;
         }
+
         public Frame(Texture2D texture, Point origin, int z, int delay, bool blend) : this(texture)
         {
             this.Origin = origin;
@@ -34,15 +35,19 @@ namespace WzComparerR2.Animation
             this.Delay = delay;
             this.Blend = blend;
         }
+
         public Texture2D Texture { get; set; }
         public Rectangle? AtlasRect { get; set; }
         public Wz_Png Png { get; set; }
+        public int Page { get; set; }
         public Point Origin { get; set; }
         public int Z { get; set; }
         public int Delay { get; set; }
         public int A0 { get; set; }
         public int A1 { get; set; }
         public bool Blend { get; set; }
+        public Point LT { get; set; }
+        public Point RB { get; set; }
 
         public Rectangle Rectangle
         {
@@ -59,7 +64,7 @@ namespace WzComparerR2.Animation
                 else
                 {
                     return Rectangle.Empty;
-                }   
+                }
             }
         }
 
@@ -100,6 +105,12 @@ namespace WzComparerR2.Animation
                         case "origin":
                             frame.Origin = (propNode.Value as Wz_Vector).ToPoint();
                             break;
+                        case "lt":
+                            frame.LT = (propNode.Value as Wz_Vector).ToPoint();
+                            break;
+                        case "rb":
+                            frame.RB = (propNode.Value as Wz_Vector).ToPoint();
+                            break;
                         case "delay":
                             frame.Delay = propNode.GetValue<int>();
                             break;
@@ -117,7 +128,7 @@ namespace WzComparerR2.Animation
 
                 if (frame.Delay == 0)
                 {
-                    frame.Delay = 100;//给予默认delay
+                    frame.Delay = 120;//给予默认delay
                 }
                 return frame;
             }

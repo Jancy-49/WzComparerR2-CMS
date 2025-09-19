@@ -13,6 +13,9 @@ using TR = System.Windows.Forms.TextRenderer;
 using TextFormatFlags = System.Windows.Forms.TextFormatFlags;
 using WzComparerR2.Text;
 using WzComparerR2.WzLib;
+using WzComparerR2.Common;
+using System.Text.RegularExpressions;
+using System.Drawing.Text;
 
 namespace WzComparerR2.CharaSimControl
 {
@@ -24,6 +27,7 @@ namespace WzComparerR2.CharaSimControl
         static GearGraphics()
         {
             TBrushes = new Dictionary<string, TextureBrush>();
+            TBrushes22ani = new Dictionary<string, TextureBrush>();
             TBrushes["n"] = new TextureBrush(Resource.UIToolTip_img_Item_Frame2_n, WrapMode.Tile);
             TBrushes["ne"] = new TextureBrush(Resource.UIToolTip_img_Item_Frame2_ne, WrapMode.Clamp);
             TBrushes["e"] = new TextureBrush(Resource.UIToolTip_img_Item_Frame2_e, WrapMode.Tile);
@@ -33,10 +37,21 @@ namespace WzComparerR2.CharaSimControl
             TBrushes["w"] = new TextureBrush(Resource.UIToolTip_img_Item_Frame2_w, WrapMode.Tile);
             TBrushes["nw"] = new TextureBrush(Resource.UIToolTip_img_Item_Frame2_nw, WrapMode.Clamp);
             TBrushes["c"] = new TextureBrush(Resource.UIToolTip_img_Item_Frame2_c, WrapMode.Tile);
+            TBrushes22ani["n"] = new TextureBrush(Resource.UIToolTipNew_img_Item_Common_frame_flexible_n, WrapMode.Tile);
+            TBrushes22ani["ne"] = new TextureBrush(Resource.UIToolTipNew_img_Item_Common_frame_flexible_ne, WrapMode.Clamp);
+            TBrushes22ani["e"] = new TextureBrush(Resource.UIToolTipNew_img_Item_Common_frame_flexible_e, WrapMode.Tile);
+            TBrushes22ani["se"] = new TextureBrush(Resource.UIToolTipNew_img_Item_Common_frame_flexible_se, WrapMode.Clamp);
+            TBrushes22ani["s"] = new TextureBrush(Resource.UIToolTipNew_img_Item_Common_frame_flexible_s, WrapMode.Tile);
+            TBrushes22ani["sw"] = new TextureBrush(Resource.UIToolTipNew_img_Item_Common_frame_flexible_sw, WrapMode.Clamp);
+            TBrushes22ani["w"] = new TextureBrush(Resource.UIToolTipNew_img_Item_Common_frame_flexible_w, WrapMode.Tile);
+            TBrushes22ani["nw"] = new TextureBrush(Resource.UIToolTipNew_img_Item_Common_frame_flexible_nw, WrapMode.Clamp);
+            TBrushes22ani["c"] = new TextureBrush(Resource.UIToolTipNew_img_Item_Common_frame_flexible_c, WrapMode.Tile);
             SetFontFamily("MS Gothic");
         }
 
+        public static bool is22aniStyle { get; set; }
         public static readonly Dictionary<string, TextureBrush> TBrushes;
+        public static readonly Dictionary<string, TextureBrush> TBrushes22ani;
         public static readonly Font ItemNameFont = new Font("宋体", 14f, FontStyle.Bold, GraphicsUnit.Pixel);
         public static readonly Font ItemDetailFont = new Font("宋体", 12f, GraphicsUnit.Pixel);
         public static readonly Font LevelBoldFont = new Font("宋体", 12f, FontStyle.Bold, GraphicsUnit.Pixel);
@@ -49,10 +64,18 @@ namespace WzComparerR2.CharaSimControl
         public static readonly Font KMSItemNameFont = new Font("Dotum", 14f, FontStyle.Bold, GraphicsUnit.Pixel);
         public static readonly Font KMSItemDetailFont = new Font("Dotum", 12f, GraphicsUnit.Pixel);
         public static readonly Font KMSItemDetailFont2 = new Font("Dotum", 11f, GraphicsUnit.Pixel);
+        public static readonly Font Morris9Font = new Font("morris9", 12f, GraphicsUnit.Pixel);
+        public static readonly Font EquipMDMoris9Font = new Font("morris9", 12f, GraphicsUnit.Pixel);
+        public static readonly Font EquipMDMoris9FontBold = new Font("morris9", 12f, FontStyle.Bold, GraphicsUnit.Pixel);
+        public static readonly Font ClassSelectFontBold = new Font("Noto Sans SC", 22f, FontStyle.Bold, GraphicsUnit.Pixel);
+        public static readonly Font ClassSelectDescFont = new Font("Noto Sans SC", 14f, FontStyle.Bold, GraphicsUnit.Pixel);
 
+        private static PrivateFontCollection _pfc = new PrivateFontCollection();
         public static Font ItemNameFont2 { get; private set; }
         public static Font ItemDetailFont2 { get; private set; }
         public static Font EquipDetailFont2 { get; private set; }
+        public static Font AchievementTitleFont { get; private set; }
+        public static Font KMSAchievementTitleFont { get; private set; }
 
         public static void SetFontFamily(string fontName)
         {
@@ -76,6 +99,20 @@ namespace WzComparerR2.CharaSimControl
                 EquipDetailFont2 = null;
             }
             EquipDetailFont2 = new Font(fontName, 12f, GraphicsUnit.Pixel);
+
+            if (AchievementTitleFont != null)
+            {
+                AchievementTitleFont.Dispose();
+                AchievementTitleFont = null;
+            }
+            AchievementTitleFont = new Font(fontName, 16f, FontStyle.Bold, GraphicsUnit.Pixel);
+
+            if (KMSAchievementTitleFont != null)
+            {
+                KMSAchievementTitleFont.Dispose();
+                KMSAchievementTitleFont = null;
+            }
+            KMSAchievementTitleFont = new Font(fontName.StartsWith("Noto Sans") ? "Noto Sans KR" : "Dotum", 16f, FontStyle.Bold, GraphicsUnit.Pixel);
         }
 
         public static readonly Color GearBackColor = Color.FromArgb(204, 0, 51, 85);
@@ -94,7 +131,39 @@ namespace WzComparerR2.CharaSimControl
         public static readonly Brush WhiteBrush = new SolidBrush(Color.FromArgb(255, 255, 255));
         public static readonly Brush GrayBrush = new SolidBrush(Color.FromArgb(102, 102, 102));
         public static readonly Brush JMSGreenBrush = new SolidBrush(Color.FromArgb(119, 255, 0));
+        public static readonly Brush ScrollPurpleBrush = new SolidBrush(Color.FromArgb(175, 173, 255));
+        public static readonly Brush PotentialNormalBrush = new SolidBrush(Color.FromArgb(133, 145, 159));
+        public static readonly Brush PotentialRareBrush = new SolidBrush(Color.FromArgb(102, 255, 255));
+        public static readonly Brush PotentialEpicBrush = new SolidBrush(Color.FromArgb(187, 119, 255));
+        public static readonly Brush PotentialUniqueBrush = new SolidBrush(Color.FromArgb(255, 204, 0));
+        public static readonly Brush PotentialLegendaryBrush = new SolidBrush(Color.FromArgb(204, 255, 0));
         public static readonly Color OrangeBrushColor = Color.FromArgb(255, 153, 0);
+        public static readonly Brush LocationBrush = new SolidBrush(Color.FromArgb(209, 255, 50));
+
+        public static readonly Brush Equip22BrushGray = new SolidBrush(Color.FromArgb(183, 191, 197));
+        public static readonly Brush Equip22BrushDarkGray = new SolidBrush(Color.FromArgb(133, 145, 159));
+        public static readonly Brush Equip22BrushRed = new SolidBrush(Color.FromArgb(255, 102, 51));
+        public static readonly Brush Equip22BrushEmphasis = new SolidBrush(Color.FromArgb(255, 204, 0));
+        public static readonly Brush Equip22BrushScroll = new SolidBrush(Color.FromArgb(175, 173, 255));
+        public static readonly Brush Equip22BrushBonusStat = new SolidBrush(Color.FromArgb(10, 227, 173));
+        public static readonly Brush Equip22BrushRare = new SolidBrush(Color.FromArgb(102, 255, 255));
+        public static readonly Brush Equip22BrushEpic = new SolidBrush(Color.FromArgb(187, 129, 255));
+        public static readonly Brush Equip22BrushLegendary = new SolidBrush(Color.FromArgb(204, 255, 0));
+        public static readonly Brush Equip22BrushExceptional = new SolidBrush(Color.FromArgb(255, 51, 51));
+        public static readonly Brush Equip22BrushEmphasisBright = new SolidBrush(Color.FromArgb(255, 245, 77));
+
+        public static readonly Brush QuestBrushDefault = new SolidBrush(Color.FromArgb(171, 181, 187));
+        public static readonly Brush QuestBrushNpc = new SolidBrush(Color.FromArgb(102, 255, 255));
+        public static readonly Brush QuestBrushMob = new SolidBrush(Color.FromArgb(255, 0, 102));
+        public static readonly Brush QuestBrushMap = new SolidBrush(Color.FromArgb(221, 254, 1));
+        public static readonly Brush QuestBrushItem = new SolidBrush(Color.FromArgb(204, 143, 255));
+        public static readonly Brush QuestBrushEnd = new SolidBrush(Color.FromArgb(101, 117, 120));
+
+        public static readonly Brush AchievementPeriodBrush = new SolidBrush(Color.FromArgb(255, 255, 204));
+        public static readonly Brush AchievementRewardBrush = new SolidBrush(Color.FromArgb(221, 221, 221));
+
+        public static readonly Brush BarrierArcBrush = new SolidBrush(Color.FromArgb(218, 161, 255));
+        public static readonly Brush BarrierAutBrush = new SolidBrush(Color.FromArgb(218, 161, 255));
         /// <summary>
         /// 表示物品说明中带有#c标识的橙色字体画刷。
         /// </summary>
@@ -117,7 +186,7 @@ namespace WzComparerR2.CharaSimControl
         /// <summary>
         /// 表示装备属性额外说明中使用的卷轴强化数值画刷。
         /// </summary>
-        public static readonly Color ScrollEnhancementColor = Color.FromArgb(170, 170, 255);
+        public static readonly Color ScrollEnhancementColor = Color.FromArgb(175, 173, 255);
         public static readonly Brush ScrollEnhancementBrush = new SolidBrush(ScrollEnhancementColor);
         /// <summary>
         /// 表示用于绘制“攻击力提升”文字的灰色画刷。
@@ -131,6 +200,10 @@ namespace WzComparerR2.CharaSimControl
         /// 表示套装属性不可用的灰色画刷。
         /// </summary>
         public static readonly Brush SetItemGrayBrush = new SolidBrush(Color.FromArgb(119, 136, 153));
+        /// <summary>
+        /// 表示效果不可用的红色画刷。
+        /// </summary>
+        public static readonly Brush BlockRedBrush = new SolidBrush(Color.FromArgb(255, 0, 102));
         /// <summary>
         /// 表示装备tooltip中金锤子描述文字的颜色画刷。
         /// </summary>
@@ -253,12 +326,18 @@ namespace WzComparerR2.CharaSimControl
         /// <param Name="x">起始的x坐标。</param>
         /// <param Name="X1">每行终止的x坐标。</param>
         /// <param Name="y">起始行的y坐标。</param>
-        public static void DrawString(Graphics g, string s, Font font, int x, int x1, ref int y, int height)
+        public static void DrawString(Graphics g, string s, Font font, int x, int x1, ref int y, int height, TextAlignment alignment = TextAlignment.Left)
         {
-            DrawString(g, s, font, null, x, x1, ref y, height);
+            DrawString(g, s, font, null, x, x1, ref y, height, alignment);
         }
 
-        public static void DrawString(Graphics g, string s, Font font, IDictionary<string, Color> fontColorTable, int x, int x1, ref int y, int height)
+        public static void DrawString(Graphics g, string s, Font font, IDictionary<string, Color> fontColorTable, int x, int x1, ref int y, int height, TextAlignment alignment = TextAlignment.Left, int strictlyAlignLeft = 0, Color defaultColor = default)
+        {
+            DrawString(g, s, font, fontColorTable, null, null, x, x1, ref y, height, alignment, strictlyAlignLeft, defaultColor);
+        }
+
+        public static void DrawString(Graphics g, string s, Font font, IDictionary<string, Color> fontColorTable, IDictionary<string, Font> fontTable, IDictionary<string, Bitmap> imageTable,
+            int x, int x1, ref int y, int height, TextAlignment alignment = TextAlignment.Left, int strictlyAlignLeft = 0, Color defaultColor = default)
         {
             if (s == null)
                 return;
@@ -275,11 +354,13 @@ namespace WzComparerR2.CharaSimControl
                 }
                 r.UseGDIRenderer = true;
                 r.FontColorTable = fontColorTable;
-                r.DrawString(g, s, font, x, x1, ref y, height);
+                r.ImageTable = imageTable;
+                r.StrictlyAlignLeft = strictlyAlignLeft;
+                r.DrawString(g, s, font, x, x1, ref y, height, alignment, defaultColor);
             }
         }
 
-        public static void DrawPlainText(Graphics g, string s, Font font, Color color, int x, int x1, ref int y, int height)
+        public static void DrawPlainText(Graphics g, string s, Font font, Color color, int x, int x1, ref int y, int height, TextAlignment alignment = TextAlignment.Left, int strictlyAlignLeft = 0)
         {
             if (s == null)
                 return;
@@ -437,9 +518,24 @@ namespace WzComparerR2.CharaSimControl
             }
         }
 
+        public static void DrawItemCountNumber(Graphics g, int x, int y, string num)
+        {
+            Bitmap bitmap;
+            for (int i = 0; i < num.Length; i++)
+            {
+                string resourceName = $"Basic_img_ItemNo_{num[i]}";
+                bitmap = (Bitmap)Resource.ResourceManager.GetObject(resourceName);
+                if (bitmap != null)
+                {
+                    g.DrawImage(bitmap, x, y);
+                    x += bitmap.Width;
+                }
+            }
+        }
+
         public static void DrawNewTooltipBack(Graphics g, int x, int y, int width, int height)
         {
-            Dictionary<string, TextureBrush> res = TBrushes;
+            Dictionary<string, TextureBrush> res = is22aniStyle ? TBrushes22ani : TBrushes;
             //测算准线
             int[] guideX = new int[4] { 0, res["w"].Image.Width, width - res["e"].Image.Width, width };
             int[] guideY = new int[4] { 0, res["n"].Image.Height, height - res["s"].Image.Height, height };
@@ -476,8 +572,37 @@ namespace WzComparerR2.CharaSimControl
             g.FillRectangle(brush, guideX[x0], guideY[y0], guideX[x1] - guideX[x0], guideY[y1] - guideY[y0]);
         }
 
+        public static string GetNameTagString(StringResult sr)
+        {
+            string res;
+            string nickWithQR = sr["nickWithQR"];
+            string nickWithWSR = sr["nickWithWSR"];
+            if (nickWithQR != null)
+            {
+                string qrDefault = sr["qrDefault"] ?? string.Empty;
+                res = Regex.Replace(nickWithQR, "#qr.*?#", qrDefault);
+            }
+            else if (!string.IsNullOrEmpty(nickWithWSR))
+            {
+                string wsrDefault = sr["wsrDefault"] ?? string.Empty;
+                res = Regex.Replace(nickWithWSR, "#wsr.*?#", wsrDefault);
+            }
+            else
+            {
+                res = sr.Name;
+            }
+
+            return res;
+        }
+
         public static void DrawNameTag(Graphics g, Wz_Node resNode, string tagName, int picW, ref int picH)
         {
+            DrawNameTag(g, resNode, tagName, picW, out Rectangle rectResult, ref picH);
+        }
+
+        public static void DrawNameTag(Graphics g, Wz_Node resNode, string tagName, int picW, out Rectangle rectResult, ref int picH)
+        {
+            rectResult = new Rectangle();
             if (g == null || resNode == null)
                 return;
 
@@ -493,6 +618,145 @@ namespace WzComparerR2.CharaSimControl
             }).ToArray();
 
             Color color = Color.FromArgb(resNode.FindNodeByPath("clr").GetValueEx(-1));
+            BitmapOrigin ani0 = default;
+            Wz_Node ani0Node = resNode.FindNodeByPath(false, "ani", "0");
+            if (ani0Node != null)
+            {
+                ani0 = BitmapOrigin.CreateFromNode(ani0Node, PluginBase.PluginManager.FindWz);
+            }
+
+            //测试y轴大小
+            int offsetY = wce.Min(bmp => bmp.OpOrigin.Y);
+            int height = wce.Max(bmp => bmp.Rectangle.Bottom);
+            bool aniNameTag = resNode.FindNodeByPath("aniNameTag").GetValueEx(false);
+
+            //测试宽度
+            var font = GearGraphics.ItemDetailFont2;
+            var fmt = StringFormat.GenericTypographic;
+            int nameWidth = string.IsNullOrEmpty(tagName) ? 0 : (int)Math.Ceiling(g.MeasureString(tagName, font, 261, fmt).Width);
+            int center = picW / 2;
+
+            if (ani0.Bitmap == null) // legacy mode
+            {
+                int left = picW / 2 - nameWidth / 2;
+                int right = left + nameWidth;
+
+                //开始绘制背景
+                picH -= offsetY;
+                if (wce[0].Bitmap != null)
+                {
+                    g.DrawImage(wce[0].Bitmap, left - wce[0].Origin.X, picH - wce[0].Origin.Y);
+                }
+                if (wce[1].Bitmap != null) //不用拉伸 用纹理平铺 看运气
+                {
+                    var brush = new TextureBrush(wce[1].Bitmap);
+                    Rectangle rect = new Rectangle(left, picH - wce[1].Origin.Y, right - left, brush.Image.Height);
+                    brush.TranslateTransform(rect.X, rect.Y);
+                    g.FillRectangle(brush, rect);
+                    brush.Dispose();
+                }
+                if (wce[2].Bitmap != null)
+                {
+                    g.DrawImage(wce[2].Bitmap, right - wce[2].Origin.X, picH - wce[2].Origin.Y);
+                }
+
+                //绘制文字
+                if (!string.IsNullOrEmpty(tagName))
+                {
+                    using var brush = new SolidBrush(color);
+                    g.DrawString(tagName, font, brush, left, picH, fmt);
+                }
+            }
+            else  //ani mode
+            {
+                bool mixedAniMode = wce[1].Bitmap != null && (wce[1].Bitmap.Width > 1 || wce[1].Bitmap.Height > 1);
+
+                offsetY = Math.Min((!aniNameTag ? offsetY : 0), ani0.OpOrigin.Y);
+                height = Math.Max((!aniNameTag ? height : 0), ani0.Rectangle.Bottom);
+
+                int bgWidth = mixedAniMode || aniNameTag ? wce[1].Bitmap.Width : nameWidth;
+                int left = center - bgWidth / 2;
+                int right = left + bgWidth;
+                int nameLeft = center - nameWidth / 2;
+
+                picH -= offsetY;
+
+                if (mixedAniMode || aniNameTag)
+                {
+                    // draw legay center
+                    // Note: item 1143360 (MILESTONE) does not render well, ignore it.
+                    g.DrawImage(wce[1].Bitmap, left - wce[1].Origin.X, picH - wce[1].Origin.Y);
+                    // draw ani0 based on bg center position
+                    g.DrawImage(ani0.Bitmap, left - (!aniNameTag ? wce[1].Origin.X : 0) - ani0.Origin.X, picH - (!aniNameTag ? wce[1].Origin.Y : 0) - ani0.Origin.Y);
+                    if (!string.IsNullOrEmpty(tagName)) // draw name
+                    {
+                        using var brush = new SolidBrush(color);
+                        // offsetX with bg for better alignment
+                        g.DrawString(tagName, font, brush, nameLeft - (!aniNameTag ? wce[1].Origin.X : 0), picH, fmt);
+                    }
+
+                    rectResult.X = left - (!aniNameTag ? wce[1].Origin.X : 0) - ani0.Origin.X;
+                    rectResult.Width = ani0.Bitmap.Width;
+                }
+                else
+                {
+                    // draw ani0 only
+                    g.DrawImage(ani0.Bitmap, left - ani0.Origin.X, picH - ani0.Origin.Y);
+
+                    rectResult.X = left - ani0.Origin.X;
+                    rectResult.Width = ani0.Bitmap.Width;
+                }
+            }
+
+            picH += height;
+
+            rectResult.Height = height - offsetY;
+            rectResult.Y = picH - rectResult.Height;
+        }
+
+        public static void DrawChatBalloon(Graphics g, Wz_Node resNode, string tagName, int picW, ref int picH)
+        {
+            DrawChatBalloon(g, resNode, tagName, picW, out Rectangle rectResult, ref picH);
+        }
+
+        public static void DrawChatBalloon(Graphics g, Wz_Node resNode, string tagName, int picW, out Rectangle rectResult, ref int picH)
+        {
+            rectResult = new Rectangle();
+            if (g == null || resNode == null)
+                return;
+
+            // 애니메이션 체크
+            Wz_Node ani0Node = resNode.FindNodeByPath(false, "0");
+            if (ani0Node != null)
+            {
+                resNode = ani0Node;
+            }
+            Color color = Color.FromArgb(resNode.FindNodeByPath("clr").GetValueEx(-1));
+
+            //加载资源和文本颜色
+            var wce = new[] { "nw", "n", "head", "ne", "w", "c", "e", "sw", "s", "arrow", "se" }.Select(n =>
+            {
+                var node = resNode.FindNodeByPath(n);
+                if (node == null)
+                {
+                    return new BitmapOrigin();
+                }
+                return BitmapOrigin.CreateFromNode(node, PluginBase.PluginManager.FindWz);
+            }).ToArray();
+
+            // head, arrow가 없을 경우, 각각 n, s로 대체
+            bool noHead = false;
+            bool noArrow = false;
+            if (wce[2].Bitmap == null)
+            {
+                wce[2] = wce[1];
+                noHead = true;
+            }
+            if (wce[9].Bitmap == null)
+            {
+                wce[9] = wce[8];
+                noArrow = true;
+            }
 
             //测试y轴大小
             int offsetY = wce.Min(bmp => bmp.OpOrigin.Y);
@@ -500,49 +764,179 @@ namespace WzComparerR2.CharaSimControl
 
             //测试宽度
             var font = GearGraphics.ItemDetailFont2;
-            var fmt = StringFormat.GenericTypographic;
-            //int width = string.IsNullOrEmpty(tagName) ? 0 : (int)Math.Ceiling(g.MeasureString(tagName, font, 261, fmt).Width);
-            int width = string.IsNullOrEmpty(tagName) ? 0 : TextRenderer.MeasureText(g, tagName, font, new Size(int.MaxValue, int.MaxValue), TextFormatFlags.NoPadding).Width;
-            if (wce[1].Bitmap != null)
+            using var fmt = (StringFormat)StringFormat.GenericTypographic.Clone();
+            fmt.Alignment = StringAlignment.Center;
+            int nameWidth = string.IsNullOrEmpty(tagName) ? 0 : TextRenderer.MeasureText(g, tagName, font, new Size(int.MaxValue, int.MaxValue), TextFormatFlags.NoPadding).Width;
+            int dxn = wce[1].Bitmap?.Width ?? 0;
+            int dxs = wce[8].Bitmap?.Width ?? 0;
+            int dy = wce[5].Bitmap?.Height ?? 0;
+            int stageWidth = (noHead ? wce[8].Bitmap?.Width ?? 0 : wce[1].Bitmap?.Width ?? 0) * 2;
+            int centerWidth = noHead ? wce[9].Bitmap?.Width ?? 0 : wce[2].Bitmap?.Width ?? 0;
+            int maxNameWidth = stageWidth * 3 + centerWidth;
+            int center = picW / 2;
+            int line = 1;
+            int stageCount = 3;
+
+            // 멀티라인 확인
+            if (maxNameWidth > 0)
             {
-                width = (int)Math.Ceiling(1.0 * width / wce[1].Bitmap.Width) * wce[1].Bitmap.Width;
+                line += (nameWidth / maxNameWidth);
             }
-            int left = picW / 2 - width / 2;
-            int right = left + width;
+            if (line == 1)
+            {
+                var tmpNameWidth = nameWidth;
+                if (stageWidth > 0)
+                {
+                    while (tmpNameWidth - stageWidth > centerWidth + stageWidth * (stageCount - 1))
+                    {
+                        tmpNameWidth -= stageWidth;
+                        stageCount--;
+                    }
+                }
+            }
+
+            int middleWidth = (stageWidth) * stageCount + centerWidth;
+            int left = center - middleWidth / 2;
+            int right = left + middleWidth;
+
+            List<int> rectLeftPlus = new List<int>();
+            List<int> rectRightPlus = new List<int>();
+            rectResult.X = left;
+            rectResult.Width = middleWidth;
 
             //开始绘制背景
             picH -= offsetY;
-            if (wce[0].Bitmap != null)
+
+            // 상단
+            if (wce[0].Bitmap != null) // nw
             {
                 g.DrawImage(wce[0].Bitmap, left - wce[0].Origin.X, picH - wce[0].Origin.Y);
+
+                rectResult.X = Math.Min(rectResult.X, left - wce[0].Origin.X);
+                rectLeftPlus.Add(wce[0].Origin.X);
             }
-            if (wce[1].Bitmap != null) //不用拉伸 用纹理平铺 看运气
+            if (wce[1].Bitmap != null) // n
             {
-                var brush = new TextureBrush(wce[1].Bitmap);
-                Rectangle rect = new Rectangle(left, picH - wce[1].Origin.Y, right - left, brush.Image.Height);
-                brush.TranslateTransform(rect.X, rect.Y);
-                g.FillRectangle(brush, rect);
-                brush.Dispose();
+                if (noHead)
+                {
+                    using var brush = new TextureBrush(wce[1].Bitmap);
+                    Rectangle rect = new Rectangle(left, picH - wce[1].Origin.Y, right - wce[3].Origin.X - left, brush.Image.Height);
+                    brush.TranslateTransform(rect.X, rect.Y);
+                    g.FillRectangle(brush, rect);
+                }
+                else
+                {
+                    var pos1 = (center - centerWidth / 2) - wce[2].Origin.X;
+                    var pos2 = (center - centerWidth / 2 + centerWidth);
+
+                    using var brush = new TextureBrush(wce[1].Bitmap);
+                    Rectangle rect = new Rectangle(left, picH - wce[1].Origin.Y, pos1 - left, brush.Image.Height);
+                    brush.TranslateTransform(rect.X, rect.Y);
+                    g.FillRectangle(brush, rect);
+
+                    rect = new Rectangle(pos2, picH - wce[1].Origin.Y, right - wce[3].Origin.X - pos2, brush.Image.Height);
+                    brush.ResetTransform();
+                    brush.TranslateTransform(rect.X, rect.Y);
+                    g.FillRectangle(brush, rect);
+
+                    using var brushC = new TextureBrush(wce[2].Bitmap); // head
+                    rect = new Rectangle(pos1, picH - wce[2].Origin.Y, pos2 - pos1, brushC.Image.Height);
+                    brushC.TranslateTransform(rect.X, rect.Y);
+                    g.FillRectangle(brushC, rect);
+                }
             }
-            if (wce[2].Bitmap != null)
+            if (wce[3].Bitmap != null) // ne
             {
-                g.DrawImage(wce[2].Bitmap, right - wce[2].Origin.X, picH - wce[2].Origin.Y);
+                g.DrawImage(wce[3].Bitmap, right - wce[3].Origin.X, picH - wce[3].Origin.Y);
+
+                rectRightPlus.Add(wce[3].Bitmap.Width - wce[3].Origin.X);
             }
 
+            // 중단
+            for (int i = 0; i < line; i++)
+            {
+                if (wce[4].Bitmap != null) // w
+                {
+                    g.DrawImage(wce[4].Bitmap, left - wce[4].Origin.X, picH - wce[4].Origin.Y);
+
+                    rectResult.X = Math.Min(rectResult.X, left - wce[4].Origin.X);
+                    rectLeftPlus.Add(wce[4].Origin.X);
+                }
+                if (wce[5].Bitmap != null) // c
+                {
+                    using var brush = new TextureBrush(wce[5].Bitmap);
+                    Rectangle rect = new Rectangle(left, picH - wce[5].Origin.Y, right - wce[6].Origin.X - left, brush.Image.Height);
+                    brush.TranslateTransform(rect.X, rect.Y);
+                    g.FillRectangle(brush, rect);
+                }
+                if (wce[6].Bitmap != null) // e
+                {
+                    g.DrawImage(wce[6].Bitmap, right - wce[6].Origin.X, picH - wce[6].Origin.Y);
+
+                    rectRightPlus.Add(wce[6].Bitmap.Width - wce[6].Origin.X);
+                }
+                picH += dy;
+            }
+
+            // 하단
+            if (wce[7].Bitmap != null) // sw
+            {
+                g.DrawImage(wce[7].Bitmap, left - wce[7].Origin.X, picH - wce[7].Origin.Y);
+
+                rectResult.X = Math.Min(rectResult.X, left - wce[7].Origin.X);
+                rectLeftPlus.Add(wce[7].Origin.X);
+            }
+            if (wce[8].Bitmap != null) // s
+            {
+                if (noArrow)
+                {
+                    using var brush = new TextureBrush(wce[8].Bitmap);
+                    Rectangle rect = new Rectangle(left, picH - wce[8].Origin.Y, right - wce[10].Origin.X - left, brush.Image.Height);
+                    brush.TranslateTransform(rect.X, rect.Y);
+                    g.FillRectangle(brush, rect);
+                }
+                else
+                {
+                    var pos1 = (center - centerWidth / 2) - wce[9].Origin.X;
+                    var pos2 = (center - centerWidth / 2 + centerWidth);
+
+                    using var brush = new TextureBrush(wce[8].Bitmap);
+                    Rectangle rect = new Rectangle(left, picH - wce[8].Origin.Y, pos1 - left, brush.Image.Height);
+                    brush.TranslateTransform(rect.X, rect.Y);
+                    g.FillRectangle(brush, rect);
+
+                    rect = new Rectangle(pos2, picH - wce[8].Origin.Y, right - wce[10].Origin.X - pos2, brush.Image.Height);
+                    brush.ResetTransform();
+                    brush.TranslateTransform(rect.X, rect.Y);
+                    g.FillRectangle(brush, rect);
+
+                    using var brushC = new TextureBrush(wce[9].Bitmap); // arrow
+                    rect = new Rectangle(pos1, picH - wce[9].Origin.Y, pos2 - pos1, brushC.Image.Height);
+                    brushC.TranslateTransform(rect.X, rect.Y);
+                    g.FillRectangle(brushC, rect);
+                }
+            }
+            if (wce[10].Bitmap != null) // se
+            {
+                g.DrawImage(wce[10].Bitmap, right - wce[10].Origin.X, picH - wce[10].Origin.Y);
+
+                rectRightPlus.Add(wce[10].Bitmap.Width - wce[10].Origin.X);
+            }
+
+            // 텍스트 입력
             //绘制文字
             if (!string.IsNullOrEmpty(tagName))
             {
-                var brush = new SolidBrush(color);
-                //g.DrawString(tagName, font, brush, left, picH, fmt);
-                g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
-                //TextRenderer.DrawText(g, tagName, font, new Point(left, picH - 2), color, TextFormatFlags.NoPadding);2 juni
-                TextRenderer.DrawText(g, tagName, font, new Rectangle(left, picH, right - left, int.MaxValue), color, TextFormatFlags.HorizontalCenter | TextFormatFlags.NoPadding);
-                //TextRenderer.DrawText(g, tagName, font, new Rectangle(left, picH, right - left, int.MaxValue), color, TextFormatFlags.NoPadding);
-                g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.ClearTypeGridFit;
-                brush.Dispose();
+                using var brush = new SolidBrush(color);
+                Rectangle rect = new Rectangle(left, picH - dy * line + 1, right - left, picH);
+                g.DrawString(tagName, font, brush, rect, fmt);
             }
 
             picH += height;
+
+            rectResult.Width += rectLeftPlus.DefaultIfEmpty(0).Max() + rectRightPlus.DefaultIfEmpty(0).Max();
+            rectResult.Height = dy * line + height - offsetY;
+            rectResult.Y = picH - rectResult.Height;
         }
 
         [DllImport("user32.dll")]
@@ -566,6 +960,8 @@ namespace WzComparerR2.CharaSimControl
 
             public bool UseGDIRenderer { get; set; }
             public IDictionary<string, Color> FontColorTable { get; set; }
+            public IDictionary<string, Font> FontTable { get; set; }
+            public IDictionary<string, Bitmap> ImageTable { get; set; }
 
             const int MAX_RANGES = 32;
             StringFormat fmt;
@@ -575,19 +971,19 @@ namespace WzComparerR2.CharaSimControl
             int drawX;
             Color defaultColor;
 
-            public void DrawString(Graphics g, string s, Font font, int x, int x1, ref int y, int height)
+            public void DrawString(Graphics g, string s, Font font, int x, int x1, ref int y, int height, TextAlignment alignment = TextAlignment.Left, Color defaultColor = default)
             {
                 //初始化环境
                 this.g = g;
                 this.drawX = x;
-                this.defaultColor = Color.White;
+                this.defaultColor = defaultColor == default ? Color.White : defaultColor;
                 float fontLineHeight = GetFontLineHeight(font);
                 this.infinityRect = new RectangleF(0, 0, ushort.MaxValue, fontLineHeight);
 
-                base.DrawFormatString(s, font, x1 - x, ref y, height);
+                base.DrawFormatString(s, font, x1 - x, ref y, height, alignment);
             }
 
-            public void DrawPlainText(Graphics g, string s, Font font, Color color, int x, int x1, ref int y, int height)
+            public void DrawPlainText(Graphics g, string s, Font font, Color color, int x, int x1, ref int y, int height, TextAlignment alignment = TextAlignment.Left)
             {
                 //初始化环境
                 this.g = g;
@@ -604,7 +1000,7 @@ namespace WzComparerR2.CharaSimControl
                 }
                 else
                 {
-                    base.DrawPlainText(s, font, x1 - x, ref y, height);
+                    base.DrawPlainText(s, font, x1 - x, ref y, height, alignment);
                 }
             }
 
@@ -617,18 +1013,25 @@ namespace WzComparerR2.CharaSimControl
             protected override void MeasureRuns(List<Run> runs)
             {
                 List<Run> tempRuns = new List<Run>(MAX_RANGES);
+                int imageWidth = 0;
+                int tmpWidth = 0;
 
                 foreach (var run in runs)
                 {
                     tempRuns.Add(run);
+                    if (run.IsImage)
+                    {
+                        tmpWidth += run.ImageWidth;
+                    }
                     if (tempRuns.Count >= MAX_RANGES)
                     {
-                        MeasureBatch(tempRuns);
+                        MeasureBatch(tempRuns, imageWidth);
                         tempRuns.Clear();
+                        imageWidth = tmpWidth;
                     }
                 }
 
-                MeasureBatch(tempRuns);
+                MeasureBatch(tempRuns, imageWidth);
 
                 //failed
                 if (runs.Where(run => !run.IsBreakLine && run.Length > 0)
@@ -650,9 +1053,15 @@ namespace WzComparerR2.CharaSimControl
                 }
             }
 
-            private void MeasureBatch(List<Run> runs)
+            private void MeasureBatch(List<Run> runs, int imageWidth = 0)
             {
                 string text = sb.ToString();
+                Func<int, bool> isSingleKoreanChar = (i) => i >= 0 && runs[i].Length == 1 && text[runs[i].StartIndex] >= '가' && text[runs[i].StartIndex] <= '힣';
+                var koreanSize = TR.MeasureText(g, "가", font, Size.Round(infinityRect.Size), TextFormatFlags.NoPadding | TextFormatFlags.NoPrefix);
+                Func<int, bool> isSpace = (i) => i >= 0 && runs[i].Length == 1 && text[runs[i].StartIndex] == ' ';
+                var spaceSize = TR.MeasureText(g, " ", font, Size.Round(infinityRect.Size), TextFormatFlags.NoPadding | TextFormatFlags.NoPrefix);
+                Func<int, bool> isNumber = (i) => i >= 0 && runs[i].Length == 1 && text[runs[i].StartIndex] >= '0' && text[runs[i].StartIndex] <= '9';
+                var numberSize = TR.MeasureText(g, "0", font, Size.Round(infinityRect.Size), TextFormatFlags.NoPadding | TextFormatFlags.NoPrefix);
                 if (runs.Count > 0 && !runs.All(run => run.IsBreakLine))
                 {
                     fmt.SetMeasurableCharacterRanges(runs.Select(r => new CharacterRange(r.StartIndex, r.Length)).ToArray());
@@ -661,7 +1070,37 @@ namespace WzComparerR2.CharaSimControl
                     {
                         var layout = new RectangleF();
                         if (this.UseGDIRenderer)
-                            layout = new RectangleF(new Point(TR.MeasureText(g, text.Substring(0, runs[i].StartIndex), font, Size.Round(infinityRect.Size), TextFormatFlags.NoPadding | TextFormatFlags.NoPrefix).Width, 0), TR.MeasureText(g, text.Substring(runs[i].StartIndex, runs[i].Length), font, Size.Round(infinityRect.Size), TextFormatFlags.NoPadding | TextFormatFlags.NoPrefix));
+                        {
+                            var prefixLayout = new Point();
+                            if (isSingleKoreanChar(i - 1))
+                                prefixLayout = new Point(runs[i - 1].X + koreanSize.Width, 0);
+                            else if (i > 0 && runs[i - 1].IsImage)
+                                prefixLayout = new Point(runs[i - 1].X + runs[i - 1].ImageWidth, 0);
+                            else if (isSpace(i - 1))
+                                prefixLayout = new Point(runs[i - 1].X + spaceSize.Width, 0);
+                            else if (isNumber(i - 1))
+                                prefixLayout = new Point(runs[i - 1].X + numberSize.Width, 0);
+                            else
+                                prefixLayout = new Point(TR.MeasureText(g, text.Substring(0, runs[i].StartIndex), font, Size.Round(infinityRect.Size), TextFormatFlags.NoPadding | TextFormatFlags.NoPrefix).Width
+                                    + imageWidth, 0);
+
+                            var currentLayout = new Size();
+                            if (isSingleKoreanChar(i))
+                                currentLayout = koreanSize;
+                            else if (runs[i].IsImage)
+                            {
+                                currentLayout = new Size(runs[i].ImageWidth, runs[i].ImageHeight); ;
+                                imageWidth += currentLayout.Width;
+                            }
+                            else if (isSpace(i))
+                                currentLayout = spaceSize;
+                            else if (isNumber(i))
+                                currentLayout = numberSize;
+                            else
+                                currentLayout = TR.MeasureText(g, text.Substring(runs[i].StartIndex, runs[i].Length), font, Size.Round(infinityRect.Size), TextFormatFlags.NoPadding | TextFormatFlags.NoPrefix);
+
+                            layout = new RectangleF(prefixLayout, currentLayout);
+                        }
                         else
                             layout = regions[i].GetBounds(g);
                         runs[i].X = (int)Math.Round(layout.Left);
@@ -721,22 +1160,38 @@ namespace WzComparerR2.CharaSimControl
                 return rects;
             }
 
-            protected override void Flush(StringBuilder sb, int startIndex, int length, int x, int y, string colorID)
+            protected override void Flush(StringBuilder sb, int startIndex, int length, int x, int y, string colorID, string fontID, string imageID, int imageHeight)
             {
                 string content = sb.ToString(startIndex, length);
                 colorID = colorID ?? string.Empty;
+                fontID = fontID ?? string.Empty;
+                imageID = imageID ?? string.Empty;
                 Color color = Color.Transparent; // VS2019 fix
+                Font font = this.font;
+                Bitmap bmp = null;
                 if (!(this.FontColorTable?.TryGetValue(colorID, out color) ?? false))
                 {
                     switch (colorID)
                     {
                         case "c": color = GearGraphics.OrangeBrushColor; break;
-                        case "e": color = GearGraphics.ScrollEnhancementColor; break;
-                        case "g": color = GearGraphics.gearGreenColor; break;
-                        case "$": color = GearGraphics.gearCyanColor; break;
                         default: color = this.defaultColor; break;
                     }
                 }
+                if (!(this.FontTable?.TryGetValue(fontID, out font) ?? false))
+                {
+                    switch (fontID)
+                    {
+                        default: font = this.font; break;
+                    }
+                }
+                if ((this.ImageTable?.TryGetValue(imageID, out bmp) ?? false) && bmp != null) // ImageTable로 전달된 이미지 그리기
+                {
+                    var dx = Math.Max((32 - bmp.Width) / 2, 0);
+                    var dy = -Math.Max(Math.Min(bmp.Height, imageHeight) - font.Height, 0);
+                    g.DrawImage(bmp, this.drawX + x + dx, y + dy);
+                    return;
+                }
+
                 if (this.UseGDIRenderer)
                 {
                     TR.DrawText(g, content, font, new Point(this.drawX + x, y), color, TextFormatFlags.NoPrefix | TextFormatFlags.NoPadding);
