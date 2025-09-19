@@ -2,8 +2,11 @@
 - 这是一个专为CMS设计的冒险岛提取工具。
 - 与其他客户端合作，例如 KMS、GMS、CMS。
 
+# 帕普拉图斯主页
+- 融合[帕普拉图斯主页](https://jancy-49.github.io/Papulatus-Daily/index.html)，实现资讯版块跟进功能。
+
 # Tooltip
-- EasyCompare可输出Skilltooltip、Itemtooltip、Eqptooltip、MapTooltip、Mobtooltip和Npctooltip
+- EasyCompare可输出Skilltooltip、Itemtooltip、Eqptooltip、MapTooltip、Mobtooltip、Npctooltip、QuestTooltip和AchvTooltip
 
 # Modules
 - **WzComparerR2** 主程序
