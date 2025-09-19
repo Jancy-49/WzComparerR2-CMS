@@ -10,15 +10,11 @@ using WzComparerR2.PluginBase;
 using WzComparerR2.WzLib;
 using WzComparerR2.Common;
 using WzComparerR2.CharaSim;
-using System.Linq;
 
 namespace WzComparerR2.CharaSimControl
 {
     public class CashPackageTooltipRender : TooltipRender
     {
-        private bool isTranslateRequired = Translator.IsTranslateEnabled;
-        private bool isCurrencyConversionEnabled = (Translator.DefaultDesiredCurrency != "none");
-        private string titleLanguage = "";
         public CashPackageTooltipRender()
         {
         }
@@ -106,9 +102,7 @@ namespace WzComparerR2.CharaSimControl
                         nameWidth += 55 + 8;
                 }
                 else
-                {
                     nameWidth += 55 + 38 + 6 + 8;
-                }
 
                 if (CashPackage.SN.Count < 8)
                 {
@@ -150,52 +144,8 @@ namespace WzComparerR2.CharaSimControl
             }
 
             picH = 10;
-            string translatedCashPackageName = "";
-            if (isCurrencyConversionEnabled)
-            {
-                if (Translator.DefaultDetectCurrency == "auto")
-                {
-                    titleLanguage = Translator.GetLanguage(CashPackage.name);
-                }
-                else
-                {
-                    titleLanguage = Translator.ConvertCurrencyToLang(Translator.DefaultDetectCurrency);
-                }
-
-            }
-            if (isTranslateRequired)
-            {
-                translatedCashPackageName = Translator.TranslateString(CashPackage.name, true);
-                isTranslateRequired = !(translatedCashPackageName == CashPackage.name);
-            }
-            if (isTranslateRequired)
-            {
-                string[] NameLines = Translator.MergeString(CashPackage.name, translatedCashPackageName, 1, false, true).Split(new string[] { Environment.NewLine }, StringSplitOptions.None);
-                foreach (string line in NameLines)
-                {
-                    if (Translator.IsKoreanStringPresent(line))
-                    {
-                        TextRenderer.DrawText(g, line, GearGraphics.KMSItemNameFont, new Point(cashBitmap.Width, picH), Color.White, TextFormatFlags.HorizontalCenter | TextFormatFlags.NoPrefix);
-                    }
-                    else
-                    {
-                        TextRenderer.DrawText(g, line, GearGraphics.ItemNameFont, new Point(cashBitmap.Width, picH), Color.White, TextFormatFlags.HorizontalCenter | TextFormatFlags.NoPrefix);
-                    }
-                    picH += 16;
-                }
-            }
-            else
-            {
-                if (Translator.IsKoreanStringPresent(CashPackage.name))
-                {
-                    TextRenderer.DrawText(g, CashPackage.name, GearGraphics.KMSItemNameFont, new Point(cashBitmap.Width, picH), Color.White, TextFormatFlags.HorizontalCenter | TextFormatFlags.NoPrefix);
-                }
-                else
-                {
-                    TextRenderer.DrawText(g, CashPackage.name, GearGraphics.ItemNameFont, new Point(cashBitmap.Width, picH), Color.White, TextFormatFlags.HorizontalCenter | TextFormatFlags.NoPrefix);
-                }
-                picH += 16;
-            }
+            TextRenderer.DrawText(g, CashPackage.name, GearGraphics.ItemNameFont2, new Point(cashBitmap.Width, picH), Color.White, TextFormatFlags.HorizontalCenter | TextFormatFlags.NoPrefix);
+            picH += 14;
             if (commodityPackage.termStart > 0 || commodityPackage.termEnd != null)
             {
                 string term = "< 出售时间 :";
@@ -219,14 +169,7 @@ namespace WzComparerR2.CharaSimControl
 
                 picH += 8;
                 //term += " >";
-                if (Translator.IsKoreanStringPresent(term))
-                {
-                    TextRenderer.DrawText(g, term, GearGraphics.KMSItemDetailFont2, new Point(cashBitmap.Width, picH), ((SolidBrush)GearGraphics.OrangeBrush4).Color, TextFormatFlags.HorizontalCenter);
-                }
-                else
-                {
-                    TextRenderer.DrawText(g, term, GearGraphics.ItemDetailFont2, new Point(cashBitmap.Width, picH), ((SolidBrush)GearGraphics.OrangeBrush4).Color, TextFormatFlags.HorizontalCenter);
-                }
+                TextRenderer.DrawText(g, term, GearGraphics.ItemDetailFont2, new Point(cashBitmap.Width, picH), ((SolidBrush)GearGraphics.OrangeBrush4).Color, TextFormatFlags.HorizontalCenter);
                 picH += 16 * term.Split('\n').Length;
                 //picH += 12; < --- commented because of line above, check!
             }
@@ -243,7 +186,7 @@ namespace WzComparerR2.CharaSimControl
                         //Max Purchase
                         break;
                     case 3:
-                        limit = "账号";
+                        limit = "冒险岛ID";
                         break;
                     case 4:
                         limit = "角色";
@@ -254,7 +197,7 @@ namespace WzComparerR2.CharaSimControl
                 }
                 if (limit != null && limit.Length > 0)
                 {
-                    TextRenderer.DrawText(g, "< " + limit + "限定出售 >", GearGraphics.ItemDetailFont, new Point(cashBitmap.Width, picH), ((SolidBrush)GearGraphics.OrangeBrush4).Color, TextFormatFlags.HorizontalCenter);
+                    TextRenderer.DrawText(g, "<" + limit + "限定出售 >", GearGraphics.ItemDetailFont, new Point(cashBitmap.Width, picH), ((SolidBrush)GearGraphics.OrangeBrush4).Color, TextFormatFlags.HorizontalCenter);
                     picH += 12;
                 }
             }
@@ -263,148 +206,12 @@ namespace WzComparerR2.CharaSimControl
             int right = cashBitmap.Width - 18;
             if (CashPackage.desc != null && CashPackage.desc.Length > 0)
                 CashPackage.desc += "";
-            string translatedCashPackageDesc = "";
-            if (isTranslateRequired)
-            {
-                switch (Translator.DefaultPreferredLayout)
-                {
-                    case 1:
-                        translatedCashPackageDesc = Translator.TranslateString(CashPackage.desc) + Environment.NewLine;
-                        break;
-                    case 2:
-                        translatedCashPackageDesc = Environment.NewLine + Translator.TranslateString(CashPackage.desc);
-                        break;
-                    case 3:
-                        translatedCashPackageDesc = Translator.TranslateString(CashPackage.desc);
-                        break;
-                    default:
-                        break;
-                }
-
-            }
             CashPackage.desc += "\n";
-            switch (Translator.DefaultPreferredLayout)
-            {
-                case 1:
-                    if (isTranslateRequired)
-                    {
-                        if (Translator.IsKoreanStringPresent(translatedCashPackageDesc))
-                        {
-                            GearGraphics.DrawString(g, translatedCashPackageDesc, GearGraphics.KMSItemDetailFont, 11, right, ref picH, 16);
-                        }
-                        else
-                        {
-                            GearGraphics.DrawString(g, translatedCashPackageDesc, GearGraphics.ItemDetailFont, 11, right, ref picH, 16);
-                        }
-                    }
-                    if (CashPackage.onlyCash == 0)
-                    {
-                        if (Translator.IsKoreanStringPresent(CashPackage.desc))
-                        {
-                            GearGraphics.DrawString(g, CashPackage.desc + "\n#（奖励道具除外）用冒险券购买，使用前仅限与他人交换1次。#", GearGraphics.KMSItemDetailFont, 11, right, ref picH, 16);
-                        }
-                        else
-                        {
-                            GearGraphics.DrawString(g, CashPackage.desc + "\n#（奖励道具除外）用冒险券购买，使用前仅限与他人交换1次。#", GearGraphics.ItemDetailFont2, 11, right, ref picH, 16);
-                        }
-                    }
-                    else
-                    {
-                        if (Translator.IsKoreanStringPresent(CashPackage.desc))
-                        {
-                            GearGraphics.DrawString(g, CashPackage.desc + "\n#只能用冒险券购买。#", GearGraphics.ItemDetailFont2, 11, right, ref picH, 16);
-                        }
-                        else
-                        {
-                            GearGraphics.DrawString(g, CashPackage.desc + "\n#只能用冒险券购买。#", GearGraphics.ItemDetailFont2, 11, right, ref picH, 16);
-                        }
-                    }
-                    break;
-                case 2:
-                    if (isTranslateRequired)
-                    {
-                        if (Translator.IsKoreanStringPresent(CashPackage.desc))
-                        {
-                            GearGraphics.DrawString(g, CashPackage.desc, GearGraphics.KMSItemDetailFont, 11, right, ref picH, 16);
-                        }
-                        else
-                        {
-                            GearGraphics.DrawString(g, CashPackage.desc, GearGraphics.ItemDetailFont, 11, right, ref picH, 16);
-                        }
-                    }
-                    if (CashPackage.onlyCash == 0)
-                    {
-                        if (Translator.IsKoreanStringPresent(translatedCashPackageDesc))
-                        {
-                            GearGraphics.DrawString(g, translatedCashPackageDesc + "\n#（奖励道具除外）用冒险券购买，使用前仅限与他人交换1次。#", GearGraphics.KMSItemDetailFont, 11, right, ref picH, 16);
-                        }
-                        else
-                        {
-                            GearGraphics.DrawString(g, translatedCashPackageDesc + "\n#（奖励道具除外）用冒险券购买，使用前仅限与他人交换1次。#", GearGraphics.ItemDetailFont, 11, right, ref picH, 16);
-                        }
-                    }
-                    else
-                    {
-                        if (Translator.IsKoreanStringPresent(translatedCashPackageDesc))
-                        {
-                            GearGraphics.DrawString(g, translatedCashPackageDesc + "\n#只能用冒险券购买。#", GearGraphics.KMSItemDetailFont, 11, right, ref picH, 16);
-                        }
-                        else
-                        {
-                            GearGraphics.DrawString(g, translatedCashPackageDesc + "\n#只能用冒险券购买。#", GearGraphics.ItemDetailFont, 11, right, ref picH, 16);
-                        }
-                    }
-                    break;
-                case 3:
-                    if (CashPackage.onlyCash == 0)
-                    {
-                        if (Translator.IsKoreanStringPresent(translatedCashPackageDesc))
-                        {
-                            GearGraphics.DrawString(g, translatedCashPackageDesc + "\n#（奖励道具除外）用冒险券购买，使用前仅限与他人交换1次。#", GearGraphics.KMSItemDetailFont, 11, right, ref picH, 16);
-                        }
-                        else
-                        {
-                            GearGraphics.DrawString(g, translatedCashPackageDesc + "\n#（奖励道具除外）用冒险券购买，使用前仅限与他人交换1次。#", GearGraphics.ItemDetailFont, 11, right, ref picH, 16);
-                        }
-                    }
-                    else
-                    {
-                        if (Translator.IsKoreanStringPresent(translatedCashPackageDesc))
-                        {
-                            GearGraphics.DrawString(g, translatedCashPackageDesc + "\n#只能用冒险券购买。#", GearGraphics.KMSItemDetailFont, 11, right, ref picH, 16);
-                        }
-                        else
-                        {
-                            GearGraphics.DrawString(g, translatedCashPackageDesc + "\n#只能用冒险券购买。#", GearGraphics.ItemDetailFont, 11, right, ref picH, 16);
-                        }
-                    }
-                    break;
-                default:
-                    if (CashPackage.onlyCash == 0)
-                    {
-                        if (Translator.IsKoreanStringPresent(CashPackage.desc))
-                        {
-                            GearGraphics.DrawString(g, CashPackage.desc + "\n#（奖励道具除外）用冒险券购买，使用前仅限与他人交换1次。#", GearGraphics.KMSItemDetailFont, 11, right, ref picH, 16);
-                        }
-                        else
-                        {
-                            GearGraphics.DrawString(g, CashPackage.desc + "\n#（奖励道具除外）用冒险券购买，使用前仅限与他人交换1次。#", GearGraphics.ItemDetailFont, 11, right, ref picH, 16);
-                        }
-                    }
-                    else
-                    {
-                        if (Translator.IsKoreanStringPresent(CashPackage.desc))
-                        {
-                            GearGraphics.DrawString(g, CashPackage.desc + "\n#只能用冒险券购买。#", GearGraphics.KMSItemDetailFont, 11, right, ref picH, 16);
-                        }
-                        else
-                        {
-                            GearGraphics.DrawString(g, CashPackage.desc + "\n#只能用冒险券购买。#", GearGraphics.ItemDetailFont, 11, right, ref picH, 16);
-                        }
-                    }
-                    break;
-            }
-  
+            if (CashPackage.onlyCash == 0)
+                GearGraphics.DrawString(g, CashPackage.desc + "\n#用冒险券购买时使用前仅限与他人交换1次。(额外道具除外)#", GearGraphics.ItemDetailFont2, 11, right, ref picH, 16);
+            //GearGraphics.DrawString(g, CashPackage.desc + "\n#(Not applicable to free bonus items) Buy this with Nexon Cash and you can trade it with another user once if unused.", GearGraphics.ItemDetailFont2, 11, right, ref picH, 16);
+            else
+                GearGraphics.DrawString(g, CashPackage.desc + "\n#只能用冒险券购买。#", GearGraphics.ItemDetailFont2, 11, right, ref picH, 16);
 
             bool hasLine = false;
             picH -= 0;//default is 4
@@ -460,14 +267,7 @@ namespace WzComparerR2.CharaSimControl
                     Wz_Node iconNode = null;
                     if (StringLinker.StringEqp.TryGetValue(commodity.ItemId, out sr))
                     {
-                        if (isTranslateRequired)
-                        {
-                            name = Translator.MergeString(sr.Name, Translator.TranslateString(sr.Name), 0, false, true);
-                        }
-                        else
-                        {
-                            name = sr.Name;
-                        }
+                        name = sr.Name;
                         string[] fullPaths = sr.FullPath.Split('\\');
                         iconNode = PluginBase.PluginManager.FindWz(string.Format(@"Character\{0}\{1:D8}.img\info\iconRaw", String.Join("\\", new List<string>(fullPaths).GetRange(2, fullPaths.Length - 3).ToArray()), commodity.ItemId));
                     }
@@ -522,7 +322,7 @@ namespace WzComparerR2.CharaSimControl
                     }
                     if (commodity.originalPrice > 0 && commodity.Price < commodity.originalPrice)
                     {
-                        info += commodity.originalPrice + "冒险券     "; // 此处为原价和折扣价留出空格
+                        info += commodity.originalPrice + "冒险券     "; // HERE is making space between original price and discounted price
                         totalOriginalPrice += commodity.originalPrice;
                     }
                     else
@@ -559,14 +359,7 @@ namespace WzComparerR2.CharaSimControl
                 }
                 if (time == null)
                 {
-                    if (Translator.IsKoreanStringPresent(name.TrimEnd(Environment.NewLine.ToCharArray())))
-                    {
-                        TextRenderer.DrawText(g, name.TrimEnd(Environment.NewLine.ToCharArray()), GearGraphics.KMSItemDetailFont, new Point(columnLeft + 55, picH + 17), Color.White, TextFormatFlags.NoPadding | TextFormatFlags.NoPrefix);
-                    }
-                    else
-                    {
-                        TextRenderer.DrawText(g, name.TrimEnd(Environment.NewLine.ToCharArray()), GearGraphics.ItemDetailFont, new Point(columnLeft + 55, picH + 17), Color.White, TextFormatFlags.NoPadding | TextFormatFlags.NoPrefix);
-                    }
+                    TextRenderer.DrawText(g, name.TrimEnd(Environment.NewLine.ToCharArray()), GearGraphics.ItemDetailFont, new Point(columnLeft + 55, picH + 17), Color.White, TextFormatFlags.NoPadding | TextFormatFlags.NoPrefix);
                     if (commodity.Bonus == 0)
                     {
                         TextRenderer.DrawText(g, info, GearGraphics.ItemDetailFont, new Point(columnLeft + 55, picH + 33), Color.White, TextFormatFlags.NoPadding | TextFormatFlags.NoPrefix);
@@ -586,14 +379,7 @@ namespace WzComparerR2.CharaSimControl
                 }
                 else
                 {
-                    if (Translator.IsKoreanStringPresent(name.Replace(Environment.NewLine, "")))
-                    {
-                        TextRenderer.DrawText(g, name.Replace(Environment.NewLine, ""), GearGraphics.KMSItemDetailFont, new Point(columnLeft + 55, picH + 8), Color.White, TextFormatFlags.NoPadding | TextFormatFlags.NoPrefix);
-                    }
-                    else
-                    {
-                        TextRenderer.DrawText(g, name.Replace(Environment.NewLine, ""), GearGraphics.ItemDetailFont, new Point(columnLeft + 55, picH + 8), Color.White, TextFormatFlags.NoPadding | TextFormatFlags.NoPrefix);
-                    }
+                    TextRenderer.DrawText(g, name.Replace(Environment.NewLine, ""), GearGraphics.ItemDetailFont, new Point(columnLeft + 55, picH + 8), Color.White, TextFormatFlags.NoPadding | TextFormatFlags.NoPrefix);
                     if (commodity.Bonus == 0)
                     {
                         TextRenderer.DrawText(g, info, GearGraphics.ItemDetailFont, new Point(columnLeft + 55, picH + 24), Color.White, TextFormatFlags.NoPadding | TextFormatFlags.NoPrefix);
@@ -626,13 +412,13 @@ namespace WzComparerR2.CharaSimControl
             g.DrawImage(Resource.CSDiscount_total, 9, picH + 1);
             if (totalOriginalPrice == totalPrice)
             {
-                TextRenderer.DrawText(g, totalPrice + "冒险券", GearGraphics.ItemDetailFont, new Point(45, picH), Color.White, TextFormatFlags.NoPadding | TextFormatFlags.NoPrefix);
+                TextRenderer.DrawText(g, totalPrice + "冒险券", GearGraphics.ItemDetailFont, new Point(64, picH), Color.White, TextFormatFlags.NoPadding | TextFormatFlags.NoPrefix);
             }
             else
             {
-                TextRenderer.DrawText(g, totalOriginalPrice + "冒险券   " + totalPrice + "冒险券", GearGraphics.ItemDetailFont, new Point(45, picH), Color.White, TextFormatFlags.NoPadding | TextFormatFlags.NoPrefix);
-                TextRenderer.DrawText(g, totalOriginalPrice + "冒险券", GearGraphics.ItemDetailFont, new Point(45, picH), Color.Red, TextFormatFlags.NoPadding | TextFormatFlags.NoPrefix);
-                g.DrawImage(Resource.CSDiscount_arrow, 45 + TextRenderer.MeasureText(g, totalOriginalPrice + "冒险券", GearGraphics.ItemDetailFont, new Size(int.MaxValue, int.MaxValue), TextFormatFlags.NoPadding).Width + 5, picH + 1);
+                TextRenderer.DrawText(g, totalOriginalPrice + "冒险券   " + totalPrice + "冒险券", GearGraphics.ItemDetailFont, new Point(64, picH), Color.White, TextFormatFlags.NoPadding | TextFormatFlags.NoPrefix);
+                TextRenderer.DrawText(g, totalOriginalPrice + "冒险券", GearGraphics.ItemDetailFont, new Point(64, picH), Color.Red, TextFormatFlags.NoPadding | TextFormatFlags.NoPrefix);
+                g.DrawImage(Resource.CSDiscount_arrow, 64 + TextRenderer.MeasureText(g, totalOriginalPrice + "冒险券", GearGraphics.ItemDetailFont, new Size(int.MaxValue, int.MaxValue), TextFormatFlags.NoPadding).Width + 5, picH + 1);
                 DrawDiscountNum(g, "-" + (int)((100 - 100.0 * totalPrice / totalOriginalPrice)) + "%", cashBitmap.Width - 40, picH - 1, StringAlignment.Near);
             }
             picH += 11;

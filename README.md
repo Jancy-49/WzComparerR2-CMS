@@ -3,7 +3,7 @@
 - 与其他客户端合作，例如 KMS、GMS、CMS。
 
 # Tooltip
-- EasyCompare可输出Skilltooltip、Itemtooltip、Eqptooltip、MapTooltip、Mobtooltip、Npctooltip、QuestTooltip和SetTooltip
+- EasyCompare可输出Skilltooltip、Itemtooltip、Eqptooltip、Mobtooltip和Npctooltip
 
 # Modules
 - **WzComparerR2** 主程序
@@ -55,7 +55,6 @@ https://open.api.nexon.com/static/maplestory/ItemIcon/KEHCJAIG.png
 - **[IMEHelper](https://github.com/JLChnToZ/IMEHelper)**
 - **[Spine-Runtime](https://github.com/EsotericSoftware/spine-runtimes)**
 - **[EmptyKeysUI](https://github.com/EmptyKeys)**
-- **[libvpx](https://www.webmproject.org/code/) & [libyuv](https://chromium.googlesource.com/libyuv/libyuv/)** for video decoding
 - **[@KENNYSOFT](https://github.com/KENNYSOFT)** and his WcR2-KMS version.
 - **[@Kagamia](https://github.com/Kagamia)** and her WcR2-CMS version.
 - **[@Spadow](https://github.com/Sunaries)** for providing his WcR2-GMS version.

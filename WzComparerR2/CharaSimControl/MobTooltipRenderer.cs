@@ -7,8 +7,6 @@ using System.Drawing.Imaging;
 using System.Text.RegularExpressions;
 using WzComparerR2.CharaSim;
 using WzComparerR2.Common;
-using WzComparerR2.WzLib;
-using WzComparerR2.AvatarCommon;
 using static WzComparerR2.CharaSimControl.RenderHelper;
 
 namespace WzComparerR2.CharaSimControl
@@ -27,7 +25,7 @@ namespace WzComparerR2.CharaSimControl
         }
 
         public Mob MobInfo { get; set; }
-        private AvatarCanvasManager avatar { get; set; }
+
         public override Bitmap Render()
         {
             if (MobInfo == null)
@@ -86,34 +84,6 @@ namespace WzComparerR2.CharaSimControl
             {
                 sbExt.Append("[固定伤害" + MobInfo.FixedDamage + "] ");
             }
-            if (MobInfo.FixedBodyAttackDamageR > 0)
-            {
-                sbExt.Append("[固定接触伤害: " + MobInfo.FixedBodyAttackDamageR + "%] ");
-            }
-            if (MobInfo.IgnoreDamage)
-            {
-                sbExt.Append("[无视伤害] ");
-            }
-            if (MobInfo.IgnoreMoveImpact)
-            {
-                sbExt.Append("[免疫突进] ");
-            }
-            if (MobInfo.IgnoreMovable)
-            {
-                sbExt.Append("[免疫昏迷/束缚] ");
-            }
-            if (MobInfo.NoDebuff)
-            {
-                sbExt.Append("[免疫减益] ");
-            }
-            if (MobInfo.OnlyNormalAttack)
-            {
-                sbExt.Append("[仅普通攻击有效] ");
-            }
-            if (MobInfo.OnlyHittedByCommonAttack)
-            {
-                sbExt.Append("[仅受普通攻击攻击] ");
-            }
 
             if (sbExt.Length > 1)
             {
@@ -141,60 +111,7 @@ namespace WzComparerR2.CharaSimControl
             propBlocks.Add(PrepareText(g, "回避值: " + MobInfo.Eva, GearGraphics.ItemDetailFont, Brushes.White, 0, picY += 16));
             propBlocks.Add(PrepareText(g, "击退: " + MobInfo.Pushed.ToString("N0"), GearGraphics.ItemDetailFont, Brushes.White, 0, picY += 16));
             propBlocks.Add(PrepareText(g, "经验值: " + MobInfo.Exp.ToString("N0"), GearGraphics.ItemDetailFont, Brushes.White, 0, picY += 16));
-            if (MobInfo.CharismaEXP > 0)
-            {
-                propBlocks.Add(PrepareText(g, "领导力: +" + MobInfo.CharismaEXP, GearGraphics.ItemDetailFont, Brushes.White, 0, picY += 16));
-            }
-            if (MobInfo.SenseEXP > 0)
-            {
-                propBlocks.Add(PrepareText(g, "感性: +" + MobInfo.SenseEXP, GearGraphics.ItemDetailFont, Brushes.White, 0, picY += 16));
-            }
-            if (MobInfo.InsightEXP > 0)
-            {
-                propBlocks.Add(PrepareText(g, "洞察力: +" + MobInfo.InsightEXP, GearGraphics.ItemDetailFont, Brushes.White, 0, picY += 16));
-            }
-            if (MobInfo.WillEXP > 0)
-            {
-                propBlocks.Add(PrepareText(g, "意志力: +" + MobInfo.WillEXP, GearGraphics.ItemDetailFont, Brushes.White, 0, picY += 16));
-            }
-            if (MobInfo.CraftEXP > 0)
-            {
-                propBlocks.Add(PrepareText(g, "手技: +" + MobInfo.CraftEXP, GearGraphics.ItemDetailFont, Brushes.White, 0, picY += 16));
-            }
-            if (MobInfo.CharmEXP > 0)
-            {
-                propBlocks.Add(PrepareText(g, "魅力: +" + MobInfo.CharmEXP, GearGraphics.ItemDetailFont, Brushes.White, 0, picY += 16));
-            }
-            if (MobInfo.WP > 0)
-            {
-                propBlocks.Add(PrepareText(g, "WP: " + MobInfo.WP, GearGraphics.ItemDetailFont, Brushes.White, 0, picY += 16));
-            }
             propBlocks.Add(PrepareText(g, GetElemAttrString(MobInfo.ElemAttr), GearGraphics.ItemDetailFont, Brushes.White, 0, picY += 16));
-            if (MobInfo.AttackPower > 0)
-            {
-                propBlocks.Add(PrepareText(g, "入场时最低战斗力 (单人): " + MobInfo.AttackPower, GearGraphics.ItemDetailFont, Brushes.White, 0, picY += 16));
-            }
-            if (MobInfo?.ID != null)
-            {
-                var locNode = PluginBase.PluginManager.FindWz("Etc\\MobLocation.img\\" + MobInfo.ID.ToString());
-                if (locNode != null)
-                {
-                    propBlocks.Add(PrepareText(g, "位置: ", GearGraphics.ItemDetailFont, GearGraphics.LocationBrush, 0, picY += 30));
-                    foreach (var locMapNode in locNode.Nodes)
-                    {
-                        int mapID = locMapNode.GetValueEx<int>(-1);
-                        string mapName = null;
-                        if (mapID >= 0)
-                        {
-                            mapName = GetMapName(mapID);
-                        }
-                        string mobLoc = string.Format(" - {0} ({1})", mapName ?? "null", mapID);
-
-                        propBlocks.Add(PrepareText(g, mobLoc, Translator.IsKoreanStringPresent(mobLoc) ? GearGraphics.KMSItemDetailFont : GearGraphics.ItemDetailFont, GearGraphics.LocationBrush, 0, picY += 16));
-                    }
-                }
-            }
-
             picY += 28;
 
             if (MobInfo.Revive.Count > 0)
@@ -234,35 +151,6 @@ namespace WzComparerR2.CharaSimControl
             Rectangle imgRect = Rectangle.Empty;
             Rectangle textRect = Measure(propBlocks);
             Bitmap mobImg = MobInfo.Default.Bitmap;
-            if (MobInfo.IsAvatarLook)
-            {
-                if (this.avatar == null)
-                {
-                    this.avatar = new AvatarCanvasManager();
-                }
-
-                var skin = MobInfo.AvatarLook.Nodes["skin"].GetValueEx<int>(0);
-                this.avatar.AddBodyFromSkin3(skin);
-
-                foreach (var node in MobInfo.AvatarLook.Nodes)
-                {
-                    var gearID = node.GetValueEx<int>(0);
-                    this.avatar.AddGear(gearID);
-                }
-
-                var img = this.avatar.GetBitmapOrigin();
-                if (img.Bitmap != null)
-                {
-                    if (MobInfo.Default.Bitmap != null)
-                    {
-                        MobInfo.Default.Bitmap.Dispose();
-                    }
-                    MobInfo.Default = img;
-                    mobImg = img.Bitmap;
-                }
-
-                this.avatar.ClearCanvas();
-            }
             if (mobImg != null)
             {
                 if (mobImg.Width > 250 || mobImg.Height > 300) //进行缩放
@@ -323,16 +211,6 @@ namespace WzComparerR2.CharaSimControl
             }
             g.Dispose();
             return bmp;
-        }
-
-        private string GetMapName(int mapID)
-        {
-            StringResult sr;
-            if (this.StringLinker == null || !this.StringLinker.StringMap.TryGetValue(mapID, out sr))
-            {
-                return null;
-            }
-            return sr.Name;
         }
 
         private string GetMobName(int mobID)

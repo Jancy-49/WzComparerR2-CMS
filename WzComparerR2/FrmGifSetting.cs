@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
-using System.IO;
 using System.Text;
 using System.Linq;
 using System.Windows.Forms;
@@ -11,7 +10,6 @@ using System.Reflection;
 using DevComponents.DotNetBar;
 using WzComparerR2.Config;
 using MathHelper = Microsoft.Xna.Framework.MathHelper;
-using Newtonsoft.Json.Linq;
 
 namespace WzComparerR2
 {
@@ -23,7 +21,7 @@ namespace WzComparerR2
             InitializeComponent();
 #if NET6_0_OR_GREATER
             // https://learn.microsoft.com/en-us/dotnet/core/compatibility/fx-core#controldefaultfont-changed-to-segoe-ui-9pt
-            this.Font = new Font(new FontFamily("宋体"), 9f);
+            this.Font = new Font(new FontFamily("MS PGothic"), 9f);
 #endif
             initSelection();
         }
@@ -132,33 +130,6 @@ namespace WzComparerR2
             get { return checkBoxX3.Checked; }
             set { checkBoxX3.Checked = value; }
         }
-        public string FFmpegBinPath
-        {
-            get { return textBoxX1.Text; }
-            set { textBoxX1.Text = value; }
-        }
-        public string FFmpegArgument
-        {
-            get { return textBoxX2.Text; }
-            set { textBoxX2.Text = value; }
-        }
-        public string FFmpegDefaultExtension
-        {
-            get { return textBoxX3.Text; }
-            set { textBoxX3.Text = value; }
-        }
-        public string FFmpegBinPathHint
-        {
-            set { textBoxX1.WatermarkText = value; }
-        }
-        public string FFmpegArgumentHint
-        {
-            set { textBoxX2.WatermarkText = value; }
-        }
-        public string FFmpegDefaultExtensionHint
-        {
-            set { textBoxX3.WatermarkText = value; }
-        }
 
         public void Load(ImageHandlerConfig config)
         {
@@ -175,9 +146,6 @@ namespace WzComparerR2
             this.MosaicBlockSize = config.MosaicInfo.BlockSize;
 
             this.PaletteOptimized = config.PaletteOptimized;
-            this.FFmpegBinPath = config.FFmpegBinPath;
-            this.FFmpegArgument = config.FFmpegArgument;
-            this.FFmpegDefaultExtension = config.FFmpegOutputFileExtension;
         }
 
         public void Save(ImageHandlerConfig config)
@@ -195,43 +163,18 @@ namespace WzComparerR2
             config.MosaicInfo.BlockSize = this.MosaicBlockSize;
 
             config.PaletteOptimized = this.PaletteOptimized;
-            config.FFmpegBinPath = this.FFmpegBinPath;
-            config.FFmpegArgument = this.FFmpegArgument;
-            config.FFmpegOutputFileExtension = this.FFmpegDefaultExtension;
         }
-        private void buttonX3_Click(object sender, EventArgs e)
+
+        private void buttonX1_Click(object sender, EventArgs e)
         {
-            OpenFileDialog dlg = new();
-            dlg.Title = "查找ffmpeg程序";
-            dlg.Filter = "ffmpeg.exe|*.exe|*.*|*.*";
-            dlg.FileName = this.FFmpegBinPath;
-            if (dlg.ShowDialog(this) == DialogResult.OK)
-            {
-                this.FFmpegBinPath = dlg.FileName;
-            }
+            this.DialogResult = DialogResult.OK;
+            this.Close();
         }
-        private void btnDiscordPreset_Click(object sender, System.EventArgs e)
+
+        private void buttonX2_Click(object sender, EventArgs e)
         {
-            string discordConfigPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "discord", "settings.json");
-            if (File.Exists(discordConfigPath))
-            {
-                // TO DO: Add support for Nitro exclusive background colors.
-                try
-                {
-                    JObject discordConfig = JObject.Parse(File.ReadAllText(discordConfigPath));
-                    string bgColor = discordConfig.SelectToken("BACKGROUND_COLOR").ToString().Replace("#", "FF");
-                    BackgroundColor = Color.FromArgb(Convert.ToInt32(bgColor, 16));
-                }
-                catch
-                {
-                    BackgroundColor = Color.FromArgb(-13750732);
-                }
-            }
-            else
-            {
-                BackgroundColor = Color.FromArgb(-13750732);
-            }
-            BackgroundType = ImageBackgroundType.Color;
+            this.DialogResult = DialogResult.Cancel;
+            this.Close();
         }
 
         private void slider1_ValueChanged(object sender, EventArgs e)

@@ -419,9 +419,8 @@ namespace WzComparerR2.Comparer
                                     && png.DataLength == pngOld.DataLength;
 
                             case WzPngComparison.Pixel:
-                                if (!(png.Width == pngOld.Width && png.Height == pngOld.Height && png.Format == pngOld.Format && png.Scale == pngOld.Scale))
+                                if (!(png.Width == pngOld.Width && png.Height == pngOld.Height && png.Form == pngOld.Form))
                                 {
-                                    // we don't compare 'Pages' because KMST set pages to 1 for all PNGs.
                                     return false;
                                 }
                                 byte[] pixelNew = png.GetRawData();
@@ -430,11 +429,19 @@ namespace WzComparerR2.Comparer
                                 {
                                     return false;
                                 }
-                                return pixelNew.SequenceEqual(pixelOld);
+                                for (int i = 0, i1 = pixelNew.Length; i < i1; i++)
+                                {
+                                    if (pixelNew[i] != pixelOld[i])
+                                    {
+                                        return false;
+                                    }
+                                }
+                                return true;
 
                             default:
                                 goto case WzPngComparison.SizeAndDataLength;
                         }
+                        break;
 
                     case Wz_Vector vector:
                         Wz_Vector vectorOld = (Wz_Vector)dataOld;
@@ -446,29 +453,6 @@ namespace WzComparerR2.Comparer
                     case Wz_Sound sound:
                         Wz_Sound soundOld = (Wz_Sound)dataOld;
                         return sound.Ms == soundOld.Ms && sound.DataLength == soundOld.DataLength;
-                    case Wz_Convex convex:
-                        Wz_Convex convexOld = (Wz_Convex)dataOld;
-                        if (convex.Points.Length != convexOld.Points.Length)
-                        {
-                            return false;
-                        }
-                        for (int i = 0; i < convex.Points.Length; i++)
-                        {
-                            var vectorNew = convex.Points[i];
-                            vectorOld = convexOld.Points[i];
-                            if (vectorNew.X != vectorOld.X || vectorNew.Y != vectorOld.Y)
-                                return false;
-                        }
-                        return true;
-
-                    case Wz_RawData rawData:
-                        Wz_RawData rawDataOld = (Wz_RawData)dataOld;
-                        return rawData.Length == rawDataOld.Length;
-
-
-                    case Wz_Video video:
-                        Wz_Video videoOld = (Wz_Video)dataOld;
-                        return video.Length == videoOld.Length;
                 }
             }
 

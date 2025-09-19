@@ -16,9 +16,7 @@ namespace WzComparerR2.Text
             var elements = new List<DocElement>();
             var sb = new StringBuilder();
             var colorStack = new Stack<string>();
-            var fontStack = new Stack<string>();
             colorStack.Push("");
-            fontStack.Push("");
 
             int strPos = 0;
             char curChar;
@@ -32,43 +30,9 @@ namespace WzComparerR2.Text
                     elements.Add(new Span()
                     {
                         Text = sb.ToString(offset, sb.Length - offset),
-                        ColorID = colorStack.Peek(),
-                        FontID = fontStack.Peek(),
+                        ColorID = colorStack.Peek()
                     });
                     offset = sb.Length;
-                }
-            };
-
-            Action<string> appendImage = (str) =>
-            {
-                var split = str.Split('/');
-                int id = 0;
-                int width = 0;
-                int height = 0;
-                bool addImage = false;
-                switch (split.Length)
-                {
-                    case 1:
-                        addImage = int.TryParse(split[0], out id);
-                        break;
-                    case 2:
-                        addImage = int.TryParse(split[0], out id) && int.TryParse(split[1], out width);
-                        break;
-                    case 3:
-                        addImage = int.TryParse(split[0], out id) && int.TryParse(split[1], out width) && int.TryParse(split[2], out height);
-                        break;
-                }
-                if (addImage)
-                {
-                    elements.Add(new Span()
-                    {
-                        Text = "",
-                        ColorID = colorStack.Peek(),
-                        FontID = fontStack.Peek(),
-                        ImageID = id.ToString(),
-                        ImageWidth = width,
-                        ImageHeight = height
-                    });
                 }
             };
 
@@ -84,7 +48,7 @@ namespace WzComparerR2.Text
                         {
                             case 'r': curChar = '\r'; break;
                             case 'n': curChar = '\n'; break;
-
+                            
                             default: curChar = '\0'; break; // when it is not recognizable escape char (ex. \b)
                         }
                     }
@@ -106,47 +70,23 @@ namespace WzComparerR2.Text
                             }
                             strPos++;
                         }
-                        else if (strPos < format.Length && format[strPos] == '$'
-                            && strPos + 1 < format.Length)//遇到#$(自定义) 更换为自定义颜色表
+                        else if (strPos < format.Length && format[strPos] == 'e')//遇到#e(自定义) 换紫蓝刷子并flush
                         {
-                            if (strPos + 2 < format.Length)// 폰트 #$^(key)#$$
-                            {
-                                if (format[strPos + 1] == '^')
-                                {
-                                    flushRun();
-                                    fontStack.Push(format.Substring(strPos + 1, 2));
-                                    strPos += 3;
-                                    break;
-                                }
-                                else if (format[strPos + 1] == '$')
-                                {
-                                    flushRun();
-                                    fontStack.Pop();
-                                    strPos += 2;
-                                    break;
-                                }
-                            }
                             flushRun();
-                            colorStack.Push(format.Substring(strPos, 2));
-                            strPos += 2;
-                        }
-                        else if (strPos < format.Length && format[strPos] == '@'
-                            && strPos + 2 < format.Length) // 이미지 #@(id)/(width)/(height)@   구분자 /
-                        {
-                            string id = format[strPos + 1].ToString();
-                            strPos += 2;
-                            while (format[strPos] != '@')
-                            {
-                                id += format[strPos].ToString();
-                                if (strPos + 1 < format.Length)
-                                {
-                                    strPos++;
-                                }
-                                else break;
-                            }
+                            colorStack.Push("e");
                             strPos++;
+                        }
+                        else if (strPos < format.Length && format[strPos] == 'g')//遇到#g(自定义) 换绿刷子并flush
+                        {
                             flushRun();
-                            appendImage(id);
+                            colorStack.Push("g");
+                            strPos++;
+                        }
+                        else if (strPos < format.Length && format[strPos] == '$')//遇到#$(自定义) 换青色刷子并flush
+                        {
+                            flushRun();
+                            colorStack.Push("$");
+                            strPos++;
                         }
                         else if (colorStack.Count == 1) //同#c
                         {

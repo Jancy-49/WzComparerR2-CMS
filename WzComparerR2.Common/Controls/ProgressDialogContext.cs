@@ -11,7 +11,6 @@ namespace WzComparerR2.Controls
     public interface IProgressDialogContext
     {
         string Message { get; set; }
-        string FullMessage { get; set; }
         int Progress { get; set; }
         int ProgressMin { get; set; }
         int ProgressMax { get; set; }
@@ -46,11 +45,7 @@ namespace WzComparerR2.Controls
             get { return this.dialog.Message; }
             set { this.dialog.Message = value; }
         }
-        public string FullMessage
-        {
-            get { return this.dialog.FullMessage; }
-            set { this.dialog.FullMessage = value; }
-        }
+
         public int Progress
         {
             get { return this.dialog.Progress; }

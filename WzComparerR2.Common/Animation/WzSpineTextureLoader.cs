@@ -26,7 +26,6 @@ namespace WzComparerR2.Animation
         public GraphicsDevice GraphicsDevice { get; private set; }
 
         public GlobalFindNodeFunction FindNodeFunction { get; set; }
-        public bool EnableTextureMissingFallback { get; set; }
 
         public void Load(Spine.AtlasPage page, string path)
         {
@@ -35,10 +34,6 @@ namespace WzComparerR2.Animation
                 page.rendererObject = texture;
                 page.width = texture.Width;
                 page.height = texture.Height;
-            }
-            else if (this.EnableTextureMissingFallback && page.width > 0 && page.height > 0)
-            {
-                page.rendererObject = this.CreateEmptyTexture(page.width, page.height);
             }
         }
 
@@ -49,10 +44,6 @@ namespace WzComparerR2.Animation
                 page.rendererObject = texture;
                 page.width = texture.Width;
                 page.height = texture.Height;
-            }
-            else if (this.EnableTextureMissingFallback && page.width > 0 && page.height > 0)
-            {
-                page.rendererObject = this.CreateEmptyTexture(page.width, page.height);
             }
         }
 
@@ -76,11 +67,6 @@ namespace WzComparerR2.Animation
             }
 
             return false;
-        }
-
-        private Texture2D CreateEmptyTexture(int width, int height)
-        {
-            return new Texture2D(this.GraphicsDevice, width, height, false, SurfaceFormat.Alpha8);
         }
     }
 }

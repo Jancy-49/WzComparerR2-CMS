@@ -9,7 +9,6 @@ using WzComparerR2.Common;
 using WzComparerR2.CharaSim;
 using WzComparerR2.WzLib;
 using WzComparerR2.Comparer;
-using WzComparerR2.PluginBase;
 using System.Text.RegularExpressions;
 
 namespace WzComparerR2.CharaSimControl
@@ -35,31 +34,25 @@ namespace WzComparerR2.CharaSimControl
         public bool DisplayPermyriadAsPercent { get; set; } = true;
         public bool IgnoreEvalError { get; set; } = false;
         public bool IsWideMode { get; set; } = true;
-        public bool Enable22AniStyle { get; set; }
-        public Dictionary<string, List<string>> DiffSkillTags = new Dictionary<string, List<string>>();
+        public bool DoSetDiffColor { get; set; } = false;
+        public Dictionary<string, List<string>> diffSkillTags = new Dictionary<string, List<string>>();
         public Wz_Node wzNode { get; set; } = null;
 
         public TooltipRender LinkRidingGearRender { get; set; }
-        public string ParsedHdesc { get; set; }
 
         public override Bitmap Render()
-        {
-            return Render(false);
-        }
-
-        public Bitmap Render(bool doHighlight)
         {
             if (this.Skill == null)
             {
                 return null;
             }
 
-            CanvasRegion region = this.IsWideMode ? (this.Enable22AniStyle ? CanvasRegion._22AniWide : CanvasRegion.Wide) : (this.Enable22AniStyle ? CanvasRegion._22AniOriginal : CanvasRegion.Original);
+            CanvasRegion region = this.IsWideMode ? CanvasRegion.Wide : CanvasRegion.Original;
+
             int picHeight;
             List<int> splitterH;
-            Bitmap originBmp = RenderSkill(region, out picHeight, out splitterH, doHighlight);
+            Bitmap originBmp = RenderSkill(region, out picHeight, out splitterH);
             Bitmap ridingGearBmp = null;
-            Bitmap origindescBmp = null;
 
             int vehicleID = Skill.VehicleID;
             if (vehicleID == 0)
@@ -79,27 +72,14 @@ namespace WzComparerR2.CharaSimControl
                 }
             }
 
-            if ((Skill.Origin || Skill.Ascent) && !Skill.Invisible)
-            {
-                origindescBmp = RenderOrigindesc(region);
-            }
-
             Size totalSize = new Size(originBmp.Width, picHeight);
             Point ridingGearOrigin = Point.Empty;
-            Point origindescOrigin = Point.Empty;
 
             if (ridingGearBmp != null)
             {
                 totalSize.Width += ridingGearBmp.Width;
                 totalSize.Height = Math.Max(picHeight, ridingGearBmp.Height);
                 ridingGearOrigin.X = originBmp.Width;
-            }
-
-            if (origindescBmp != null)
-            { 
-                totalSize.Width += origindescBmp.Width;
-                totalSize.Height = Math.Max(picHeight, origindescBmp.Height);
-                origindescOrigin.X = originBmp.Width;
             }
 
             Bitmap tooltip = new Bitmap(totalSize.Width, totalSize.Height);
@@ -121,7 +101,8 @@ namespace WzComparerR2.CharaSimControl
             g.DrawImage(originBmp, 0, 0, new Rectangle(0, 0, originBmp.Width, picHeight), GraphicsUnit.Pixel);
 
             //左上角
-            if (!Enable22AniStyle) g.DrawImage(Resource.UIToolTip_img_Skill_Frame_cover, 3, 3);
+            g.DrawImage(Resource.UIToolTip_img_Skill_Frame_cover, 3, 3);
+
             if (this.ShowObjectID)
             {
                 GearGraphics.DrawGearDetailNumber(g, 3, 3, Skill.SkillID.ToString("d7"), true);
@@ -133,24 +114,16 @@ namespace WzComparerR2.CharaSimControl
                     new Rectangle(Point.Empty, ridingGearBmp.Size), GraphicsUnit.Pixel);
             }
 
-            if (origindescBmp != null)
-            {
-                g.DrawImage(origindescBmp, origindescOrigin.X, origindescOrigin.Y, 
-                    new Rectangle(Point.Empty, origindescBmp.Size), GraphicsUnit.Pixel);
-            }
-
             if (originBmp != null)
                 originBmp.Dispose();
             if (ridingGearBmp != null)
                 ridingGearBmp.Dispose();
-            if (origindescBmp != null)
-                origindescBmp.Dispose();
 
             g.Dispose();
             return tooltip;
         }
 
-        private Bitmap RenderSkill(CanvasRegion region, out int picH, out List<int> splitterH, bool doHighlight = false)
+        private Bitmap RenderSkill(CanvasRegion region, out int picH, out List<int> splitterH)
         {
             Bitmap bitmap = new Bitmap(region.Width, DefaultPicHeight);
             Graphics g = Graphics.FromImage(bitmap);
@@ -158,12 +131,10 @@ namespace WzComparerR2.CharaSimControl
             var v6SkillSummaryFontColorTable = new Dictionary<string, Color>()
             {
                 { "c", GearGraphics.SkillSummaryOrangeTextColor },
-                { "$g", GearGraphics.gearCyanColor },
             };
 
             picH = 0;
             splitterH = new List<int>();
-            string skillIDstr = Skill.SkillID.ToString().PadLeft(7, '0');
 
             //获取文字
             StringResult sr;
@@ -173,64 +144,16 @@ namespace WzComparerR2.CharaSimControl
                 sr.Name = "(null)";
             }
 
-            bool isTranslateRequired = Translator.IsTranslateEnabled;
-            bool isNewLineRequired = false;
-            string translatedSkillName = "";
-            if (isTranslateRequired)
-            {
-                translatedSkillName = Translator.TranslateString(sr.Name, true);
-                SizeF titleSize;
-                if (Translator.IsKoreanStringPresent(translatedSkillName + sr.Name))
-                {
-                    titleSize = TextRenderer.MeasureText(g, translatedSkillName + " (" + sr.Name + ")", GearGraphics.KMSItemNameFont, new Size(int.MaxValue, int.MaxValue), TextFormatFlags.NoPrefix);
-                }
-                else
-                {
-                    titleSize = TextRenderer.MeasureText(g, translatedSkillName + " (" + sr.Name + ")", GearGraphics.ItemNameFont2, new Size(int.MaxValue, int.MaxValue), TextFormatFlags.NoPrefix);
-                }
-                if (titleSize.Width > (int)(0.96 * region.Width))
-                {
-                    isNewLineRequired = true;
-                }
-            }
             //绘制技能名称
             format.Alignment = StringAlignment.Center;
-            if (isTranslateRequired)
+            if (IsKoreanStringPresent(sr.Name))
             {
-                string mergedSkillName;
-                if (isNewLineRequired)
-                {
-                    mergedSkillName = Translator.MergeString(sr.Name, translatedSkillName, 1, false, true);
-                }
-                else
-                {
-                    mergedSkillName = Translator.MergeString(sr.Name, translatedSkillName, 0, false, true);
-                }
-                if (Translator.IsKoreanStringPresent(translatedSkillName + sr.Name))
-                {
-                    TextRenderer.DrawText(g, mergedSkillName, GearGraphics.KMSItemNameFont, new Point(bitmap.Width, 10), Color.White, TextFormatFlags.HorizontalCenter | TextFormatFlags.NoPrefix);
-                }
-                else
-                {
-                    TextRenderer.DrawText(g, mergedSkillName, GearGraphics.ItemNameFont2, new Point(bitmap.Width, 10), Color.White, TextFormatFlags.HorizontalCenter | TextFormatFlags.NoPrefix);
-                }
-                if (translatedSkillName.Contains(Environment.NewLine))
-                {
-                    picH += 30;
-                }
+                TextRenderer.DrawText(g, sr.Name, GearGraphics.KMSItemNameFont, new Point(bitmap.Width, 10), Color.White, TextFormatFlags.HorizontalCenter | TextFormatFlags.NoPrefix);
             }
             else
             {
-                if (Translator.IsKoreanStringPresent(sr.Name))
-                {
-                    TextRenderer.DrawText(g, sr.Name, GearGraphics.KMSItemNameFont, new Point(bitmap.Width, 10), Color.White, TextFormatFlags.HorizontalCenter | TextFormatFlags.NoPrefix);
-                }
-                else
-                {
-                    TextRenderer.DrawText(g, sr.Name, GearGraphics.ItemNameFont2, new Point(bitmap.Width, 10), Color.White, TextFormatFlags.HorizontalCenter | TextFormatFlags.NoPrefix);
-                }
+                TextRenderer.DrawText(g, sr.Name, GearGraphics.ItemNameFont2, new Point(bitmap.Width, 10), Color.White, TextFormatFlags.HorizontalCenter | TextFormatFlags.NoPrefix);
             }
-
             //绘制图标
             if (Skill.Icon.Bitmap != null)
             {
@@ -246,10 +169,7 @@ namespace WzComparerR2.CharaSimControl
             {
                 g.DrawImage(Resource.UIWindow2_img_Skill_skillTypeIcon_origin, 16, 11);
             }
-            if (Skill.Ascent)
-            {
-                g.DrawImage(Resource.UIWindow2_img_Skill_skillTypeIcon_ascent, 16, 11);
-            }
+
             //绘制desc
             picH = 35;
             if (Skill.HyperStat)
@@ -260,28 +180,14 @@ namespace WzComparerR2.CharaSimControl
             if (sr.Desc != null)
             {
                 string hdesc = SummaryParser.GetSkillSummary(sr.Desc, Skill.Level, Skill.Common, SummaryParams.Default);
-                if (isTranslateRequired)
+                //string hStr = SummaryParser.GetSkillSummary(skill, skill.Level, sr, SummaryParams.Default);
+                if (IsKoreanStringPresent(hdesc))
                 {
-                    string mergedDescString = Translator.MergeString(hdesc, Translator.TranslateString(hdesc), 2);
-                    if (Translator.IsKoreanStringPresent(mergedDescString))
-                    {
-                        GearGraphics.DrawString(g, mergedDescString, GearGraphics.KMSItemDetailFont, v6SkillSummaryFontColorTable, Skill.Icon.Bitmap == null ? region.LevelDescLeft : region.SkillDescLeft, region.TextRight, ref picH, 16);
-                    }
-                    else
-                    {
-                        GearGraphics.DrawString(g, mergedDescString, GearGraphics.ItemDetailFont, v6SkillSummaryFontColorTable, Skill.Icon.Bitmap == null ? region.LevelDescLeft : region.SkillDescLeft, region.TextRight, ref picH, 16);
-                    }
+                    GearGraphics.DrawString(g, hdesc, GearGraphics.KMSItemDetailFont, v6SkillSummaryFontColorTable, Skill.Icon.Bitmap == null ? region.LevelDescLeft : region.SkillDescLeft, region.TextRight, ref picH, 16);
                 }
                 else
                 {
-                    if (Translator.IsKoreanStringPresent(hdesc))
-                    {
-                        GearGraphics.DrawString(g, hdesc, GearGraphics.KMSItemDetailFont, v6SkillSummaryFontColorTable, Skill.Icon.Bitmap == null ? region.LevelDescLeft : region.SkillDescLeft, region.TextRight, ref picH, 16);
-                    }
-                    else
-                    {
-                        GearGraphics.DrawString(g, hdesc, GearGraphics.ItemDetailFont, v6SkillSummaryFontColorTable, Skill.Icon.Bitmap == null ? region.LevelDescLeft : region.SkillDescLeft, region.TextRight, ref picH, 16);
-                    }
+                    GearGraphics.DrawString(g, hdesc, GearGraphics.ItemDetailFont, v6SkillSummaryFontColorTable, Skill.Icon.Bitmap == null ? region.LevelDescLeft : region.SkillDescLeft, region.TextRight, ref picH, 16);
                 }
             }
             if (Skill.TimeLimited)
@@ -304,26 +210,7 @@ namespace WzComparerR2.CharaSimControl
             }
             if (Skill.IsPetAutoBuff)
             {
-                //GearGraphics.DrawString(g, "#c可登记宠物自动增益技能#", GearGraphics.ItemDetailFont2, v6SkillSummaryFontColorTable, Skill.Icon.Bitmap == null ? region.LevelDescLeft : region.SkillDescLeft, region.TextRight, ref picH, 16);
-                if (doHighlight && DiffSkillTags.ContainsKey(skillIDstr) && DiffSkillTags[skillIDstr].Contains("IsPetAutoBuff"))
-                {
-                    GearGraphics.DrawString(g, "#g可登记宠物自动增益技能#", GearGraphics.ItemDetailFont2, v6SkillSummaryFontColorTable, Skill.Icon.Bitmap == null ? region.LevelDescLeft : region.SkillDescLeft, region.TextRight, ref picH, 16);
-                }
-                else
-                {
-                    GearGraphics.DrawString(g, "#c可登记宠物自动增益技能#", GearGraphics.ItemDetailFont2, v6SkillSummaryFontColorTable, Skill.Icon.Bitmap == null ? region.LevelDescLeft : region.SkillDescLeft, region.TextRight, ref picH, 16);
-                }
-            }
-            if (Skill.IsSequenceOn)
-            {
-                if (doHighlight && DiffSkillTags.ContainsKey(skillIDstr) && DiffSkillTags[skillIDstr].Contains("isSequenceOn"))
-                {
-                    GearGraphics.DrawString(g, "#$g可登记技能序列#", GearGraphics.ItemDetailFont2, v6SkillSummaryFontColorTable, Skill.Icon.Bitmap == null ? region.LevelDescLeft : region.SkillDescLeft, region.TextRight, ref picH, 16);
-                }
-                else
-                {
-                    GearGraphics.DrawString(g, "#c可登记技能序列#", GearGraphics.ItemDetailFont2, v6SkillSummaryFontColorTable, Skill.Icon.Bitmap == null ? region.LevelDescLeft : region.SkillDescLeft, region.TextRight, ref picH, 16);
-                }
+                GearGraphics.DrawString(g, "#c可登记宠物自动增益技能#", GearGraphics.ItemDetailFont2, v6SkillSummaryFontColorTable, Skill.Icon.Bitmap == null ? region.LevelDescLeft : region.SkillDescLeft, region.TextRight, ref picH, 16);
             }
             if (Skill.reqGuildLv > 0)
             {
@@ -344,28 +231,61 @@ namespace WzComparerR2.CharaSimControl
             splitterH.Add(picH);
             picH += 15;
 
-            var skillSummaryOptions = new SkillSummaryOptions
-            {
-                ConvertCooltimeMS = this.DisplayCooltimeMSAsSec,
-                ConvertPerM = this.DisplayPermyriadAsPercent,
-                IgnoreEvalError = this.IgnoreEvalError,
-                EndColorOnNewLine = true,
-            };
-
             if (Skill.Level > 0)
             {
+                string hStr = null; ;
                 // 스킬 변경점에 초록색 칠하기
-                if (doHighlight)
+                if (DoSetDiffColor)
                 {
-
+                    //code from SummaryParser
+                    string h = null;
+                    if (Skill.PreBBSkill) //用level声明的技能
+                    {
+                        string hs;
+                        if (Skill.Common.TryGetValue("hs", out hs))
+                        {
+                            h = sr[hs];
+                        }
+                        else if (sr.SkillH.Count >= Skill.Level)
+                        {
+                            h = sr.SkillH[Skill.Level - 1];
+                        }
+                    }
+                    else
+                    {
+                        if (sr.SkillH.Count > 0)
+                        {
+                            h = sr.SkillH[0];
+                        }
+                    }
+                    if (diffSkillTags.ContainsKey(Skill.SkillID.ToString()))
+                    {
+                        foreach (var tags in diffSkillTags[Skill.SkillID.ToString()])
+                        {
+                            h = (h == null ? null : Regex.Replace(h, "#" + tags + @"([^a-zA-Z0-9])", "#g#" + tags + "#$1"));
+                        }
+                    }
                     if (Skill.SkillID / 100000 == 4000)
                     {
                         if (Skill.VSkillValue == 2) Skill.Level = 60;
                         if (Skill.VSkillValue == 1) Skill.Level = 30;
                     }
+                    hStr = SummaryParser.GetSkillSummary(h, Skill.Level, Skill.Common, SummaryParams.Default, new SkillSummaryOptions
+                    {
+                        ConvertCooltimeMS = this.DisplayCooltimeMSAsSec,
+                        ConvertPerM = this.DisplayPermyriadAsPercent,
+                        IgnoreEvalError = this.IgnoreEvalError,
+                    });
                 }
-                string hStr = SummaryParser.GetSkillSummary(Skill, Skill.Level, sr, SummaryParams.Default, skillSummaryOptions, doHighlight, skillIDstr, this.DiffSkillTags);
-
+                else
+                {
+                    hStr = SummaryParser.GetSkillSummary(Skill, Skill.Level, sr, SummaryParams.Default, new SkillSummaryOptions
+                    {
+                        ConvertCooltimeMS = this.DisplayCooltimeMSAsSec,
+                        ConvertPerM = this.DisplayPermyriadAsPercent,
+                        IgnoreEvalError = this.IgnoreEvalError,
+                    });
+                }
                 GearGraphics.DrawString(g, "[现在等级 " + Skill.Level + "]", GearGraphics.ItemDetailFont, region.LevelDescLeft, region.TextRight, ref picH, 16);
                 if (Skill.SkillID / 10000 / 1000 == 10 && Skill.Level == 1 && Skill.ReqLevel > 0)
                 {
@@ -373,30 +293,13 @@ namespace WzComparerR2.CharaSimControl
                 }
                 if (hStr != null)
                 {
-                    ParsedHdesc = hStr;
-                    if (isTranslateRequired)
+                    if (IsKoreanStringPresent(hStr))
                     {
-                        string mergedhStr = Translator.MergeString(hStr, Translator.TranslateString(hStr), 2);
-                        if (Translator.IsKoreanStringPresent(mergedhStr))
-                        {
-                            GearGraphics.DrawString(g, mergedhStr, GearGraphics.KMSItemDetailFont, v6SkillSummaryFontColorTable, region.LevelDescLeft, region.TextRight, ref picH, 16);
-                        }
-                        else
-                        {
-                            GearGraphics.DrawString(g, mergedhStr, GearGraphics.ItemDetailFont, v6SkillSummaryFontColorTable, region.LevelDescLeft, region.TextRight, ref picH, 16);
-                        }
+                        GearGraphics.DrawString(g, hStr, GearGraphics.KMSItemDetailFont, v6SkillSummaryFontColorTable, region.LevelDescLeft, region.TextRight, ref picH, 16);
                     }
                     else
                     {
-
-                        if (Translator.IsKoreanStringPresent(hStr))
-                        {
-                            GearGraphics.DrawString(g, hStr, GearGraphics.KMSItemDetailFont, v6SkillSummaryFontColorTable, region.LevelDescLeft, region.TextRight, ref picH, 16);
-                        }
-                        else
-                        {
-                            GearGraphics.DrawString(g, hStr, GearGraphics.ItemDetailFont, v6SkillSummaryFontColorTable, region.LevelDescLeft, region.TextRight, ref picH, 16);
-                        }
+                        GearGraphics.DrawString(g, hStr, GearGraphics.ItemDetailFont, v6SkillSummaryFontColorTable, region.LevelDescLeft, region.TextRight, ref picH, 16);
                     }
                 }
             }
@@ -416,29 +319,13 @@ namespace WzComparerR2.CharaSimControl
                 }
                 if (hStr != null)
                 {
-                    if (isTranslateRequired)
+                    if (IsKoreanStringPresent(hStr))
                     {
-                        string mergedhStr = Translator.MergeString(hStr, Translator.TranslateString(hStr), 2);
-                        if (Translator.IsKoreanStringPresent(mergedhStr))
-                        {
-                            GearGraphics.DrawString(g, mergedhStr, GearGraphics.KMSItemDetailFont, v6SkillSummaryFontColorTable, region.LevelDescLeft, region.TextRight, ref picH, 16);
-                        }
-                        else
-                        {
-                            GearGraphics.DrawString(g, mergedhStr, GearGraphics.ItemDetailFont, v6SkillSummaryFontColorTable, region.LevelDescLeft, region.TextRight, ref picH, 16);
-                        }
+                        GearGraphics.DrawString(g, hStr, GearGraphics.KMSItemDetailFont, v6SkillSummaryFontColorTable, region.LevelDescLeft, region.TextRight, ref picH, 16);
                     }
                     else
                     {
-
-                        if (Translator.IsKoreanStringPresent(hStr))
-                        {
-                            GearGraphics.DrawString(g, hStr, GearGraphics.KMSItemDetailFont, v6SkillSummaryFontColorTable, region.LevelDescLeft, region.TextRight, ref picH, 16);
-                        }
-                        else
-                        {
-                            GearGraphics.DrawString(g, hStr, GearGraphics.ItemDetailFont, v6SkillSummaryFontColorTable, region.LevelDescLeft, region.TextRight, ref picH, 16);
-                        }
+                        GearGraphics.DrawString(g, hStr, GearGraphics.ItemDetailFont, v6SkillSummaryFontColorTable, region.LevelDescLeft, region.TextRight, ref picH, 16);
                     }
                 }
             }
@@ -534,21 +421,9 @@ namespace WzComparerR2.CharaSimControl
                 {
                     attr.Add("地区移动限制");
                 }
-                if (Skill.isTrigger)
-                {
-                    attr.Add("触发技能");
-                }
                 if (Skill.CombatOrders)
                 {
-                    //attr.Add("应用战斗命令");
-                    if (doHighlight && DiffSkillTags.ContainsKey(skillIDstr) && DiffSkillTags[skillIDstr].Contains("combatOrders"))
-                    {
-                        attr.Add("#g应用战斗命令#");
-                    }
-                    else
-                    {
-                        attr.Add("应用战斗命令");
-                    }
+                    attr.Add("应用战斗命令");
                 }
                 if (Skill.microCooltime)
                 {
@@ -669,10 +544,6 @@ namespace WzComparerR2.CharaSimControl
                 if (Skill.cancelBuffByForbiddenField)
                 {
                     attr.Add("禁区取消增益");
-                }
-                if (Skill.applySixthSkillIncBuffDuration)
-                {
-                    attr.Add("应用6转技能增加增益时间");
                 } 
                 if (Skill.notResetDarkSight)
                 {
@@ -693,10 +564,6 @@ namespace WzComparerR2.CharaSimControl
                 if (Skill.showSummonedBuffIcon)
                 {
                     attr.Add("显示召唤增益图标");
-                }
-                if (Skill.buffIcon)
-                {
-                    attr.Add("增益图标");
                 }
                 if (Skill.jobShield)
                 {
@@ -774,14 +641,6 @@ namespace WzComparerR2.CharaSimControl
                 {
                     attr.Add("联名技能");
                 }
-                if (Skill.bgmLoop)
-                {
-                    attr.Add("BGM循环");
-                }
-                if (Skill.notAbleWhenFlying)
-                {
-                    attr.Add("飞行时不可用");
-                }
                 if (attr.Count > 0)
                 {
                     skillDescEx.Add("#c" + string.Join("、", attr.ToArray()) + "#");
@@ -837,10 +696,6 @@ namespace WzComparerR2.CharaSimControl
 
             }
 
-            if (Skill.randomEffect > 0)
-            {
-                skillDescEx.Add("#c[随机效果] " + Skill.randomEffect + "种#");
-            }
             if (Skill.makeMesoByMobDead > 0)
             {
                 skillDescEx.Add("#c[掉落] " + Skill.makeMesoByMobDead + "金币#");
@@ -850,21 +705,6 @@ namespace WzComparerR2.CharaSimControl
             {
                 skillDescEx.Add("#c[掉落] " + Skill.makeMesoByMobDead_reboot + "金币#");
             }
-            
-            if (Skill.bossCoinWorthR > 0)
-            {
-                skillDescEx.Add("#c[提高强力结晶售价] " + Skill.bossCoinWorthR + "%#");
-            }
-            
-            if (Skill.bossRewardDropR > 0)
-            {
-                skillDescEx.Add("#c[提高奖励掉落率] " + Skill.bossRewardDropR + "%#");
-            }
-            
-            if (Skill.fixSkillAlpha > 0)
-            {
-                skillDescEx.Add("#c[固定灰度] " + Skill.fixSkillAlpha + "#");
-            }
 
             if (skillDescEx.Count > 0)
             {
@@ -873,14 +713,7 @@ namespace WzComparerR2.CharaSimControl
                 picH += 9;
                 foreach (var descEx in skillDescEx)
                 {
-                    if (Translator.IsKoreanStringPresent(descEx))
-                    {
-                        GearGraphics.DrawString(g, descEx, GearGraphics.KMSItemDetailFont, region.LevelDescLeft, region.TextRight, ref picH, 16);
-                    }
-                    else
-                    {
-                        GearGraphics.DrawString(g, descEx, GearGraphics.ItemDetailFont, region.LevelDescLeft, region.TextRight, ref picH, 16);
-                    }
+                    GearGraphics.DrawString(g, descEx, GearGraphics.ItemDetailFont, region.LevelDescLeft, region.TextRight, ref picH, 16);
                 }
                 picH += 3;
             }
@@ -891,11 +724,14 @@ namespace WzComparerR2.CharaSimControl
             g.Dispose();
             return bitmap;
         }
-
+        private bool IsKoreanStringPresent(string checkString)
+        {
+            return checkString.Any(c => (c >= '\uAC00' && c <= '\uD7A3'));
+        }
         private void DrawV6SkillDotline(Graphics g, int x1, int x2, int y)
         {
             // here's a trick that we won't draw left and right part because it looks the same as background border.
-            var picCenter = Enable22AniStyle ? Resource.UIToolTipNew_img_Skill_Frame_dotline_c : Resource.UIToolTip_img_Skill_Frame_dotline_c;
+            var picCenter = Resource.UIToolTip_img_Skill_Frame_dotline_c;
             using (var brush = new TextureBrush(picCenter))
             {
                 brush.TranslateTransform(x1, y);
@@ -908,75 +744,14 @@ namespace WzComparerR2.CharaSimControl
             TooltipRender renderer = this.LinkRidingGearRender;
             if (renderer == null)
             {
-                if (this.Enable22AniStyle)
-                {
-                    GearTooltipRender22 defaultRenderer = new GearTooltipRender22();
-                    defaultRenderer.StringLinker = this.StringLinker;
-                    defaultRenderer.ShowObjectID = true;
-                    renderer = defaultRenderer;
-                }
-                else
-                {
-                    GearTooltipRender2 defaultRenderer = new GearTooltipRender2();
-                    defaultRenderer.StringLinker = this.StringLinker;
-                    defaultRenderer.ShowObjectID = true;
-                    renderer = defaultRenderer;
-                }
+                GearTooltipRender2 defaultRenderer = new GearTooltipRender2();
+                defaultRenderer.StringLinker = this.StringLinker;
+                defaultRenderer.ShowObjectID = false;
+                renderer = defaultRenderer;
             }
 
             renderer.TargetItem = gear;
             return renderer.Render();
-        }
-
-        private Bitmap RenderOrigindesc(CanvasRegion region)
-        {
-            Bitmap bitmap = new Bitmap(430, Skill.Origin ? 120 : 300);
-            Graphics g = Graphics.FromImage(bitmap);
-            GearGraphics.DrawNewTooltipBack(g, 0, 0, bitmap.Width, Skill.Origin ? 120 : 300);
-            int picH = 13;
-            if (Skill.Origin)
-            {
-                string origin_skill_desc = PluginManager.FindWz($@"String\StringTable.img\SID_ORIGIN_SKILL_DESC").GetValueEx<string>(null).Replace("\\n", "\r\n");
-                string origin_skill_h = "攻击命中时，对象在10秒内无法移动。";
-                if (Translator.IsKoreanStringPresent(origin_skill_desc))
-                {
-                    GearGraphics.DrawPlainText(g, origin_skill_desc, GearGraphics.KMSItemDetailFont, Color.FromArgb(175, 173, 255), region.LevelDescLeft, region.TextRight, ref picH, 16);
-                }
-                else
-                {
-                    GearGraphics.DrawPlainText(g, origin_skill_desc, GearGraphics.ItemDetailFont, Color.FromArgb(175, 173, 255), region.LevelDescLeft, region.TextRight, ref picH, 16);
-                }
-                picH += 19;
-                DrawV6SkillDotline(g, region.SplitterX1, region.SplitterX2, picH);
-                picH += 16;
-                GearGraphics.DrawPlainText(g, origin_skill_h, GearGraphics.ItemDetailFont, Color.FromArgb(175, 173, 255), region.LevelDescLeft, region.TextRight, ref picH, 16);
-            }
-            if (Skill.Ascent)
-            {
-                string ascent_skill_desc = PluginManager.FindWz($@"String\StringTable.img\SID_ASCENT_SKILL_DESC").GetValueEx<string>(null).Replace("\\n", "\r\n");
-                string ascent_skill_h = PluginManager.FindWz($@"String\StringTable.img\SID_ASCENT_SKILL_H").GetValueEx<string>(null).Replace("\\n", "\r\n");
-                if (Translator.IsKoreanStringPresent(ascent_skill_desc))
-                {
-                    GearGraphics.DrawPlainText(g, ascent_skill_desc, GearGraphics.KMSItemDetailFont, Color.FromArgb(175, 173, 255), region.LevelDescLeft, region.TextRight, ref picH, 16);
-                }
-                else
-                {
-                    GearGraphics.DrawPlainText(g, ascent_skill_desc, GearGraphics.ItemDetailFont, Color.FromArgb(175, 173, 255), region.LevelDescLeft, region.TextRight, ref picH, 16);
-                }
-                picH += 9;
-                DrawV6SkillDotline(g, region.SplitterX1, region.SplitterX2, picH);
-                picH += 16;
-                if (Translator.IsKoreanStringPresent(ascent_skill_h))
-                {
-                    GearGraphics.DrawPlainText(g, ascent_skill_h, GearGraphics.KMSItemDetailFont, Color.FromArgb(175, 173, 255), region.LevelDescLeft, region.TextRight, ref picH, 16);
-                }
-                else
-                {
-                    GearGraphics.DrawPlainText(g, ascent_skill_h, GearGraphics.ItemDetailFont, Color.FromArgb(175, 173, 255), region.LevelDescLeft, region.TextRight, ref picH, 16);
-                }
-            }
-            g.Dispose();
-            return bitmap;
         }
 
         private class CanvasRegion
@@ -1008,30 +783,6 @@ namespace WzComparerR2.CharaSimControl
                 TitleCenterX = 215,
                 SplitterX1 = 4,
                 SplitterX2 = 424,
-                SkillDescLeft = 92,
-                LinkedSkillNameLeft = 49,
-                LevelDescLeft = 13,
-                TextRight = 411,
-            };
-
-            public static CanvasRegion _22AniOriginal { get; } = new CanvasRegion()
-            {
-                Width = 290,
-                TitleCenterX = 144,
-                SplitterX1 = 12,
-                SplitterX2 = 276,
-                SkillDescLeft = 90,
-                LinkedSkillNameLeft = 46,
-                LevelDescLeft = 8,
-                TextRight = 272,
-            };
-
-            public static CanvasRegion _22AniWide { get; } = new CanvasRegion()
-            {
-                Width = 430,
-                TitleCenterX = 215,
-                SplitterX1 = 12,
-                SplitterX2 = 416,
                 SkillDescLeft = 92,
                 LinkedSkillNameLeft = 49,
                 LevelDescLeft = 13,

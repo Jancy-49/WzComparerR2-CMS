@@ -75,12 +75,12 @@ namespace WzComparerR2
             {
                 return bp;
             }
-            //Wz_Uol uol;
-            //while ((uol = node.GetValue<Wz_Uol>(null)) != null)
-            //{
-            //    node = uol.HandleUol(node);
-            //}
-            node = node.HandleFullUol(findNode);
+            Wz_Uol uol;
+            while ((uol = node.GetValue<Wz_Uol>(null)) != null)
+            {
+                node = uol.HandleUol(node);
+            }
+
             //获取linkNode
             //var linkNode = node.GetLinkedSourceNode(findNode);
             var linkNode = node.GetLinkedSourceNode(findNode, wzf);

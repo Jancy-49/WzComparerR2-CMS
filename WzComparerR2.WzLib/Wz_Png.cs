@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Buffers;
 using System.Collections.Generic;
 using System.Text;
 using System.Drawing;
@@ -7,293 +6,268 @@ using System.IO;
 using System.IO.Compression;
 using System.Drawing.Imaging;
 using System.Runtime.InteropServices;
-using System.Runtime.CompilerServices;
-using WzComparerR2.WzLib.Utilities;
-
-#if NET6_0_OR_GREATER
-using System.Runtime.Intrinsics;
-using System.Runtime.Intrinsics.X86;
-#endif
 
 namespace WzComparerR2.WzLib
 {
     public class Wz_Png
     {
-        public Wz_Png(int w, int h, int data_length, Wz_TextureFormat format, int scale, int pages, uint offs, Wz_Image wz_i)
+        public Wz_Png(int w, int h, int data_length, int form, uint offs, Wz_Image wz_i)
         {
-            this.Width = w;
-            this.Height = h;
-            this.DataLength = data_length;
-            this.Format = format;
-            this.Scale = scale;
-            this.Pages = pages;
-            this.Offset = offs;
-            this.WzImage = wz_i;
+            this.w = w;
+            this.h = h;
+            this.data_length = data_length;
+            this.form = form;
+            this.offs = offs;
+            this.wz_i = wz_i;
         }
+
+        private int w;
+        private int h;
+        private int data_length;
+        private int form;
+        private uint offs;
+        private Wz_Image wz_i;
 
         /// <summary>
         /// 获取或设置图片的宽度。
         /// </summary>
-        public int Width { get; set; }
+        public int Width
+        {
+            get { return w; }
+            set { w = value; }
+        }
 
         /// <summary>
         /// 获取或设置图片的高度。
         /// </summary>
-        public int Height { get; set; }
+        public int Height
+        {
+            get { return h; }
+            set { h = value; }
+        }
 
         /// <summary>
         /// 获取或设置数据块的长度。
         /// </summary>
-        public int DataLength { get; set; }
+        public int DataLength
+        {
+            get { return data_length; }
+            set { data_length = value; }
+        }
 
         /// <summary>
         /// 获取或设置数据块对于文件的偏移。
         /// </summary>
-        public uint Offset { get; set; }
+        public uint Offset
+        {
+            get { return offs; }
+            set { offs = value; }
+        }
 
         /// <summary>
         /// 获取或设置图片的数据压缩方式。
         /// </summary>
-        public int Form => (int)this.Format + this.Scale;
-
-        public Wz_TextureFormat Format { get; set; }
-
-        public int Scale { get; set; }
-
-        /// <summary>
-        /// The actual width and height sacale is pow(2, value).
-        /// </summary>
-        public int ActualScale => this.Scale > 0 ? (1 << this.Scale) : 1;
-
-        public int Pages { get; set; }
-
-        public int ActualPages => this.Pages > 0 ? this.Pages : 1;
+        public int Form
+        {
+            get { return form; }
+            set { form = value; }
+        }
 
         /// <summary>
         /// 获取或设置图片所属的WzFile
         /// </summary>
         public IMapleStoryFile WzFile
         {
-            get { return this.WzImage?.WzFile; }
+            get { return wz_i?.WzFile; }
         }
 
         /// <summary>
         /// 获取或设置图片所属的WzImage
         /// </summary>
-        public Wz_Image WzImage { get; set; }
-
-        public int GetRawDataSize() => this.GetRawDataSizePerPage() * this.ActualPages;
-
-        public int GetRawDataSizePerPage() => GetUncompressedDataSize(this.Format, this.ActualScale, this.Width, this.Height);
+        public Wz_Image WzImage
+        {
+            get { return wz_i; }
+            set { wz_i = value; }
+        }
 
         public byte[] GetRawData()
         {
-            int dataSize = this.GetRawDataSize();
-            byte[] rawData = new byte[dataSize];
-            int count = this.GetRawData(rawData);
-            if (count != dataSize)
-            {
-                throw new Exception($"Data size mismatch. (expected: {dataSize}, actual: {count})");
-            }
-            return rawData;
-        }
-
-        public int GetRawData(Span<byte> buffer)
-        {
-            return this.GetRawData(0, buffer);
-        }
-
-        public int GetRawData(int skipBytes, Span<byte> buffer)
-        {
             lock (this.WzFile.ReadLock)
             {
-                using (var zlib = this.UnsafeOpenRead())
+                DeflateStream zlib;
+                byte[] plainData = null;
+
+                var stream = this.WzImage.OpenRead();
+                long endPosition = this.Offset + this.DataLength;
+                stream.Position = this.Offset + 1; // skip the first byte
+                var bReader = new BinaryReader(stream);
+
+                if (bReader.ReadUInt16() == 0x9C78)
                 {
-                    if (skipBytes > 0)
-                    {
-                        var pool = ArrayPool<byte>.Shared;
-                        byte[] tempBuffer = pool.Rent(4096);
-                        try
-                        {
-                            while (skipBytes > 0)
-                            {
-                                int len = zlib.Read(tempBuffer, 0, (int)Math.Min(skipBytes, tempBuffer.Length));
-                                if (len == 0)
-                                {
-                                    break;
-                                }
-                                skipBytes -= len;
-                            }
-                        }
-                        finally
-                        {
-                            pool.Return(tempBuffer);
-                        }
-                    }
+                    byte[] buffer = bReader.ReadBytes((int)(endPosition - stream.Position));
+                    MemoryStream dataStream = new MemoryStream(buffer, false);
 
-                    return zlib.ReadAvailableBytes(buffer);
+                    zlib = new DeflateStream(dataStream, CompressionMode.Decompress);
                 }
+                else
+                {
+                    stream.Position -= 2;
+                    byte[] buffer = new byte[this.DataLength];
+                    int dataEndOffset = 0;
+                    
+                    var encKeys = this.WzImage.EncKeys;
+
+                    while (stream.Position < endPosition)
+                    {
+                        int blockSize = bReader.ReadInt32();
+                        if (stream.Position + blockSize > endPosition)
+                        {
+                            throw new Exception($"Wz_Png exceeds the declared data size. (data length: {this.DataLength}, readed bytes: {dataEndOffset}, next block: {blockSize})");
+                        }
+                        bReader.Read(buffer, dataEndOffset, blockSize);
+                        encKeys.Decrypt(buffer, dataEndOffset, blockSize);
+
+                        dataEndOffset += blockSize;
+                    }
+                    var dataStream = new MemoryStream(buffer, 0, dataEndOffset, false);
+                    dataStream.Position = 2;
+                    zlib = new DeflateStream(dataStream, CompressionMode.Decompress);
+                }
+
+                switch (this.Form)
+                {
+                    case 1:
+                    case 257:
+                    case 513:
+                        plainData = new byte[this.w * this.h * 2];
+                        ReadAvailableBytes(zlib, plainData, 0, plainData.Length);
+                        break;
+
+                    case 2:
+                        plainData = new byte[this.w * this.h * 4];
+                        ReadAvailableBytes(zlib, plainData, 0, plainData.Length);
+                        break;
+
+                    case 3:
+                        plainData = new byte[((int)Math.Ceiling(this.w / 4.0)) * 4 * ((int)Math.Ceiling(this.h / 4.0)) * 4 / 8];
+                        ReadAvailableBytes(zlib, plainData, 0, plainData.Length);
+                        break;
+
+                    case 517:
+                        plainData = new byte[this.w * this.h / 128];
+                        ReadAvailableBytes(zlib, plainData, 0, plainData.Length);
+                        break;
+
+                    case 1026:
+                    case 2050:
+                        plainData = new byte[this.w * this.h];
+                        ReadAvailableBytes(zlib, plainData, 0, plainData.Length);
+                        break;
+
+                    default:
+                        var msOut = new MemoryStream();
+                        zlib.CopyTo(msOut);
+                        plainData = msOut.ToArray();
+                        break;
+                }
+                if (zlib != null)
+                {
+                    zlib.Close();
+                }
+                return plainData;
             }
-        }
-
-        public Stream UnsafeOpenRead()
-        {
-            DeflateStream zlib;
-
-            var stream = this.WzImage.OpenRead();
-            long endPosition = this.Offset + this.DataLength;
-            stream.Position = this.Offset + 1; // skip the first byte
-            Span<byte> zlibHeader = stackalloc byte[2];
-            stream.ReadExactly(zlibHeader);
-
-            if (MemoryMarshal.Read<ushort>(zlibHeader) == 0x9C78) //TODO: more generic zlib header validation
-            {
-                Stream dataStream = new PartialStream(stream, stream.Position, endPosition - stream.Position, true);
-                zlib = new DeflateStream(dataStream, CompressionMode.Decompress);
-            }
-            else
-            {
-                stream.Position -= 2;
-                Stream dataStream = new PartialStream(stream, stream.Position, endPosition - stream.Position, true);
-                Stream chunkStream = new ChunkedEncryptedInputStream(dataStream, this.WzImage.EncKeys);
-                chunkStream.ReadExactly(zlibHeader);
-                zlib = new DeflateStream(chunkStream, CompressionMode.Decompress);
-            }
-
-            return zlib;
         }
 
         public Bitmap ExtractPng()
         {
-            return this.ExtractPng(page: 0);
-        }
-
-        public Bitmap ExtractPng(int page)
-        {
-            if (this.Pages > 0)
-            {
-                if (page < 0 || page >= this.Pages)
-                {
-                    throw new ArgumentOutOfRangeException(nameof(page));
-                }
-            }
-            else
-            {
-                // ignore it, always pick the first page.
-                page = 0;
-            }
-
             byte[] pixel = this.GetRawData();
+            if (pixel == null)
+            {
+                return null;
+            }
             Bitmap pngDecoded = null;
             BitmapData bmpdata;
             byte[] argb;
 
-            switch (this.Form)
+            switch (this.form)
             {
                 case 1: //16位argb4444
-                    pngDecoded = new Bitmap(this.Width, this.Height, PixelFormat.Format32bppArgb);
+                    argb = GetPixelDataBgra4444(pixel, this.w, this.h);
+                    pngDecoded = new Bitmap(this.w, this.h, PixelFormat.Format32bppArgb);
                     bmpdata = pngDecoded.LockBits(new Rectangle(Point.Empty, pngDecoded.Size), ImageLockMode.WriteOnly, PixelFormat.Format32bppArgb);
-                    unsafe
-                    {
-                        Span<byte> output = new Span<byte>(bmpdata.Scan0.ToPointer(), bmpdata.Stride * bmpdata.Height);
-                        GetPixelDataBgra4444(pixel, this.Width, this.Height, output);
-                    }
+                    Marshal.Copy(argb, 0, bmpdata.Scan0, argb.Length);
                     pngDecoded.UnlockBits(bmpdata);
                     break;
 
                 case 2: //32位argb8888
-                    pngDecoded = new Bitmap(this.Width, this.Height, PixelFormat.Format32bppArgb);
+                    pngDecoded = new Bitmap(this.w, this.h, PixelFormat.Format32bppArgb);
                     bmpdata = pngDecoded.LockBits(new Rectangle(Point.Empty, pngDecoded.Size), ImageLockMode.WriteOnly, PixelFormat.Format32bppArgb);
                     Marshal.Copy(pixel, 0, bmpdata.Scan0, pixel.Length);
                     pngDecoded.UnlockBits(bmpdata);
                     break;
 
                 case 3: //黑白缩略图
-                    argb = GetPixelDataForm3(pixel, this.Width, this.Height);
-                    pngDecoded = new Bitmap(this.Width, this.Height, PixelFormat.Format32bppArgb);
+                    argb = GetPixelDataForm3(pixel, this.w, this.h);
+                    pngDecoded = new Bitmap(this.w, this.h, PixelFormat.Format32bppArgb);
                     bmpdata = pngDecoded.LockBits(new Rectangle(Point.Empty, pngDecoded.Size), ImageLockMode.WriteOnly, PixelFormat.Format32bppArgb);
                     Marshal.Copy(argb, 0, bmpdata.Scan0, argb.Length);
                     pngDecoded.UnlockBits(bmpdata);
                     break;
 
                 case 257: //16位argb1555
-                    pngDecoded = new Bitmap(this.Width, this.Height, PixelFormat.Format16bppArgb1555);
+                    pngDecoded = new Bitmap(this.w, this.h, PixelFormat.Format16bppArgb1555);
                     bmpdata = pngDecoded.LockBits(new Rectangle(Point.Empty, pngDecoded.Size), ImageLockMode.WriteOnly, PixelFormat.Format16bppArgb1555);
                     CopyBmpDataWithStride(pixel, pngDecoded.Width * 2, bmpdata);
                     pngDecoded.UnlockBits(bmpdata);
                     break;
 
                 case 513: //16位rgb565
-                    pngDecoded = new Bitmap(this.Width, this.Height, PixelFormat.Format16bppRgb565);
+                    pngDecoded = new Bitmap(this.w, this.h, PixelFormat.Format16bppRgb565);
                     bmpdata = pngDecoded.LockBits(new Rectangle(new Point(), pngDecoded.Size), ImageLockMode.WriteOnly, PixelFormat.Format16bppRgb565);
                     CopyBmpDataWithStride(pixel, pngDecoded.Width * 2, bmpdata);
                     pngDecoded.UnlockBits(bmpdata);
                     break;
 
                 case 517: //16位rgb565缩略图
-                    argb = GetPixelDataForm517(pixel, this.Width, this.Height);
-                    pngDecoded = new Bitmap(this.Width, this.Height, PixelFormat.Format16bppRgb565);
-                    bmpdata = pngDecoded.LockBits(new Rectangle(0, 0, this.Width, this.Height), ImageLockMode.WriteOnly, PixelFormat.Format16bppRgb565);
+                    argb = GetPixelDataForm517(pixel, this.w, this.h);
+                    pngDecoded = new Bitmap(this.w, this.h, PixelFormat.Format16bppRgb565);
+                    bmpdata = pngDecoded.LockBits(new Rectangle(0, 0, this.w, this.h), ImageLockMode.WriteOnly, PixelFormat.Format16bppRgb565);
                     Marshal.Copy(argb, 0, bmpdata.Scan0, argb.Length);
                     pngDecoded.UnlockBits(bmpdata);
                     break;
-                /* pngDecoded = new Bitmap(this.w, this.h);
-                 pngSize = this.w * this.h / 128;
-                 plainData = new byte[pngSize];
-                 zlib.Read(plainData, 0, pngSize);
-                 byte iB = 0;
-                 for (int i = 0; i < pngSize; i++)
-                 {
-                     for (byte j = 0; j < 8; j++)
-                     {
-                         iB = Convert.ToByte(((plainData[i] & (0x01 << (7 - j))) >> (7 - j)) * 0xFF);
-                         for (int k = 0; k < 16; k++)
-                         {
-                             if (x == this.w) { x = 0; y++; }
-                             pngDecoded.SetPixel(x, y, Color.FromArgb(0xFF, iB, iB, iB));
-                             x++;
-                         }
-                     }
-                 }
-                 break;*/
+                   /* pngDecoded = new Bitmap(this.w, this.h);
+                    pngSize = this.w * this.h / 128;
+                    plainData = new byte[pngSize];
+                    zlib.Read(plainData, 0, pngSize);
+                    byte iB = 0;
+                    for (int i = 0; i < pngSize; i++)
+                    {
+                        for (byte j = 0; j < 8; j++)
+                        {
+                            iB = Convert.ToByte(((plainData[i] & (0x01 << (7 - j))) >> (7 - j)) * 0xFF);
+                            for (int k = 0; k < 16; k++)
+                            {
+                                if (x == this.w) { x = 0; y++; }
+                                pngDecoded.SetPixel(x, y, Color.FromArgb(0xFF, iB, iB, iB));
+                                x++;
+                            }
+                        }
+                    }
+                    break;*/
 
                 case 1026: //dxt3
-                    argb = GetPixelDataDXT3(pixel, this.Width, this.Height);
-                    pngDecoded = new Bitmap(this.Width, this.Height, PixelFormat.Format32bppArgb);
+                    argb = GetPixelDataDXT3(pixel, this.w, this.h);
+                    pngDecoded = new Bitmap(this.w, this.h, PixelFormat.Format32bppArgb);
                     bmpdata = pngDecoded.LockBits(new Rectangle(new Point(), pngDecoded.Size), ImageLockMode.WriteOnly, PixelFormat.Format32bppArgb);
                     Marshal.Copy(argb, 0, bmpdata.Scan0, argb.Length);
                     pngDecoded.UnlockBits(bmpdata);
                     break;
 
                 case 2050: //dxt5
-                    argb = GetPixelDataDXT5(pixel, this.Width, this.Height);
-                    pngDecoded = new Bitmap(this.Width, this.Height, PixelFormat.Format32bppArgb);
+                    argb = GetPixelDataDXT5(pixel, this.w, this.h);
+                    pngDecoded = new Bitmap(this.w, this.h, PixelFormat.Format32bppArgb);
                     bmpdata = pngDecoded.LockBits(new Rectangle(new Point(), pngDecoded.Size), ImageLockMode.WriteOnly, PixelFormat.Format32bppArgb);
                     Marshal.Copy(argb, 0, bmpdata.Scan0, argb.Length);
-                    pngDecoded.UnlockBits(bmpdata);
-                    break;
-
-                case 2562: //r10g10b10a2
-                    pngDecoded = new Bitmap(this.Width, this.Height, PixelFormat.Format32bppArgb);
-                    bmpdata = pngDecoded.LockBits(new Rectangle(0, 0, this.Width, this.Height), ImageLockMode.WriteOnly, PixelFormat.Format32bppArgb);
-                    unsafe
-                    {
-                        int pageSize = this.Width * this.Height * 4;
-                        Span<byte> outputPixels = new Span<byte>(bmpdata.Scan0.ToPointer(), bmpdata.Stride * bmpdata.Height);
-                        ImageCodec.R10G10B10A2ToBGRA32(pixel.AsSpan(pageSize * page, pageSize), outputPixels);
-                    }
-                    pngDecoded.UnlockBits(bmpdata);
-                    break;
-
-                case 4098: //bc7
-                    pngDecoded = new Bitmap(this.Width, this.Height, PixelFormat.Format32bppArgb);
-                    bmpdata = pngDecoded.LockBits(new Rectangle(0, 0, this.Width, this.Height), ImageLockMode.WriteOnly, PixelFormat.Format32bppArgb);
-                    unsafe
-                    {
-                        Span<byte> outputPixels = new Span<byte>(bmpdata.Scan0.ToPointer(), bmpdata.Stride * bmpdata.Height);
-                        ImageCodec.BC7ToRGBA32(pixel, outputPixels, bmpdata.Width, bmpdata.Stride, bmpdata.Height);
-                        ImageCodec.RGBA32ToBGRA32(outputPixels, outputPixels);
-                    }
                     pngDecoded.UnlockBits(bmpdata);
                     break;
             }
@@ -304,68 +278,15 @@ namespace WzComparerR2.WzLib
         public static byte[] GetPixelDataBgra4444(byte[] rawData, int width, int height)
         {
             byte[] argb = new byte[width * height * 4];
-            GetPixelDataBgra4444(rawData, width, height, argb);
-            return argb;
-        }
-
-        public static void GetPixelDataBgra4444(ReadOnlySpan<byte> rawData, int width, int height, Span<byte> output)
-        {
-            if (output.Length < width * height * 4)
             {
-                throw new ArgumentException($"Output buffer requires at least {width * height * 4} bytes.", nameof(output));
-            }
-#if NET6_0_OR_GREATER
-            /*
-                      0        1        2        3
-              data    ggggbbbb aaaarrrr -------- --------
-              xmm0 = unpack_low(data, data)
-                      ggggbbbb ggggbbbb aaaarrrr aaaarrrr
-              xmm1 = (ushort[])xmm0 >> 4
-                      bbbbgggg 0000gggg rrrraaaa 0000aaaa
-              xmm0 &= 0F F0 0F F0
-                      0000bbbb gggg0000 0000rrrr aaaa0000
-              xmm1 &= F0 0F F0 0F
-                      bbbb0000 0000gggg rrrr0000 0000aaaa
-              xmm0 |= xmm1
-                      bbbbbbbb gggggggg rrrrrrrr aaaaaaaa
-            */
-            if (rawData.Length >= 16 && Avx2.IsSupported)
-            {
-                var mask0 = Vector256.Create(
-                        0x0f, 0xf0, 0x0f, 0xf0, 0x0f, 0xf0, 0x0f, 0xf0,
-                        0x0f, 0xf0, 0x0f, 0xf0, 0x0f, 0xf0, 0x0f, 0xf0,
-                        0x0f, 0xf0, 0x0f, 0xf0, 0x0f, 0xf0, 0x0f, 0xf0,
-                        0x0f, 0xf0, 0x0f, 0xf0, 0x0f, 0xf0, 0x0f, 0xf0);
-                var mask1 = Vector256.Create(
-                        0xf0, 0x0f, 0xf0, 0x0f, 0xf0, 0x0f, 0xf0, 0x0f,
-                        0xf0, 0x0f, 0xf0, 0x0f, 0xf0, 0x0f, 0xf0, 0x0f,
-                        0xf0, 0x0f, 0xf0, 0x0f, 0xf0, 0x0f, 0xf0, 0x0f,
-                        0xf0, 0x0f, 0xf0, 0x0f, 0xf0, 0x0f, 0xf0, 0x0f);
-                Vector128<byte> xmm;
-
-                unsafe
+                int p;
+                for (int i = 0; i < rawData.Length; i++)
                 {
-                    while (rawData.Length >= 16)
-                    {
-                        fixed (byte* pRawData = rawData)
-                            xmm = Sse2.LoadVector128(pRawData);
-                        var ymm0 = Vector256.Create(Avx.UnpackLow(xmm, xmm), Avx.UnpackHigh(xmm, xmm));
-                        var ymm1 = Avx2.ShiftRightLogical(ymm0.AsUInt16(), 4).AsByte();
-                        var ymm2 = Avx2.Or(Avx2.And(ymm0, mask0), Avx2.And(ymm1, mask1));
-                        fixed (byte* pOutput = output)
-                            Avx.Store(pOutput, ymm2);
-                        rawData = rawData.Slice(16);
-                        output = output.Slice(32);
-                    }
+                    p = rawData[i] & 0x0F; p |= (p << 4); argb[i * 2] = (byte)p;
+                    p = rawData[i] & 0xF0; p |= (p >> 4); argb[i * 2 + 1] = (byte)p;
                 }
             }
-#endif
-            int p;
-            for (int i = 0; i < rawData.Length; i++)
-            {
-                p = rawData[i] & 0x0F; p |= (p << 4); output[i * 2] = (byte)p;
-                p = rawData[i] & 0xF0; p |= (p >> 4); output[i * 2 + 1] = (byte)p;
-            }
+            return argb;
         }
 
         public static byte[] GetPixelDataDXT3(byte[] rawData, int width, int height)
@@ -393,7 +314,7 @@ namespace WzComparerR2.WzLib
                             SetPixel(pixel,
                                 x + i,
                                 y + j,
-                                width,
+                                width, 
                                 colorTable[colorIdxTable[j * 4 + i]],
                                 alphaTable[j * 4 + i]);
                         }
@@ -581,14 +502,14 @@ namespace WzComparerR2.WzLib
             alpha[1] = a1;
             if (a0 > a1)
             {
-                for (int i = 2; i < 8; i++)
+                for(int i = 2; i < 8; i++)
                 {
                     alpha[i] = (byte)(((8 - i) * a0 + (i - 1) * a1 + 3) / 7);
                 }
             }
             else
             {
-                for (int i = 2; i < 6; i++)
+                for(int i = 2; i < 6; i++)
                 {
                     alpha[i] = (byte)(((6 - i) * a0 + (i - 1) * a1 + 2) / 5);
                 }
@@ -604,7 +525,7 @@ namespace WzComparerR2.WzLib
                 int flags = rawData[offset]
                     | (rawData[offset + 1] << 8)
                     | (rawData[offset + 2] << 16);
-                for (int j = 0; j < 8; j++)
+                for(int j = 0; j < 8; j++)
                 {
                     int mask = 0x07 << (3 * j);
                     alphaIndex[i + j] = (flags & mask) >> (3 * j);
@@ -643,60 +564,20 @@ namespace WzComparerR2.WzLib
             }
         }
 
-        public static int GetUncompressedDataSize(Wz_TextureFormat format, int scale, int width, int height)
+        private static int ReadAvailableBytes(Stream inputStream, byte[] array, int offset, int count)
         {
-            if (scale > 0)
+            // this is a wrapper function that to make sure always reading as much as requested from zlib stream;
+            // https://github.com/Kagamia/WzComparerR2/issues/195
+            int totalRead = 0;
+            while (count > 0)
             {
-                if ((width % scale) != 0 || (height % scale) != 0)
-                {
-                    throw new ArgumentException("Width or height cannot be divided by scale");
-                }
-                width /= scale;
-                height /= scale;
+                int bytesRead = inputStream.Read(array, offset, count);
+                if (bytesRead == 0) break;
+                totalRead += bytesRead;
+                offset += bytesRead;
+                count -= bytesRead;
             }
-            return GetUncompressedDataSize(format, width, height);
+            return totalRead;
         }
-
-        public static int GetUncompressedDataSize(Wz_TextureFormat format, int width, int height)
-        {
-            return format switch
-            {
-                Wz_TextureFormat.ARGB4444 or
-                Wz_TextureFormat.ARGB1555 or
-                Wz_TextureFormat.RGB565 => width * height * 2,
-
-                Wz_TextureFormat.ARGB8888 or
-                Wz_TextureFormat.RGBA1010102 => width * height * 4,
-
-                Wz_TextureFormat.DXT3 or
-                Wz_TextureFormat.DXT5 or
-                Wz_TextureFormat.BC7 => ((width + 3) / 4) * ((height + 3) / 4) * 16,
-
-                Wz_TextureFormat.DXT1 => ((width + 3) / 4) * ((height + 3) / 4) * 8,
-
-                Wz_TextureFormat.A8 => width * height,
-
-                Wz_TextureFormat.RGBA32Float => width * height * 16,
-
-                _ => throw new ArgumentException($"Unknown texture format {(int)format}.")
-            };
-        }
-    }
-
-    public enum Wz_TextureFormat
-    {
-        Unknown = 0,
-        ARGB4444 = 1,
-        ARGB8888 = 2,
-        ARGB1555 = 257,
-        RGB565 = 513,
-        DXT3 = 1026,
-        DXT5 = 2050,
-        /* introduced in KMST 1186 */
-        A8 = 2304,
-        RGBA1010102 = 2562,
-        DXT1 = 4097,
-        BC7 = 4098,
-        RGBA32Float = 4100,
     }
 }

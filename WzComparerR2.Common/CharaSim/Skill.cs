@@ -65,7 +65,6 @@ namespace WzComparerR2.CharaSim
         public bool areaAttack { get; set; }
         public bool chainAttack { get; set; }
         public bool isFieldMovingLimit { get; set; }
-        public bool isTrigger { get; set; }
         public bool ignoreActionWhenAddAttackProc { get; set; }
         public bool CombatOrders { get; set; }
         public bool microCooltime { get; set; }
@@ -88,8 +87,6 @@ namespace WzComparerR2.CharaSim
         public int VSkillValue { get; set; }
         public int alertTime { get; set; }
         public bool Origin { get; set; }
-        public bool Ascent { get; set; }
-        public bool applySixthSkillIncBuffDuration { get; set; }
         public bool TimeLimited { get; set; }
         public bool isCancelableBuff { get; set; }
         public bool fixEffectCanceled { get; set; }
@@ -104,7 +101,6 @@ namespace WzComparerR2.CharaSim
         public bool canSummonedAttackOnDarkSight { get; set; }
         public bool maintainSplitSummoned { get; set; }
         public bool showSummonedBuffIcon { get; set; }
-        public bool buffIcon { get; set; }
         public bool jobShield { get; set; }
         public bool rectBasedOnTarget { get; set; }
         public bool normalAttackAtBulletEmpty { get; set; }
@@ -124,7 +120,6 @@ namespace WzComparerR2.CharaSim
         public bool footholdInstallSummoned { get; set; }
         public bool addAttackCoolTime { get; set; }
         public Tuple<int, int> RelationSkill { get; set; }
-        public bool IsSequenceOn { get; set; }
         public bool IsPetAutoBuff { get; set; }
         public bool DisableNextLevelInfo { get; set; }
         public bool petPassive { get; set; }
@@ -142,14 +137,10 @@ namespace WzComparerR2.CharaSim
         public int makeMesoByMobDead { get; set; }
         public int makeMesoByMobDead_reboot { get; set; }
         public int screenPoolCount { get; set; }
-        public int bossCoinWorthR { get; set; }
-        public int bossRewardDropR { get; set; }
-        public int randomEffect { get; set; }
+        public bool bossCoinWorthR { get; set; }
+        public bool bossRewardDropR { get; set; }
         public bool collabo { get; set; }
-        public bool bgmLoop { get; set; }
-        public bool notAbleWhenFlying { get; set; }
         public int reqGuildLv { get; set; }
-        public int fixSkillAlpha { get; set; }
         public Point LT { get; set; }
         public Point RB { get; set; }
         public int MaxLevel
@@ -262,9 +253,6 @@ namespace WzComparerR2.CharaSim
                     case "isFieldMovingLimit":
                         skill.isFieldMovingLimit = childNode.GetValue<int>() != 0;
                         break;
-                    case "isTrigger":
-                        skill.isTrigger = childNode.GetValue<int>() != 0;
-                        break;
                     case "combatOrders":
                         skill.CombatOrders = childNode.GetValue<int>() != 0;
                         break;
@@ -329,20 +317,11 @@ namespace WzComparerR2.CharaSim
                     case "origin":
                         skill.Origin = childNode.GetValue<int>() != 0;
                         break;
-                    case "ascent":
-                        skill.Ascent = childNode.GetValue<int>() != 0;
-                        break;
-                    case "applySixthSkillIncBuffDuration":
-                        skill.applySixthSkillIncBuffDuration = childNode.GetValue<int>() != 0;
-                        break;
                     case "timeLimited":
                         skill.TimeLimited = childNode.GetValue<int>() != 0;
                         break;
                     case "relationSkill":
                         skill.RelationSkill = Tuple.Create(childNode.Nodes["skillID"].GetValueEx<int>(0), childNode.Nodes["periodMin"].GetValueEx<int>(0));
-                        break;
-                    case "isSequenceOn":
-                        skill.IsSequenceOn = childNode.GetValue<int>() != 0;
                         break;
                     case "isPetAutoBuff":
                         skill.IsPetAutoBuff = childNode.GetValue<int>() != 0;
@@ -367,9 +346,6 @@ namespace WzComparerR2.CharaSim
                         break;
                     case "reqLev":
                         skill.ReqLevel = childNode.GetValue<int>();
-                        break;
-                    case "fixSkillAlpha":
-                        skill.fixSkillAlpha = childNode.GetValue<int>();
                         break;
                     case "req":
                         foreach (Wz_Node reqNode in childNode.Nodes)
@@ -474,9 +450,6 @@ namespace WzComparerR2.CharaSim
                     case "showSummonedBuffIcon":
                         skill.showSummonedBuffIcon = childNode.GetValue<int>() != 0;
                         break;
-                    case "buffIcon":
-                        skill.buffIcon = childNode.GetValue<int>() != 0;
-                        break;
                     case "jobShield":
                         skill.jobShield = childNode.GetValue<int>() != 0;
                         break;
@@ -517,13 +490,10 @@ namespace WzComparerR2.CharaSim
                         skill.makeEventPointByMobDead = childNode.GetValue<int>() != 0;
                         break;
                     case "bossCoinWorthR":
-                        skill.bossCoinWorthR = childNode.GetValue<int>();
+                        skill.bossCoinWorthR = childNode.GetValue<int>() != 0;
                         break;
                     case "bossRewardDropR":
-                        skill.bossRewardDropR = childNode.GetValue<int>();
-                        break;
-                    case "randomEffect":
-                        skill.randomEffect = childNode.GetValue<int>();
+                        skill.bossRewardDropR = childNode.GetValue<int>() != 0;
                         break;
                     case "repeatDance":
                         skill.repeatDance = childNode.GetValue<int>() != 0;
@@ -533,12 +503,6 @@ namespace WzComparerR2.CharaSim
                         break;
                     case "collabo":
                         skill.collabo = childNode.GetValue<int>() != 0;
-                        break;
-                    case "bgmLoop":
-                        skill.bgmLoop = childNode.GetValue<int>() != 0;
-                        break;
-                    case "notAbleWhenFlying":
-                        skill.notAbleWhenFlying = childNode.GetValue<int>() != 0;
                         break;
                 }
             }
@@ -576,7 +540,8 @@ namespace WzComparerR2.CharaSim
             skill.PreBBSkill = false;
             if (skill.levelCommon.Count > 0)
             {
-                if (skill.common.Count <= 0 || skill.common.ContainsKey("maxLevel"))
+                if (skill.common.Count <= 0
+                    || (skill.common.Count == 1 && skill.common.ContainsKey("maxLevel")))
                 {
                     skill.PreBBSkill = true;
                 }

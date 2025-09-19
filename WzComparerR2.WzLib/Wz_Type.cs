@@ -15,7 +15,6 @@ namespace WzComparerR2.WzLib
         Effect,
         Etc,
         Item,
-        Language,
         Map,
         Mob,
         Morph,

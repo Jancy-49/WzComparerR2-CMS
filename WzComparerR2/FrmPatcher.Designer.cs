@@ -113,10 +113,6 @@
             this.expandablePanel3.SuspendLayout();
             this.SuspendLayout();
             // 
-            // superTooltip1
-            // 
-            this.superTooltip1.DefaultTooltipSettings = superTooltipInfo1;
-            // 
             // comboBoxEx1
             // 
             this.comboBoxEx1.DisplayMember = "Text";

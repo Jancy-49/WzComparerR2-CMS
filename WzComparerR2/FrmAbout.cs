@@ -49,13 +49,10 @@ namespace WzComparerR2
         {
             this.advTree1.Nodes.Clear();
 
-            this.advTree1.Nodes.Add(new Node("CMS <font color=\"#808080\">v5.8.0</font>"));
+            this.advTree1.Nodes.Add(new Node("CMS <font color=\"#808080\">v5.5.0</font>"));
             this.advTree1.Nodes.Add(new Node("[CMS] 中文版<font color=\"#808080\">Jancy</font>"));
             foreach (var contribution in new[]
 {
-                Tuple.Create("[CMS] 新增联盟预览功能", "Jancy"),
-                Tuple.Create("[CMS] 新增OPENAPI查询功能", "Jancy"),
-                Tuple.Create("[CMS] 新增Tooltip对比功能", "Jancy"),
                 Tuple.Create("[KMS] 新增各种功能，最终翻译", "朴贤民"),
                 Tuple.Create("[KMS] 短语翻译", "舒林猫"),
                 Tuple.Create("[KMS] 短语错误报告", "인소야닷컴 실버"),

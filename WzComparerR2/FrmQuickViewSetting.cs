@@ -25,13 +25,6 @@ namespace WzComparerR2
 #endif
             this.comboBoxEx1.SelectedIndex = 0;
             this.comboBoxEx2.SelectedIndex = 0;
-
-            cmbPreferredStringCopyMethod.Items.AddRange(new[]
-                {
-                new ComboItem("原始文本") { Value = 0 },
-                new ComboItem("纯文本") { Value = 1 },
-                new ComboItem("MapleWiki优化文本") { Value = 2 },
-            });
         }
 
         [Link]
@@ -144,13 +137,6 @@ namespace WzComparerR2
         }
 
         [Link]
-        public bool Gear_MaxStar25
-        {
-            get { return checkBoxX17.Checked; }
-            set { checkBoxX17.Checked = value; }
-        }
-
-        [Link]
         public bool Recipe_ShowID
         {
             get { return checkBoxX7.Checked; }
@@ -178,87 +164,8 @@ namespace WzComparerR2
             set { checkBoxX12.Checked = value; }
         }
 
-        [Link]
-        public bool Map_ShowMiniMap
-        {
-            get { return chkShowMiniMap.Checked; }
-            set { chkShowMiniMap.Checked = value; }
-        }
-
-        [Link]
-        public bool Map_ShowMapObjectID
-        {
-            get { return chkShowMapObjectID.Checked; }
-            set { chkShowMapObjectID.Checked = value; }
-        }
-
-        [Link]
-        public bool Map_ShowMobNpcObjectID
-        {
-            get { return chkShowMobNpcObjectID.Checked; }
-            set { chkShowMobNpcObjectID.Checked = value; }
-        }
-
-        [Link]
-        public bool Map_ShowBgmName
-        {
-            get { return chkShowBgmName.Checked; }
-            set { chkShowBgmName.Checked = value; }
-        }
-
-        public int PreferredStringCopyMethod
-        {
-            get
-            {
-                return ((cmbPreferredStringCopyMethod.SelectedItem as ComboItem)?.Value as int?) ?? 0;
-            }
-            set
-            {
-                var items = cmbPreferredStringCopyMethod.Items.Cast<ComboItem>();
-                var item = items.FirstOrDefault(_item => _item.Value as int? == value)
-                    ?? items.Last();
-                item.Value = value;
-                cmbPreferredStringCopyMethod.SelectedItem = item;
-            }
-        }
-
-        public bool CopyParsedSkillString
-        {
-            get { return chkCopyParsedSkillString.Checked; }
-            set { chkCopyParsedSkillString.Checked = value; }
-        }
-
-        public bool Map_ShowMiniMapMob
-        {
-            get { return chkShowMiniMapMob.Checked; }
-            set { chkShowMiniMapMob.Checked = value; }
-        }
-
-        [Link]
-        public bool Map_ShowMiniMapNpc
-        {
-            get { return chkShowMiniMapNpc.Checked; }
-            set { chkShowMiniMapNpc.Checked = value; }
-        }
-
-        [Link]
-        public bool Map_ShowMiniMapPortal
-        {
-            get { return chkShowMiniMapPortal.Checked; }
-            set { chkShowMiniMapPortal.Checked = value; }
-        }
-
-        public bool Enable22AniStyle
-        {
-            get { return chkEnable22AniStyle.Checked; }
-            set { chkEnable22AniStyle.Checked = value; }
-        }
-
         public void Load(CharaSimConfig config)
         {
-            this.PreferredStringCopyMethod = config.PreferredStringCopyMethod;
-            this.CopyParsedSkillString = config.CopyParsedSkillString;
-            this.Enable22AniStyle = config.Enable22AniStyle;
             var linkProp = this.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance)
                 .Where(prop => prop.GetCustomAttributes(typeof(LinkAttribute), false).Length > 0);
 
@@ -278,9 +185,6 @@ namespace WzComparerR2
 
         public void Save(CharaSimConfig config)
         {
-            config.PreferredStringCopyMethod = this.PreferredStringCopyMethod;
-            config.CopyParsedSkillString = this.CopyParsedSkillString;
-            config.Enable22AniStyle = this.Enable22AniStyle;
             var linkProp = this.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance)
                 .Where(prop => prop.GetCustomAttributes(typeof(LinkAttribute), false).Length > 0);
 
@@ -296,12 +200,6 @@ namespace WzComparerR2
                 }
                 catch { }
             }
-        }
-        private void ChkShowMiniMap_CheckedChanged(object sender, System.EventArgs e)
-        {
-            this.chkShowMiniMapMob.Enabled = this.chkShowMiniMap.Checked;
-            this.chkShowMiniMapNpc.Enabled = this.chkShowMiniMap.Checked;
-            this.chkShowMiniMapPortal.Enabled = this.chkShowMiniMap.Checked;
         }
 
         private sealed class LinkAttribute : Attribute

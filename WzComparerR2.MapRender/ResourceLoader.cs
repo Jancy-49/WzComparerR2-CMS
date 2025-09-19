@@ -328,7 +328,6 @@ namespace WzComparerR2.MapRender
                     if (spine != null) //读取spine动画
                     {
                         var textureLoader = new SpineTextureLoader(this, node);
-                        textureLoader.EnableTextureMissingFallback = true;
                         var atlasNode = node.Nodes[spine + ".atlas"];
 
                         detectionResult = SpineLoader.Detect(atlasNode);
@@ -343,10 +342,6 @@ namespace WzComparerR2.MapRender
                         Wz_Node frameNode;
                         for (int i = 0; (frameNode = node.Nodes[i.ToString()]) != null; i++)
                         {
-                            if (i == 0 && frameNode?.Value == null)
-                            {
-                                return InnerLoadAnimationData(frameNode);
-                            }
                             var frame = LoadFrame(frameNode);
                             frames.Add(frame);
                         }
@@ -393,7 +388,6 @@ namespace WzComparerR2.MapRender
             if (detectionResult.Success)
             {
                 var textureLoader = new SpineTextureLoader(this, detectionResult.SourceNode.ParentNode);
-                textureLoader.EnableTextureMissingFallback = true;
                 if (detectionResult.Version == SpineVersion.V2)
                 {
                     return SpineAnimationDataV2.Create(detectionResult, textureLoader);
@@ -405,23 +399,6 @@ namespace WzComparerR2.MapRender
             }
 
             return null;
-        }
-
-        private Texture2D CreateEmptyTexture(string path, int width, int height)
-        {
-            if (!loadedItems.TryGetValue(path, out ResourceHolder holder))
-            {
-                holder = new ResourceHolder();
-                holder.Resource = new Texture2D(this.GraphicsDevice, width, height, false, SurfaceFormat.Alpha8);
-                loadedItems[path] = holder;
-            }
-            //结算计数器
-            if (isCounting)
-            {
-                holder.Count++;
-            }
-            //特殊处理
-            return (Texture2D)holder.Resource;
         }
 
         protected virtual void Dispose(bool disposing)
@@ -453,7 +430,6 @@ namespace WzComparerR2.MapRender
 
             public ResourceLoader BaseLoader { get; set; }
             public Wz_Node TopNode { get; set; }
-            public bool EnableTextureMissingFallback { get; set; }
 
             public void Load(Spine.AtlasPage page, string path)
             {
@@ -462,10 +438,6 @@ namespace WzComparerR2.MapRender
                     page.rendererObject = texture;
                     page.width = texture.Width;
                     page.height = texture.Height;
-                }
-                else if (this.EnableTextureMissingFallback && page.width > 0 && page.height > 0)
-                {
-                    page.rendererObject = this.CreateEmptyTexture(path, page.width, page.height);
                 }
             }
 
@@ -476,10 +448,6 @@ namespace WzComparerR2.MapRender
                     page.rendererObject = texture;
                     page.width = texture.Width;
                     page.height = texture.Height;
-                }
-                else if (this.EnableTextureMissingFallback && page.width > 0 && page.height > 0)
-                {
-                    page.rendererObject = this.CreateEmptyTexture(path, page.width, page.height);
                 }
             }
 
@@ -513,8 +481,6 @@ namespace WzComparerR2.MapRender
 
                 return false;
             }
-            private Texture2D CreateEmptyTexture(string path, int width, int height) => this.BaseLoader.CreateEmptyTexture(path, width, height);
-
         }
     }
 }

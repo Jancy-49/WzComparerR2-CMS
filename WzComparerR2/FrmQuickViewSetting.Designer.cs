@@ -30,14 +30,6 @@
         {
             this.superTabControl1 = new DevComponents.DotNetBar.SuperTabControl();
             this.superTabControlPanel1 = new DevComponents.DotNetBar.SuperTabControlPanel();
-            this.chkEnable22AniStyle = new DevComponents.DotNetBar.Controls.CheckBoxX();
-            this.chkShowMiniMap = new DevComponents.DotNetBar.Controls.CheckBoxX();
-            this.chkShowMapObjectID = new DevComponents.DotNetBar.Controls.CheckBoxX();
-            this.chkShowMobNpcObjectID = new DevComponents.DotNetBar.Controls.CheckBoxX();
-            this.chkShowMiniMapMob = new DevComponents.DotNetBar.Controls.CheckBoxX();
-            this.chkShowMiniMapNpc = new DevComponents.DotNetBar.Controls.CheckBoxX();
-            this.chkShowMiniMapPortal = new DevComponents.DotNetBar.Controls.CheckBoxX();
-            this.chkShowBgmName = new DevComponents.DotNetBar.Controls.CheckBoxX();
             this.checkBoxX18 = new DevComponents.DotNetBar.Controls.CheckBoxX();
             this.checkBoxX15 = new DevComponents.DotNetBar.Controls.CheckBoxX();
             this.checkBoxX14 = new DevComponents.DotNetBar.Controls.CheckBoxX();
@@ -63,7 +55,6 @@
             this.superTabItem1 = new DevComponents.DotNetBar.SuperTabItem();
             this.superTabControlPanel2 = new DevComponents.DotNetBar.SuperTabControlPanel();
             this.checkBoxX11 = new DevComponents.DotNetBar.Controls.CheckBoxX();
-            this.checkBoxX17 = new DevComponents.DotNetBar.Controls.CheckBoxX();
             this.checkBoxX6 = new DevComponents.DotNetBar.Controls.CheckBoxX();
             this.checkBoxX4 = new DevComponents.DotNetBar.Controls.CheckBoxX();
             this.checkBoxX3 = new DevComponents.DotNetBar.Controls.CheckBoxX();
@@ -80,21 +71,12 @@
             this.panelEx1 = new DevComponents.DotNetBar.PanelEx();
             this.buttonX2 = new DevComponents.DotNetBar.ButtonX();
             this.buttonX1 = new DevComponents.DotNetBar.ButtonX();
-            this.labelX4 = new DevComponents.DotNetBar.LabelX();
-            this.cmbPreferredStringCopyMethod = new DevComponents.DotNetBar.Controls.ComboBoxEx();
-            this.chkCopyParsedSkillString = new DevComponents.DotNetBar.Controls.CheckBoxX();
-            this.superTabControlPanel5 = new DevComponents.DotNetBar.SuperTabControlPanel();
-            this.superTabControlPanel6 = new DevComponents.DotNetBar.SuperTabControlPanel();
-            this.superTabItem5 = new DevComponents.DotNetBar.SuperTabItem();
-            this.superTabItem6 = new DevComponents.DotNetBar.SuperTabItem();
             ((System.ComponentModel.ISupportInitialize)(this.superTabControl1)).BeginInit();
             this.superTabControl1.SuspendLayout();
             this.superTabControlPanel1.SuspendLayout();
             this.superTabControlPanel2.SuspendLayout();
             this.superTabControlPanel3.SuspendLayout();
             this.superTabControlPanel4.SuspendLayout();
-            this.superTabControlPanel5.SuspendLayout();
-            this.superTabControlPanel6.SuspendLayout();
             this.panelEx1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -120,8 +102,6 @@
             this.superTabControl1.Controls.Add(this.superTabControlPanel2);
             this.superTabControl1.Controls.Add(this.superTabControlPanel3);
             this.superTabControl1.Controls.Add(this.superTabControlPanel4);
-            this.superTabControl1.Controls.Add(this.superTabControlPanel6);
-            this.superTabControl1.Controls.Add(this.superTabControlPanel5);
             this.superTabControl1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.superTabControl1.Location = new System.Drawing.Point(0, 0);
             this.superTabControl1.Name = "superTabControl1";
@@ -136,9 +116,7 @@
             this.superTabItem1,
             this.superTabItem2,
             this.superTabItem3,
-            this.superTabItem4,
-            this.superTabItem6,
-            this.superTabItem5,});
+            this.superTabItem4});
             this.superTabControl1.Text = "superTabControl1";
             // 
             // superTabControlPanel1
@@ -394,12 +372,11 @@
             this.superTabItem1.AttachedControl = this.superTabControlPanel1;
             this.superTabItem1.GlobalItem = false;
             this.superTabItem1.Name = "superTabItem1";
-            this.superTabItem1.Text = "技能";
+            this.superTabItem1.Text = "Skill";
             // 
             // superTabControlPanel2
             // 
             this.superTabControlPanel2.Controls.Add(this.checkBoxX18);
-            this.superTabControlPanel2.Controls.Add(this.checkBoxX17);
             this.superTabControlPanel2.Controls.Add(this.checkBoxX11);
             this.superTabControlPanel2.Controls.Add(this.checkBoxX6);
             this.superTabControlPanel2.Controls.Add(this.checkBoxX4);
@@ -411,22 +388,6 @@
             this.superTabControlPanel2.TabIndex = 0;
             this.superTabControlPanel2.TabItem = this.superTabItem2;
             this.superTabControlPanel2.Visible = false;
-            // 
-            // checkBoxX17
-            // 
-            this.checkBoxX17.AutoSize = true;
-            this.checkBoxX17.BackColor = System.Drawing.Color.Transparent;
-            // 
-            // 
-            // 
-            this.checkBoxX17.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
-            this.checkBoxX17.Location = new System.Drawing.Point(13, 108);
-            this.checkBoxX17.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.checkBoxX17.Name = "checkBoxX17";
-            this.checkBoxX17.Size = new System.Drawing.Size(120, 18);
-            this.checkBoxX17.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
-            this.checkBoxX17.TabIndex = 4;
-            this.checkBoxX17.Text = "最大星之力25星";
             // 
             // checkBoxX11
             // 
@@ -574,7 +535,7 @@
             this.superTabItem3.AttachedControl = this.superTabControlPanel3;
             this.superTabItem3.GlobalItem = false;
             this.superTabItem3.Name = "superTabItem3";
-            this.superTabItem3.Text = "道具";
+            this.superTabItem3.Text = "Item";
             // 
             // superTabControlPanel4
             // 
@@ -607,7 +568,7 @@
             this.superTabItem4.AttachedControl = this.superTabControlPanel4;
             this.superTabItem4.GlobalItem = false;
             this.superTabItem4.Name = "superTabItem4";
-            this.superTabItem4.Text = "配方";
+            this.superTabItem4.Text = "Recipe";
             // 
             // panelEx1
             // 
@@ -628,218 +589,6 @@
             this.panelEx1.Style.ForeColor.ColorSchemePart = DevComponents.DotNetBar.eColorSchemePart.PanelText;
             this.panelEx1.Style.GradientAngle = 90;
             this.panelEx1.TabIndex = 1;
-            //
-            // superTabControlPanel6
-            // 
-            this.superTabControlPanel6.Controls.Add(this.chkShowMiniMap);
-            this.superTabControlPanel6.Controls.Add(this.chkShowMapObjectID);
-            this.superTabControlPanel6.Controls.Add(this.chkShowMobNpcObjectID);
-            this.superTabControlPanel6.Controls.Add(this.chkShowMiniMapMob);
-            this.superTabControlPanel6.Controls.Add(this.chkShowMiniMapNpc);
-            this.superTabControlPanel6.Controls.Add(this.chkShowMiniMapPortal);
-            this.superTabControlPanel6.Controls.Add(this.chkShowBgmName);
-            this.superTabControlPanel6.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.superTabControlPanel6.Location = new System.Drawing.Point(62, 0);
-            this.superTabControlPanel6.Name = "superTabControlPanel6";
-            this.superTabControlPanel6.Size = new System.Drawing.Size(242, 211);
-            this.superTabControlPanel6.TabIndex = 0;
-            this.superTabControlPanel6.TabItem = this.superTabItem6;
-            this.superTabControlPanel6.Visible = false;
-            // 
-            // superTabItem6
-            // 
-            this.superTabItem6.AttachedControl = this.superTabControlPanel6;
-            this.superTabItem6.GlobalItem = false;
-            this.superTabItem6.Name = "superTabItem6";
-            this.superTabItem6.Text = "地图";
-            // 
-            // chkShowMiniMap
-            // 
-            this.chkShowMiniMap.AutoSize = true;
-            this.chkShowMiniMap.BackColor = System.Drawing.Color.Transparent;
-            // 
-            // 
-            // 
-            this.chkShowMiniMap.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
-            this.chkShowMiniMap.Location = new System.Drawing.Point(13, 12);
-            this.chkShowMiniMap.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.chkShowMiniMap.Name = "chkShowMiniMap";
-            this.chkShowMiniMap.Size = new System.Drawing.Size(145, 16);
-            this.chkShowMiniMap.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
-            this.chkShowMiniMap.TabIndex = 4;
-            this.chkShowMiniMap.Text = "小地图预览";
-            // 
-            // chkShowMapObjectID
-            // 
-            this.chkShowMapObjectID.AutoSize = true;
-            this.chkShowMapObjectID.BackColor = System.Drawing.Color.Transparent;
-            // 
-            // 
-            // 
-            this.chkShowMapObjectID.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
-            this.chkShowMapObjectID.Location = new System.Drawing.Point(13, 36);
-            this.chkShowMapObjectID.Name = "chkShowMapObjectID";
-            this.chkShowMapObjectID.Size = new System.Drawing.Size(172, 16);
-            this.chkShowMapObjectID.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
-            this.chkShowMapObjectID.TabIndex = 2;
-            this.chkShowMapObjectID.Text = "显示小地图代码";
-            // 
-            // chkShowMobNpcObjectID
-            // 
-            this.chkShowMobNpcObjectID.AutoSize = true;
-            this.chkShowMobNpcObjectID.BackColor = System.Drawing.Color.Transparent;
-            // 
-            // 
-            // 
-            this.chkShowMobNpcObjectID.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
-            this.chkShowMobNpcObjectID.Location = new System.Drawing.Point(13, 60);
-            this.chkShowMobNpcObjectID.Name = "chkShowMobNpcObjectID";
-            this.chkShowMobNpcObjectID.Size = new System.Drawing.Size(172, 16);
-            this.chkShowMobNpcObjectID.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
-            this.chkShowMobNpcObjectID.TabIndex = 3;
-            this.chkShowMobNpcObjectID.Text = "显示怪物/NPC代码";
-            // 
-            // chkShowMiniMapMob
-            // 
-            this.chkShowMiniMapMob.AutoSize = true;
-            this.chkShowMiniMapMob.BackColor = System.Drawing.Color.Transparent;
-            // 
-            // 
-            // 
-            this.chkShowMiniMapMob.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
-            this.chkShowMiniMapMob.Location = new System.Drawing.Point(13, 84);
-            this.chkShowMiniMapMob.Name = "chkShowMiniMapMob";
-            this.chkShowMiniMapMob.Size = new System.Drawing.Size(190, 16);
-            this.chkShowMiniMapMob.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
-            this.chkShowMiniMapMob.TabIndex = 4;
-            this.chkShowMiniMapMob.Text = "显示怪物";
-            // 
-            // chkShowMiniMapNpc
-            // 
-            this.chkShowMiniMapNpc.AutoSize = true;
-            this.chkShowMiniMapNpc.BackColor = System.Drawing.Color.Transparent;
-            // 
-            // 
-            // 
-            this.chkShowMiniMapNpc.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
-            this.chkShowMiniMapNpc.Location = new System.Drawing.Point(13, 108);
-            this.chkShowMiniMapNpc.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.chkShowMiniMapNpc.Name = "chkShowMiniMapNpc";
-            this.chkShowMiniMapNpc.Size = new System.Drawing.Size(190, 16);
-            this.chkShowMiniMapNpc.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
-            this.chkShowMiniMapNpc.TabIndex = 5;
-            this.chkShowMiniMapNpc.Text = "显示NPC";
-            // 
-            // chkShowMiniMapPortal
-            // 
-            this.chkShowMiniMapPortal.AutoSize = true;
-            this.chkShowMiniMapPortal.BackColor = System.Drawing.Color.Transparent;
-            // 
-            // 
-            // 
-            this.chkShowMiniMapPortal.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
-            this.chkShowMiniMapPortal.Location = new System.Drawing.Point(13, 132);
-            this.chkShowMiniMapPortal.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.chkShowMiniMapPortal.Name = "chkShowMiniMapPortal";
-            this.chkShowMiniMapPortal.Size = new System.Drawing.Size(190, 16);
-            this.chkShowMiniMapPortal.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
-            this.chkShowMiniMapPortal.TabIndex = 6;
-            this.chkShowMiniMapPortal.Text = "显示传送门";
-            // 
-            // chkShowBgmName
-            // 
-            this.chkShowBgmName.AutoSize = true;
-            this.chkShowBgmName.BackColor = System.Drawing.Color.Transparent;
-            // 
-            // 
-            // 
-            this.chkShowBgmName.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
-            this.chkShowBgmName.Location = new System.Drawing.Point(13, 156);
-            this.chkShowBgmName.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.chkShowBgmName.Name = "chkShowBgmName";
-            this.chkShowBgmName.Size = new System.Drawing.Size(190, 16);
-            this.chkShowBgmName.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
-            this.chkShowBgmName.TabIndex = 7;
-            this.chkShowBgmName.Text = "显示BGM名称";
-            // 
-            // superTabControlPanel5
-            // 
-            this.superTabControlPanel5.Controls.Add(this.chkEnable22AniStyle);
-            this.superTabControlPanel5.Controls.Add(this.chkCopyParsedSkillString);
-            this.superTabControlPanel5.Controls.Add(this.labelX4);
-            this.superTabControlPanel5.Controls.Add(this.cmbPreferredStringCopyMethod);
-            this.superTabControlPanel5.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.superTabControlPanel5.Location = new System.Drawing.Point(62, 0);
-            this.superTabControlPanel5.Name = "superTabControlPanel5";
-            this.superTabControlPanel5.Size = new System.Drawing.Size(242, 211);
-            this.superTabControlPanel5.TabIndex = 0;
-            this.superTabControlPanel5.TabItem = this.superTabItem5;
-            this.superTabControlPanel5.Visible = false;
-            // 
-            // superTabItem5
-            // 
-            this.superTabItem5.AttachedControl = this.superTabControlPanel5;
-            this.superTabItem5.GlobalItem = false;
-            this.superTabItem5.Name = "superTabItem5";
-            this.superTabItem5.Text = "其它";
-            // 
-            // chkCopyParsedSkillString
-            // 
-            this.chkCopyParsedSkillString.AutoSize = true;
-            this.chkCopyParsedSkillString.BackColor = System.Drawing.Color.Transparent;
-            // 
-            // 
-            // 
-            this.chkCopyParsedSkillString.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
-            this.chkCopyParsedSkillString.Location = new System.Drawing.Point(13, 12);
-            this.chkCopyParsedSkillString.Name = "chkCopyParsedSkillString";
-            this.chkCopyParsedSkillString.Size = new System.Drawing.Size(124, 16);
-            this.chkCopyParsedSkillString.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
-            this.chkCopyParsedSkillString.TabIndex = 2;
-            this.chkCopyParsedSkillString.Text = "复制技能文本";
-            // 
-            // labelX4
-            // 
-            this.labelX4.AutoSize = true;
-            this.labelX4.BackColor = System.Drawing.Color.Transparent;
-            // 
-            // 
-            // 
-            this.labelX4.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
-            this.labelX4.Location = new System.Drawing.Point(13, 36);
-            this.labelX4.Name = "labelX4";
-            this.labelX4.Size = new System.Drawing.Size(87, 16);
-            this.labelX4.TabIndex = 3;
-            this.labelX4.Text = "复制方法";
-            // 
-            // cmbPreferredStringCopyMethod
-            // 
-            this.cmbPreferredStringCopyMethod.DisplayMember = "Text";
-            this.cmbPreferredStringCopyMethod.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed;
-            this.cmbPreferredStringCopyMethod.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cmbPreferredStringCopyMethod.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.cmbPreferredStringCopyMethod.FormattingEnabled = true;
-            this.cmbPreferredStringCopyMethod.ItemHeight = 13;
-            this.cmbPreferredStringCopyMethod.Location = new System.Drawing.Point(94, 34);
-            this.cmbPreferredStringCopyMethod.Name = "cmbPreferredStringCopyMethod";
-            this.cmbPreferredStringCopyMethod.Size = new System.Drawing.Size(160, 19);
-            this.cmbPreferredStringCopyMethod.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
-            this.cmbPreferredStringCopyMethod.TabIndex = 3;
-            // 
-            // chkEnable22AniStyle
-            // 
-            this.chkEnable22AniStyle.AutoSize = true;
-            this.chkEnable22AniStyle.BackColor = System.Drawing.Color.Transparent;
-            // 
-            // 
-            // 
-            this.chkEnable22AniStyle.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
-            this.chkEnable22AniStyle.Location = new System.Drawing.Point(13, 60);
-            this.chkEnable22AniStyle.Name = "chkEnable22AniStyle";
-            this.chkEnable22AniStyle.Size = new System.Drawing.Size(145, 16);
-            this.chkEnable22AniStyle.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
-            this.chkEnable22AniStyle.TabIndex = 4;
-            this.chkEnable22AniStyle.Text = "启用22周年纪念主题";
             // 
             // buttonX2
             // 
@@ -889,10 +638,6 @@
             this.superTabControlPanel3.PerformLayout();
             this.superTabControlPanel4.ResumeLayout(false);
             this.superTabControlPanel4.PerformLayout();
-            this.superTabControlPanel5.ResumeLayout(false);
-            this.superTabControlPanel5.PerformLayout();
-            this.superTabControlPanel6.ResumeLayout(false);
-            this.superTabControlPanel6.PerformLayout();
             this.panelEx1.ResumeLayout(false);
             this.ResumeLayout(false);
 
@@ -932,10 +677,6 @@
         private DevComponents.DotNetBar.Controls.CheckBoxX checkBoxX4;
         private DevComponents.DotNetBar.SuperTabControlPanel superTabControlPanel4;
         private DevComponents.DotNetBar.SuperTabItem superTabItem4;
-        private DevComponents.DotNetBar.SuperTabControlPanel superTabControlPanel5;
-        private DevComponents.DotNetBar.SuperTabItem superTabItem5;
-        private DevComponents.DotNetBar.SuperTabControlPanel superTabControlPanel6;
-        private DevComponents.DotNetBar.SuperTabItem superTabItem6;
         private DevComponents.DotNetBar.Controls.CheckBoxX checkBoxX6;
         private DevComponents.DotNetBar.Controls.CheckBoxX checkBoxX7;
         private DevComponents.DotNetBar.Controls.CheckBoxX checkBoxX9;
@@ -946,18 +687,6 @@
         private DevComponents.DotNetBar.Controls.CheckBoxX checkBoxX13;
         private DevComponents.DotNetBar.Controls.CheckBoxX checkBoxX14;
         private DevComponents.DotNetBar.Controls.CheckBoxX checkBoxX15;
-        private DevComponents.DotNetBar.Controls.CheckBoxX checkBoxX17;
         private DevComponents.DotNetBar.Controls.CheckBoxX checkBoxX18;
-        private DevComponents.DotNetBar.LabelX labelX4;
-        private DevComponents.DotNetBar.Controls.CheckBoxX chkEnable22AniStyle;
-        private DevComponents.DotNetBar.Controls.CheckBoxX chkShowMiniMap;
-        private DevComponents.DotNetBar.Controls.CheckBoxX chkShowMapObjectID;
-        private DevComponents.DotNetBar.Controls.CheckBoxX chkShowMobNpcObjectID;
-        private DevComponents.DotNetBar.Controls.CheckBoxX chkShowMiniMapMob;
-        private DevComponents.DotNetBar.Controls.CheckBoxX chkShowMiniMapNpc;
-        private DevComponents.DotNetBar.Controls.CheckBoxX chkShowMiniMapPortal;
-        private DevComponents.DotNetBar.Controls.CheckBoxX chkShowBgmName;
-        private DevComponents.DotNetBar.Controls.ComboBoxEx cmbPreferredStringCopyMethod;
-        private DevComponents.DotNetBar.Controls.CheckBoxX chkCopyParsedSkillString;
     }
 }

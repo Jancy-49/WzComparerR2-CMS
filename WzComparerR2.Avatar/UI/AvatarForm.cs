@@ -17,14 +17,6 @@ using WzComparerR2.WzLib;
 using WzComparerR2.PluginBase;
 using WzComparerR2.Config;
 using WzComparerR2.Controls;
-using WzComparerR2.AvatarCommon;
-using WzComparerR2.Encoders;
-using System.IO;
-using DevComponents.AdvTree;
-
-#if NET6_0_OR_GREATER
-using WzComparerR2.OpenAPI;
-#endif
 
 namespace WzComparerR2.Avatar.UI
 {
@@ -35,29 +27,9 @@ namespace WzComparerR2.Avatar.UI
             InitializeComponent();
             this.avatar = new AvatarCanvas();
             this.animator = new Animator();
-            // virtual comboboxes for item effects, not shown
-            this.cmbEffectFrames = new DevComponents.DotNetBar.Controls.ComboBoxEx[AvatarCanvas.LayerSlotLength];
-            this.cmbActionEffects = new DevComponents.DotNetBar.Controls.ComboBoxEx[AvatarCanvas.LayerSlotLength];
-            for (int i = 0; i < AvatarCanvas.LayerSlotLength; i++)
-            {
-                var t1 = new DevComponents.DotNetBar.Controls.ComboBoxEx();
-                t1.SelectedIndexChanged += new System.EventHandler(this.cmbEffectFrames_SelectedIndexChanged);
-                cmbEffectFrames[i] = t1;
-
-                var t2 = new DevComponents.DotNetBar.Controls.ComboBoxEx();
-                t2.SelectedIndexChanged += new System.EventHandler(this.cmbActionEffect_SelectedIndexChanged);
-                cmbActionEffects[i] = t2;
-            }
-            this.panelDockContainer2.Controls.Remove(this.chkHairShade); // disable chkHairShade
             btnReset_Click(btnReset, EventArgs.Empty);
             FillWeaponIdx();
             FillEarSelection();
-            Instance = this;
-
-#if NET6_0_OR_GREATER
-            // https://learn.microsoft.com/en-us/dotnet/core/compatibility/fx-core#controldefaultfont-changed-to-segoe-ui-9pt
-            this.Font = new Font(new FontFamily("宋体"), 9f);
-#endif
         }
 
         public SuperTabControlPanel GetTabPanel()
@@ -74,7 +46,6 @@ namespace WzComparerR2.Avatar.UI
         }
 
         public Entry PluginEntry { get; set; }
-        public static AvatarForm Instance;
 
         AvatarCanvas avatar;
         bool inited;
@@ -82,19 +53,6 @@ namespace WzComparerR2.Avatar.UI
         bool suspendUpdate;
         bool needUpdate;
         Animator animator;
-        string specifiedSavePath = "";
-        // virtual comboboxes for item effects, not shown
-        private DevComponents.DotNetBar.Controls.ComboBoxEx[] cmbActionEffects;
-        private DevComponents.DotNetBar.Controls.ComboBoxEx[] cmbEffectFrames;
-        private bool updatingActionEffect = false;
-#if NET6_0_OR_GREATER
-        private NexonOpenAPI API;
-        private string characterName = "";
-        private int previousRegion = 2;
-        private string APIregion;
-#endif
-
-        private string chairName;
 
         /// <summary>
         /// wz1节点选中事件。
@@ -161,66 +119,27 @@ namespace WzComparerR2.Avatar.UI
                             if (tamingMobNode != null)
                             {
                                 this.SuspendUpdateDisplay();
-                                RemoveChairPart();
-                                LoadTamingPart(tamingMobNode, BitmapOrigin.CreateFromNode(skillNode.Nodes["icon"], PluginBase.PluginManager.FindWz), skillID, true);
+                                LoadTamingPart(tamingMobNode, BitmapOrigin.CreateFromNode(skillNode.Nodes["icon"], PluginBase.PluginManager.FindWz) , skillID, true);
                                 this.ResumeUpdateDisplay();
                             }
                         }
                     }
                     break;
 
-                case Wz_Type.Item: // should sync with LoadCode()
+                case Wz_Type.Item:
                     Wz_Node itemNode = e.Node;
                     if (Int32.TryParse(itemNode.Text, out int itemID))
                     {
-                        bool removeTamingPart = true;
-                        Wz_Vector brm = null;
-
                         int tamingMobID = itemNode.FindNodeByPath("info\\tamingMob").GetValueEx<int>(0);
-                        if (tamingMobID == 0)
-                        {
-                            tamingMobID = itemNode.FindNodeByPath("info\\customChair\\self\\tamingMob").GetValueEx<int>(0);
-                        }
                         if (tamingMobID != 0)
                         {
-                            brm = itemNode.FindNodeByPath("info\\group\\sit\\0\\bodyRelMove").GetValueEx<Wz_Vector>(null);
                             var tamingMobNode = PluginBase.PluginManager.FindWz(string.Format(@"Character\TamingMob\{0:D8}.img", tamingMobID));
                             if (tamingMobNode != null)
                             {
-                                removeTamingPart = false;
-
                                 this.SuspendUpdateDisplay();
-                                RemoveChairPart();
-                                LoadTamingPart(tamingMobNode, BitmapOrigin.CreateFromNode(tamingMobNode.FindNodeByPath("info\\icon"), PluginBase.PluginManager.FindWz), tamingMobID, false, brm);
+                                LoadTamingPart(tamingMobNode, BitmapOrigin.CreateFromNode(itemNode.FindNodeByPath("info\\icon"), PluginBase.PluginManager.FindWz), itemID, false);
                                 this.ResumeUpdateDisplay();
                             }
-                        }
-
-                        brm = itemNode.FindNodeByPath("info\\bodyRelMove").GetValueEx<Wz_Vector>(null);
-                        bool isSitActionExists = itemNode.FindNodeByPath("info\\sitAction").GetValueEx<string>(null) != null;
-                        if (itemID / 10000 == 301 || itemID / 1000 == 5204 || brm != null || isSitActionExists) // 由椅子道具, 道具代码或bodyRelMove和sitAction属性有无决定
-                        {
-                            bool fb = false;
-                            if (brm == null)
-                            {
-                                fb = false;
-                            }
-                            else if (isSitActionExists)
-                            {
-                                fb = true;
-                            }
-
-                            this.SuspendUpdateDisplay();
-                            if (removeTamingPart) RemoveTamingPart();
-                            LoadChairPart(itemNode, BitmapOrigin.CreateFromNode(itemNode.FindNodeByPath("info\\icon"), PluginBase.PluginManager.FindWz), itemID, brm, fb);
-                            this.ResumeUpdateDisplay();
-                        }
-
-                        if (itemID / 10000 == 501) // effect items
-                        {
-                            this.SuspendUpdateDisplay();
-                            LoadEffectPart(itemNode);
-                            this.ResumeUpdateDisplay();
                         }
                     }
                     break;
@@ -282,94 +201,20 @@ namespace WzComparerR2.Avatar.UI
             AvatarPart part = this.avatar.AddPart(imgNode);
             if (part != null)
             {
-                if (part == this.avatar.Taming)
-                {
-                    RemoveChairPart();
-                }
                 OnNewPartAdded(part);
                 FillAvatarParts();
                 UpdateDisplay();
             }
         }
 
-        /// <summary>
-        /// 删除TamingMob部件。
-        /// </summary>
-        private void RemoveTamingPart()
-        {
-            this.avatar.RemoveTamingPart();
-            this.cmbTamingFrame.Items.Clear();
-            this.cmbActionTaming.Items.Clear();
-        }
-
-        /// <summary>
-        /// 导入TamingMob部件。
-        /// </summary>
-        /// <param name="brm">BodyRelMove信息。</param>
-        private void LoadTamingPart(Wz_Node imgNode, BitmapOrigin forceIcon, int forceID, bool isSkill, Wz_Vector brm = null)
+        private void LoadTamingPart(Wz_Node imgNode, BitmapOrigin forceIcon, int forceID, bool isSkill)
         {
             if (!this.inited && !this.AvatarInit() && imgNode == null)
             {
                 return;
             }
 
-            AvatarPart part = this.avatar.AddTamingPart(imgNode, forceIcon, forceID, isSkill, brm);
-            if (part != null)
-            {
-                OnNewPartAdded(part);
-                FillAvatarParts();
-                UpdateDisplay();
-            }
-        }
-
-        /// <summary>
-        /// 의자 아이템 파트를 삭제합니다.
-        /// </summary>
-        private void RemoveChairPart()
-        {
-            this.avatar.RemoveChairPart();
-            this.cmbGroupChair.Items.Clear();
-            this.cmbGroupChair.Enabled = false;
-        }
-
-        /// <summary>
-        /// 의자 아이템 파트를 로드합니다.
-        /// </summary>
-        /// <param name="brm">BodyRelMove 정보입니다.</param>
-        private void LoadChairPart(Wz_Node imgNode, BitmapOrigin forceIcon, int forceID, Wz_Vector brm, bool forceAct)
-        {
-            if (!this.inited && !this.AvatarInit() && imgNode == null)
-            {
-                return;
-            }
-
-            AvatarPart part = this.avatar.AddChairPart(imgNode, forceIcon, forceID, brm, forceAct);
-            if (part != null)
-            {
-                if (part.GroupCount > 0)
-                {
-                    this.cmbGroupChair.Enabled = true;
-                    FillComboItems(this.cmbGroupChair, 1, part.GroupCount);
-                }
-                else this.cmbGroupChair.Enabled = false;
-
-                OnNewPartAdded(part);
-                FillAvatarParts();
-                UpdateDisplay();
-            }
-        }
-
-        /// <summary>
-        /// 이펙트 아이템 파트를 로드합니다.
-        /// </summary>
-        private void LoadEffectPart(Wz_Node imgNode)
-        {
-            if (!this.inited && !this.AvatarInit() && imgNode == null)
-            {
-                return;
-            }
-
-            AvatarPart part = this.avatar.AddEffectPart(imgNode);
+            AvatarPart part = this.avatar.AddTamingPart(imgNode, forceIcon, forceID, isSkill);
             if (part != null)
             {
                 OnNewPartAdded(part);
@@ -421,10 +266,6 @@ namespace WzComparerR2.Avatar.UI
                 SetTamingDefaultBodyAction();
                 SetTamingDefault();
             }
-            else if (part == avatar.Chair)
-            {
-                SetChairDefault();
-            }
             else if (part == avatar.Weapon) //同步武器类型
             {
                 FillWeaponTypes();
@@ -442,27 +283,6 @@ namespace WzComparerR2.Avatar.UI
                     || avatar.Coat != null && avatar.Coat.Visible)
                 {
                     avatar.Longcoat.Visible = false;
-                }
-            }
-            else if (part == avatar.Cap) // sets CapType
-            {
-                avatar.CapType = part.VSlot;
-            }
-
-            if (part.EffectNode != null || part == avatar.Chair || part == avatar.Effect) // load Effects
-            {
-                this.updatingActionEffect = true;
-                this.avatar.LoadAllEffects();
-                FillEffectAction();
-                this.updatingActionEffect = false;
-
-                if (this.chkBodyPlay.Checked)
-                {
-                    SyncBodyEffect();
-                }
-                if (this.chkTamingPlay.Checked)
-                {
-                    SyncTamingEffect();
                 }
             }
         }
@@ -518,7 +338,6 @@ namespace WzComparerR2.Avatar.UI
             this.GetSelectedBodyFrame(out int bodyFrame, out _);
             this.GetSelectedEmotionFrame(out int emoFrame, out _);
             this.GetSelectedTamingFrame(out int tamingFrame, out _);
-            this.GetSelectedEffectFrames(out int[] effectFrames, out _);
 
             //获取武器状态
             selectedItem = this.cmbWeaponType.SelectedItem as ComboItem;
@@ -536,7 +355,7 @@ namespace WzComparerR2.Avatar.UI
                 return;
             }
 
-            string actionTag = string.Format("{0}:{1},{2}:{3},{4}:{5},{6},{7},{8},{9},{10},{11},{12}:{13}:{14}",
+            string actionTag = string.Format("{0}:{1},{2}:{3},{4}:{5},{6},{7},{8},{9},{10}",
                 this.avatar.ActionName,
                 bodyFrame,
                 this.avatar.EmotionName,
@@ -547,18 +366,14 @@ namespace WzComparerR2.Avatar.UI
                 this.avatar.ShowHairShade ? 1 : 0,
                 this.avatar.EarType,
                 this.avatar.WeaponType,
-                this.avatar.WeaponIndex,
-                this.avatar.GroupChair,
-                this.avatar.ActionName,
-                string.Join("_", effectFrames),
-                string.Join("_", this.avatar.EffectVisibles));
+                this.avatar.WeaponIndex);
 
             if (!avatarContainer1.HasCache(actionTag))
             {
                 try
                 {
                     var actionFrames = avatar.GetActionFrames(avatar.ActionName);
-                    var bone = avatar.CreateFrame(bodyFrame, emoFrame, tamingFrame, effectFrames);
+                    var bone = avatar.CreateFrame(bodyFrame, emoFrame, tamingFrame);
                     var layers = avatar.CreateFrameLayers(bone);
                     avatarContainer1.AddCache(actionTag, layers);
                 }
@@ -570,7 +385,7 @@ namespace WzComparerR2.Avatar.UI
             avatarContainer1.SetKey(actionTag);
         }
 
-        public string GetAllPartsTag()
+        private string GetAllPartsTag()
         {
             string[] partsID = new string[avatar.Parts.Length];
             for (int i = 0; i < avatar.Parts.Length; i++)
@@ -599,10 +414,6 @@ namespace WzComparerR2.Avatar.UI
 
         private void SelectBodyAction(string actionName)
         {
-            if (!this.chkBodyPlay.Checked && this.chkTamingPlay.Checked && this.avatar.Chair != null)
-            {
-                this.chkBodyPlay.Checked = true;
-            }
             for (int i = 0; i < cmbActionBody.Items.Count; i++)
             {
                 ComboItem item = cmbActionBody.Items[i] as ComboItem;
@@ -610,57 +421,6 @@ namespace WzComparerR2.Avatar.UI
                 {
                     cmbActionBody.SelectedIndex = i;
                     return;
-                }
-            }
-        }
-
-        /// <summary>
-        /// Body 액션을 선택된 프레임으로 고정합니다.
-        /// </summary>
-        /// <param name="actionName">고정할 Body Action의 이름</param>
-        /// <param name="idx">고정할 프레임 번호</param>
-        private void FixBodyAction(string actionName, int Idx)
-        {
-            this.SelectBodyAction(actionName);
-
-            if (this.chkBodyPlay.Checked)
-            {
-                this.chkBodyPlay.Checked = false;
-            }
-
-            if (Idx >= 0)
-            {
-                this.cmbBodyFrame.SelectedIndex = Idx;
-            }
-        }
-
-        /// <summary>
-        /// cmbActionEffects의 각 콤보 박스에 대하여, actionName과 같은 이름을 가진 아이템을 선택합니다.
-        /// <br/>actionName과 같은 이름을 가진 아이템이 없다면, defalut, effect, effect2와 같은 이름을 가진 아이템을 선택합니다.
-        /// </summary>
-        private void SelectEffectAction(string actionName)
-        {
-            for (int j = 0; j < cmbActionEffects.Count(); j++)
-            {
-                var defaultIdx = -1;
-                for (int i = 0; i < cmbActionEffects[j].Items.Count; i++)
-                {
-                    ComboItem item = cmbActionEffects[j].Items[i] as ComboItem;
-                    if (item != null && item.Text == actionName)
-                    {
-                        cmbActionEffects[j].SelectedIndex = i;
-                        defaultIdx = -1;
-                        break;
-                    }
-                    if (item != null && (item.Text == "default" || item.Text == "effect" || item.Text == "effect2"))
-                    {
-                        defaultIdx = i;
-                        continue;
-                    }
-                }
-                if (defaultIdx > -1)
-                {
-                    cmbActionEffects[j].SelectedIndex = defaultIdx;
                 }
             }
         }
@@ -676,11 +436,6 @@ namespace WzComparerR2.Avatar.UI
                     return;
                 }
             }
-        }
-
-        private void SelectEmotionByIndex(int emotionIdx)
-        {
-            cmbEmotion.SelectedIndex = emotionIdx + 1;
         }
 
         #region 同步界面
@@ -734,25 +489,6 @@ namespace WzComparerR2.Avatar.UI
             FillComboItems(cmbActionTaming, avatar.TamingActions);
         }
 
-        /// <summary>
-        /// 이펙트 동작 이름(AvatarCanvas의 EffectActions의 값)으로 cmbActionEffects를 채웁니다.
-        /// </summary>
-        private void FillEffectAction()
-        {
-            for (int i = 0; i < cmbActionEffects.Length; i++)
-            {
-                FillComboItems(cmbActionEffects[i], avatar.EffectActions[i]);
-            }
-
-            var selectedItem = this.cmbActionBody.SelectedItem as ComboItem;
-            SelectEffectAction(selectedItem.Text);
-
-            this.SuspendUpdateDisplay();
-            FillEffectFrame();
-            this.ResumeUpdateDisplay();
-            UpdateDisplay();
-        }
-
         private void FillWeaponTypes()
         {
             List<int> weaponTypes = avatar.GetCashWeaponTypes();
@@ -780,7 +516,7 @@ namespace WzComparerR2.Avatar.UI
         {
             if (this.avatar.Taming != null)
             {
-                var tamingAction = (this.cmbActionTaming.SelectedItem as ComboItem)?.Text;
+                var tamingAction =  (this.cmbActionTaming.SelectedItem as ComboItem)?.Text;
                 if (tamingAction != null)
                 {
                     string forceAction = this.avatar.Taming.Node.FindNodeByPath($@"characterAction\{tamingAction}").GetValueEx<string>(null);
@@ -795,29 +531,6 @@ namespace WzComparerR2.Avatar.UI
                         this.SelectEmotion(forceEmotion);
                     }
                 }
-            }
-        }
-
-        /// <summary>
-        /// 의자 아이템의 기본 캐릭터 동작을 지정합니다.<br/>기본값 sit 또는 sitAction으로 설정된 값
-        /// </summary>
-        private void SetChairDefault()
-        {
-            if (this.avatar.Taming == null && this.avatar.Chair != null)
-            {
-                string forceAction = this.avatar.Chair.Node.FindNodeByPath("info\\sitAction").GetValueEx<string>("sit");
-                int fixFrameIdx = this.avatar.Chair.Node.FindNodeByPath("info\\fixFrameIdx").GetValueEx<int>(-1);
-                if (fixFrameIdx >= 0)
-                {
-                    this.FixBodyAction(forceAction, fixFrameIdx);
-                }
-                else
-                {
-                    this.SelectBodyAction(forceAction);
-                }
-
-                int forceEmotion = this.avatar.Chair.Node.FindNodeByPath("info\\sitEmotion").GetValueEx<int>(-1);
-                this.SelectEmotionByIndex(forceEmotion);
             }
         }
 
@@ -839,7 +552,6 @@ namespace WzComparerR2.Avatar.UI
                     btn.Checked = part.Visible;
                     btn.btnItemShow.Click += BtnItemShow_Click;
                     btn.btnItemDel.Click += BtnItemDel_Click;
-                    btn.chkShowEffect.Click += ChkShowEffect_Click;
                     btn.CheckedChanged += Btn_CheckedChanged;
                     btn.rdoMixColor0.CheckedChanged += RadioMixColor0_CheckedChanged;
                     btn.rdoMixColor1.CheckedChanged += RadioMixColor1_CheckedChanged;
@@ -878,25 +590,6 @@ namespace WzComparerR2.Avatar.UI
                     {
                         this.avatar.Parts[index] = null;
                         this.FillAvatarParts();
-                        this.UpdateDisplay();
-                    }
-                }
-            }
-        }
-
-        private void ChkShowEffect_Click(object sender, EventArgs e)
-        {
-            var btn = (sender as BaseItem).Parent as AvatarPartButtonItem;
-            if (btn != null)
-            {
-                var part = btn.Tag as AvatarPart;
-                part.EffectVisible = btn.chkShowEffect.Checked;
-                if (part != null)
-                {
-                    int index = Array.IndexOf(this.avatar.Parts, part);
-                    if (index > -1)
-                    {
-                        this.avatar.EffectVisibles[index] = btn.chkShowEffect.Checked;
                         this.UpdateDisplay();
                     }
                 }
@@ -1022,8 +715,8 @@ namespace WzComparerR2.Avatar.UI
                 text = string.Format("{0}\r\n{1}{2}", sr.Name, part.IsSkill ? "s" : "", part.ID);
                 if (part.IsMixing)
                 {
-                    text = string.Format("{0}\r\n{1} {2} : {3} {4}\r\n{5}+{6}*{7}",
-                        Regex.Replace(sr.Name, "^([^ ]+色 )?", "混合"),
+                    text = string.Format("{0} ( {1} {2} : {3} {4} )\r\n{5}+{6}*{7}",
+                        Regex.Replace(sr.Name, "^([^ ]+色 )?", "混合 "),
                         GetColorName(part.ID.Value),
                         100 - part.MixOpacity,
                         GetMixColorName(part.MixColor, part.ID.Value),
@@ -1036,14 +729,6 @@ namespace WzComparerR2.Avatar.UI
             else
             {
                 text = string.Format("{0}\r\n{1}", "(null)", part.ID == null ? "-" : part.ID.ToString());
-            }
-            if (part.ID.ToString().StartsWith("3"))
-            {
-                chairName = RemoveInvalidFileNameChars(string.Format("{0}_{1}", part.ID.ToString(), text.Substring(0, text.IndexOf("\r\n"))));
-            }
-            if (!part.HasImage && part.EffectNode == null)
-            {
-                text += " (隐藏)";
             }
             btn.Text = text;
             btn.NeedRecalcSize = true;
@@ -1117,26 +802,6 @@ namespace WzComparerR2.Avatar.UI
             else
             {
                 cmbTamingFrame.Items.Clear();
-            }
-        }
-
-        /// <summary>
-        /// cmbEffectFrames에 이펙트의 프레임을 ActionFrame[]으로 불러옵니다.
-        /// </summary>
-        private void FillEffectFrame()
-        {
-            for (int i = 0; i < this.cmbEffectFrames.Length; i++)
-            {
-                ComboItem actionItem = cmbActionEffects[i].SelectedItem as ComboItem;
-                if (actionItem != null)
-                {
-                    ActionFrame[] frames = avatar.GetEffectFrames(actionItem.Text, i);
-                    FillComboItems(cmbEffectFrames[i], frames);
-                }
-                else
-                {
-                    cmbEffectFrames[i].Items.Clear();
-                }
             }
         }
 
@@ -1250,34 +915,12 @@ namespace WzComparerR2.Avatar.UI
         {
             return this.GetSelectedActionFrame(this.cmbTamingFrame, out frameIndex, out actionFrame);
         }
-
-        private bool GetSelectedEffectFrames(out int[] frameIndex, out ActionFrame[] actionFrame)
-        {
-            var frameIndexs = new List<int>();
-            var actionFrames = new List<ActionFrame>();
-            foreach (var cmb in this.cmbEffectFrames)
-            {
-                this.GetSelectedActionFrame(cmb, out int fi, out ActionFrame af);
-                frameIndexs.Add(fi);
-                actionFrames.Add(af);
-            }
-            frameIndex = frameIndexs.ToArray();
-            actionFrame = actionFrames.ToArray();
-            return frameIndex.Count(x => x >= 0) > 0 && actionFrame.Count(x => x != null) > 0;
-        }
         #endregion
 
         private void cmbActionBody_SelectedIndexChanged(object sender, EventArgs e)
         {
             this.SuspendUpdateDisplay();
             FillBodyActionFrame();
-
-            this.updatingActionEffect = true;
-            var selectedItem = this.cmbActionBody.SelectedItem as ComboItem;
-            SelectEffectAction(selectedItem.Text); // effect action is bounded to body action
-            FillEffectFrame();
-            this.updatingActionEffect = false;
-
             this.ResumeUpdateDisplay();
             UpdateDisplay();
         }
@@ -1300,15 +943,6 @@ namespace WzComparerR2.Avatar.UI
             UpdateDisplay();
         }
 
-        private void cmbActionEffect_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            if (this.updatingActionEffect) return;
-            this.SuspendUpdateDisplay();
-            FillEffectFrame();
-            this.ResumeUpdateDisplay();
-            UpdateDisplay();
-        }
-
         private void cmbBodyFrame_SelectedIndexChanged(object sender, EventArgs e)
         {
             UpdateDisplay();
@@ -1320,11 +954,6 @@ namespace WzComparerR2.Avatar.UI
         }
 
         private void cmbTamingFrame_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            UpdateDisplay();
-        }
-
-        private void cmbEffectFrames_SelectedIndexChanged(object sender, EventArgs e)
         {
             UpdateDisplay();
         }
@@ -1344,26 +973,7 @@ namespace WzComparerR2.Avatar.UI
             UpdateDisplay();
         }
 
-        private void cmbGroupChair_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            this.SuspendUpdateDisplay();
-            var part = this.avatar.GroupChairChanged((Convert.ToInt32((sender as ComboBoxEx).Text) - 1).ToString());
-            if (part != null)
-            {
-                OnNewPartAdded(part);
-                FillAvatarParts();
-            }
-            FillEffectFrame();
-            this.ResumeUpdateDisplay();
-            UpdateDisplay();
-        }
-
         private void chkBodyPlay_CheckedChanged(object sender, EventArgs e)
-        {
-            setBodyDelay();
-        }
-
-        public void setBodyDelay()
         {
             if (chkBodyPlay.Checked)
             {
@@ -1376,145 +986,12 @@ namespace WzComparerR2.Avatar.UI
                 {
                     this.animator.BodyDelay = actionFrame.AbsoluteDelay;
                 }
-                setEffectDelay(false);
             }
             else
             {
                 this.animator.BodyDelay = -1;
-                setEffectDelay(true);
                 TimerEnabledCheck();
             }
-        }
-
-        public void setTamingDelay()
-        {
-            if (chkTamingPlay.Checked)
-            {
-                if (!this.timer1.Enabled)
-                {
-                    AnimateStart();
-                }
-
-                if (this.GetSelectedTamingFrame(out _, out var actionFrame) && actionFrame.AbsoluteDelay > 0)
-                {
-                    this.animator.TamingDelay = actionFrame.AbsoluteDelay;
-                }
-                setChairDelay(false);
-            }
-            else
-            {
-                this.animator.TamingDelay = -1;
-                setChairDelay(true);
-                TimerEnabledCheck();
-            }
-        }
-
-        public void setEffectDelay(bool init = false)
-        {
-            if (init)
-            {
-                for (int i = 0; i < this.animator.EffectDelay.Length; i++)
-                {
-                    if (i == AvatarCanvas.IndexChairLayer1 || i == AvatarCanvas.IndexChairLayer2
-                        || i == AvatarCanvas.IndexChairEffectLayer1 || i == AvatarCanvas.IndexChairEffectLayer2)
-                        continue;
-
-                    this.animator.EffectDelay[i] = -1;
-                }
-            }
-            else
-            {
-                bool effects = this.GetSelectedEffectFrames(out _, out var effectFrame);
-                if (effects)
-                {
-                    for (int i = 0; i < effectFrame.Length; i++)
-                    {
-                        if (i == AvatarCanvas.IndexChairLayer1 || i == AvatarCanvas.IndexChairLayer2
-                            || i == AvatarCanvas.IndexChairEffectLayer1 || i == AvatarCanvas.IndexChairEffectLayer2)
-                            continue;
-
-                        if (effectFrame[i]?.AbsoluteDelay > 0)
-                        {
-                            this.animator.EffectDelay[i] = effectFrame[i].AbsoluteDelay;
-                        }
-                    }
-                }
-            }
-        }
-
-        public void setChairDelay(bool init = false)
-        {
-            var index = new[] { AvatarCanvas.IndexChairLayer1, AvatarCanvas.IndexChairLayer2, AvatarCanvas.IndexChairEffectLayer1, AvatarCanvas.IndexChairEffectLayer2 };
-
-            if (init)
-            {
-                foreach (int i in index)
-                {
-                    this.animator.EffectDelay[i] = -1;
-                }
-            }
-            else
-            {
-                bool effects = this.GetSelectedEffectFrames(out _, out var effectFrame);
-                if (effects)
-                {
-                    foreach (int i in index)
-                    {
-                        if (effectFrame[i]?.AbsoluteDelay > 0)
-                        {
-                            this.animator.EffectDelay[i] = effectFrame[i].AbsoluteDelay;
-                        }
-                    }
-                }
-            }
-        }
-
-        /// <summary>
-        /// Body 프레임과 의자를 제외한 ItemEffect 프레임을 모두 0으로 맞춥니다.
-        /// </summary>
-        private void SyncBodyEffect()
-        {
-            if (this.cmbBodyFrame.Items.Count > 0)
-            {
-                this.cmbBodyFrame.SelectedIndex = 0;
-            }
-
-            for (int i = 0; i < cmbEffectFrames.Length; i++)
-            {
-                if (i == AvatarCanvas.IndexChairLayer1 || i == AvatarCanvas.IndexChairLayer2
-                    || i == AvatarCanvas.IndexChairEffectLayer1 || i == AvatarCanvas.IndexChairEffectLayer2)
-                    continue;
-
-                if (this.cmbEffectFrames[i].Items.Count > 0)
-                {
-                    this.cmbEffectFrames[i].SelectedIndex = 0;
-                }
-            }
-
-            setBodyDelay();
-        }
-
-        /// <summary>
-        /// TamingMob 프레임과 의자의 프레임을 모두 0으로 맞춥니다.
-        /// </summary>
-        private void SyncTamingEffect()
-        {
-            var index = new[] { AvatarCanvas.IndexChairLayer1, AvatarCanvas.IndexChairLayer2, AvatarCanvas.IndexChairEffectLayer1, AvatarCanvas.IndexChairEffectLayer2 };
-
-            if (this.cmbTamingFrame.Items.Count > 0)
-            {
-                this.cmbTamingFrame.SelectedIndex = 0;
-            }
-
-            foreach (int i in index)
-            {
-                if (this.cmbEffectFrames[i].Items.Count > 0)
-                {
-                    this.cmbEffectFrames[i].SelectedIndex = 0;
-                }
-            }
-
-            setTamingDelay();
         }
 
         private void chkEmotionPlay_CheckedChanged(object sender, EventArgs e)
@@ -1540,7 +1017,23 @@ namespace WzComparerR2.Avatar.UI
 
         private void chkTamingPlay_CheckedChanged(object sender, EventArgs e)
         {
-            setTamingDelay();
+            if (chkTamingPlay.Checked)
+            {
+                if (!this.timer1.Enabled)
+                {
+                    AnimateStart();
+                }
+
+                if (this.GetSelectedTamingFrame(out _, out var actionFrame) && actionFrame.AbsoluteDelay > 0)
+                {
+                    this.animator.TamingDelay = actionFrame.AbsoluteDelay;
+                }
+            }
+            else
+            {
+                this.animator.TamingDelay = -1;
+                TimerEnabledCheck();
+            }
         }
 
         private void chkHairCover_CheckedChanged(object sender, EventArgs e)
@@ -1552,13 +1045,6 @@ namespace WzComparerR2.Avatar.UI
         private void chkHairShade_CheckedChanged(object sender, EventArgs e)
         {
             avatar.ShowHairShade = chkHairShade.Checked;
-            UpdateDisplay();
-        }
-
-        private void chkApplyBRM_CheckedChanged(object sender, EventArgs e)
-        {
-            avatar.ApplyBRM = chkApplyBRM.Checked;
-            this.avatarContainer1.ClearAllCache();
             UpdateDisplay();
         }
 
@@ -1581,9 +1067,6 @@ namespace WzComparerR2.Avatar.UI
         private void AnimateUpdate()
         {
             this.SuspendUpdateDisplay();
-            this.animator.SuspendUpdate();
-
-            var beforeTamingFrameIdx = cmbTamingFrame.SelectedIndex;
 
             if (this.animator.BodyDelay == 0 && FindNextFrame(cmbBodyFrame) && this.GetSelectedBodyFrame(out _, out var bodyFrame))
             {
@@ -1600,15 +1083,6 @@ namespace WzComparerR2.Avatar.UI
                 this.animator.TamingDelay = tamingFrame.AbsoluteDelay;
             }
 
-            for (int i = 0; i < this.cmbEffectFrames.Length; i++)
-            {
-                if (this.animator.EffectDelay[i] == 0 && FindNextFrame(cmbEffectFrames[i]) && this.GetSelectedActionFrame(cmbEffectFrames[i], out _, out var effectFrame))
-                {
-                    this.animator.EffectDelay[i] = effectFrame.AbsoluteDelay;
-                }
-            }
-
-            this.animator.TrigUpdate();
             this.ResumeUpdateDisplay();
         }
 
@@ -1692,7 +1166,6 @@ namespace WzComparerR2.Avatar.UI
             }
         }
 
-
         private void btnMale_Click(object sender, EventArgs e)
         {
             if (this.avatar.Parts.All(part => part == null)
@@ -1716,7 +1189,7 @@ namespace WzComparerR2.Avatar.UI
             switch (MessageBoxEx.Show("是否加载基础元素师角色？\r\n\r\nYes - 女\r\nNo - 男", "确认", MessageBoxButtons.YesNoCancel))
             {
                 case DialogResult.Yes:
-                    LoadCode("2003,12003,51484,61183,1051667,1073551,1372243", 0);
+                    LoadCode("2003,12003,51484,61183,1051667,1073551,1372243", 0); 
                     return;
 
                 case DialogResult.No:
@@ -1724,58 +1197,6 @@ namespace WzComparerR2.Avatar.UI
                     return;
 
                 case DialogResult.Cancel:
-                default:
-                    return;
-            }
-        }
-        private void btnTanjiroKamado_Click(object sender, EventArgs e)
-        {
-            switch (MessageBoxEx.Show("是否加载基础灶门炭治郎角色？", "确认", MessageBoxButtons.YesNo))
-            {
-                case DialogResult.Yes:
-                    LoadCode("2000,12000,55074,63820,1054199,1073962,1703528,1022344", 0);
-                    return;
-
-                case DialogResult.No:
-                default:
-                    return;
-            }
-        }
-        private void btnNezukoKamado_Click(object sender, EventArgs e)
-        {
-            switch (MessageBoxEx.Show("是否加载基础竈門禰豆子角色", "确认", MessageBoxButtons.YesNo))
-            {
-                case DialogResult.Yes:
-                    LoadCode("2000,12000,56095,67490,1054200,1073963,1012832", 0);
-                    return;
-
-                case DialogResult.No:
-                default:
-                    return;
-            }
-        }
-        private void btnZenitsuAgatsuma_Click(object sender, EventArgs e)
-        {
-            switch (MessageBoxEx.Show("是否加载基础我妻善逸角色？", "确认", MessageBoxButtons.YesNo))
-            {
-                case DialogResult.Yes:
-                    LoadCode("2000,12000,55075,63830,1054201,1073964,1703529", 0);
-                    return;
-
-                case DialogResult.No:
-                default:
-                    return;
-            }
-        }
-        private void btnInosukeHashibira_Click(object sender, EventArgs e)
-        {
-            switch (MessageBoxEx.Show("是否加载基础嘴平伊之助角色？", "确认", MessageBoxButtons.YesNo))
-            {
-                case DialogResult.Yes:
-                    LoadCode("2000,12000,20000,30000,1006567,1050783,1073965,1103743,1703530", 0);
-                    return;
-
-                case DialogResult.No:
                 default:
                     return;
             }
@@ -1903,509 +1324,65 @@ namespace WzComparerR2.Avatar.UI
             }
         }
 
-        private void btnCustomPreset_Click(object sender, EventArgs e)
-        {
-            string avatarPath = Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "Images");
-            if (LoadAvatarForm.Instance == null)
-            {
-                new LoadAvatarForm().Show();
-            }
-            else
-            {
-                LoadAvatarForm.Instance.Show();
-            }
-            LoadAvatarForm._files.Clear();
-            if (!File.Exists(avatarPath))
-            {
-                System.IO.Directory.CreateDirectory(avatarPath);
-            }
-            string[] files = Directory.GetFiles(avatarPath);
-            LoadAvatarForm._files.AddRange(files);
-            LoadAvatarForm.LoadImages();
-        }
-
-        public void SavePreset(string pendingCode)
-        {
-            if (string.IsNullOrEmpty(pendingCode)) return;
-            string avatarPresetPath = Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "Images", pendingCode.Replace("*", "×") + ".png");
-            this.GetSelectedBodyFrame(out int bodyFrame, out _);
-            this.GetSelectedEmotionFrame(out int emoFrame, out _);
-            this.GetSelectedTamingFrame(out int tamingFrame, out _);
-            this.GetSelectedEffectFrames(out int[] effectFrames, out _);
-            var bone = this.avatar.CreateFrame(bodyFrame, emoFrame, tamingFrame, effectFrames);
-            var frame = this.avatar.DrawFrame(bone);
-            frame.Bitmap.Save(avatarPresetPath, System.Drawing.Imaging.ImageFormat.Png);
-        }
-
-        private void btnOldBokugen_Click(object sender, EventArgs e)
-        {
-            switch (MessageBoxEx.Show("是否加载基础墨玄角色(旧版)？\r\n\r\nYes - 男\r\nNo - 女", "确认", MessageBoxButtons.YesNoCancel))
-            {
-                case DialogResult.Yes:
-                    LoadCode("2000,12000,50646,60050,1050575,1073510,1403000", 0);
-                    return;
-
-                case DialogResult.No:
-                    LoadCode("2000,12000,51659,61040,1051647,1073897,1403000", 0);
-                    return;
-
-                case DialogResult.Cancel:
-                default:
-                    return;
-            }
-        }
-
-        private void btnNewBokugen_Click(object sender, EventArgs e)
-        {
-            switch (MessageBoxEx.Show("是否加载新版墨玄角色(新版)？\r\n\r\nYes - 男\r\nNo - 女", "确认", MessageBoxButtons.YesNoCancel))
-            {
-                case DialogResult.Yes:
-                    LoadCode("2041,12041,55661,63740,1050758,1070188,1403000", 0);
-                    return;
-
-                case DialogResult.No:
-                    LoadCode("2041,12041,56683,67230,1051837,1071203,1403000", 0);
-                    return;
-
-                case DialogResult.Cancel:
-                default:
-                    return;
-            }
-        }
-
-        private void btnSaveAsGif_Click(object sender, EventArgs e)
-        {
-            if (this.avatar.Body == null || this.avatar.Head == null)
-            {
-                MessageBoxEx.Show("没有选择");
-                return;
-            }
-
-            SaveGif(sender, e, chkBodyPlay.Checked, chkEmotionPlay.Checked, chkTamingPlay.Checked);
-        }
-
-        private async void btnAPI_Click(object sender, EventArgs e)
-        {
-#if NET6_0_OR_GREATER
-            if (PluginManager.FindWz(Wz_Type.Base) == null)
-            {
-                ToastNotification.Show(this, $"错误: 无法加载Base.wz文件。", null, 2000, eToastGlowColor.Red, eToastPosition.TopCenter);
-                return;
-            }
-
-            var dlg = new AvatarAPIForm();
-            dlg.CharaName = characterName;
-            dlg.selectedRegion = previousRegion;
-
-            if (dlg.ShowDialog() == DialogResult.OK)
-            {
-                characterName = dlg.CharaName;
-                previousRegion = dlg.selectedRegion;
-                string avatarCode;
-                switch (dlg.selectedRegion)
-                {
-                    default:
-                        ToastNotification.Show(this, $"请选择角色区域", null, 3000, eToastGlowColor.Red, eToastPosition.TopCenter);
-                        return;
-                    case 1: // KMS
-                        this.API = new NexonOpenAPI("-", "KMS");
-                        try
-                        {
-                            ToastNotification.Show(this, $"正在加载角色。请稍后...", null, 3000, eToastGlowColor.Green, eToastPosition.TopCenter);
-                            avatarCode = await this.API.GetAvatarCode(dlg.CharaName, "KMS");
-                            if (string.IsNullOrEmpty(avatarCode))
-                            {
-                                ToastNotification.Show(this, $"未找到角色", null, 3000, eToastGlowColor.Red, eToastPosition.TopCenter);
-                            }
-                            else
-                            {
-                                await Type3(avatarCode);
-                            }
-                        }
-                        catch (Exception ex)
-                        {
-                            ToastNotification.Show(this, $"错误: {ex.Message}", null, 3000, eToastGlowColor.Orange, eToastPosition.TopCenter);
-                        }
-                        break;
-
-                        // Following are unused
-                        var key = ((string)WcR2Config.Default.NxOpenAPIKey).Trim();
-                        if (string.IsNullOrEmpty(key))
-                        {
-                            ToastNotification.Show(this, $"请在设置当中填写API密钥", null, 3000, eToastGlowColor.Red, eToastPosition.TopCenter);
-                            return;
-                        }
-
-                        try
-                        {
-                            if (this.API == null || !this.API.CheckSameAPIKey(key))
-                            {
-                                this.API = new NexonOpenAPI(key, "KMS");
-                            }
-
-                            ToastNotification.Show(this, $"正在加载角色。请稍后...", null, 3000, eToastGlowColor.Green, eToastPosition.TopCenter);
-                            var name = dlg.CharaName;
-                            var ocid = await this.API.GetCharacterOCID(name);
-
-                            if (dlg.Type1)
-                            {
-                                await Type1(ocid);
-                            }
-                            else
-                            {
-                                await Type2(ocid);
-                            }
-                        }
-                        catch (Exception ex)
-                        {
-                            ToastNotification.Show(this, $"错误: {ex.Message}", null, 3000, eToastGlowColor.Red, eToastPosition.TopCenter);
-                        }
-                        break;
-                    case 2: // JMS
-                        this.API = new NexonOpenAPI("-", "KMS");
-                        try
-                        {
-                            ToastNotification.Show(this, $"正在加载角色。请稍后...", null, 3000, eToastGlowColor.Green, eToastPosition.TopCenter);
-                            avatarCode = await this.API.GetAvatarCode(dlg.CharaName, "JMS");
-                            if (string.IsNullOrEmpty(avatarCode))
-                            {
-                                ToastNotification.Show(this, $"未找到角色。", null, 3000, eToastGlowColor.Red, eToastPosition.TopCenter);
-                            }
-                            else
-                            {
-                                await Type3(avatarCode);
-                            }
-                        }
-                        catch (Exception ex)
-                        {
-                            ToastNotification.Show(this, $"错误: {ex.Message}", null, 3000, eToastGlowColor.Orange, eToastPosition.TopCenter);
-                        }
-                        break;
-                    case 4: // GMS-NA
-                        this.API = new NexonOpenAPI("-", "KMS");
-                        try
-                        {
-                            ToastNotification.Show(this, $"正在加载角色。请稍后...", null, 3000, eToastGlowColor.Green, eToastPosition.TopCenter);
-                            avatarCode = await this.API.GetAvatarCode(dlg.CharaName, "GMS-NA");
-                            if (string.IsNullOrEmpty(avatarCode))
-                            {
-                                ToastNotification.Show(this, $"未找到角色。", null, 3000, eToastGlowColor.Red, eToastPosition.TopCenter);
-                            }
-                            else
-                            {
-                                await Type3(avatarCode);
-                            }
-                        }
-                        catch (Exception ex)
-                        {
-                            ToastNotification.Show(this, $"错误: {ex.Message}", null, 3000, eToastGlowColor.Orange, eToastPosition.TopCenter);
-                        }
-                        break;
-                    case 5: // GMS-EU
-                        this.API = new NexonOpenAPI("-", "KMS");
-                        try
-                        {
-                            ToastNotification.Show(this, $"正在加载角色。请稍后...", null, 3000, eToastGlowColor.Green, eToastPosition.TopCenter);
-                            avatarCode = await this.API.GetAvatarCode(dlg.CharaName, "GMS-EU");
-                            if (string.IsNullOrEmpty(avatarCode))
-                            {
-                                ToastNotification.Show(this, $"未找到角色。", null, 3000, eToastGlowColor.Red, eToastPosition.TopCenter);
-                            }
-                            else
-                            {
-                                await Type3(avatarCode);
-                            }
-                        }
-                        catch (Exception ex)
-                        {
-                            ToastNotification.Show(this, $"错误: {ex.Message}", null, 3000, eToastGlowColor.Orange, eToastPosition.TopCenter);
-                        }
-                        break;
-                    case 6: // MSEA
-                        this.API = new NexonOpenAPI("-", "KMS");
-                        try
-                        {
-                            ToastNotification.Show(this, $"稍后...", null, 3000, eToastGlowColor.Green, eToastPosition.TopCenter);
-                            avatarCode = await this.API.GetAvatarCode(dlg.CharaName, "MSEA");
-                            if (string.IsNullOrEmpty(avatarCode))
-                            {
-                                ToastNotification.Show(this, $"未找到角色。", null, 3000, eToastGlowColor.Red, eToastPosition.TopCenter);
-                            }
-                            else
-                            {
-                                await Type3(avatarCode);
-                            }
-                        }
-                        catch (Exception ex)
-                        {
-                            ToastNotification.Show(this, $"错误: {ex.Message}", null, 3000, eToastGlowColor.Orange, eToastPosition.TopCenter);
-                        }
-                        break;
-                    case 7: // TMS
-                        this.API = new NexonOpenAPI("-", "KMS");
-                        try
-                        {
-                            ToastNotification.Show(this, $"正在加载角色。请稍后...", null, 3000, eToastGlowColor.Green, eToastPosition.TopCenter);
-                            avatarCode = await this.API.GetAvatarCode(dlg.CharaName, "TMS");
-                            if (string.IsNullOrEmpty(avatarCode))
-                            {
-                                ToastNotification.Show(this, $"未找到角色。", null, 3000, eToastGlowColor.Red, eToastPosition.TopCenter);
-                            }
-                            else
-                            {
-                                await Type4(avatarCode);
-                            }
-                        }
-                        catch (Exception ex)
-                        {
-                            ToastNotification.Show(this, $"错误: {ex.Message}", null, 3000, eToastGlowColor.Orange, eToastPosition.TopCenter);
-                        }
-                        break;
-                    case 8: // MSN
-                        this.API = new NexonOpenAPI("-", "KMS");
-                        try
-                        {
-                            avatarCode = await this.API.GetAvatarCode(dlg.CharaName, "MSN");
-                            if (string.IsNullOrEmpty(avatarCode))
-                            {
-                                ToastNotification.Show(this, $"未找到角色。", null, 3000, eToastGlowColor.Red, eToastPosition.TopCenter);
-                            }
-                            else
-                            {
-                                string[] decodedInfo = Encoding.UTF8.GetString(Convert.FromBase64String(avatarCode)).Split("a");
-                                List<string> msnCode = new List<string> {};
-                                msnCode.Add((Int32.Parse(decodedInfo[0]) + 2000).ToString());
-                                msnCode.Add((Int32.Parse(decodedInfo[1]) + 12000).ToString());
-                                foreach (string itemCode in decodedInfo.Skip(2))
-                                {
-                                    switch (itemCode.Length)
-                                    {
-                                        default:
-                                            break;
-                                        case 5:
-                                        case 7:
-                                            msnCode.Add(itemCode);
-                                            break;
-                                        case 8:
-                                            msnCode.Add(itemCode.Substring(0, 5));
-                                            break;
-
-                                    }
-                                }
-                                LoadCode(string.Join(",", msnCode), 0);
-                            }
-                        }
-                        catch (Exception ex)
-                        {
-                            ToastNotification.Show(this, $"错误: {ex.Message}", null, 3000, eToastGlowColor.Orange, eToastPosition.TopCenter);
-                        }
-                        break;
-                }
-            }
-
-            async Task Type1(string ocid) // 外形基准
-            {
-                UnpackedAvatarData res = await this.API.GetAvatarResult(ocid);
-
-                var mixFace = int.Parse(res.MixFaceRatio) != 0 ? $"+{res.MixFaceColor}*{res.MixFaceRatio}" : "";
-                var mixHair = int.Parse(res.MixHairRatio) != 0 ? $"+{res.MixHairColor}*{res.MixHairRatio}" : "";
-
-                for (int i = 0; i < this.cmbEar.Items.Count; i++)
-                {
-                    if ((this.cmbEar.Items[i] as ComboItem).Text == res.EarType.ToString())
-                    {
-                        this.cmbEar.SelectedIndex = i;
-                        break;
-                    }
-                }
-
-                var code = $"20{res.Skin}, {res.Face + mixFace}, {res.Hair + mixHair}, {res.Cap}, {res.FaceAcc}, {res.EyeAcc}, {res.EarAcc}, {res.Coat}, {res.Pants}, {res.Shoes}, {res.Gloves}, {res.Cape}, {res.Shield}, {res.Weapon}, {res.CashWeapon}";
-                LoadCode(code, 0);
-
-                if (res.UnknownVer)
-                {
-                    throw new Exception($"未知代码版本。 (版本: {res.Version})");
-                }
-            }
-
-            async Task Type2(string ocid) // 装备界面基准
-            {
-                LoadedAvatarData res = await this.API.GetAvatarResult2(ocid);
-
-                var skinID = FindIDFromString(res.SkinInfo["SkinName"], gender: 2);
-                var faceID = FindIDFromString(res.FaceInfo["FaceName"], gender: res.Gender);
-                var hairID = FindIDFromString(res.HairInfo["HairName"], gender: res.Gender);
-
-                if (string.IsNullOrEmpty(skinID))
-                {
-                    throw new Exception($"请登录连接角色");
-                }
-
-                if (!string.IsNullOrEmpty(faceID) && faceID.Length == 5)
-                    faceID = faceID.Remove(2, 1).Insert(2, Array.IndexOf(AvatarCanvas.FaceColor, res.FaceInfo["BaseColor"]).ToString());
-                if (!string.IsNullOrEmpty(hairID) && hairID.Length == 5)
-                    hairID = hairID.Remove(4, 1).Insert(4, Array.IndexOf(AvatarCanvas.HairColor, res.HairInfo["BaseColor"]).ToString());
-
-                var mixFace = !string.IsNullOrEmpty(res.FaceInfo["MixColor"]) ? $"+{Array.IndexOf(AvatarCanvas.FaceColor, res.FaceInfo["MixColor"])}*{res.FaceInfo["MixRate"]}" : "";
-                var mixHair = !string.IsNullOrEmpty(res.HairInfo["MixColor"]) ? $"+{Array.IndexOf(AvatarCanvas.HairColor, res.HairInfo["MixColor"])}*{res.HairInfo["MixRate"]}" : "";
-
-                LoadCode($"{skinID},{faceID + mixFace},{hairID + mixHair}", 0);
-                foreach (var list in new[] { res.ItemList, res.CashBaseItemList, res.CashPresetItemList })
-                {
-                    if (list.Count > 0)
-                        LoadCode(string.Join(",", list), 1);
-                }
-            }
-
-            async Task Type3(string avatarCode) // raw avatarCode
-            {
-                UnpackedAvatarData res = await this.API.ParseAvatarCode(avatarCode);
-
-                var mixFace = int.Parse(res.MixFaceRatio) != 0 ? $"+{res.MixFaceColor}*{res.MixFaceRatio}" : "";
-                var mixHair = int.Parse(res.MixHairRatio) != 0 ? $"+{res.MixHairColor}*{res.MixHairRatio}" : "";
-
-                for (int i = 0; i < this.cmbEar.Items.Count; i++)
-                {
-                    if ((this.cmbEar.Items[i] as ComboItem).Text == res.EarType.ToString())
-                    {
-                        this.cmbEar.SelectedIndex = i;
-                        break;
-                    }
-                }
-
-                var code = $"20{res.Skin}, {res.Face + mixFace}, {res.Hair + mixHair}, {res.Cap}, {res.FaceAcc}, {res.EyeAcc}, {res.EarAcc}, {res.Coat}, {res.Pants}, {res.Shoes}, {res.Gloves}, {res.Cape}, {res.Shield}, {res.Weapon}, {res.CashWeapon}";
-                LoadCode(code, 0);
-
-                if (res.UnknownVer)
-                {
-                    throw new Exception($"未知代码版本。 (版本: {res.Version})");
-                }
-            }
-
-            async Task Type4(string avatarCode) // TMS cipherText
-            {
-                UnpackedAvatarData res = await this.API.ParseCharacterLookCipherText(avatarCode);
-
-                var mixFace = int.Parse(res.MixFaceRatio) != 0 ? $"+{res.MixFaceColor}*{res.MixFaceRatio}" : "";
-                var mixHair = int.Parse(res.MixHairRatio) != 0 ? $"+{res.MixHairColor}*{res.MixHairRatio}" : "";
-
-                for (int i = 0; i < this.cmbEar.Items.Count; i++)
-                {
-                    if ((this.cmbEar.Items[i] as ComboItem).Text == res.EarType.ToString())
-                    {
-                        this.cmbEar.SelectedIndex = i;
-                        break;
-                    }
-                }
-
-                var code = $"20{res.Skin}, {res.Face}, {res.Face + mixFace}, {res.Hair}, {res.Hair + mixHair}, {res.Cap}, {res.FaceAcc}, {res.EyeAcc}, {res.EarAcc}, {res.Coat}, {res.Pants}, {res.Shoes}, {res.Gloves}, {res.Cape}, {res.Shield}, {res.Weapon}, {res.CashWeapon}";
-                LoadCode(code, 0);
-
-                if (res.UnknownVer)
-                {
-                    throw new Exception($"未知代码版本。 (版本: {res.Version})");
-                }
-            }
-#else
-            ToastNotification.Show(this, $"要使用该功能，需使用.NET 6.0或.NET 8.0版本。", null, 2000, eToastGlowColor.Red, eToastPosition.TopCenter);
-            return;
-#endif
-        }
-
         private void btnReset_Click(object sender, EventArgs e)
         {
             this.avatarContainer1.Origin = new Point(this.avatarContainer1.Width / 2, this.avatarContainer1.Height / 2 + 40);
             this.avatarContainer1.Invalidate();
         }
 
-        private void SaveGif(object sender, EventArgs e, bool isBodyPlayingChecked = true, bool isEmotionPlayingChecked = true, bool isTamingPlayingChecked = true, string outputFileName = null)
+        private void btnSaveAsGif_Click(object sender, EventArgs e)
         {
-            bool bodyPlaying = isBodyPlayingChecked && cmbBodyFrame.Items.Count > 1;
-            bool emoPlaying = isEmotionPlayingChecked && cmbEmotionFrame.Items.Count > 1;
-            bool tamingPlaying = isTamingPlayingChecked && cmbTamingFrame.Items.Count > 1;
-            bool effectPlaying = (bodyPlaying || (isTamingPlayingChecked && avatar.Chair != null)) ? (GetSelectedEffectFrames(out int[] frameIndex, out ActionFrame[] actionFrame) ? true : false) : false;
-            string defaultFileName;
+            bool bodyPlaying = chkBodyPlay.Checked && cmbBodyFrame.Items.Count > 1;
+            bool emoPlaying = chkEmotionPlay.Checked && cmbEmotionFrame.Items.Count > 1;
+            bool tamingPlaying = chkTamingPlay.Checked && cmbTamingFrame.Items.Count > 1;
 
             int aniCount = new[] { bodyPlaying, emoPlaying, tamingPlaying }.Count(b => b);
-            int effectCount = effectPlaying ? 1 : 0;
-            aniCount += effectCount; // add effect parts
 
             if (aniCount == 0)
             {
                 this.GetSelectedBodyFrame(out int bodyFrame, out _);
                 this.GetSelectedEmotionFrame(out int emoFrame, out _);
                 this.GetSelectedTamingFrame(out int tamingFrame, out _);
-                this.GetSelectedEffectFrames(out int[] effectFrames, out _);
-
-                defaultFileName = string.Format("avatar{0}{1}{2}{3}{4}.png",
-                        string.IsNullOrEmpty(avatar.ActionName) ? "" : ("_" + avatar.ActionName + "(" + bodyFrame + ")"),
-                        string.IsNullOrEmpty(avatar.EmotionName) ? "" : ("_" + avatar.EmotionName + "(" + emoFrame + ")"),
-                        string.IsNullOrEmpty(avatar.TamingActionName) ? "" : ("_" + avatar.TamingActionName + "(" + tamingFrame + ")"),
-                        (!string.IsNullOrEmpty(avatar.ActionName) && avatar.ActionName == "sit") ? ("_" + chairName) : "",
-                        btnEnableAutosave.Checked ? ("_" + DateTime.Now.ToString("yyyyMMdd_HHmmss")) : "");
 
                 // no animation is playing, save as png
-                if (!btnEnableAutosave.Checked)
+                var dlg = new SaveFileDialog()
                 {
-                    var dlg = new SaveFileDialog()
-                    {
-                        Title = "保存角色帧",
-                        Filter = "PNG (*.png)|*.png|*.*|*.*",
-                        FileName = defaultFileName
-                    };
-                    if (dlg.ShowDialog() != DialogResult.OK)
-                    {
-                        return;
-                    }
-                    outputFileName = dlg.FileName;
-                }
-                else
+                    Title = "Save avatar frame",
+                    Filter = "PNG (*.png)|*.png|*.*|*.*",
+                    FileName = string.Format("avatar{0}{1}{2}.png",
+                        string.IsNullOrEmpty(avatar.ActionName) ? "" : ("_" + avatar.ActionName + "(" + bodyFrame + ")"),
+                        string.IsNullOrEmpty(avatar.EmotionName) ? "" : ("_" + avatar.EmotionName + "(" + emoFrame + ")"),
+                        string.IsNullOrEmpty(avatar.TamingActionName) ? "" : ("_" + avatar.TamingActionName + "(" + tamingFrame + ")"))
+                };
+
+                if (dlg.ShowDialog() != DialogResult.OK)
                 {
-                    outputFileName = Path.Combine(specifiedSavePath, defaultFileName.Replace('\\', '.'));
+                    return;
                 }
 
-                var bone = this.avatar.CreateFrame(bodyFrame, emoFrame, tamingFrame, effectFrames);
+                var bone = this.avatar.CreateFrame(bodyFrame, emoFrame, tamingFrame);
                 var frame = this.avatar.DrawFrame(bone);
-                frame.Bitmap.Save(outputFileName, System.Drawing.Imaging.ImageFormat.Png);
+                frame.Bitmap.Save(dlg.FileName, System.Drawing.Imaging.ImageFormat.Png);
             }
             else
             {
                 var config = ImageHandlerConfig.Default;
-                using var encoder = AnimateEncoderFactory.CreateEncoder(config);
-                var cap = encoder.Compatibility;
-                string extensionFilter = string.Join(";", cap.SupportedExtensions.Select(ext => $"*{ext}"));
+                var encParams = AnimateEncoderFactory.GetEncoderParams(config.GifEncoder.Value);
 
-                defaultFileName = string.Format("avatar{0}{1}{2}{3}{4}{5}",
+                var dlg = new SaveFileDialog()
+                {
+                    Title = "Save avatar",
+                    Filter = string.Format("{0} (*{1})|*{1}|全部文件(*.*)|*.*", encParams.FileDescription, encParams.FileExtension),
+                    FileName = string.Format("avatar{0}{1}{2}{3}",
                         string.IsNullOrEmpty(avatar.ActionName) ? "" : ("_" + avatar.ActionName),
                         string.IsNullOrEmpty(avatar.EmotionName) ? "" : ("_" + avatar.EmotionName),
                         string.IsNullOrEmpty(avatar.TamingActionName) ? "" : ("_" + avatar.TamingActionName),
-                        (!string.IsNullOrEmpty(avatar.ActionName) && avatar.ActionName == "sit") ? ("_" + chairName) : "",
-                        btnEnableAutosave.Checked ? ("_" + DateTime.Now.ToString("yyyyMMdd_HHmmss")) : "",
-                        cap.DefaultExtension);
+                        encParams.FileExtension)
+                };
 
-                if (!btnEnableAutosave.Checked)
+                if (dlg.ShowDialog() != DialogResult.OK)
                 {
-                    var dlg = new SaveFileDialog()
-                    {
-                        Title = "保存角色",
-                        Filter = string.Format("{0} (*{1})|*{1}|全部文件(*.*)|*.*", encoder.Name, extensionFilter),
-                        FileName = defaultFileName
-                    };
-                    if (dlg.ShowDialog() != DialogResult.OK)
-                    {
-                        return;
-                    }
-                    outputFileName = dlg.FileName;
-                }
-                else
-                {
-                    outputFileName = System.IO.Path.Combine(specifiedSavePath, defaultFileName.Replace('\\', '.'));
-                }
-
-                string framesDirName = Path.Combine(Path.GetDirectoryName(outputFileName), Path.GetFileNameWithoutExtension(outputFileName) + ".frames");
-                if (config.SavePngFramesEnabled && !Directory.Exists(framesDirName))
-                {
-                    Directory.CreateDirectory(framesDirName);
+                    return;
                 }
 
                 var actPlaying = new[] { bodyPlaying, emoPlaying, tamingPlaying };
@@ -2429,30 +1406,10 @@ namespace WzComparerR2.Avatar.UI
                             return null;
                         }
                     }).ToArray();
-                var effectActFrames = cmbEffectFrames // get ActionFrame array from effect combobox
-                    .Select((cmb, i) =>
-                    {
-                        if (effectPlaying && avatar.IsPartEffectVisible(i)) // effect playing is bounded to body playing or taming playing with Chair part
-                        {
-                            return cmb.Items.OfType<ComboItem>().Select(cmbItem => new
-                            {
-                                index = int.Parse(cmbItem.Text),
-                                actionFrame = cmbItem.Tag as ActionFrame,
-                            }).ToArray();
-                        }
-                        else if (this.GetSelectedActionFrame(cmb, out var index, out var actionFrame))
-                        {
-                            return new[] { new { index, actionFrame } };
-                        }
-                        else
-                        {
-                            return null;
-                        }
-                    }).ToArray();
 
                 var gifLayer = new GifLayer();
 
-                if (aniCount == 1 && !cap.IsFixedFrameRate && !effectPlaying)
+                if (aniCount == 1)
                 {
                     int aniActIndex = Array.FindIndex(actPlaying, b => b);
                     for (int fIdx = 0, fCnt = actFrames[aniActIndex].Length; fIdx < fCnt; fIdx++)
@@ -2465,14 +1422,14 @@ namespace WzComparerR2.Avatar.UI
                             if (i == aniActIndex)
                             {
                                 actionIndices[i] = act[fIdx].index;
-                                delay = act[fIdx].actionFrame.AbsoluteDelay;
+                                delay = act[i].actionFrame.AbsoluteDelay;
                             }
                             else if (act != null)
                             {
                                 actionIndices[i] = act[0].index;
                             }
                         }
-                        var bone = this.avatar.CreateFrame(actionIndices[0], actionIndices[1], actionIndices[2], null);
+                        var bone = this.avatar.CreateFrame(actionIndices[0], actionIndices[1], actionIndices[2]);
                         var frameData = this.avatar.DrawFrame(bone);
                         gifLayer.AddFrame(new GifFrame(frameData.Bitmap, frameData.Origin, delay));
                     }
@@ -2480,9 +1437,8 @@ namespace WzComparerR2.Avatar.UI
                 else
                 {
                     // more than 2 animating action parts, for simplicity, we use fixed frame delay.
-                    actFrames = actFrames.Concat(effectActFrames).ToArray();
-                    int aniLength = actFrames.Max(layer => layer == null ? 0 : layer.Sum(f => f.actionFrame.AbsoluteDelay));
-                    int aniDelay = config.MinDelay;
+                    var aniLength = actFrames.Max(layer => layer == null ? 0 : layer.Sum(f => f.actionFrame.AbsoluteDelay));
+                    var aniDelay = 30;
 
                     // pipeline functions
                     IEnumerable<int> RenderDelay()
@@ -2502,7 +1458,7 @@ namespace WzComparerR2.Avatar.UI
                         int[] actionState = new int[actFrames.Length];
                         for (int i = 0; i < actionState.Length; i++)
                         {
-                            actionState[i] = actFrames[i] != null ? (actFrames[i].Length < 1 ? -1 : 0) : -1;
+                            actionState[i] = actFrames[i] != null ? 0 : -1;
                         }
 
                         foreach (int delay in delayEnumerator)
@@ -2518,15 +1474,11 @@ namespace WzComparerR2.Avatar.UI
                             // update state
                             for (int i = 0; i < actionState.Length; i++)
                             {
-                                if (i >= 3 ? effectPlaying : actPlaying[i])
+                                if (actPlaying[i])
                                 {
                                     var act = actFrames[i];
                                     time[i] += delay;
                                     int frameIndex = actionState[i];
-                                    if (act == null || act.Length < 1)
-                                    {
-                                        continue;
-                                    }
                                     while (time[i] >= act[frameIndex].actionFrame.AbsoluteDelay)
                                     {
                                         time[i] -= act[frameIndex].actionFrame.AbsoluteDelay;
@@ -2573,7 +1525,7 @@ namespace WzComparerR2.Avatar.UI
 
                     GifFrame ApplyFrame(int[] actionIndices, int delay)
                     {
-                        var bone = this.avatar.CreateFrame(actionIndices[0], actionIndices[1], actionIndices[2], actionIndices.Skip(3).ToArray());
+                        var bone = this.avatar.CreateFrame(actionIndices[0], actionIndices[1], actionIndices[2]);
                         var frameData = this.avatar.DrawFrame(bone);
                         return new GifFrame(frameData.Bitmap, frameData.Origin, delay);
                     }
@@ -2581,11 +1533,11 @@ namespace WzComparerR2.Avatar.UI
                     // build pipeline
                     var step1 = RenderDelay();
                     var step2 = GetFrameActionIndices(step1);
-                    var step3 = cap.IsFixedFrameRate ? step2 : MergeFrames(step2);
+                    var step3 = MergeFrames(step2);
                     var step4 = step3.Select(tp => ApplyFrame(tp.Item1, tp.Item2));
 
                     // run pipeline
-                    foreach (var gifFrame in step4)
+                    foreach(var gifFrame in step4)
                     {
                         gifLayer.AddFrame(gifFrame);
                     }
@@ -2593,7 +1545,7 @@ namespace WzComparerR2.Avatar.UI
 
                 if (gifLayer.Frames.Count <= 0)
                 {
-                    MessageBoxEx.Show(this, "计算动画数据失败。", "错误");
+                    MessageBoxEx.Show(this, "计算动画数据失败。", "Error");
                     return;
                 }
 
@@ -2633,47 +1585,43 @@ namespace WzComparerR2.Avatar.UI
                     }
                 }
 
-                using var bgBrush = CreateBackgroundBrush();
-                encoder.Init(outputFileName, clientRect.Width, clientRect.Height);
-                int currentFrame = 1;
-                foreach (IGifFrame gifFrame in gifLayer.Frames)
+                var bgBrush = CreateBackgroundBrush();
+                using (var enc = AnimateEncoderFactory.CreateEncoder(dlg.FileName, clientRect.Width, clientRect.Height, config))
                 {
-                    using (var bmp = new Bitmap(clientRect.Width, clientRect.Height, System.Drawing.Imaging.PixelFormat.Format32bppArgb))
+                    foreach (IGifFrame gifFrame in gifLayer.Frames)
                     {
-                        using (var g = Graphics.FromImage(bmp))
+                        using (var bmp = new Bitmap(clientRect.Width, clientRect.Height, System.Drawing.Imaging.PixelFormat.Format32bppArgb))
                         {
-                            // draw background
-                            if (bgBrush != null)
+                            using (var g = Graphics.FromImage(bmp))
                             {
-                                g.FillRectangle(bgBrush, 0, 0, bmp.Width, bmp.Height);
+                                // draw background
+                                if (bgBrush != null)
+                                {
+                                    g.FillRectangle(bgBrush, 0, 0, bmp.Width, bmp.Height);
+                                }
+                                gifFrame.Draw(g, clientRect);
                             }
-                            gifFrame.Draw(g, clientRect);
+                            enc.AppendFrame(bmp, Math.Max(10, gifFrame.Delay));
                         }
-                        if (config.SavePngFramesEnabled)
-                        {
-                            bmp.Save(Path.Combine(framesDirName, currentFrame.ToString().PadLeft(3, '0') + ".png"), System.Drawing.Imaging.ImageFormat.Png);
-                            currentFrame++;
-                        }
-                        encoder.AppendFrame(bmp, Math.Max(cap.MinFrameDelay, gifFrame.Delay));
                     }
                 }
+                bgBrush?.Dispose();
             }
         }
 
-        public void LoadCode(string code, int loadType)
+        private void LoadCode(string code, int loadType)
         {
-            chairName = "";
             //解析
             var matches = Regex.Matches(code, @"s?(\d+)(\+([0-7])\*(\d{1,2}))?([,\s]|$)");
             if (matches.Count <= 0)
             {
-                ToastNotification.Show(this, $"错误: 道具代码相关的道具不存在。", null, 3000, eToastGlowColor.Red, eToastPosition.TopCenter);
+                MessageBoxEx.Show("道具代码相关的道具不存在。", "错误");
                 return;
             }
 
             if (PluginManager.FindWz(Wz_Type.Base) == null)
             {
-                ToastNotification.Show(this, $"错误: 无法打开Base.wz文件。", null, 2000, eToastGlowColor.Red, eToastPosition.TopCenter);
+                MessageBoxEx.Show("无法打开Base.wz文件。", "错误");
                 return;
             }
 
@@ -2684,13 +1632,13 @@ namespace WzComparerR2.Avatar.UI
             //试图初始化
             if (!this.inited && !this.AvatarInit())
             {
-                ToastNotification.Show(this, $"错误: 无法初始化纸娃娃插件。", null, 2000, eToastGlowColor.Red, eToastPosition.TopCenter);
+                MessageBoxEx.Show("无法初始化纸娃娃插件。", "错误");
                 return;
             }
             var sl = this.PluginEntry.Context.DefaultStringLinker;
             if (!sl.HasValues) //生成默认stringLinker
             {
-                sl.Load(PluginManager.FindWz(Wz_Type.String).GetValueEx<Wz_File>(null), PluginManager.FindWz(Wz_Type.Item).GetValueEx<Wz_File>(null), PluginManager.FindWz(Wz_Type.Etc).GetValueEx<Wz_File>(null), PluginManager.FindWz(Wz_Type.Quest).GetValueEx<Wz_File>(null));
+                sl.Load(PluginManager.FindWz(Wz_Type.String).GetValueEx<Wz_File>(null), PluginManager.FindWz(Wz_Type.Item).GetValueEx<Wz_File>(null), PluginManager.FindWz(Wz_Type.Etc).GetValueEx<Wz_File>(null));
             }
 
             if (loadType == 0) //先清空。。
@@ -2740,53 +1688,17 @@ namespace WzComparerR2.Avatar.UI
                         }
                     }
                     imgNode = FindNodeByItemID(itemWz, gearID);
-                    if (imgNode != null) // should sync with OnSelectedNode2Changed()
+                    if (imgNode != null)
                     {
-                        bool removeTamingPart = true;
-                        Wz_Vector brm = null;
-
                         int tamingMobID = imgNode.FindNodeByPath("info\\tamingMob").GetValueEx<int>(0);
-                        if (tamingMobID == 0)
-                        {
-                            tamingMobID = imgNode.FindNodeByPath("info\\customChair\\self\\tamingMob").GetValueEx<int>(0);
-                        }
                         if (tamingMobID != 0)
                         {
-                            brm = imgNode.FindNodeByPath("info\\group\\sit\\0\\bodyRelMove").GetValueEx<Wz_Vector>(null);
                             var tamingMobNode = PluginBase.PluginManager.FindWz(string.Format(@"Character\TamingMob\{0:D8}.img", tamingMobID));
                             if (tamingMobNode != null)
                             {
-                                removeTamingPart = false;
-
-                                this.avatar.RemoveChairPart();
-                                var part = this.avatar.AddTamingPart(tamingMobNode, BitmapOrigin.CreateFromNode(tamingMobNode.FindNodeByPath("info\\icon"), PluginBase.PluginManager.FindWz), tamingMobID, false, brm);
+                                var part = this.avatar.AddTamingPart(tamingMobNode, BitmapOrigin.CreateFromNode(imgNode.FindNodeByPath("info\\icon"), PluginBase.PluginManager.FindWz), gearID, false);
                                 OnNewPartAdded(part);
                             }
-                        }
-
-                        brm = imgNode.FindNodeByPath("info\\bodyRelMove").GetValueEx<Wz_Vector>(null);
-                        bool isSitActionExists = imgNode.FindNodeByPath("info\\sitAction").GetValueEx<string>(null) != null;
-                        if (gearID / 10000 == 301 || gearID / 1000 == 5204 || brm != null || isSitActionExists) // 由椅子道具, 道具代码或bodyRelMove和sitAction属性有无决定
-                        {
-                            bool fb = false;
-                            if (brm == null)
-                            {
-                                fb = false;
-                            }
-                            else if (isSitActionExists)
-                            {
-                                fb = true;
-                            }
-
-                            if (removeTamingPart) RemoveTamingPart();
-                            var part = this.avatar.AddChairPart(imgNode, BitmapOrigin.CreateFromNode(imgNode.FindNodeByPath("info\\icon"), PluginBase.PluginManager.FindWz), gearID, brm, fb);
-                            OnNewPartAdded(part);
-                        }
-
-                        if (gearID / 10000 == 501) // effect items
-                        {
-                            var part = this.avatar.AddEffectPart(imgNode);
-                            OnNewPartAdded(part);
                         }
                         continue;
                     }
@@ -2797,22 +1709,7 @@ namespace WzComparerR2.Avatar.UI
                 }
             }
 
-            if (this.avatar.Longcoat != null)
-            {
-                if (this.avatar.Pants != null)
-                {
-                    this.avatar.Pants.Visible = false;
-                }
-                if (this.avatar.Coat != null)
-                {
-                    this.avatar.Coat.Visible = false;
-                }
-                this.avatar.Longcoat.Visible = true;
-            }
-
             //刷新
-            //Use stand1 pose by request
-            this.SelectBodyAction("stand1" ?? "default");
             this.FillAvatarParts();
             this.UpdateDisplay();
 
@@ -2825,7 +1722,7 @@ namespace WzComparerR2.Avatar.UI
                 {
                     sb.Append("  ").AppendLine(gearID.ToString("D8"));
                 }
-                ToastNotification.Show(this, sb.ToString(), null, 4000, eToastGlowColor.Red, eToastPosition.TopCenter);
+                MessageBoxEx.Show(sb.ToString(), "错误");
             }
 
         }
@@ -2950,44 +1847,14 @@ namespace WzComparerR2.Avatar.UI
             return null;
         }
 
-        private string FindIDFromString(string name, int gender = 2)
-        {
-            if (string.IsNullOrEmpty(name))
-            {
-                return "";
-            }
-
-            var sl = this.PluginEntry.Context.DefaultStringLinker;
-            if (!sl.HasValues) //生成默认stringLinker
-            {
-                sl.Load(PluginManager.FindWz(Wz_Type.String).GetValueEx<Wz_File>(null), PluginManager.FindWz(Wz_Type.Item).GetValueEx<Wz_File>(null), PluginManager.FindWz(Wz_Type.Etc).GetValueEx<Wz_File>(null), PluginManager.FindWz(Wz_Type.Quest).GetValueEx<Wz_File>(null));
-            }
-
-            foreach (var kv in sl.StringEqp)
-            {
-                if (kv.Value.Name == name)
-                {
-                    if (gender == 2 || ((gender + 1) & Gear.GetCosmeticGender(kv.Key)) > 0)
-                    {
-                        return kv.Key.ToString();
-                    }
-                }
-            }
-            return "";
-        }
-
         private class Animator
         {
             public Animator()
             {
                 this.delays = new int[3] { -1, -1, -1 };
-                this.effectDelays = Enumerable.Repeat(-1, AvatarCanvas.LayerSlotLength).ToArray();
-                this.suspend = false;
             }
 
             private int[] delays;
-            private int[] effectDelays;
-            private bool suspend;
 
             public int NextFrameDelay { get; private set; }
 
@@ -3021,16 +1888,6 @@ namespace WzComparerR2.Avatar.UI
                 }
             }
 
-            public int[] EffectDelay
-            {
-                get { return this.effectDelays; }
-                set
-                {
-                    this.effectDelays = value;
-                    Update();
-                }
-            }
-
             public void Elapse(int millisecond)
             {
                 for (int i = 0; i < delays.Length; i++)
@@ -3040,19 +1897,10 @@ namespace WzComparerR2.Avatar.UI
                         delays[i] = delays[i] > millisecond ? (delays[i] - millisecond) : 0;
                     }
                 }
-                for (int i = 0; i < effectDelays.Length; i++)
-                {
-                    if (effectDelays[i] >= 0)
-                    {
-                        effectDelays[i] = effectDelays[i] > millisecond ? (effectDelays[i] - millisecond) : 0;
-                    }
-                }
             }
 
             private void Update()
             {
-                if (this.suspend) return;
-
                 int nextFrame = 0;
                 foreach (int delay in this.delays)
                 {
@@ -3061,56 +1909,13 @@ namespace WzComparerR2.Avatar.UI
                         nextFrame = nextFrame <= 0 ? delay : Math.Min(nextFrame, delay);
                     }
                 }
-                foreach (int delay in this.effectDelays)
-                {
-                    if (delay > 0)
-                    {
-                        nextFrame = nextFrame <= 0 ? delay : Math.Min(nextFrame, delay);
-                    }
-                }
                 this.NextFrameDelay = nextFrame;
-            }
-
-            public void SuspendUpdate()
-            {
-                this.suspend = true;
-            }
-
-            public void TrigUpdate()
-            {
-                this.suspend = false;
-                Update();
             }
         }
 
         private void btnExport_Click(object sender, EventArgs e)
         {
             ExportAvatar(sender, e);
-        }
-
-        private void btnEnableAutosave_Click(object sender, EventArgs e)
-        {
-            if (String.IsNullOrEmpty(specifiedSavePath)) btnSpecifySavePath_Click(sender, e);
-            if (!String.IsNullOrEmpty(specifiedSavePath))
-            {
-                btnSpecifySavePath.Enabled = btnEnableAutosave.Checked;
-            }
-            else
-            {
-                btnEnableAutosave.Checked = false;
-            }
-        }
-
-        private void btnSpecifySavePath_Click(object sender, EventArgs e)
-        {
-            using (FolderBrowserDialog dlg = new FolderBrowserDialog())
-            {
-                dlg.Description = "选择自动保存角色的路径。";
-                if (DialogResult.OK == dlg.ShowDialog())
-                {
-                    specifiedSavePath = dlg.SelectedPath;
-                }
-            }
         }
 
         private void ExportAvatar(object sender, EventArgs e)
@@ -3144,20 +1949,16 @@ namespace WzComparerR2.Avatar.UI
             }
 
             var config = ImageHandlerConfig.Default;
-            using var encoder = AnimateEncoderFactory.CreateEncoder(config);
-            var cap = encoder.Compatibility;
-
-            string extensionFilter = string.Join(";", cap.SupportedExtensions.Select(ext => $"*{ext}"));
+            var encParams = AnimateEncoderFactory.GetEncoderParams(config.GifEncoder.Value);
 
             FolderBrowserDialog dlg = new FolderBrowserDialog();
-            dlg.Description = "选择要导出的文件夹。";
+            dlg.Description = "请选择加载的文件夹。";
 
             async Task ExportGif(string actionName)
             {
                 var actionFrames = avatar.GetActionFrames(actionName);
                 var faceFrames = avatar.GetFaceFrames(avatar.EmotionName);
                 var tamingFrames = avatar.GetTamingFrames(avatar.TamingActionName);
-                var effectActions = new ActionFrame[AvatarCanvas.LayerSlotLength];
                 if (emoFrame <= -1 || emoFrame >= faceFrames.Length)
                 {
                     return;
@@ -3169,7 +1970,7 @@ namespace WzComparerR2.Avatar.UI
                 {
                     if (frame.Delay != 0)
                     {
-                        var bone = string.IsNullOrEmpty(avatar.TamingActionName) ? avatar.CreateFrame(frame, faceFrames[emoFrame], null, null) : avatar.CreateFrame(actionFrames[0], faceFrames[emoFrame], frame, null);
+                        var bone = string.IsNullOrEmpty(avatar.TamingActionName) ? avatar.CreateFrame(frame, faceFrames[emoFrame], null) : avatar.CreateFrame(actionFrames[0], faceFrames[emoFrame], frame);
                         var bmp = avatar.DrawFrame(bone);
 
                         Point pos = bmp.OpOrigin;
@@ -3179,13 +1980,13 @@ namespace WzComparerR2.Avatar.UI
                     }
                 }
 
-                string fileName = System.IO.Path.Combine(dlg.SelectedPath, actionName.Replace('\\', '.') + cap.DefaultExtension);
+                string fileName = System.IO.Path.Combine(dlg.SelectedPath, actionName.Replace('\\', '.') + encParams.FileExtension);
 
                 var tasks = new List<Task>();
 
                 tasks.Add(Task.Run(() =>
                 {
-                    GifEncoder enc = AnimateEncoderFactory.CreateEncoder(config);
+                    GifEncoder enc = AnimateEncoderFactory.CreateEncoder(fileName, gif.GetRect().Width, gif.GetRect().Height, config);
                     gif.SaveGif(enc, fileName, Color.Transparent);
                 }));
 
@@ -3194,7 +1995,7 @@ namespace WzComparerR2.Avatar.UI
 
             async Task ExportJob(IProgressDialogContext context, CancellationToken cancellationToken)
             {
-                IEnumerable<AvatarCommon.Action> actionEnumerator = avatar.Actions;
+                IEnumerable<Action> actionEnumerator = avatar.Actions;
                 var step1 = actionEnumerator.TakeWhile(_ => !cancellationToken.IsCancellationRequested);
 
                 var step2 = step1.Select(item => ExportGif(item.Name));
@@ -3224,15 +2025,8 @@ namespace WzComparerR2.Avatar.UI
 
             if (dlg.ShowDialog() == DialogResult.OK)
             {
-                ProgressDialog.Show(this.FindForm(), "正在导出...", avatar.Actions.Count + " 正在导出动作...", true, false, ExportJob);
+                ProgressDialog.Show(this.FindForm(), "加载中...", avatar.Actions.Count + " 动作加载中...", true, false, ExportJob);
             }
-        }
-        private static string RemoveInvalidFileNameChars(string fileName)
-        {
-            if (String.IsNullOrEmpty(fileName)) return "未知";
-            string invalidChars = new string(System.IO.Path.GetInvalidFileNameChars());
-            string regexPattern = $"[{Regex.Escape(invalidChars)}]";
-            return Regex.Replace(fileName, regexPattern, "_");
         }
     }
 }

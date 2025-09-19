@@ -18,27 +18,12 @@ namespace WzComparerR2.CharaSimControl
             tooltip.TopMost = true;
         }
 
-        private AfrmTooltip quickView;
         private AfrmTooltip tooltip;
         private AfrmItem frmItem;
         private AfrmStat frmStat;
         private AfrmEquip frmEquip;
-        private AfrmUnion frmUnion;
         private Character character;
         private StringLinker stringLinker;
-        public AfrmTooltip TooltipQuickView
-        {
-            get
-            {
-                if (quickView == null)
-                {
-                    quickView = new AfrmTooltip();
-                    quickView.ObjectMouseMove += new ObjectMouseEventHandler(frmQuickView_ObjectMouseMove);
-                    quickView.ObjectMouseLeave += new EventHandler(frmQuickView_ObjectMouseLeave);
-                }
-                return quickView;
-            }
-        }
 
         public AfrmItem UIItem
         {
@@ -92,20 +77,6 @@ namespace WzComparerR2.CharaSimControl
             }
         }
 
-        public AfrmUnion UIUnion
-        {
-            get
-            {
-                if (frmUnion == null)
-                {
-                    frmUnion = new AfrmUnion();
-                    frmUnion.KeyDown += new KeyEventHandler(afrm_KeyDown);
-                    frmUnion.Character = this.character;
-                }
-                return frmUnion;
-            }
-        }
-
         public Character Character
         {
             get { return character; }
@@ -119,8 +90,6 @@ namespace WzComparerR2.CharaSimControl
                     this.frmStat.Character = value;
                 if (frmEquip != null)
                     this.frmEquip.Character = value;
-                if (frmUnion != null)
-                    this.frmUnion.Character = value;
             }
         }
 
@@ -281,10 +250,7 @@ namespace WzComparerR2.CharaSimControl
         {
             if (e.Obj is Skill && !this.stringLinker.HasValues)
             {
-                this.stringLinker.Load(PluginBase.PluginManager.FindWz(Wz_Type.String).GetValueEx<Wz_File>(null),
-                    PluginBase.PluginManager.FindWz(Wz_Type.Item).GetValueEx<Wz_File>(null),
-                    PluginBase.PluginManager.FindWz(Wz_Type.Etc).GetValueEx<Wz_File>(null),
-                    PluginBase.PluginManager.FindWz(Wz_Type.Quest).GetValueEx<Wz_File>(null));
+                this.stringLinker.Load(PluginBase.PluginManager.FindWz(Wz_Type.String).GetValueEx<Wz_File>(null), PluginBase.PluginManager.FindWz(Wz_Type.Item).GetValueEx<Wz_File>(null), PluginBase.PluginManager.FindWz(Wz_Type.Etc).GetValueEx<Wz_File>(null));
             }
             if (e.Obj == null)
             {
@@ -304,30 +270,6 @@ namespace WzComparerR2.CharaSimControl
         }
 
         private void frmStat_ObjectMouseLeave(object sender, EventArgs e)
-        {
-            tooltip.Visible = false;
-        }
-
-        private void frmQuickView_ObjectMouseMove(object sender, ObjectMouseEventArgs e)
-        {
-            if (e.Obj == null)
-            {
-                tooltip.Visible = false;
-                return;
-            }
-            if (e.Obj != tooltip.TargetItem)
-            {
-                tooltip.TargetItem = e.Obj;
-                tooltip.Refresh();
-            }
-            Point pos = quickView.PointToScreen(e.Location);
-            pos.Offset(5, 5);
-            tooltip.Location = pos;
-            tooltip.Visible = true;
-            tooltip.BringToFront();
-        }
-
-        private void frmQuickView_ObjectMouseLeave(object sender, EventArgs e)
         {
             tooltip.Visible = false;
         }

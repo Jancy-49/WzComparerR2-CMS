@@ -1,22 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Text;
+using System.IO;
+using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
-using SpineV2 = Spine.V2;
-using WzComparerR2.Animation;
-using WzComparerR2.Common;
-using WzComparerR2.Config;
-using WzComparerR2.Controls;
-using WzComparerR2.Encoders;
-using WzComparerR2.Rendering;
+
 using WzComparerR2.WzLib;
+using WzComparerR2.Controls;
+using WzComparerR2.Animation;
+using WzComparerR2.Rendering;
+using WzComparerR2.Config;
+using WzComparerR2.Common;
 
 namespace WzComparerR2
 {
@@ -59,21 +57,14 @@ namespace WzComparerR2
         private SpriteBatchEx sprite;
         private StringBuilder sbInfo;
 
-
         public void ShowImage(Wz_Png png)
         {
-            this.ShowImage(png, 0);
-        }
-
-        public void ShowImage(Wz_Png png, int page)
-        {
-            if (this.ShowOverlayAni) return; // 动画重叠时无自动PNG预览
+            if (this.ShowOverlayAni) return; // 애니메이션 중첩 중일때는 자동 png 미리보기 없음
             //添加到动画控件
             var frame = new Animation.Frame()
             {
-                Texture = png.ToTexture(page, this.GraphicsDevice),
+                Texture = png.ToTexture(this.GraphicsDevice),
                 Png = png,
-                Page = page,
                 Delay = 0,
                 Origin = Point.Zero,
             };
@@ -82,11 +73,6 @@ namespace WzComparerR2
             frameData.Frames.Add(frame);
 
             this.ShowAnimation(frameData);
-        }
-
-        public FrameAnimationData LoadVideo(Wz_Video wzVideo)
-        {
-            return new MaplestoryCanvasVideoLoader().Load(wzVideo, this.GraphicsDevice);
         }
 
         public FrameAnimationData LoadFrameAnimation(Wz_Node node, FrameAnimationCreatingOptions options = default)
@@ -104,7 +90,6 @@ namespace WzComparerR2
             if (!detectionResult.Success)
                 return null;
             var textureLoader = new WzSpineTextureLoader(detectionResult.SourceNode.ParentNode, this.GraphicsDevice, PluginBase.PluginManager.FindWz);
-            textureLoader.EnableTextureMissingFallback = true;
             if (detectionResult.Version == SpineVersion.V2)
                 return SpineAnimationDataV2.Create(detectionResult, textureLoader);
             else if (detectionResult.Version == SpineVersion.V4)
@@ -121,52 +106,6 @@ namespace WzComparerR2
         public FrameAnimationData LoadPngFrameAnimation(Wz_Node node)
         {
             return FrameAnimationData.CreateFromPngNode(node, this.GraphicsDevice, PluginBase.PluginManager.FindWz);
-        }
-
-        public FrameAnimationData ConvertSpineToFrameAnimation(AnimationItem aniItem, int delay = 60)
-        {
-            var frameAnimationData = new FrameAnimationData();
-            if (delay > 0)
-            {
-                var rec = new AnimationRecoder(this.GraphicsDevice);
-
-                rec.Items.Add(aniItem);
-                int length = Math.Min(rec.GetMaxLength(), 10000); // 最长10秒限制
-                IEnumerable<int> frames = length == 0 ? new[] { 0 } : Enumerable.Range(0, Math.Max((int)Math.Ceiling(1.0 * length / delay) - 1, 0));
-
-                rec.ResetAll();
-                rec.BackgroundColor = Color.Transparent;
-                Microsoft.Xna.Framework.Rectangle bounds = aniItem.Measure();
-                if (length > 0)
-                {
-                    for (int i = 0; i < frames.Count(); i++)
-                    {
-                        rec.Update(TimeSpan.FromMilliseconds(delay));
-                        var rect = aniItem.Measure();
-                        bounds = Microsoft.Xna.Framework.Rectangle.Union(bounds, rect);
-                    }
-                }
-                bounds.Offset(aniItem.Position);
-
-                rec.ResetAll();
-                rec.Begin(bounds);
-                for (int i = 0; i < frames.Count(); i++)
-                {
-                    rec.Draw();
-                    rec.Update(TimeSpan.FromMilliseconds(delay));
-                    var t2d = rec.GetPngTexture();
-                    var frame = new Frame(t2d, new Point(-bounds.Left, -bounds.Top), 0, delay, true);
-                    frameAnimationData.Frames.Add(frame);
-                }
-                rec.End();
-            }
-
-            this.DisposeAnimationItem(aniItem);
-
-            if (frameAnimationData.Frames.Count > 0)
-                return frameAnimationData;
-            else
-                return null;
         }
 
         public void ShowAnimation(FrameAnimationData data)
@@ -188,9 +127,9 @@ namespace WzComparerR2
         }
 
         // 动画嵌套
-        public void ShowOverlayAnimation(FrameAnimationData data, string multiFrameInfo = null, bool isPngFrameAni = false)
+        public void ShowOverlayAnimation(FrameAnimationData data, bool isPngFrameAni = false)
         {
-            this.ShowOverlayAnimation(new FrameAnimator(data), multiFrameInfo, isPngFrameAni);
+            this.ShowOverlayAnimation(new FrameAnimator(data), isPngFrameAni);
         }
 
         public void ShowAnimation(AnimationItem animator)
@@ -211,12 +150,12 @@ namespace WzComparerR2
         }
 
         // 动画嵌套
-        public void ShowOverlayAnimation(AnimationItem animator, string multiFrameInfo, bool isPngFrameAni)
+        public void ShowOverlayAnimation(AnimationItem animator, bool isPngFrameAni)
         {
             if (!ShowOverlayAni)
             {
                 ShowOverlayAni = !ShowOverlayAni;
-                ClearItemList();
+                this.Items.Clear();
             }
 
             FrameAnimator baseAniItem;
@@ -231,38 +170,24 @@ namespace WzComparerR2
 
             FrameAnimator aniItem = (FrameAnimator)animator;
 
-            var frmOverlayAniOptions = new FrmOverlayAniOptions(aniItem.Data.Frames, multiFrameInfo, isPngFrameAni);
+            var frmOverlayAniOptions = new FrmOverlayAniOptions(0, aniItem.Data.Frames.Count - 1, isPngFrameAni);
             int delayOffset = 0;
             int moveX = 0;
             int moveY = 0;
             int frameStart = 0;
             int frameEnd = 0;
-            int speedX = 0;
-            int speedY = 0;
-            int goX = 0;
-            int goY = 0;
-            int pngDelay = 120;
-            bool fullMove = false;
-
+            int pngDelay = 100;
 
             // 获取信息
             if (frmOverlayAniOptions.ShowDialog() == DialogResult.OK)
             {
-                frmOverlayAniOptions.GetValues(out delayOffset, out moveX, out moveY, out frameStart, out frameEnd, out speedX, out speedY, out goX, out goY, out fullMove, out pngDelay);
+                frmOverlayAniOptions.GetValues(out delayOffset, out moveX, out moveY, out frameStart, out frameEnd, out pngDelay);
                 frameStart = frameStart == -1 ? 0 : frameStart;
                 frameEnd = frameEnd == -1 ? aniItem.Data.Frames.Count - 1 : frameEnd;
 
-                if (frameStart > frameEnd)
-                {
-                    DisposeAnimationItem(aniItem);
-                    return;
-                }
+                if (frameStart > frameEnd) return;
             }
-            else
-            {
-                DisposeAnimationItem(aniItem);
-                return;
-            }
+            else return;
 
             // 设置一张png的延时
             if (isPngFrameAni)
@@ -271,15 +196,13 @@ namespace WzComparerR2
                 aniItem.Data.Frames[0].Delay = pngDelay;
             }
 
-            var config = ImageHandlerConfig.Default;
-            if ((speedX != 0 && goX != 0) || (speedY != 0 && goY != 0))
-            {
-                FrameAnimationData.ApplyMovement(this.GraphicsDevice, aniItem.Data, speedX, speedY, goX, goY, fullMove, frameStart, ref frameEnd);
-            }
-            var newAniItem = new FrameAnimator(FrameAnimationData.MergeAnimationData(baseAniItem.Data, aniItem.Data,
-                    this.GraphicsDevice, delayOffset, moveX, moveY, frameStart, frameEnd));
-
             this.Items.Clear();
+
+            var config = ImageHandlerConfig.Default;
+            var newAniItem = new FrameAnimator(FrameAnimationData.MergeAnimationData(baseAniItem.Data, aniItem.Data,
+                    this.GraphicsDevice, System.Drawing.Color.FromArgb(config.BackgroundType.Value == ImageBackgroundType.Transparent ? 0 : 255, config.BackgroundColor.Value).ToXnaColor(),
+                    delayOffset, moveX, moveY, frameStart, frameEnd));
+
             this.Items.Add(newAniItem);
 
             if (this.AutoAdjustPosition)
@@ -290,7 +213,7 @@ namespace WzComparerR2
             this.Invalidate();
         }
 
-        public void AddHitboxOverlay()
+        public void AddOverlayRect()
         {
             FrameAnimator baseAniItem;
             if (this.Items.Count == 0)
@@ -314,34 +237,19 @@ namespace WzComparerR2
             var frmOverlayAniOptions = new FrmOverlayRectOptions(0, baseDelayAll, config);
             int startTime = 0;
             int endTime = 0;
-            int radius = 0;
-            int speedX = 0;
-            int speedY = 0;
-            int goX = 0;
-            int goY = 0;
-            var frameEnd = 0;
+            int rectBlend = 153;
+            int outlineBlend = 255;
             Point lt;
             Point rb;
             Color bgColor = System.Drawing.Color.FromArgb(config.BackgroundType.Value == ImageBackgroundType.Transparent ? 0 : 255, config.BackgroundColor.Value).ToXnaColor();
 
             if (frmOverlayAniOptions.ShowDialog() == DialogResult.OK)
             {
-                frmOverlayAniOptions.GetValues(out lt, out rb, out startTime, out endTime, out radius, out int alpha, out int type, out speedX, out speedY, out goX, out goY, config);
-                Color fillColor = System.Drawing.Color.FromArgb((255 * alpha / 100), config.OverlayRectColor.Value).ToXnaColor();
-                Color outlineColor = System.Drawing.Color.FromArgb(255, config.OverlayRectColor.Value).ToXnaColor();
+                frmOverlayAniOptions.GetValues(out lt, out rb, out startTime, out endTime, config);
+                Color rectColor = System.Drawing.Color.FromArgb(rectBlend, config.OverlayRectColor.Value).ToXnaColor();
+                Color outlineColor = System.Drawing.Color.FromArgb(outlineBlend, config.OverlayRectColor.Value).ToXnaColor();
 
-                FrameAnimationData aniItemData = null;
-                switch (type)
-                {
-                    case 0:
-                        aniItemData = FrameAnimationData.CreateRectData(lt, rb, endTime - startTime, this.GraphicsDevice, fillColor, outlineColor);
-                        break;
-                    case 1:
-                        aniItemData = FrameAnimationData.CreateCircleData(lt, radius, endTime - startTime, this.GraphicsDevice, fillColor, outlineColor);
-                        break;
-                    default:
-                        break;
-                }
+                var aniItemData = FrameAnimationData.CreateRectData(lt, rb, endTime - startTime, this.GraphicsDevice, bgColor, rectColor, outlineColor);
 
                 if (aniItemData == null) return;
 
@@ -349,14 +257,12 @@ namespace WzComparerR2
             }
             else return;
 
-            if ((speedX != 0 && goX != 0) || (speedY != 0 && goY != 0))
-            {
-                FrameAnimationData.ApplyMovement(this.GraphicsDevice, aniItem.Data, speedX, speedY, goX, goY, false, 0, ref frameEnd);
-            }
-            var newAniItem = new FrameAnimator(FrameAnimationData.MergeAnimationData(baseAniItem.Data, aniItem.Data,
-                    this.GraphicsDevice, startTime, 0, 0, 0, frameEnd));
-
             this.Items.Clear();
+
+            var newAniItem = new FrameAnimator(FrameAnimationData.MergeAnimationData(baseAniItem.Data, aniItem.Data,
+                    this.GraphicsDevice, bgColor,
+                    startTime, 0, 0, 0, 0));
+
             this.Items.Add(newAniItem);
 
             if (this.AutoAdjustPosition)
@@ -393,19 +299,14 @@ namespace WzComparerR2
             }
         }
 
-        public bool SaveAsGif(AnimationItem aniItem, string fileName, ImageHandlerConfig config, GifEncoder encoder, bool showOptions)
+        public bool SaveAsGif(AnimationItem aniItem, string fileName, ImageHandlerConfig config, bool options)
         {
             var rec = new AnimationRecoder(this.GraphicsDevice);
-            var cap = encoder.Compatibility;
 
             rec.Items.Add(aniItem);
             int length = rec.GetMaxLength();
-            int delay = Math.Max(cap.MinFrameDelay, config.MinDelay);
-            int[] timeline = null;
-            if (!cap.IsFixedFrameRate)
-            {
-                timeline = rec.GetGifTimeLine(delay, cap.MaxFrameDelay);
-            }
+            int delay = Math.Max(10, config.MinDelay);
+            var timeline = rec.GetGifTimeLine(delay, 655350);
 
             // calc available canvas area
             rec.ResetAll();
@@ -437,7 +338,7 @@ namespace WzComparerR2
                 OutputHeight = bounds.Height,
             };
 
-            if (showOptions)
+            if (options)
             {
                 var frmOptions = new FrmGifClipOptions()
                 {
@@ -513,7 +414,8 @@ namespace WzComparerR2
             }
 
             // select encoder
-            encoder.Init(fileName, targetSize.X, targetSize.Y);
+            GifEncoder enc = AnimateEncoderFactory.CreateEncoder(fileName, targetSize.X, targetSize.Y, config);
+            var encParams = AnimateEncoderFactory.GetEncoderParams(config.GifEncoder.Value);
 
             // pipeline functions
             IEnumerable<Tuple<byte[], int>> MergeFrames(IEnumerable<Tuple<byte[], int>> frames)
@@ -531,7 +433,7 @@ namespace WzComparerR2
                         prevFrame = currentFrame;
                         prevDelay = currentDelay;
                     }
-                    else if (prevFrame.AsSpan().SequenceEqual(currentFrame.AsSpan()))
+                    else if (memcmp(prevFrame, currentFrame, (IntPtr)prevFrame.Length) == 0)
                     {
                         prevDelay += currentDelay;
                     }
@@ -598,7 +500,7 @@ namespace WzComparerR2
             async Task<int> ApplyFrame(byte[] frameData, int frameDelay)
             {
                 byte[] gifData = null;
-                if (cap.AlphaSupportMode != AlphaSupportMode.FullAlpha && config.BackgroundType.Value == ImageBackgroundType.Transparent)
+                if (!encParams.SupportAlphaChannel && config.BackgroundType.Value == ImageBackgroundType.Transparent)
                 {
                     using (var rt2 = rec.GetGifTexture(config.BackgroundColor.Value.ToXnaColor(), config.MinMixedAlpha))
                     {
@@ -622,17 +524,15 @@ namespace WzComparerR2
                     tasks.Add(Task.Run(() =>
                     {
                         string pngFileName = Path.Combine(framesDirName, $"{prevTime}_{prevTime + frameDelay}.png");
-                        GCHandle gcHandle = GCHandle.Alloc(frameData, GCHandleType.Pinned);
-                        try
+                        unsafe
                         {
-                            using (var bmp = new System.Drawing.Bitmap(targetSize.X, targetSize.Y, targetSize.X * 4, System.Drawing.Imaging.PixelFormat.Format32bppArgb, gcHandle.AddrOfPinnedObject()))
+                            fixed (byte* pFrameBuffer = frameData)
                             {
-                                bmp.Save(pngFileName, System.Drawing.Imaging.ImageFormat.Png);
+                                using (var bmp = new System.Drawing.Bitmap(targetSize.X, targetSize.Y, targetSize.X * 4, System.Drawing.Imaging.PixelFormat.Format32bppArgb, new IntPtr(pFrameBuffer)))
+                                {
+                                    bmp.Save(pngFileName, System.Drawing.Imaging.ImageFormat.Png);
+                                }
                             }
-                        }
-                        finally
-                        {
-                            gcHandle.Free();
                         }
                     }));
                 }
@@ -642,15 +542,12 @@ namespace WzComparerR2
                 {
                     // TODO: only for gif here?
                     frameDelay = Math.Max(10, (int)(Math.Round(frameDelay / 10.0) * 10));
-
-                    GCHandle gcHandle = GCHandle.Alloc(frameData, GCHandleType.Pinned);
-                    try
+                    unsafe
                     {
-                        encoder.AppendFrame(gcHandle.AddrOfPinnedObject(), frameDelay);
-                    }
-                    finally
-                    {
-                        gcHandle.Free();
+                        fixed (byte* pGifBuffer = gifData)
+                        {
+                            enc.AppendFrame(new IntPtr(pGifBuffer), frameDelay);
+                        }
                     }
                 }));
 
@@ -661,7 +558,7 @@ namespace WzComparerR2
 
             async Task RenderJob(IProgressDialogContext context, CancellationToken cancellationToken)
             {
-                bool isCompareAndMergeFrames = timeline == null && !cap.IsFixedFrameRate;
+                bool isCompareAndMergeFrames = timeline == null;
 
                 // build pipeline
                 IEnumerable<int> delayEnumerator = timeline == null ? RenderDelay() : ClipTimeline(timeline);
@@ -711,25 +608,18 @@ namespace WzComparerR2
                 }
                 catch (Exception ex)
                 {
-                    if (ex is AggregateException aggrEx && aggrEx.InnerExceptions.Count == 1)
-                    {
-                        context.Message = $"错误: {aggrEx.InnerExceptions[0].Message}";
-                    }
-                    else
-                    {
-                        context.Message = $"错误 : {ex.Message}";
-                    }
-                    context.FullMessage = ex.ToString();
+                    context.Message = $"Error: {ex.Message}";
                     throw;
                 }
                 finally
                 {
                     rec.End();
+                    enc.Dispose();
                     this.IsPlaying = isPlaying;
                 }
             }
 
-            var dialogResult = ProgressDialog.Show(this.FindForm(), "导出中", "保存动画", true, false, RenderJob);
+            var dialogResult = ProgressDialog.Show(this.FindForm(), "正在输出...", "正在导出动画...", true, false, RenderJob);
             return dialogResult == DialogResult.OK;
         }
 
@@ -817,75 +707,9 @@ namespace WzComparerR2
             }
         }
 
-        private void DisposeAnimationItem(AnimationItem animationItem)
-        {
-            switch (animationItem)
-            {
-                case FrameAnimator frameAni:
-                    if (frameAni.Data?.Frames != null)
-                    {
-                        foreach (var frame in frameAni.Data.Frames)
-                        {
-                            if (frame.Texture != null && !frame.Texture.IsDisposed)
-                            {
-                                frame.Texture.Dispose();
-                            }
-                        }
-                    }
-                    break;
-                case SpineAnimatorV2 spineV2:
-                    if (spineV2.Skeleton != null)
-                    {
-                        foreach (var slot in spineV2.Skeleton.Slots.Items)
-                        {
-                            var atlasRegion = (slot.Attachment switch
-                            {
-                                SpineV2.MeshAttachment mesh => mesh.RendererObject,
-                                SpineV2.RegionAttachment region => region.RendererObject,
-                                SpineV2.SkinnedMeshAttachment skinnedMesh => skinnedMesh.RendererObject,
-                                _ => null
-                            }) as SpineV2.AtlasRegion;
-                            if (atlasRegion?.page?.rendererObject is Texture2D texture && !texture.IsDisposed)
-                            {
-                                texture.Dispose();
-                            }
-                        }
-                    }
-                    break;
-                case SpineAnimatorV4 spineV4:
-                    if (spineV4.Skeleton != null)
-                    {
-                        foreach (var slot in spineV4.Skeleton.Slots.Items)
-                        {
-                            var atlasRegion = (slot.Attachment switch
-                            {
-                                Spine.MeshAttachment mesh => mesh.Region,
-                                Spine.RegionAttachment region => region.Region,
-                                _ => null
-                            }) as Spine.AtlasRegion;
-                            if (atlasRegion?.page?.rendererObject is Texture2D texture && !texture.IsDisposed)
-                            {
-                                texture.Dispose();
-                            }
-                        }
-                    }
-                    break;
-            }
-        }
-        public void ClearItemList()
-        {
-            if (this.Items.Count > 0)
-            {
-                var itemsCopy = new List<AnimationItem>(this.Items);
-                this.Items.Clear();
-                foreach (var aniItem in itemsCopy)
-                {
-                    this.DisposeAnimationItem(aniItem);
-                }
-            }
-        }
 
         [DllImport("msvcrt.dll", CallingConvention = CallingConvention.Cdecl)]
         private static extern int memcmp(byte[] b1, byte[] b2, IntPtr count);
+
     }
 }

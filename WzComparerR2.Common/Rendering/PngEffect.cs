@@ -11,12 +11,11 @@ namespace WzComparerR2.Rendering
     public class PngEffect : Effect
     {
         public PngEffect(GraphicsDevice graphicDevice)
-            : base(graphicDevice, GetEffectCode())
+            :base(graphicDevice, GetEffectCode())
         {
             this.AlphaMixEnabled = false;
             this.MinMixedAlpha = 255;
             this.MixedColor = Color.White;
-            this.Overlay = false;
         }
 
         public bool AlphaMixEnabled
@@ -41,26 +40,12 @@ namespace WzComparerR2.Rendering
             set { this.Parameters["mixedColor"].SetValue(value.ToVector4()); }
         }
 
-        public bool Overlay
-        {
-            get { return overlay_; }
-            set
-            {
-                if (value)
-                {
-                    this.CurrentTechnique = this.Techniques["techov"];
-                }
-                this.overlay_ = value;
-            }
-        }
-
         private bool alphaMixed;
-        private bool overlay_;
 
         private static byte[] GetEffectCode()
         {
             var asm = Assembly.GetAssembly(typeof(PngEffect));
-
+            
             using (var input = asm.GetManifestResourceStream("WzComparerR2.Rendering.Effect.PngEffect.mgfxo"))
             {
                 byte[] code = new byte[input.Length];

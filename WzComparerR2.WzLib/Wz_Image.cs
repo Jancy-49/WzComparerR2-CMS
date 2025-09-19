@@ -1,10 +1,11 @@
 ﻿using System;
-using System.Buffers;
-using System.IO;
+using System.Collections.Generic;
+using System.Text;
 using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
+using System.IO;
 using WzComparerR2.WzLib.Utilities;
+using System.Buffers;
 
 namespace WzComparerR2.WzLib
 {
@@ -38,7 +39,7 @@ namespace WzComparerR2.WzLib
         public uint HashedOffset { get; set; }
         public uint HashedOffsetPosition { get; set; }
         public long Offset { get; set; }
-
+        
         public Wz_Node Node { get; private set; }
 
         public Wz_Node OwnerNode { get; set; }
@@ -54,7 +55,7 @@ namespace WzComparerR2.WzLib
             get { return this.Name.EndsWith(".lua"); }
         }
 
-        public IWzDecrypter EncKeys
+        public Wz_Crypto.Wz_CryptoKey EncKeys
         {
             get
             {
@@ -81,6 +82,8 @@ namespace WzComparerR2.WzLib
                 {
                     this.stream = this.OpenRead();
                 }
+                var reader = new WzBinaryReader(this.stream, true);
+                reader.BaseStream.Position = 0;
 
                 bool disabledChec = this.WzFile?.WzStructure?.ImgCheckDisabled ?? false;
                 if (!disabledChec && !this.chec)
@@ -93,74 +96,49 @@ namespace WzComparerR2.WzLib
                     this.chec = true;
                 }
 
-                if (this.IsTextFormat())
+                if (!this.checEnc)
                 {
-                    var reader = new WzStreamReader(this.stream);
-
-                    try
+                    if (!this.IsLuaImage)
                     {
-                        lock (this.WzFile.ReadLock)
+                        try
                         {
-                            reader.BaseStream.Position = 0;
-                            this.ExtractImgInTextFormat(reader, this.Node);
-                            this.extr = true;
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        e = ex;
-                        this.Unextract();
-                        return false;
-                    }
-                }
-                else
-                {
-                    if (!this.checEnc)
-                    {
-                        if (!this.IsLuaImage)
-                        {
-                            try
+                            this.TryDetectEnc();
+                            if (!this.checEnc)
                             {
-                                this.TryDetectEnc();
-                                if (!this.checEnc)
-                                {
-                                    e = null;
-                                    return false;
-                                }
-                            }
-                            catch (Exception ex)
-                            {
-                                e = ex;
-                                this.Unextract();
+                                e = null;
                                 return false;
                             }
                         }
-                    }
-
-                    try
-                    {
-                        lock (this.WzFile.ReadLock)
+                        catch (Exception ex)
                         {
-                            var reader = new WzBinaryReader(this.stream, true);
-                            reader.BaseStream.Position = 0;
-
-                            if (!this.IsLuaImage)
-                            {
-                                ExtractImg(reader, this.Node);
-                            }
-                            else
-                            {
-                                ExtractLua(reader);
-                            }
-                            this.extr = true;
+                            e = ex;
+                            this.Unextract();
+                            return false;
                         }
                     }
-                    catch (Exception ex)
+                }
+
+                try
+                {
+                    lock (this.WzFile.ReadLock)
                     {
-                        e = ex;
-                        this.Unextract();
-                        return false;
+                        reader.BaseStream.Position = 0;
+                        if (!this.IsLuaImage)
+                        {
+                            ExtractImg(reader, this.Node);
+                        }
+                        else
+                        {
+                            ExtractLua(reader);
+                        }
+                        this.extr = true;
                     }
+                }
+                catch (Exception ex)
+                {
+                    e = ex;
+                    this.Unextract();
+                    return false;
                 }
             }
             e = null;
@@ -266,10 +244,9 @@ namespace WzComparerR2.WzLib
                     int w = reader.ReadCompressedInt32();
                     int h = reader.ReadCompressedInt32();
                     int form = reader.ReadCompressedInt32();
-                    int scale = reader.ReadByte();
-                    int pages = reader.ReadInt32(); // introduced in KMST 1186
+                    reader.SkipBytes(5);
                     int dataLen = reader.ReadInt32();
-                    parent.Value = new Wz_Png(w, h, dataLen, (Wz_TextureFormat)form, scale, pages, (uint)reader.BaseStream.Position, this);
+                    parent.Value = new Wz_Png(w, h, dataLen, form, (uint)reader.BaseStream.Position, this);
                     reader.SkipBytes(dataLen);
                     break;
 
@@ -293,19 +270,7 @@ namespace WzComparerR2.WzLib
                     break;
 
                 case "Sound_DX8":
-                    int soundDX8Ver = reader.ReadByte();
-                    if (soundDX8Ver == 1) // introduced in KMST 1184
-                    {
-                        if (reader.ReadByte() == 0x01) // read sub property
-                        {
-                            reader.SkipBytes(2);
-                            entries = reader.ReadCompressedInt32();
-                            for (int i = 0; i < entries; i++)
-                            {
-                                ExtractValue(reader, parent);
-                            }
-                        }
-                    }
+                    reader.SkipBytes(1);
                     dataLen = reader.ReadCompressedInt32();
                     int duration = reader.ReadCompressedInt32();
                     int soundDecl = reader.ReadByte();
@@ -315,40 +280,44 @@ namespace WzComparerR2.WzLib
                     mediaType.FixedSizeSamples = reader.ReadByte() != 0;
                     mediaType.TemporalCompression = reader.ReadByte() != 0;
                     mediaType.FormatType = new Guid(reader.ReadBytes(16));
-                    switch (soundDecl)
+                    switch(soundDecl)
                     {
                         case 2:
                             int fmtExLen = reader.ReadCompressedInt32();
                             var fmtExData = reader.ReadBytes(fmtExLen);
                             mediaType.CbFormat = (uint)fmtExLen;
 
-                            if (!this.TryDecryptWaveFormatEx(fmtExData, out Interop.WAVEFORMATEX waveFormatEx))
+                            GCHandle gcHandle = GCHandle.Alloc(fmtExData, GCHandleType.Pinned);
+                            try
                             {
-                                throw new Exception($"Failed to parse WAVEFORMATEX struct at offset {this.Offset}+{reader.BaseStream.Position}.");
+                                var waveFormatEx = Marshal.PtrToStructure<Interop.WAVEFORMATEX>(gcHandle.AddrOfPinnedObject());
+                                if (fmtExLen != waveFormatEx.CbSize + Marshal.SizeOf<Interop.WAVEFORMATEX>())
+                                {
+                                    //  parse waveFormatEx after decryption
+                                    this.EncKeys.Decrypt(fmtExData, 0, fmtExLen);
+                                    waveFormatEx = Marshal.PtrToStructure<Interop.WAVEFORMATEX>(gcHandle.AddrOfPinnedObject());
+                                    if (fmtExLen != waveFormatEx.CbSize + Marshal.SizeOf<Interop.WAVEFORMATEX>())
+                                    {
+                                        throw new Exception($"Failed to parse WAVEFORMATEX struct at offset {this.Offset}+{reader.BaseStream.Position}.");
+                                    }
+                                }
+                                switch (waveFormatEx.FormatTag)
+                                {
+                                    case Interop.WAVE_FORMAT_PCM:
+                                        mediaType.PbFormat = waveFormatEx;
+                                        break;
+
+                                    case Interop.WAVE_FORMAT_MPEGLAYER3:
+                                        mediaType.PbFormat = Marshal.PtrToStructure<Interop.MPEGLAYER3WAVEFORMAT>(gcHandle.AddrOfPinnedObject());
+                                        break;
+
+                                    default:
+                                        throw new Exception($"Unknown WAVEFORMATEX.FormatTag {waveFormatEx.FormatTag} at offset {this.Offset}+{reader.BaseStream.Position}.");
+                                }
                             }
-                            switch (waveFormatEx.FormatTag)
+                            finally
                             {
-                                case Interop.WAVE_FORMAT_PCM:
-                                    mediaType.PbFormat = waveFormatEx;
-                                    break;
-
-                                case Interop.WAVE_FORMAT_MPEGLAYER3:
-                                    if (fmtExLen == Interop.MPEGLAYER3WAVEFORMAT_SIZE)
-                                    {
-                                        mediaType.PbFormat = MemoryMarshal.Read<Interop.MPEGLAYER3WAVEFORMAT>(fmtExData);
-                                    }
-                                    else
-                                    {
-                                        // workaround for KMST1185
-                                        mediaType.PbFormat = new Interop.MPEGLAYER3WAVEFORMAT
-                                        {
-                                            Wfx = waveFormatEx
-                                        };
-                                    }
-                                    break;
-
-                                default:
-                                    throw new Exception($"Unknown WAVEFORMATEX.FormatTag {waveFormatEx.FormatTag} at offset {this.Offset}+{reader.BaseStream.Position}.");
+                                gcHandle.Free();
                             }
                             break;
                     }
@@ -378,23 +347,6 @@ namespace WzComparerR2.WzLib
                     int rawDataLen = reader.ReadCompressedInt32();
                     parent.Value = new Wz_RawData((uint)reader.BaseStream.Position, rawDataLen, this);
                     reader.SkipBytes(rawDataLen);
-                    break;
-
-                case "Canvas#Video": // introduced in KMST v1181
-                    reader.SkipBytes(1);
-                    if (reader.ReadByte() == 0x01) // introduced in KMST 1188, read sub property
-                    {
-                        reader.SkipBytes(2);
-                        entries = reader.ReadCompressedInt32();
-                        for (int i = 0; i < entries; i++)
-                        {
-                            ExtractValue(reader, parent);
-                        }
-                    }
-                    int unknown = reader.ReadByte();
-                    int videoLen = reader.ReadCompressedInt32();
-                    parent.Value = new Wz_Video((uint)reader.BaseStream.Position, videoLen, this);
-                    reader.SkipBytes(videoLen);
                     break;
 
                 default:
@@ -505,35 +457,6 @@ namespace WzComparerR2.WzLib
             }
         }
 
-        private bool TryDecryptWaveFormatEx(Span<byte> data, out Interop.WAVEFORMATEX waveFormatEx)
-        {
-            // GMSv256: wz uses different keys on property name and waveFormatEx encryption.
-            Span<byte> dataCopy = stackalloc byte[data.Length];
-            foreach (var enc in new[] {
-                Wz_CryptoKeyType.BMS,
-                Wz_CryptoKeyType.KMS,
-                Wz_CryptoKeyType.GMS,
-            })
-            {
-                data.CopyTo(dataCopy);
-                this.WzFile.WzStructure.encryption.GetKeys(enc).Decrypt(dataCopy);
-                if (MemoryMarshal.TryRead(dataCopy, out waveFormatEx))
-                {
-                    if ((data.Length == waveFormatEx.CbSize + Interop.WAVEFORMATEX_SIZE)
-                        // workaround for KMST1185, waveFormatEx only has 18 bytes but cbsize is also 18.
-                        || (data.Length == waveFormatEx.CbSize && waveFormatEx.FormatTag == Interop.WAVE_FORMAT_MPEGLAYER3)
-                        )
-                    {
-                        // copy back to the original buffer
-                        dataCopy.CopyTo(data);
-                        return true;
-                    }
-                }
-            }
-            waveFormatEx = default;
-            return false;
-        }
-
         private void ExtractLua(WzBinaryReader reader)
         {
             while (reader.BaseStream.Position < reader.BaseStream.Length)
@@ -595,85 +518,7 @@ namespace WzComparerR2.WzLib
             this.encType = maxCharEnc;
             this.checEnc = true;
         }
-
-        private bool IsTextFormat()
-        {
-            ReadOnlySpan<byte> signatureBytes = "#Property"u8;
-            if (this.stream.Length < signatureBytes.Length)
-            {
-                return false;
-            }
-
-            this.stream.Position = 0;
-            Span<byte> buffer = stackalloc byte[signatureBytes.Length];
-            this.stream.ReadExactly(buffer);
-
-            return buffer.SequenceEqual(signatureBytes);
-        }
-
-        private void ExtractImgInTextFormat(WzStreamReader reader, Wz_Node parent)
-        {
-            reader.SkipLine();
-            this.ReadProperty(reader, parent, true);
-        }
-
-        private void ReadProperty(WzStreamReader reader, Wz_Node parent, bool isTopLevel = false)
-        {
-            while (!reader.EndOfStream)
-            {
-                reader.SkipWhitespaceExceptLineEnding();
-                string key = reader.ReadUntilWhitespace();
-
-                if (string.IsNullOrEmpty(key)) // skip empty line
-                {
-                    reader.SkipLine();
-                    continue;
-                }
-                else if (key == "}" && !isTopLevel) // end property
-                {
-                    if (!reader.SkipLineAndCheckEmpty())
-                    {
-                        throw new Exception("Incorrect property end line.");
-                    }
-                    return;
-                }
-
-                reader.SkipWhitespaceExceptLineEnding();
-                int equalSign = reader.Read();
-                if (equalSign != '=')
-                    throw new Exception($"Expect '=' sign but got '{(char)equalSign}'.");
-                reader.SkipWhitespaceExceptLineEnding();
-
-                string stringVal = reader.ReadLine();
-
-                if (string.IsNullOrEmpty(stringVal))
-                {
-                    parent.Nodes.Add(key);
-                }
-                else if (stringVal == "{") // start property
-                {
-                    Wz_Node child = parent.Nodes.Add(key);
-                    this.ReadProperty(reader, child, false);
-                }
-                else if (int.TryParse(stringVal, out var intVal))
-                {
-                    parent.Nodes.Add(key).Value = intVal;
-                }
-                else if (long.TryParse(stringVal, out var longVal))
-                {
-                    parent.Nodes.Add(key).Value = longVal;
-                }
-                else if (double.TryParse(stringVal, out var doubleVal))
-                {
-                    parent.Nodes.Add(key).Value = doubleVal;
-                }
-                else
-                {
-                    parent.Nodes.Add(key).Value = stringVal;
-                }
-            }
-        }
-
+        
         internal class Wz_ImageNode : Wz_Node
         {
             public Wz_ImageNode(string nodeText, Wz_Image image) : base(nodeText)

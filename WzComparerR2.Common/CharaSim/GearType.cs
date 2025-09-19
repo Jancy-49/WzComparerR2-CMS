@@ -156,11 +156,7 @@ namespace WzComparerR2.CharaSim
         /// </summary>
         breathShooter = 1214,
         /// <summary>
-        /// 长剑 1215
-        /// </summary>
-        longSword = 1215,
-        /// <summary>
-        /// Long Sword 1215
+        /// 灵魂手铳 122
         /// </summary>
         soulShooter = 122,
         /// <summary>
@@ -175,10 +171,6 @@ namespace WzComparerR2.CharaSim
         /// 记忆长杖 125
         /// </summary>
         memorialStaff = 1252,
-        /// <summary>
-        /// 星光权杖 1253
-        /// </summary>
-        celestialLight = 1253,
         /// <summary>
         /// 驯兽魔法棒 1259
         /// </summary>
@@ -312,10 +304,6 @@ namespace WzComparerR2.CharaSim
         /// </summary>
         boxingSky = 135286,
         /// <summary>
-        /// 引航指针 135_00
-        /// </summary>
-        compass = 135287,
-        /// <summary>
         /// 手腕护带 135_90
         /// </summary>
         viperWristband = 135290,
@@ -403,10 +391,6 @@ namespace WzComparerR2.CharaSim
         /// 索魂器 135403x
         /// </summary>
         hexSeeker = 135403,
-        /// <summary>
-        /// yeouiGem 135404
-        /// </summary>
-        yeouiGem = 135404,
         /// <summary>
         /// 手杖
         /// </summary>
@@ -532,29 +516,6 @@ namespace WzComparerR2.CharaSim
         /// 图腾 120
         /// </summary>
         totem = 120,
-        /// <summary>
-        /// 神秘徽章 1712
-        /// </summary>
-        arcaneSymbol = 1712,
-        /// <summary>
-        /// 原初徽章 1713
-        /// </summary>
-        authenticSymbol = 1713,
-        /// <summary>
-        /// 豪华原初徽章 1714
-        /// </summary>
-        grandAuthenticSymbol = 1714,
-        /// <summary>
-        /// 宝玉 178
-        /// </summary>
-        jewel = 178,
-         /// <summary>
-        /// MSN纸娃娃 179
-        /// </summary>
-        face_n = 1790,
-        hair_n = 1791,
-        head_n = 1792,
-        hair2_n = 1793,
         /// <summary>
         /// 宠物装备 180
         /// </summary>

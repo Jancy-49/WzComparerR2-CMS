@@ -24,14 +24,14 @@ namespace WzComparerR2.PluginBase
         /// </summary>
         /// <param Name="Type">要搜索wz文件的Wz_Type。</param>
         /// <returns></returns>
-        public static Wz_Node FindWz(Wz_Type type, bool hasChildNodes = false)
+        public static Wz_Node FindWz(Wz_Type type)
         {
-            return FindWz(type, null, hasChildNodes);
+            return FindWz(type, null);
         }
 
-        public static Wz_Node FindWz(Wz_Type type, Wz_File sourceWzFile, bool hasChildNodes = false)
+        public static Wz_Node FindWz(Wz_Type type, Wz_File sourceWzFile)
         {
-            FindWzEventArgs e = new FindWzEventArgs(type, hasChildNodes) { WzFile = sourceWzFile };
+            FindWzEventArgs e = new FindWzEventArgs(type) { WzFile = sourceWzFile };
             if (WzFileFinding != null)
             {
                 WzFileFinding(null, e);
