@@ -17,6 +17,7 @@ namespace WzComparerR2.Config
             this.MainStyleColor = Color.DimGray;
             this.SortWzOnOpened = true;
             this.AutoDetectExtFiles = true;
+            this.AutoDetectUpdate = true;
             this.NoPatcherPrompt = false;
             this.WzVersionVerifyMode = WzLib.WzVersionVerifyMode.Fast;
             this.PreferredLayout = 0;
@@ -25,6 +26,7 @@ namespace WzComparerR2.Config
             this.DetectCurrency = "auto";
             this.DesiredCurrency = "none";
             this.OpenAIExtraOption = false;
+            this.EnableAutoUpdate = true;
             this.LMTemperature = 0.7;
             this.MaximumToken = -1;
         }
@@ -200,6 +202,16 @@ namespace WzComparerR2.Config
         }
 
         /// <summary>
+        /// Automatic Update Configuration
+        /// </summary>
+        [ConfigurationProperty("EnableAutoUpdate")]
+        public ConfigItem<bool> EnableAutoUpdate
+        {
+            get { return (ConfigItem<bool>)this["EnableAutoUpdate"]; }
+            set { this["EnableAutoUpdate"] = value; }
+        }
+
+        /// <summary>
         /// 获取或设置Wz对比报告默认输出文件夹。
         /// </summary>
         [ConfigurationProperty("comparerOutputFolder")]
@@ -247,6 +259,13 @@ namespace WzComparerR2.Config
         {
             get { return (ConfigItem<bool>)this["autoDetectExtFiles"]; }
             set { this["autoDetectExtFiles"] = value; }
+        }
+
+        [ConfigurationProperty("autoDetectUpdate")]
+        public ConfigItem<bool> AutoDetectUpdate
+        {
+            get { return (ConfigItem<bool>)this["autoDetectUpdate"]; }
+            set { this["autoDetectUpdate"] = value; }
         }
 
         /// <summary>

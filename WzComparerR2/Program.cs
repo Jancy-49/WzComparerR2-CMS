@@ -33,9 +33,9 @@ namespace WzComparerR2
         }
 
         public static string LibPath { get; private set; }
-        private static List<Assembly> loadedPluginAssemblies = new List<Assembly>();
         public static string NxAPIBaseURL = "https://open.api.nexon.com";
-        public static string WcR2MajorVersion = "v5.8.0.";
+        private static List<Assembly> loadedPluginAssemblies = new List<Assembly>();
+
         private
 
         /// <summary>
@@ -139,8 +139,15 @@ namespace WzComparerR2
             }
         }
 
+        // System.Runtime.InteropServices.RuntimeInformation.ProcessArchitecture requires .netfx 4.7.1, here we use env var instead.
         static string GetManagedDllDirectory() => Path.Combine(Application.StartupPath, "Lib");
-        static string GetUnmanagedDllDirectory() => Path.Combine(Application.StartupPath, "Lib", Environment.Is64BitProcess ? "x64" : "x86");
+        static string GetUnmanagedDllDirectory() => Path.Combine(Application.StartupPath, "Lib", RuntimeInformation.ProcessArchitecture switch
+        {
+            Architecture.X86 => "x86",
+            Architecture.X64 => "x64",
+            Architecture.Arm64 => "ARM64",
+            _ => null,
+        });
 
         [DllImport("kernel32.dll")]
         static extern bool SetDllDirectory(string path);

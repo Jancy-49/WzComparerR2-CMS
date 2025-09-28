@@ -46,6 +46,7 @@ namespace WzComparerR2
         public MainForm()
         {
             InitializeComponent();
+            this.Shown += new EventHandler(MainForm_Shown);
 #if NET6_0_OR_GREATER
             // https://learn.microsoft.com/en-us/dotnet/core/compatibility/fx-core#controldefaultfont-changed-to-segoe-ui-9pt
             this.Font = new Font(new FontFamily("宋体"), 9f);
@@ -346,6 +347,21 @@ namespace WzComparerR2
             Translator.DefaultMaximumToken = config.MaximumToken;
             Translator.IsExtraParamEnabled = config.OpenAIExtraOption;
             Translator.ExchangeTable = null;
+        }
+
+        async Task<bool> AutomaticCheckUpdate()
+        {
+            return await FrmUpdater.QueryUpdate();
+            // Following code is from JMS implementation
+            /*var config = WcR2Config.Default;
+            if (config.EnableAutoUpdate)
+            {
+                return await FrmUpdater.QueryUpdate();
+            }
+            else
+            {
+                return false;
+            }*/
         }
 
         void CharaSimLoader_WzFileFinding(object sender, FindWzEventArgs e)
@@ -4656,17 +4672,9 @@ namespace WzComparerR2
 
         private void buttonItemUpdate_Click(object sender, EventArgs e)
         {
-#if NET6_0_OR_GREATER
-            Process.Start(new ProcessStartInfo
-            {
-                UseShellExecute = true,
-                FileName = "https://github.com/Jancy-49/WzComparerR2-CMS",
-            });
-#else
-            Process.Start("https://github.com/Jancy-49/WzComparerR2-CMS");
-#endif
+            new FrmUpdater().ShowDialog();
         }
-        
+
         private void buttonPapulatus_Click(object sender, EventArgs e)
         {
 #if NET6_0_OR_GREATER
@@ -5553,6 +5561,15 @@ namespace WzComparerR2
             string invalidChars = new string(System.IO.Path.GetInvalidFileNameChars());
             string regexPattern = $"[{Regex.Escape(invalidChars)}]";
             return Regex.Replace(fileName, regexPattern, "_");
+        }
+        private async void MainForm_Shown(object sender, EventArgs e)
+        {
+            //Automatic Update Check
+            if (WcR2Config.Default.AutoDetectUpdate)
+            {
+                bool isUpdateRequired = await AutomaticCheckUpdate();
+                if (isUpdateRequired) new FrmUpdater().ShowDialog();
+            }
         }
     }
 

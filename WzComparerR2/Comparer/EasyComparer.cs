@@ -48,7 +48,7 @@ namespace WzComparerR2.Comparer
         private Wz_File[] ItemWzNewOld { get; set; } = new Wz_File[2];
         private Wz_File[] EtcWzNewOld { get; set; } = new Wz_File[2];
         private Wz_File[] QuestWzNewOld { get; set; } = new Wz_File[2];
-        private List<string> TooltipInfo = new List<string>();
+        private List<string> skillTooltipInfo = new List<string>();
         private List<string> itemTooltipInfo = new List<string>();
         private List<string> eqpTooltipInfo = new List<string>();
         private List<string> mobTooltipInfo = new List<string>();
@@ -57,6 +57,7 @@ namespace WzComparerR2.Comparer
         private List<string> cashTooltipInfo = new List<string>();
         private List<string> questTooltipInfo = new List<string>();
         private List<string> achievementTooltipInfo = new List<string>();
+        private Dictionary<string, Dictionary<string, List<string>>> diffHtml = new Dictionary<string, Dictionary<string, List<string>>>();
         private Dictionary<string, List<string>> diffSkillTags = new Dictionary<string, List<string>>();
         private Dictionary<string, List<string>> diffItemTags = new Dictionary<string, List<string>>();
         private Dictionary<string, List<string>> diffEqpTags = new Dictionary<string, List<string>>();
@@ -352,6 +353,10 @@ namespace WzComparerR2.Comparer
                         {
                             sw.Flush();
                             sw.Close();
+                        }
+                        if (saveCashTooltip || saveEqpTooltip || saveItemTooltip || saveMapTooltip || saveMobTooltip || saveNpcTooltip || saveSkillTooltip || saveQuestTooltip || saveAchievementTooltip)
+                        {
+                            saveTooltipHtml(outputDir);
                         }
                     }
                     catch
@@ -740,7 +745,7 @@ namespace WzComparerR2.Comparer
                 }
                 OnPatchingStateChanged(new Patcher.PatchingEventArgs(null, Patcher.PatchingState.CompareFinished));
             }
-            if (saveSkillTooltip && type.ToString() == "String" && TooltipInfo != null)
+            if (saveSkillTooltip && type.ToString() == "String" && skillTooltipInfo != null)
             {
                 if (!Directory.Exists(skillTooltipPath))
                 {
@@ -814,6 +819,60 @@ namespace WzComparerR2.Comparer
             }
         }
 
+        //将Tooltip输出为HTML格式
+        private void saveTooltipHtml(string outputDir)
+        {
+            FileStream htmlFile = null;
+            StreamWriter sw = null;
+            string htmlTooltipPath = Path.Combine(outputDir, "Tooltip.html");
+            try
+            {
+                htmlFile = new FileStream(htmlTooltipPath, FileMode.Create, FileAccess.Write);
+                sw = new StreamWriter(htmlFile, Encoding.UTF8);
+                sw.WriteLine("<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">");
+                sw.WriteLine("<html>");
+                sw.WriteLine("<head>");
+                sw.WriteLine("<meta http-equiv=\"content-type\" content=\"text/html;charset=utf-8\">");
+                sw.WriteLine("<title>Tooltip</title>");
+                sw.WriteLine("<link rel=\"stylesheet\" href=\"https://fonts.googleapis.com/css?family=Noto+Sans+SC:100,300,400,500,700,900\">");
+                sw.WriteLine("<link type=\"text/css\" rel=\"stylesheet\" href=\"https://jancy-1256059393.cos-website.ap-guangzhou.myqcloud.com/Compare/Compare.css\" />");
+                sw.WriteLine("</head>");
+                sw.WriteLine("<body>");
+                foreach (var category in diffHtml)
+                {
+                    string categoryName = category.Key;
+                    Dictionary<string, List<string>> changes = category.Value;
+                    if (changes.Values.All(list => list.Count == 0)) continue;
+                    string TooltipPath = Path.Combine(outputDir, categoryName + "Tooltip");
+                    sw.Write("<p class=\"sections\" section=\"{0}\">{0}</p></br>", categoryName);
+                    foreach (var changeType in changes)
+                    {
+                        string changeName = changeType.Key;
+                        List<string> itemList = changeType.Value;
+                        sw.WriteLine("<h3 class=\"compare\">{0}</h3></br>", changeName);
+                        sw.WriteLine("<ul class=\"{0}\" style=\"font-family: \"Noto Sans SC\"\";>", categoryName);
+                        foreach (string item in itemList)
+                        {
+                            sw.WriteLine("<span><img src=\"{0}/{1}Tooltip/{2}\"></img></span></br>", outputDir, categoryName, item);
+                            sw.WriteLine("<li>{0}</li>", item.Split(new[] { '_' + categoryName }, StringSplitOptions.None).Last());
+                        }
+                        sw.WriteLine("</ul>");
+                    }
+                }
+                sw.WriteLine("</body>");
+                sw.WriteLine("</html>");
+            }
+            finally
+            {
+                if (sw != null)
+                {
+                    sw.Flush();
+                    sw.Close();
+                }
+                diffHtml.Clear();
+            }
+        }
+
         // 变更技能Tooltip输出
         private void saveTooltip(string skillTooltipPath)
         {
@@ -822,7 +881,7 @@ namespace WzComparerR2.Comparer
             SkillTooltipRender2 skillRenderNew = new SkillTooltipRender2();
             SkillTooltipRender2 skillRenderOld = new SkillTooltipRender2();
             int count = 0;
-            int allCount = TooltipInfo.Count;
+            int allCount = skillTooltipInfo.Count;
             var skillTypeFont = new Font("宋体", 11f, GraphicsUnit.Pixel);
 
             this.stringWzNew = wzNew?.FindNodeByPath("String").GetNodeWzFile();
@@ -852,8 +911,8 @@ namespace WzComparerR2.Comparer
             skillRenderOld.Enable22AniStyle = CharaSimConfig.Default.Enable22AniStyle;
             skillRenderNew.ShowParameters = CharaSimConfig.Default.Skill.ShowParameters;
             skillRenderOld.ShowParameters = CharaSimConfig.Default.Skill.ShowParameters;
-
-            foreach (var skillID in TooltipInfo)
+            diffHtml["Skill"] = new Dictionary<string, List<string>>() { { "变更", new List<string>() }, { "新增", new List<string>() }, { "删除", new List<string>() } };
+            foreach (var skillID in skillTooltipInfo)
             {
                 try
                 {
@@ -917,6 +976,7 @@ namespace WzComparerR2.Comparer
                     GearGraphics.DrawPlainText(g, skillType, skillTypeFont, Color.FromArgb(255, 255, 255), 2, (int)Math.Ceiling(skillTypeTextInfo.Width) + 2, ref picH, 10);
 
                     string imageName = Path.Combine(skillTooltipPath, "Skill_" + skillID + '[' + (ItemStringHelper.GetJobName(int.Parse(skillID) / 10000) ?? "其它") + "]_" + skillType + ".png");
+                    diffHtml["Skill"][skillType].Add("Skill_" + skillID + '[' + (ItemStringHelper.GetJobName(int.Parse(skillID) / 10000) ?? "其它") + "]_" + skillType + ".png");
                     if (!File.Exists(imageName))
                     {
                         resultImage.Save(imageName, System.Drawing.Imaging.ImageFormat.Png);
@@ -929,7 +989,7 @@ namespace WzComparerR2.Comparer
                     FailToExportTooltips.Add("Skill Tooltip: " + skillID, ex.Message);
                 }
             }
-            TooltipInfo.Clear();
+            skillTooltipInfo.Clear();
             diffSkillTags.Clear();
         }
 
@@ -965,6 +1025,7 @@ namespace WzComparerR2.Comparer
             itemRenderOld.CompareMode = true;
             itemRenderNew.Enable22AniStyle = CharaSimConfig.Default.Enable22AniStyle;
             itemRenderOld.Enable22AniStyle = CharaSimConfig.Default.Enable22AniStyle;
+            diffHtml["Item"] = new Dictionary<string, List<string>> { { "变更", new List<string>() }, { "新增", new List<string>() }, { "删除", new List<string>() } };
 
             foreach (var itemID in itemTooltipInfo)
             {
@@ -1053,6 +1114,7 @@ namespace WzComparerR2.Comparer
                     GearGraphics.DrawPlainText(g, itemType, itemTypeFont, Color.FromArgb(255, 255, 255), 2, (int)Math.Ceiling(itemTypeTextInfo.Width) + 2, ref picH, 10);
 
                     string imageName = Path.Combine(itemTooltipPath, "Item_" + itemID + "_" + itemType + ".png");
+                    diffHtml["Item"][itemType].Add("Item_" + itemID + "_" + itemType + ".png");
                     if (!File.Exists(imageName))
                     {
                         resultImage.Save(imageName, System.Drawing.Imaging.ImageFormat.Png);
@@ -1069,6 +1131,7 @@ namespace WzComparerR2.Comparer
             diffItemTags.Clear();
         }
 
+        // 变更装备Tooltip输出
         private void saveTooltip3(string eqpTooltipPath)
         {
             StringLinker slNew = new StringLinker();
@@ -1094,8 +1157,8 @@ namespace WzComparerR2.Comparer
             eqpRenderOld.StringLinker = slOld;
             eqpRenderNew.ShowObjectID = true;
             eqpRenderOld.ShowObjectID = true;
-            //eqpRenderNew.Enable22AniStyle = CharaSimConfig.Default.Enable22AniStyle;
-            //eqpRenderOld.Enable22AniStyle = CharaSimConfig.Default.Enable22AniStyle;
+            diffHtml["Eqp"] = new Dictionary<string, List<string>> { { "变更", new List<string>() }, { "新增", new List<string>() }, { "删除", new List<string>() } };
+
             foreach (var eqpID in eqpTooltipInfo)
             {
                 try
@@ -1246,6 +1309,7 @@ namespace WzComparerR2.Comparer
                     GearGraphics.DrawPlainText(g, eqpType, eqpTypeFont, Color.FromArgb(255, 255, 255), 2, (int)Math.Ceiling(eqpTypeTextInfo.Width) + 2, ref picH, 10);
 
                     string imageName = Path.Combine(eqpTooltipPath, "Eqp_" + eqpID + "_" + eqpType + ".png");
+                    diffHtml["Eqp"][eqpType].Add("Eqp_" + eqpID + "_" + eqpType + ".png");
                     if (!File.Exists(imageName))
                     {
                         resultImage.Save(imageName, System.Drawing.Imaging.ImageFormat.Png);
@@ -1262,6 +1326,7 @@ namespace WzComparerR2.Comparer
             diffEqpTags.Clear();
         }
 
+        // 变更怪物Tooltip输出
         private void saveTooltip4(string mobTooltipPath)
         {
             StringLinker slNew = new StringLinker();
@@ -1287,8 +1352,8 @@ namespace WzComparerR2.Comparer
             mobRenderOld.StringLinker = slOld;
             mobRenderNew.ShowObjectID = true;
             mobRenderOld.ShowObjectID = true;
-            //mobRenderNew.Enable22AniStyle = CharaSimConfig.Default.Enable22AniStyle;
-            //mobRenderOld.Enable22AniStyle = CharaSimConfig.Default.Enable22AniStyle;
+            diffHtml["Mob"] = new Dictionary<string, List<string>> { { "变更", new List<string>() }, { "新增", new List<string>() }, { "删除", new List<string>() } };
+
             foreach (var mobID in mobTooltipInfo)
             {
                 try
@@ -1348,6 +1413,7 @@ namespace WzComparerR2.Comparer
                     //GearGraphics.DrawPlainText(g, mobType, mobTypeFont, Color.FromArgb(255, 255, 255), 2, (int)Math.Ceiling(mobTypeTextInfo.Width) + 2, ref picH, 10);
 
                     string imageName = Path.Combine(mobTooltipPath, "Mob_" + mobID + "_" + mobType + ".png");
+                    diffHtml["Mob"][mobType].Add("Mob_" + mobID + "_" + mobType + ".png");
                     if (!File.Exists(imageName))
                     {
                         resultImage.Save(imageName, System.Drawing.Imaging.ImageFormat.Png);
@@ -1364,6 +1430,7 @@ namespace WzComparerR2.Comparer
             diffMobTags.Clear();
         }
 
+        // 变更NPC Tooltip输出
         private void saveTooltip5(string npcTooltipPath)
         {
             StringLinker slNew = new StringLinker();
@@ -1389,8 +1456,8 @@ namespace WzComparerR2.Comparer
             npcRenderOld.StringLinker = slOld;
             npcRenderNew.ShowObjectID = true;
             npcRenderOld.ShowObjectID = true;
-            //npcRenderNew.Enable22AniStyle = CharaSimConfig.Default.Enable22AniStyle;
-            //npcRenderOld.Enable22AniStyle = CharaSimConfig.Default.Enable22AniStyle;
+            diffHtml["Npc"] = new Dictionary<string, List<string>> { { "变更", new List<string>() }, { "新增", new List<string>() }, { "删除", new List<string>() } };
+
             foreach (var npcID in npcTooltipInfo)
             {
                 try
@@ -1450,6 +1517,7 @@ namespace WzComparerR2.Comparer
                     //GearGraphics.DrawPlainText(g, npcType, npcTypeFont, Color.FromArgb(255, 255, 255), 2, (int)Math.Ceiling(npcTypeTextInfo.Width) + 2, ref picH, 10);
 
                     string imageName = Path.Combine(npcTooltipPath, "Npc_" + npcID + "_" + npcType + ".png");
+                    diffHtml["Npc"][npcType].Add("Npc_" + npcID + "_" + npcType + ".png");
                     if (!File.Exists(imageName))
                     {
                         resultImage.Save(imageName, System.Drawing.Imaging.ImageFormat.Png);
@@ -1466,6 +1534,7 @@ namespace WzComparerR2.Comparer
             diffNpcTags.Clear();
         }
 
+        // 变更礼包Tooltip输出
         private void saveTooltip6(string itemTooltipPath)
         {
             StringLinker slNew = new StringLinker();
@@ -1491,8 +1560,8 @@ namespace WzComparerR2.Comparer
             cashRenderOld.StringLinker = slOld;
             cashRenderNew.ShowObjectID = true;
             cashRenderOld.ShowObjectID = true;
-            //cashRenderNew.Enable22AniStyle = CharaSimConfig.Default.Enable22AniStyle;
-            //cashRenderOld.Enable22AniStyle = CharaSimConfig.Default.Enable22AniStyle;
+            diffHtml["Item"] = new Dictionary<string, List<string>> { { "变更", new List<string>() }, { "新增", new List<string>() }, { "删除", new List<string>() } };
+
             foreach (var itemID in cashTooltipInfo)
             {
                 try
@@ -1556,6 +1625,7 @@ namespace WzComparerR2.Comparer
                     GearGraphics.DrawPlainText(g, itemType, itemTypeFont, Color.FromArgb(255, 255, 255), 2, (int)Math.Ceiling(itemTypeTextInfo.Width) + 2, ref picH, 10);
 
                     string imageName = Path.Combine(itemTooltipPath, "Item_" + itemID + "_" + itemType + ".png");
+                    diffHtml["Item"][itemType].Add("Item_" + itemID + "_" + itemType + ".png");
                     if (!File.Exists(imageName))
                     {
                         resultImage.Save(imageName, System.Drawing.Imaging.ImageFormat.Png);
@@ -1572,6 +1642,7 @@ namespace WzComparerR2.Comparer
             diffCashTags.Clear();
         }
 
+        // 变更地图Tooltip输出
         private void saveTooltip7(string mapTooltipPath)
         {
             StringLinker slNew = new StringLinker();
@@ -1609,6 +1680,7 @@ namespace WzComparerR2.Comparer
             mapRenderOld.ShowBgmName = true;
             mapRenderNew.ShowMobNpcObjectID = true;
             mapRenderOld.ShowMobNpcObjectID = true;
+            diffHtml["Map"] = new Dictionary<string, List<string>> { { "变更", new List<string>() }, { "新增", new List<string>() }, { "删除", new List<string>() } };
 
             foreach (var mapID in mapTooltipInfo)
             {
@@ -1669,6 +1741,7 @@ namespace WzComparerR2.Comparer
                     //GearGraphics.DrawPlainText(g, mapType, mapTypeFont, Color.FromArgb(255, 255, 255), 2, (int)Math.Ceiling(mapTypeTextInfo.Width) + 2, ref picH, 10);
 
                     string imageName = Path.Combine(mapTooltipPath, "Map_" + mapID + "_" + mapType + ".png");
+                    diffHtml["Map"][mapType].Add("Map_" + mapID + "_" + mapType + ".png");
                     if (!File.Exists(imageName))
                     {
                         resultImage.Save(imageName, System.Drawing.Imaging.ImageFormat.Png);
@@ -1685,6 +1758,7 @@ namespace WzComparerR2.Comparer
             diffMapTags.Clear();
         }
 
+        // 变更任务Tooltip输出
         private void saveTooltip8(string questTooltipPath)
         {
             QuestTooltipRenderer[] questRenderNewOld = new QuestTooltipRenderer[2];
@@ -1708,6 +1782,7 @@ namespace WzComparerR2.Comparer
                 questRenderNewOld[i].CompareMode = true;
                 questRenderNewOld[i].ShowAllStates = true;
             }
+            diffHtml["Quest"] = new Dictionary<string, List<string>> { { "变更", new List<string>() }, { "新增", new List<string>() }, { "删除", new List<string>() } };
 
             foreach (var questID in questTooltipInfo)
             {
@@ -1839,6 +1914,7 @@ namespace WzComparerR2.Comparer
                     if (ShowChangeType && nullQuestIdx != 0) GearGraphics.DrawPlainText(g, questType, questTypeFont, Color.FromArgb(255, 255, 255), 2, (int)Math.Ceiling(questTypeTextInfo.Width) + 2, ref picH, 10);
 
                     string imageName = Path.Combine(questTooltipPath, "Quest_" + questID + "_" + questType + ".png");
+                    diffHtml["Quest"][questType].Add("Quest_" + questID + "_" + questType + ".png");
                     if (!File.Exists(imageName))
                     {
                         resultImage.Save(imageName, System.Drawing.Imaging.ImageFormat.Png);
@@ -1854,6 +1930,7 @@ namespace WzComparerR2.Comparer
             questTooltipInfo.Clear();
         }
 
+        // 变更成就Tooltip输出
         private void saveTooltip9(string achvTooltipPath)
         {
             AchievementTooltipRenderer[] achvRenderNewOld = new AchievementTooltipRenderer[2];
@@ -1874,6 +1951,7 @@ namespace WzComparerR2.Comparer
                 achvRenderNewOld[i].ShowObjectID = this.ShowObjectID;
                 achvRenderNewOld[i].CompareMode = true;
             }
+            diffHtml["Achievement"] = new Dictionary<string, List<string>> { { "变更", new List<string>() }, { "新增", new List<string>() }, { "删除", new List<string>() } };
 
             foreach (var achvID in achievementTooltipInfo)
             {
@@ -1987,6 +2065,7 @@ namespace WzComparerR2.Comparer
                     if (ShowChangeType && nullAchievementIdx != 0) GearGraphics.DrawPlainText(g, achvType, achvTypeFont, Color.FromArgb(255, 255, 255), 2, (int)Math.Ceiling(achvTypeTextInfo.Width) + 2, ref picH, 10);
 
                     string imageName = Path.Combine(achvTooltipPath, "Achievement_" + achvID + "_" + achvType + ".png");
+                    diffHtml["Achievement"][achvType].Add("Achievement_" + achvID + "_" + achvType + ".png");
                     if (!File.Exists(imageName))
                     {
                         resultImage.Save(imageName, System.Drawing.Imaging.ImageFormat.Png);
@@ -2011,13 +2090,13 @@ namespace WzComparerR2.Comparer
             if (match.Success)
             {
                 string skillID = match.Groups[1].ToString();
-                if (!TooltipInfo.Contains(skillID) && skillID != null)
+                if (!skillTooltipInfo.Contains(skillID) && skillID != null)
                 {
-                    TooltipInfo.Add(skillID);
+                    skillTooltipInfo.Add(skillID);
                     diffSkillTags[skillID] = new List<string>();
                     diffSkillTags[skillID].Add(tag);
                 }
-                else if (TooltipInfo.Contains(skillID) && skillID != null)
+                else if (skillTooltipInfo.Contains(skillID) && skillID != null)
                 {
                     if (!diffSkillTags[skillID].Contains(tag))
                     {
@@ -2196,9 +2275,9 @@ namespace WzComparerR2.Comparer
             if (match.Success)
             {
                 string skillID = match.Groups[1].ToString();
-                if (!TooltipInfo.Contains(skillID) && skillID != null)
+                if (!skillTooltipInfo.Contains(skillID) && skillID != null)
                 {
-                    TooltipInfo.Add(skillID);
+                    skillTooltipInfo.Add(skillID);
                 }
             }
         }

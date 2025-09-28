@@ -65,7 +65,23 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <Compile Update="FrmOverlaySpineOptions.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="FrmOverlayRectOptions.cs">
+      <SubType>Form</SubType>
+    </Compile>
+  </ItemGroup>
+  <Target Name="UpdateBuildTime" BeforeTargets="BeforeCompile">
+	<WriteLinesToFile File="BuildInfo.cs" Lines="namespace WzComparerR2 { internal class BuildInfo { public static string BuildTime =&gt; &quot;m$(FormattedBuildTime)00&quot;%3b } }" Overwrite="true" />
+  </Target>
+  <ItemGroup>
 	<Compile Update="FrmOverlayRectOptions.cs">
+	  <SubType>Form</SubType>
+	</Compile>
+  </ItemGroup>
+  <ItemGroup>
+	<Compile Update="FrmUpdater.cs">
 	  <SubType>Form</SubType>
 	</Compile>
   </ItemGroup>

@@ -47,6 +47,7 @@
             this.labelX2 = new DevComponents.DotNetBar.LabelX();
             this.chkImgCheckDisabled = new DevComponents.DotNetBar.Controls.CheckBoxX();
             this.chkWzSortByImgID = new DevComponents.DotNetBar.Controls.CheckBoxX();
+            this.chkAutoDetectUpdate = new DevComponents.DotNetBar.Controls.CheckBoxX();
             this.chkAutoCheckExtFiles = new DevComponents.DotNetBar.Controls.CheckBoxX();
             this.chkOpenAIExtraOption = new DevComponents.DotNetBar.Controls.CheckBoxX();
             this.chkEnableTranslate = new DevComponents.DotNetBar.Controls.CheckBoxX();
@@ -801,6 +802,21 @@
             this.superTabItem4.Name = "superTabItem4";
             this.superTabItem4.Text = "OpenAI";
             // 
+            // chkAutoDetectUpdate
+            // 
+            this.chkAutoDetectUpdate.AutoSize = true;
+            this.chkAutoDetectUpdate.BackColor = System.Drawing.Color.Transparent;
+            // 
+            // 
+            // 
+            this.chkAutoDetectUpdate.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
+            this.chkAutoDetectUpdate.Location = new System.Drawing.Point(14, 13);
+            this.chkAutoDetectUpdate.Name = "chkAutoDetectUpdate";
+            this.chkAutoDetectUpdate.Size = new System.Drawing.Size(107, 18);
+            this.chkAutoDetectUpdate.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
+            this.chkAutoDetectUpdate.TabIndex = 5;
+            this.chkAutoDetectUpdate.Text = "自动检查更新";
+            // 
             // FrmOptions
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -856,6 +872,7 @@
         private DevComponents.DotNetBar.Controls.ComboBoxEx cmbWzEncoding;
         private DevComponents.DotNetBar.Controls.CheckBoxX chkAutoCheckExtFiles;
         private DevComponents.DotNetBar.Controls.CheckBoxX chkWzSortByImgID;
+        private DevComponents.DotNetBar.Controls.CheckBoxX chkAutoDetectUpdate;
         private DevComponents.DotNetBar.Controls.CheckBoxX chkImgCheckDisabled;
         private DevComponents.DotNetBar.Controls.CheckBoxX chkOpenAIExtraOption;
         private DevComponents.DotNetBar.Controls.CheckBoxX chkEnableTranslate;
