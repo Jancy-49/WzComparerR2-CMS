@@ -39,6 +39,7 @@ namespace WzComparerR2
             this.ribbonBar10 = new DevComponents.DotNetBar.RibbonBar();
             this.btnMapleUnion = new DevComponents.DotNetBar.ButtonItem();
             this.buttonJobSelect = new DevComponents.DotNetBar.ButtonItem();
+            this.buttonSkill = new DevComponents.DotNetBar.ButtonItem();
             this.itemContainer37 = new DevComponents.DotNetBar.ItemContainer();
             this.itemContainer38 = new DevComponents.DotNetBar.ItemContainer();
             this.comboBoxItemCharacter = new DevComponents.DotNetBar.ComboBoxItem();
@@ -97,6 +98,8 @@ namespace WzComparerR2
             this.buttonItemSoundSave = new DevComponents.DotNetBar.ButtonItem();
             this.sliderItemSoundVol = new DevComponents.DotNetBar.SliderItem();
             this.ribbonPanel1 = new DevComponents.DotNetBar.RibbonPanel();
+            this.ribbonBar14 = new DevComponents.DotNetBar.RibbonBar();
+            this.buttonPathSearch = new DevComponents.DotNetBar.ButtonItem();
             this.ribbonBar9 = new DevComponents.DotNetBar.RibbonBar();
             this.buttonItemPatcher = new DevComponents.DotNetBar.ButtonItem();
             this.buttonItemInstallGame = new DevComponents.DotNetBar.ButtonItem();
@@ -143,9 +146,13 @@ namespace WzComparerR2
             this.buttonItem1 = new DevComponents.DotNetBar.ButtonItem();
             this.ribbonBar7 = new DevComponents.DotNetBar.RibbonBar();
             this.buttonPapulatus = new DevComponents.DotNetBar.ButtonItem();
+            this.buttonDiscord = new DevComponents.DotNetBar.ButtonItem();
+            this.buttonQQ = new DevComponents.DotNetBar.ButtonItem();
+            this.buttonQQChannel = new DevComponents.DotNetBar.ButtonItem();
             this.buttonItemUpdate = new DevComponents.DotNetBar.ButtonItem();
             this.ribbonBar6 = new DevComponents.DotNetBar.RibbonBar();
             this.ribbonBar12 = new DevComponents.DotNetBar.RibbonBar();
+            this.ribbonBar13 = new DevComponents.DotNetBar.RibbonBar();
             this.buttonItemAbout = new DevComponents.DotNetBar.ButtonItem();
             this.ribbonTabItem1 = new DevComponents.DotNetBar.RibbonTabItem();
             this.ribbonTabItem2 = new DevComponents.DotNetBar.RibbonTabItem();
@@ -195,10 +202,15 @@ namespace WzComparerR2
             this.itemContainer45 = new DevComponents.DotNetBar.ItemContainer();
             this.itemContainer46 = new DevComponents.DotNetBar.ItemContainer();
             this.itemContainer47 = new DevComponents.DotNetBar.ItemContainer();
+            this.itemContainer48 = new DevComponents.DotNetBar.ItemContainer();
+            this.itemContainer49 = new DevComponents.DotNetBar.ItemContainer();
+            this.itemContainer50 = new DevComponents.DotNetBar.ItemContainer();
+            this.itemContainer51 = new DevComponents.DotNetBar.ItemContainer();
             this.textBoxX1 = new DevComponents.DotNetBar.Controls.TextBoxX();
             this.textBoxX2 = new DevComponents.DotNetBar.Controls.TextBoxX();
             this.textBoxAPIKey = new DevComponents.DotNetBar.Controls.TextBoxX();
             this.textBoxAPIKey2 = new DevComponents.DotNetBar.Controls.TextBoxX();
+            this.textBoxAPIKey3 = new DevComponents.DotNetBar.Controls.TextBoxX();
             this.textBoxIGN = new DevComponents.DotNetBar.Controls.TextBoxX();
             this.textBoxocid = new DevComponents.DotNetBar.Controls.TextBoxX();
             this.textBoxouid = new DevComponents.DotNetBar.Controls.TextBoxX();
@@ -209,6 +221,7 @@ namespace WzComparerR2
             this.textBoxDate = new DevComponents.DotNetBar.Controls.TextBoxX();
             this.textBoxResult = new DevComponents.DotNetBar.Controls.TextBoxX();
             this.columnHeaderServer = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeaderCategory = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeaderNotice = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeaderTaskID = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeaderDetecttime = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
@@ -261,6 +274,7 @@ namespace WzComparerR2
             this.chkShowChangeType = new DevComponents.DotNetBar.Controls.CheckBoxX();
             this.chkShowLinkedTamingMob = new DevComponents.DotNetBar.Controls.CheckBoxX();
             this.chkSkipKMSContent = new DevComponents.DotNetBar.Controls.CheckBoxX();
+            this.chkSkipGodChangseopDuplicatedNodes = new DevComponents.DotNetBar.Controls.CheckBoxX();
             this.chkResolvePngLink = new DevComponents.DotNetBar.Controls.CheckBoxX();
             this.superTooltip1 = new DevComponents.DotNetBar.SuperTooltip();
             DevComponents.DotNetBar.SuperTooltipInfo superTooltipInfo1 = new DevComponents.DotNetBar.SuperTooltipInfo();
@@ -270,6 +284,7 @@ namespace WzComparerR2
             this.labelX2 = new DevComponents.DotNetBar.LabelX();
             this.countdownTimer = new System.Windows.Forms.Timer();
             this.labelTimer = new DevComponents.DotNetBar.LabelX();
+            this.labelHint = new DevComponents.DotNetBar.LabelX();
             this.pictureBoxEx2 = new WzComparerR2.PictureBoxEx();
             this.labelAPIKey = new DevComponents.DotNetBar.LabelX();
             this.labelMode = new DevComponents.DotNetBar.LabelX();
@@ -314,6 +329,11 @@ namespace WzComparerR2
             this.dateTimePickerDailyReport = new System.Windows.Forms.DateTimePicker();
             this.btnConfirmDailyReport = new System.Windows.Forms.Button();
             this.dailyReportForm = new System.Windows.Forms.Form();
+            this.pathSearchForm = new System.Windows.Forms.Form();
+            this.textBoxPath = new DevComponents.DotNetBar.Controls.TextBoxX();
+            this.labelPath = new DevComponents.DotNetBar.LabelX();
+            this.btnYes = new DevComponents.DotNetBar.ButtonX();
+            this.btnNo = new DevComponents.DotNetBar.ButtonX();
             this.btnExportSkillOption = new DevComponents.DotNetBar.ButtonX();
             this.btnExportSkill = new DevComponents.DotNetBar.ButtonX();
             this.btnSkillName = new DevComponents.DotNetBar.ButtonX();
@@ -354,6 +374,7 @@ namespace WzComparerR2
             this.tsmi1DumpAsXml = new System.Windows.Forms.ToolStripMenuItem();
             this.tsmi1SaveImgList = new System.Windows.Forms.ToolStripMenuItem();
             this.tsmi1UpdateStringLinker = new System.Windows.Forms.ToolStripMenuItem();
+            this.tsmi1ExportSound = new System.Windows.Forms.ToolStripMenuItem();
             this.nodeConnector1 = new DevComponents.AdvTree.NodeConnector();
             this.elementStyle1 = new DevComponents.DotNetBar.ElementStyle();
             this.listViewExString = new DevComponents.DotNetBar.Controls.ListViewEx();
@@ -517,7 +538,7 @@ namespace WzComparerR2
             this.ribbonBar10.Size = new System.Drawing.Size(270, 91);
             this.ribbonBar10.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
             this.ribbonBar10.TabIndex = 1;
-            this.ribbonBar10.Text = "MapleUnion";
+            this.ribbonBar10.Text = "冒险岛联盟";
             // 
             // btnMapleUnion
             // 
@@ -562,7 +583,7 @@ namespace WzComparerR2
             this.ribbonBar8.Size = new System.Drawing.Size(270, 91);
             this.ribbonBar8.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
             this.ribbonBar8.TabIndex = 1;
-            this.ribbonBar8.Text = "CharaSim";
+            this.ribbonBar8.Text = "角色模拟";
             // 
             // 
             // 
@@ -934,7 +955,7 @@ namespace WzComparerR2
             this.buttonItemCharaEquip.AutoCheckOnClick = true;
             this.buttonItemCharaEquip.Name = "buttonItemCharaEquip";
             this.buttonItemCharaEquip.Text = "装备窗";
-            this.buttonItemCharaEquip.Tooltip = "打开/关闭装备窗";
+            this.buttonItemCharaEquip.Tooltip = "打开/关闭装备窗\r\n请在开启文件时使用。";
             this.buttonItemCharaEquip.CheckedChanged += new System.EventHandler(this.buttonItemCharaEquip_CheckedChanged);
             // 
             // 
@@ -945,8 +966,31 @@ namespace WzComparerR2
             this.buttonJobSelect.AutoCheckOnClick = true;
             this.buttonJobSelect.Name = "buttonJobSelect";
             this.buttonJobSelect.Text = "选择职业";
-            this.buttonJobSelect.Tooltip = "选择职业。\r\n这将影响装备窗的显示。";
+            this.buttonJobSelect.Tooltip = "选择职业。\r\n这将影响装备窗和技能窗的显示。\r\n请在开启非MSN和非KMS文件时使用。";
             this.buttonJobSelect.CheckedChanged += new System.EventHandler(this.buttonJobSelect_CheckedChanged);
+            // 
+            // itemContainer48
+            // 
+            // 
+            // 
+            // 
+            this.itemContainer48.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
+            this.itemContainer48.TitleStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
+            this.itemContainer48.LayoutOrientation = DevComponents.DotNetBar.eOrientation.Vertical;
+            this.itemContainer48.Name = "itemContainer48";
+            this.itemContainer48.SubItems.AddRange(new DevComponents.DotNetBar.BaseItem[] {
+            this.buttonSkill});
+            // 
+            // 
+            // 
+            // 
+            // buttonSkill
+            // 
+            this.buttonSkill.AutoCheckOnClick = true;
+            this.buttonSkill.Name = "buttonSkill";
+            this.buttonSkill.Text = "技能";
+            this.buttonSkill.Tooltip = "技能预览。\r\n显示选择职业对应的技能界面。\r\n请在开启非MSN文件时使用。";
+            this.buttonSkill.CheckedChanged += new System.EventHandler(this.buttonSkill_CheckedChanged);
             // 
             // itemContainer47
             // 
@@ -1032,7 +1076,8 @@ namespace WzComparerR2
             this.itemContainer45.Name = "itemContainer45";
             this.itemContainer45.SubItems.AddRange(new DevComponents.DotNetBar.BaseItem[] {
             this.itemContainer33,
-            this.itemContainer47});
+            this.itemContainer47,
+            this.itemContainer48});
             // 
             // ribbonBar3
             // 
@@ -1056,7 +1101,7 @@ namespace WzComparerR2
             this.ribbonBar3.Size = new System.Drawing.Size(262, 91);
             this.ribbonBar3.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
             this.ribbonBar3.TabIndex = 0;
-            this.ribbonBar3.Text = "SoundPlayer";
+            this.ribbonBar3.Text = "播放器";
             // 
             // 
             // 
@@ -1215,6 +1260,7 @@ namespace WzComparerR2
             // ribbonPanel1
             // 
             this.ribbonPanel1.ColorSchemeStyle = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
+            this.ribbonPanel1.Controls.Add(this.ribbonBar14);
             this.ribbonPanel1.Controls.Add(this.ribbonBar9);
             this.ribbonPanel1.Controls.Add(this.ribbonBar4);
             this.ribbonPanel1.Controls.Add(this.ribbonBar1);
@@ -1237,6 +1283,99 @@ namespace WzComparerR2
             this.ribbonPanel1.StyleMouseOver.CornerType = DevComponents.DotNetBar.eCornerType.Square;
             this.ribbonPanel1.TabIndex = 1;
             // 
+            // ribbonBar14
+            // 
+            this.ribbonBar14.AutoOverflowEnabled = true;
+            // 
+            // 
+            // 
+            this.ribbonBar14.BackgroundMouseOverStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
+            // 
+            // 
+            // 
+            this.ribbonBar14.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
+            this.ribbonBar14.ContainerControlProcessDialogKey = true;
+            this.ribbonBar14.Dock = System.Windows.Forms.DockStyle.Left;
+            this.ribbonBar14.DragDropSupport = true;
+            this.ribbonBar14.Items.AddRange(new DevComponents.DotNetBar.BaseItem[] {
+            this.buttonPathSearch});
+            this.ribbonBar14.Location = new System.Drawing.Point(339, 0);
+            this.ribbonBar14.Name = "ribbonBar14";
+            this.ribbonBar14.Size = new System.Drawing.Size(63, 91);
+            this.ribbonBar14.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
+            this.ribbonBar14.TabIndex = 2;
+            this.ribbonBar14.Text = "路径搜索";
+            // 
+            // buttonPathSearch
+            // 
+            this.buttonPathSearch.Name = "buttonPathSearch";
+            this.buttonPathSearch.SubItemsExpandWidth = 14;
+            this.buttonPathSearch.Text = "路径搜索";
+            this.buttonPathSearch.Click += new System.EventHandler(this.buttonPathSearch_Click);
+            // 
+            // pathSearchForm
+            // 
+            this.pathSearchForm.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
+            this.pathSearchForm.MaximizeBox = false;
+            this.pathSearchForm.MinimizeBox = false;
+            this.pathSearchForm.ControlBox = true;
+            this.pathSearchForm.ClientSize = new System.Drawing.Size(360, 80);
+            this.pathSearchForm.Controls.Add(this.textBoxPath);
+            this.pathSearchForm.Controls.Add(this.labelPath);
+            this.pathSearchForm.Controls.Add(this.btnYes);
+            this.pathSearchForm.Controls.Add(this.btnNo);
+            this.pathSearchForm.Name = "pathSearchForm";
+            this.pathSearchForm.Text = "路径搜索";
+            // 
+            // textBoxPath
+            // 
+            // 
+            // 
+            // 
+            this.textBoxPath.Border.Class = "TextBoxBorder";
+            this.textBoxPath.Border.CornerType = DevComponents.DotNetBar.eCornerType.Square;
+            this.textBoxPath.DisabledBackColor = System.Drawing.Color.White;
+            this.textBoxPath.Dock = System.Windows.Forms.DockStyle.None;
+            this.textBoxPath.Location = new System.Drawing.Point(50, 16);
+            this.textBoxPath.Multiline = false;
+            this.textBoxPath.Name = "textBoxPath";
+            this.textBoxPath.ReadOnly = false;
+            this.textBoxPath.ScrollBars = System.Windows.Forms.ScrollBars.None;
+            this.textBoxPath.Size = new System.Drawing.Size(300, 23);
+            this.textBoxPath.TabIndex = 0;
+            this.textBoxPath.Visible = true;
+            //this.textBoxPath.KeyDown += new System.Windows.Forms.KeyEventHandler(this.textBoxItemSearchString_KeyDown);
+            // 
+            // labelPath
+            // 
+            this.labelPath.Location = new System.Drawing.Point(10, 16);
+            this.labelPath.Name = "labelPath";
+            this.labelPath.Size = new System.Drawing.Size(44, 16);
+            this.labelPath.Name = "labelPath";
+            this.labelPath.Text = "路径";
+            // 
+            // btnYes
+            // 
+            this.btnYes.AccessibleRole = System.Windows.Forms.AccessibleRole.PushButton;
+            this.btnYes.ColorTable = DevComponents.DotNetBar.eButtonColor.OrangeWithBackground;
+            this.btnYes.Location = new System.Drawing.Point(135, 50);
+            this.btnYes.Name = "btnOk";
+            this.btnYes.Size = new System.Drawing.Size(75, 23);
+            this.btnYes.TabIndex = 1;
+            this.btnYes.Text = "查询";
+            this.btnYes.DialogResult = System.Windows.Forms.DialogResult.OK;
+            // 
+            // btnCancel
+            // 
+            this.btnNo.AccessibleRole = System.Windows.Forms.AccessibleRole.PushButton;
+            this.btnNo.ColorTable = DevComponents.DotNetBar.eButtonColor.OrangeWithBackground;
+            this.btnNo.Location = new System.Drawing.Point(215, 50);
+            this.btnNo.Name = "btnNo";
+            this.btnNo.Size = new System.Drawing.Size(75, 23);
+            this.btnNo.TabIndex = 2;
+            this.btnNo.Text = "取消";
+            this.btnNo.DialogResult = System.Windows.Forms.DialogResult.Cancel;
+            // 
             // ribbonBar9
             // 
             this.ribbonBar9.AutoOverflowEnabled = true;
@@ -1257,7 +1396,7 @@ namespace WzComparerR2
             this.ribbonBar9.Name = "ribbonBar9";
             this.ribbonBar9.Size = new System.Drawing.Size(63, 91);
             this.ribbonBar9.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
-            this.ribbonBar9.TabIndex = 2;
+            this.ribbonBar9.TabIndex = 3;
             this.ribbonBar9.Text = "补丁工具";
             // 
             // 
@@ -1682,6 +1821,7 @@ namespace WzComparerR2
             this.ribbonPanel3.Controls.Add(this.ribbonBar7);
             this.ribbonPanel3.Controls.Add(this.ribbonBar6);
             this.ribbonPanel3.Controls.Add(this.ribbonBar12);
+            this.ribbonPanel3.Controls.Add(this.ribbonBar13);
             this.ribbonPanel3.Dock = System.Windows.Forms.DockStyle.Fill;
             this.ribbonPanel3.Location = new System.Drawing.Point(0, 56);
             this.ribbonPanel3.Name = "ribbonPanel3";
@@ -1723,7 +1863,7 @@ namespace WzComparerR2
             this.ribbonBar11.Size = new System.Drawing.Size(140, 91);
             this.ribbonBar11.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
             this.ribbonBar11.TabIndex = 2;
-            this.ribbonBar11.Text = "Test";
+            this.ribbonBar11.Text = "测试";
             // 
             // 
             // 
@@ -1761,7 +1901,7 @@ namespace WzComparerR2
             this.ribbonBar12.Size = new System.Drawing.Size(140, 91);
             this.ribbonBar12.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
             this.ribbonBar12.TabIndex = 2;
-            this.ribbonBar12.Text = "Papulatus";
+            this.ribbonBar12.Text = "帕普拉图斯";
             // 
             // 
             // 
@@ -1777,6 +1917,89 @@ namespace WzComparerR2
             this.buttonPapulatus.SubItemsExpandWidth = 28;
             this.buttonPapulatus.Text = "帕普拉图斯";
             this.buttonPapulatus.Click += new System.EventHandler(this.buttonPapulatus_Click);
+            // 
+            // ribbonBar13
+            // 
+            this.ribbonBar13.AutoOverflowEnabled = true;
+            // 
+            // 
+            // 
+            this.ribbonBar13.BackgroundMouseOverStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
+            // 
+            // 
+            // 
+            this.ribbonBar13.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
+            this.ribbonBar13.ContainerControlProcessDialogKey = true;
+            this.ribbonBar13.Dock = System.Windows.Forms.DockStyle.Left;
+            this.ribbonBar13.LayoutOrientation = DevComponents.DotNetBar.eOrientation.Vertical;
+            this.ribbonBar13.DragDropSupport = true;
+            this.ribbonBar13.Items.AddRange(new DevComponents.DotNetBar.BaseItem[] {
+            this.itemContainer49,
+            this.itemContainer50,
+            this.itemContainer51});
+            this.ribbonBar13.Location = new System.Drawing.Point(110, 0);
+            this.ribbonBar13.Name = "ribbonBar13";
+            this.ribbonBar13.Size = new System.Drawing.Size(140, 91);
+            this.ribbonBar13.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
+            this.ribbonBar13.TabIndex = 2;
+            this.ribbonBar13.Text = "联系";
+            // 
+            // itemContainer49
+            // 
+            // 
+            // 
+            // 
+            this.itemContainer49.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
+            this.itemContainer49.TitleStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
+            this.itemContainer49.LayoutOrientation = DevComponents.DotNetBar.eOrientation.Vertical;
+            this.itemContainer49.Name = "itemContainer49";
+            this.itemContainer49.SubItems.AddRange(new DevComponents.DotNetBar.BaseItem[] {
+            this.buttonDiscord});
+            // 
+            // buttonDiscord
+            // 
+            this.buttonDiscord.Name = "buttonDiscord";
+            this.buttonDiscord.SubItemsExpandWidth = 28;
+            this.buttonDiscord.Text = "Discord";
+            this.buttonDiscord.Click += new System.EventHandler(this.buttonDiscord_Click);
+            // 
+            // itemContainer50
+            // 
+            // 
+            // 
+            // 
+            this.itemContainer50.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
+            this.itemContainer50.TitleStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
+            this.itemContainer50.LayoutOrientation = DevComponents.DotNetBar.eOrientation.Vertical;
+            this.itemContainer50.Name = "itemContainer50";
+            this.itemContainer50.SubItems.AddRange(new DevComponents.DotNetBar.BaseItem[] {
+            this.buttonQQ});
+            // 
+            // buttonQQ
+            // 
+            this.buttonQQ.Name = "buttonQQ";
+            this.buttonQQ.SubItemsExpandWidth = 28;
+            this.buttonQQ.Text = "QQ群";
+            this.buttonQQ.Click += new System.EventHandler(this.buttonQQ_Click);
+            // 
+            // itemContainer51
+            // 
+            // 
+            // 
+            // 
+            this.itemContainer51.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
+            this.itemContainer51.TitleStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
+            this.itemContainer51.LayoutOrientation = DevComponents.DotNetBar.eOrientation.Vertical;
+            this.itemContainer51.Name = "itemContainer49";
+            this.itemContainer51.SubItems.AddRange(new DevComponents.DotNetBar.BaseItem[] {
+            this.buttonQQChannel});
+            // 
+            // buttonQQChannel
+            // 
+            this.buttonQQChannel.Name = "buttonQQChannel";
+            this.buttonQQChannel.SubItemsExpandWidth = 28;
+            this.buttonQQChannel.Text = "QQ频道";
+            this.buttonQQChannel.Click += new System.EventHandler(this.buttonQQChannel_Click);
             // 
             // ribbonBar7
             // 
@@ -2758,6 +2981,7 @@ namespace WzComparerR2
             this.superTabControlPanel2.Controls.Add(this.chkShowChangeType);
             this.superTabControlPanel2.Controls.Add(this.chkShowLinkedTamingMob);
             this.superTabControlPanel2.Controls.Add(this.chkSkipKMSContent);
+            this.superTabControlPanel2.Controls.Add(this.chkSkipGodChangseopDuplicatedNodes);
             this.superTabControlPanel2.Controls.Add(this.chkResolvePngLink);
             this.superTabControlPanel2.Controls.Add(this.chkOutputRemovedImg);
             this.superTabControlPanel2.Controls.Add(this.chkOutputAddedImg);
@@ -2862,6 +3086,21 @@ namespace WzComparerR2
             this.chkSkipKMSContent.TabIndex = 23;
             this.chkSkipKMSContent.Text = "跳过KMS内容";
             this.chkSkipKMSContent.Checked = false;
+            // 
+            // chkSkipGodChangseopDuplicatedNodes
+            // 
+            // 
+            // 
+            // 
+            this.chkSkipGodChangseopDuplicatedNodes.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
+            this.chkSkipGodChangseopDuplicatedNodes.Location = new System.Drawing.Point(1081, 61);
+            this.chkSkipGodChangseopDuplicatedNodes.Name = "chkSkipGodChangseopDuplicatedNodes";
+            this.chkSkipGodChangseopDuplicatedNodes.Size = new System.Drawing.Size(185, 25);
+            this.chkSkipGodChangseopDuplicatedNodes.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
+            this.superTooltip1.SetSuperTooltip(this.chkSkipGodChangseopDuplicatedNodes, new DevComponents.DotNetBar.SuperTooltipInfo("跳过重复节点", "", "跳过以“_.img”结尾的重复节点。", null, null, DevComponents.DotNetBar.eTooltipColor.System, true, false, new System.Drawing.Size(180, 110)));
+            this.chkSkipGodChangseopDuplicatedNodes.TabIndex = 25;
+            this.chkSkipGodChangseopDuplicatedNodes.Text = "跳过重复节点";
+            this.chkSkipGodChangseopDuplicatedNodes.Checked = true;
             // 
             // chkOutputSkillTooltip
             // 
@@ -3261,7 +3500,7 @@ namespace WzComparerR2
             this.textBoxResult.Name = "textBoxResult";
             this.textBoxResult.ReadOnly = true;
             this.textBoxResult.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.textBoxResult.Size = new System.Drawing.Size(1700, 550);
+            this.textBoxResult.Size = new System.Drawing.Size(800, 600);
             this.textBoxResult.TabIndex = 6;
             // 
             // textBoxDate
@@ -3335,7 +3574,7 @@ namespace WzComparerR2
             this.textBoxGuildid.Border.CornerType = DevComponents.DotNetBar.eCornerType.Square;
             this.textBoxGuildid.DisabledBackColor = System.Drawing.Color.White;
             this.textBoxGuildid.Dock = System.Windows.Forms.DockStyle.None;
-            this.textBoxGuildid.Location = new System.Drawing.Point(406, 96);
+            this.textBoxGuildid.Location = new System.Drawing.Point(416, 96);
             this.textBoxGuildid.Multiline = true;
             this.textBoxGuildid.Name = "textBoxGuildid";
             this.textBoxGuildid.ReadOnly = true;
@@ -3351,7 +3590,7 @@ namespace WzComparerR2
             // 
             // 
             this.labelGuildid.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
-            this.labelGuildid.Location = new System.Drawing.Point(346, 96);
+            this.labelGuildid.Location = new System.Drawing.Point(356, 96);
             this.labelGuildid.Name = "labelouid";
             this.labelGuildid.Size = new System.Drawing.Size(50, 23);
             this.labelGuildid.TabIndex = 6;
@@ -3495,7 +3734,7 @@ namespace WzComparerR2
             this.cmbWorldName.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cmbWorldName.FormattingEnabled = true;
             this.cmbWorldName.ItemHeight = 15;
-            this.cmbWorldName.Location = new System.Drawing.Point(236, 96);
+            this.cmbWorldName.Location = new System.Drawing.Point(246, 96);
             this.cmbWorldName.Name = "cmbWorldName";
             this.cmbWorldName.Size = new System.Drawing.Size(100, 23);
             this.cmbWorldName.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
@@ -3509,7 +3748,7 @@ namespace WzComparerR2
             // 
             // 
             this.labelWorldName.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
-            this.labelWorldName.Location = new System.Drawing.Point(176, 96);
+            this.labelWorldName.Location = new System.Drawing.Point(186, 96);
             this.labelWorldName.Name = "labelWorldName";
             this.labelWorldName.Size = new System.Drawing.Size(50, 23);
             this.labelWorldName.TabIndex = 6;
@@ -3644,6 +3883,7 @@ namespace WzComparerR2
             //
             this.cmbMode.Items.Add("KMS");
             this.cmbMode.Items.Add("MSEA");
+            this.cmbMode.Items.Add("TMS");
             this.cmbMode.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed;
             this.cmbMode.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cmbMode.FormattingEnabled = true;
@@ -3697,6 +3937,20 @@ namespace WzComparerR2
             this.textBoxAPIKey2.Size = new System.Drawing.Size(650, 23);
             this.textBoxAPIKey2.TabIndex = 0;
             // 
+            // textBoxAPIKey3
+            // 
+            this.textBoxAPIKey3.Border.Class = "TextBoxBorder";
+            this.textBoxAPIKey3.Border.CornerType = DevComponents.DotNetBar.eCornerType.Square;
+            this.textBoxAPIKey3.DisabledBackColor = System.Drawing.Color.White;
+            this.textBoxAPIKey3.Dock = System.Windows.Forms.DockStyle.None;
+            this.textBoxAPIKey3.Location = new System.Drawing.Point(246, 10);
+            this.textBoxAPIKey3.Multiline = true;
+            this.textBoxAPIKey3.Name = "textBoxAPIKey3";
+            this.textBoxAPIKey3.ReadOnly = false;
+            this.textBoxAPIKey3.ScrollBars = System.Windows.Forms.ScrollBars.None;
+            this.textBoxAPIKey3.Size = new System.Drawing.Size(650, 23);
+            this.textBoxAPIKey3.TabIndex = 0;
+            // 
             // labelIGN
             // 
             this.labelIGN.AutoSize = true;
@@ -3746,6 +4000,7 @@ namespace WzComparerR2
             this.superTabControlPanel4.Controls.Add(this.btnIGN);
             this.superTabControlPanel4.Controls.Add(this.textBoxAPIKey);
             this.superTabControlPanel4.Controls.Add(this.textBoxAPIKey2);
+            this.superTabControlPanel4.Controls.Add(this.textBoxAPIKey3);
             this.superTabControlPanel4.Controls.Add(this.textBoxIGN);
             this.superTabControlPanel4.Controls.Add(this.textBoxocid);
             this.superTabControlPanel4.Controls.Add(this.textBoxouid);
@@ -3792,6 +4047,7 @@ namespace WzComparerR2
             this.superTabControlPanel5.Controls.Add(this.pictureBoxEx2);
             this.superTabControlPanel5.Controls.Add(this.btnGameStart);
             this.superTabControlPanel5.Controls.Add(this.btnAnswer);
+            this.superTabControlPanel5.Controls.Add(this.labelHint);
             this.superTabControlPanel5.Controls.Add(this.labelTimer);
             this.superTabControlPanel5.Controls.Add(this.textBoxAnswer);
             this.superTabControlPanel5.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -3808,16 +4064,29 @@ namespace WzComparerR2
             this.pictureBoxEx2.FrameInterval = 30;
             this.pictureBoxEx2.GlobalScale = 1F;
             this.pictureBoxEx2.IsPlaying = true;
-            this.pictureBoxEx2.Location = new System.Drawing.Point(6, 79);
-            this.pictureBoxEx2.MouseDragEnabled = true;
-            this.pictureBoxEx2.MouseDragSaveEnabled = true;
-            this.pictureBoxEx2.Name = "pictureBoxEx1";
+            this.pictureBoxEx2.Location = new System.Drawing.Point(6, 102);
+            this.pictureBoxEx2.MouseDragEnabled = false;
+            this.pictureBoxEx2.MouseDragSaveEnabled = false;
+            this.pictureBoxEx2.Name = "pictureBoxEx2";
             this.pictureBoxEx2.PictureName = null;
             this.pictureBoxEx2.ShowInfo = true;
             this.pictureBoxEx2.ShowPositionGridOnDrag = true;
-            this.pictureBoxEx2.Size = new System.Drawing.Size(292, 123);
+            this.pictureBoxEx2.Size = new System.Drawing.Size(32, 32);
             this.pictureBoxEx2.TabIndex = 7;
             this.pictureBoxEx2.Text = "pictureBoxEx2";
+            // 
+            // labelHint
+            // 
+            this.labelHint.AutoSize = true;
+            // 
+            // 
+            // 
+            this.labelHint.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
+            this.labelHint.Location = new System.Drawing.Point(6, 53);
+            this.labelHint.Name = "labelHint";
+            this.labelHint.Size = new System.Drawing.Size(400, 23);
+            this.labelHint.TabIndex = 6;
+            this.labelHint.Text = "";
             // 
             // labelTimer
             // 
@@ -3826,7 +4095,7 @@ namespace WzComparerR2
             // 
             // 
             this.labelTimer.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
-            this.labelTimer.Location = new System.Drawing.Point(6, 53);
+            this.labelTimer.Location = new System.Drawing.Point(6, 76);
             this.labelTimer.Name = "labelTimer";
             this.labelTimer.Size = new System.Drawing.Size(400, 23);
             this.labelTimer.TabIndex = 6;
@@ -3861,6 +4130,7 @@ namespace WzComparerR2
             this.btnAnswer.TabIndex = 1;
             this.btnAnswer.Text = "回答";
             this.btnAnswer.Visible = false;
+            this.btnAnswer.Click += new System.EventHandler(this.btnAnswer_Click);
             // 
             // textBoxAnswer
             // 
@@ -4391,6 +4661,13 @@ namespace WzComparerR2
             this.tsmi1UpdateStringLinker.Size = new System.Drawing.Size(154, 22);
             this.tsmi1UpdateStringLinker.Text = "StringLinker更新";
             this.tsmi1UpdateStringLinker.Click += new System.EventHandler(this.tsmi1UpdateStringLinker_Click);
+            //
+            // tsmi1ExportSound
+            // 
+            this.tsmi1ExportSound.Name = "tsmi1ExportSound";
+            this.tsmi1ExportSound.Size = new System.Drawing.Size(154, 22);
+            this.tsmi1ExportSound.Text = "提取音频";
+            this.tsmi1ExportSound.Click += new System.EventHandler(this.tsmi1ExportSound_Click);
             // 
             // tsmi1SaveImgList
             // 
@@ -4515,9 +4792,9 @@ namespace WzComparerR2
             this.bar1.GrabHandleStyle = DevComponents.DotNetBar.eGrabHandleStyle.Caption;
             this.bar1.IsMaximized = false;
             this.bar1.Items.AddRange(new DevComponents.DotNetBar.BaseItem[] {
-            this.dockContainerItem1,
             this.dockContainerItem3,
-            this.dockContainerItem4});
+            this.dockContainerItem4,
+            this.dockContainerItem1,});
             this.bar1.LayoutType = DevComponents.DotNetBar.eLayoutType.DockContainer;
             this.bar1.Location = new System.Drawing.Point(0, 3);
             this.bar1.Name = "bar1";
@@ -4620,6 +4897,7 @@ namespace WzComparerR2
             this.listViewExNotice.Border.CornerType = DevComponents.DotNetBar.eCornerType.Square;
             this.listViewExNotice.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
                 this.columnHeaderServer,
+                this.columnHeaderCategory,
                 this.columnHeaderNotice,
                 this.columnHeaderTaskID,
                 this.columnHeaderDetecttime});
@@ -4641,17 +4919,22 @@ namespace WzComparerR2
             // columnHeaderServer
             // 
             this.columnHeaderServer.Text = "服务器";
-            this.columnHeaderServer.Width = 100;
+            this.columnHeaderServer.Width = 60;
+            // 
+            // columnHeaderCategory
+            // 
+            this.columnHeaderCategory.Text = "分类";
+            this.columnHeaderCategory.Width = 50;
             // 
             // columnHeaderNotice
             // 
             this.columnHeaderNotice.Text = "公告";
-            this.columnHeaderNotice.Width = 500;
+            this.columnHeaderNotice.Width = 600;
             // 
             // columnHeaderTaskID
             // 
-            this.columnHeaderTaskID.Text = "任务ID";
-            this.columnHeaderTaskID.Width = 100;
+            this.columnHeaderTaskID.Text = "任务代码";
+            this.columnHeaderTaskID.Width = 70;
             // 
             // columnHeaderDetecttime
             // 
@@ -4970,6 +5253,7 @@ namespace WzComparerR2
         private DevComponents.DotNetBar.Controls.TextBoxX textBoxX2;
         private DevComponents.DotNetBar.Controls.TextBoxX textBoxAPIKey;
         private DevComponents.DotNetBar.Controls.TextBoxX textBoxAPIKey2;
+        private DevComponents.DotNetBar.Controls.TextBoxX textBoxAPIKey3;
         private DevComponents.DotNetBar.Controls.TextBoxX textBoxIGN;
         private DevComponents.DotNetBar.Controls.TextBoxX textBoxocid;
         private DevComponents.DotNetBar.Controls.TextBoxX textBoxouid;
@@ -4994,6 +5278,7 @@ namespace WzComparerR2
         private DevComponents.AdvTree.ColumnHeader columnHeader4;
         private DevComponents.AdvTree.ColumnHeader columnHeader5;
         private System.Windows.Forms.ColumnHeader columnHeaderServer;
+        private System.Windows.Forms.ColumnHeader columnHeaderCategory;
         private System.Windows.Forms.ColumnHeader columnHeaderNotice;
         private System.Windows.Forms.ColumnHeader columnHeaderTaskID;
         private System.Windows.Forms.ColumnHeader columnHeaderDetecttime;
@@ -5079,7 +5364,12 @@ namespace WzComparerR2
         private DevComponents.DotNetBar.ItemContainer itemContainer45;
         private DevComponents.DotNetBar.ItemContainer itemContainer46;
         private DevComponents.DotNetBar.ItemContainer itemContainer47;
-        private DevComponents.DotNetBar.ButtonItem buttonJobSelect;
+        private DevComponents.DotNetBar.ItemContainer itemContainer48;
+        private DevComponents.DotNetBar.ItemContainer itemContainer49;
+        private DevComponents.DotNetBar.ItemContainer itemContainer50;
+        private DevComponents.DotNetBar.ItemContainer itemContainer51;
+        public DevComponents.DotNetBar.ButtonItem buttonJobSelect;
+        public DevComponents.DotNetBar.ButtonItem buttonSkill;
         private DevComponents.DotNetBar.ButtonItem buttonDisableOverlayAni;
         private DevComponents.DotNetBar.ButtonItem buttonOverlayRect;
         private DevComponents.DotNetBar.ButtonItem buttonLoadMultiFrameAniList;
@@ -5103,6 +5393,8 @@ namespace WzComparerR2
         private DevComponents.DotNetBar.ItemContainer itemContainer40;
         private DevComponents.DotNetBar.ButtonItem buttonItemCreateChara;
         private DevComponents.DotNetBar.ButtonItem buttonItemEdit;
+        private DevComponents.DotNetBar.RibbonBar ribbonBar14;
+        private DevComponents.DotNetBar.ButtonItem buttonPathSearch;
         private DevComponents.DotNetBar.RibbonBar ribbonBar9;
         private DevComponents.DotNetBar.ButtonItem buttonItemPatcher;
         private DevComponents.DotNetBar.ButtonItem buttonItemInstallGame;
@@ -5133,6 +5425,11 @@ namespace WzComparerR2
         private System.Windows.Forms.DateTimePicker dateTimePickerDailyReport;
         private System.Windows.Forms.Button btnConfirmDailyReport;
         private System.Windows.Forms.Form dailyReportForm;
+        private System.Windows.Forms.Form pathSearchForm;
+        private DevComponents.DotNetBar.Controls.TextBoxX textBoxPath;
+        private DevComponents.DotNetBar.LabelX labelPath;
+        private DevComponents.DotNetBar.ButtonX btnYes;
+        private DevComponents.DotNetBar.ButtonX btnNo;
         private DevComponents.DotNetBar.ButtonX btnExportSkillOption;
         private DevComponents.DotNetBar.ButtonX btnExportSkill;
         private DevComponents.DotNetBar.ButtonX btnSkillName;
@@ -5158,6 +5455,7 @@ namespace WzComparerR2
         private DevComponents.DotNetBar.LabelX labelX1;
         private DevComponents.DotNetBar.LabelX labelX2;
         private System.Windows.Forms.Timer countdownTimer;
+        private DevComponents.DotNetBar.LabelX labelHint;
         private DevComponents.DotNetBar.LabelX labelTimer;
         private DevComponents.DotNetBar.LabelX labelAPIKey;
         private DevComponents.DotNetBar.LabelX labelMode;
@@ -5211,8 +5509,12 @@ namespace WzComparerR2
         private DevComponents.DotNetBar.PanelDockContainer panelDockContainer4;
         private DevComponents.DotNetBar.RibbonBar ribbonBar11;
         private DevComponents.DotNetBar.RibbonBar ribbonBar12;
+        private DevComponents.DotNetBar.RibbonBar ribbonBar13;
         private DevComponents.DotNetBar.ButtonItem buttonItem1;
         private DevComponents.DotNetBar.ButtonItem buttonPapulatus;
+        private DevComponents.DotNetBar.ButtonItem buttonDiscord;
+        private DevComponents.DotNetBar.ButtonItem buttonQQ;
+        private DevComponents.DotNetBar.ButtonItem buttonQQChannel;
         private DevComponents.DotNetBar.ButtonItem btnNodeBack;
         private DevComponents.DotNetBar.ButtonItem btnNodeForward;
         private System.Windows.Forms.ToolStripMenuItem tsmi2SaveAs;
@@ -5223,6 +5525,7 @@ namespace WzComparerR2
         private DevComponents.DotNetBar.ButtonItem buttonItemUpdate;
         private System.Windows.Forms.ToolStripMenuItem tsmi1DumpAsXml;
         private System.Windows.Forms.ToolStripMenuItem tsmi1UpdateStringLinker;
+        private System.Windows.Forms.ToolStripMenuItem tsmi1ExportSound;
         private System.Windows.Forms.ToolStripMenuItem tsmi1SaveImgList;
         private DevComponents.Editors.ComboItem comboItem18;
         private DevComponents.DotNetBar.Controls.CheckBoxX chkResolvePngLink;
@@ -5247,6 +5550,7 @@ namespace WzComparerR2
         private DevComponents.DotNetBar.Controls.CheckBoxX chkShowChangeType;
         private DevComponents.DotNetBar.Controls.CheckBoxX chkShowLinkedTamingMob;
         private DevComponents.DotNetBar.Controls.CheckBoxX chkSkipKMSContent;
+        private DevComponents.DotNetBar.Controls.CheckBoxX chkSkipGodChangseopDuplicatedNodes;
         private DevComponents.Editors.ComboItem comboItem19;
         private DevComponents.Editors.ComboItem comboItem20;
         private DevComponents.Editors.ComboItem comboItem21;

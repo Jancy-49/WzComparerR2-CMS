@@ -23,6 +23,7 @@ namespace WzComparerR2.CharaSimControl
         private AfrmItem frmItem;
         private AfrmStat frmStat;
         private AfrmEquip frmEquip;
+        private AfrmSkill frmSkill;
         private AfrmUnion frmUnion;
         private AfrmJob frmJob;
         private Character character;
@@ -93,6 +94,22 @@ namespace WzComparerR2.CharaSimControl
             }
         }
 
+        public AfrmSkill UISkill
+        {
+            get
+            {
+                if (frmSkill == null)
+                {
+                    frmSkill = new AfrmSkill();
+                    frmSkill.KeyDown += new KeyEventHandler(afrm_KeyDown);
+                    frmSkill.ObjectMouseMove += new ObjectMouseEventHandler(frmSkill_ObjectMouseMove);
+                    frmSkill.ObjectMouseLeave += new EventHandler(frmSkill_ObjectMouseLeave);
+                    frmSkill.Character = this.character;
+                }
+                return frmSkill;
+            }
+        }
+
         public AfrmUnion UIUnion
         {
             get
@@ -134,6 +151,8 @@ namespace WzComparerR2.CharaSimControl
                     this.frmStat.Character = value;
                 if (frmEquip != null)
                     this.frmEquip.Character = value;
+                if (frmSkill != null)
+                    this.frmSkill.Character = value;
                 if (frmUnion != null)
                     this.frmUnion.Character = value;
                 if (frmJob != null)
@@ -151,7 +170,7 @@ namespace WzComparerR2.CharaSimControl
             }
         }
 
-        private void afrm_KeyDown(object sender, KeyEventArgs e)
+        public void afrm_KeyDown(object sender, KeyEventArgs e)
         {
             Form frm = sender as Form;
             if (frm == null)
@@ -184,6 +203,9 @@ namespace WzComparerR2.CharaSimControl
                     break;
                 case Keys.E:
                     frmEquip.Visible = !frmEquip.Visible;
+                    break;
+                case Keys.K:
+                    frmSkill.Visible = !frmSkill.Visible;
                     break;
             }
         }
@@ -321,6 +343,37 @@ namespace WzComparerR2.CharaSimControl
         }
 
         private void frmStat_ObjectMouseLeave(object sender, EventArgs e)
+        {
+            tooltip.Visible = false;
+        }
+
+        public void frmSkill_ObjectMouseMove(object sender, ObjectMouseEventArgs e)
+        {
+            if (e.Obj is Skill && !this.stringLinker.HasValues)
+            {
+                this.stringLinker.Load(PluginBase.PluginManager.FindWz(Wz_Type.String).GetValueEx<Wz_File>(null),
+                    PluginBase.PluginManager.FindWz(Wz_Type.Item).GetValueEx<Wz_File>(null),
+                    PluginBase.PluginManager.FindWz(Wz_Type.Etc).GetValueEx<Wz_File>(null),
+                    PluginBase.PluginManager.FindWz(Wz_Type.Quest).GetValueEx<Wz_File>(null));
+            }
+            if (e.Obj == null)
+            {
+                tooltip.Visible = false;
+                return;
+            }
+            if (e.Obj != tooltip.TargetItem)
+            {
+                tooltip.TargetItem = e.Obj;
+                tooltip.Refresh();
+            }
+            Point pos = frmSkill.PointToScreen(e.Location);
+            pos.Offset(5, 5);
+            tooltip.Location = pos;
+            tooltip.Visible = true;
+            tooltip.BringToFront();
+        }
+
+        public void frmSkill_ObjectMouseLeave(object sender, EventArgs e)
         {
             tooltip.Visible = false;
         }

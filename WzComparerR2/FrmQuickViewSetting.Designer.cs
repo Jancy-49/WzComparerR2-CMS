@@ -31,6 +31,7 @@
             this.superTabControl1 = new DevComponents.DotNetBar.SuperTabControl();
             this.superTabControlPanel1 = new DevComponents.DotNetBar.SuperTabControlPanel();
             this.chkEnable22AniStyle = new DevComponents.DotNetBar.Controls.CheckBoxX();
+            this.chkShowAllIllustAtOnce = new DevComponents.DotNetBar.Controls.CheckBoxX();
             this.chkShowMiniMap = new DevComponents.DotNetBar.Controls.CheckBoxX();
             this.chkShowMapObjectID = new DevComponents.DotNetBar.Controls.CheckBoxX();
             this.chkShowMobNpcObjectID = new DevComponents.DotNetBar.Controls.CheckBoxX();
@@ -81,6 +82,16 @@
             this.comboBoxEx4 = new DevComponents.DotNetBar.Controls.ComboBoxEx();
             this.superTabItem3 = new DevComponents.DotNetBar.SuperTabItem();
             this.superTabControlPanel4 = new DevComponents.DotNetBar.SuperTabControlPanel();
+            this.superTabControlPanel8 = new DevComponents.DotNetBar.SuperTabControlPanel();
+            this.superTabControlPanel9 = new DevComponents.DotNetBar.SuperTabControlPanel();
+            this.chkShowDamageSkinID = new DevComponents.DotNetBar.Controls.CheckBoxX();
+            this.chkShowDamageSkin = new DevComponents.DotNetBar.Controls.CheckBoxX();
+            this.chkUseMiniSize = new DevComponents.DotNetBar.Controls.CheckBoxX();
+            this.chkAlwaysUseMseaFormat = new DevComponents.DotNetBar.Controls.CheckBoxX();
+            this.chkAllowFamiliarOutOfBounds = new DevComponents.DotNetBar.Controls.CheckBoxX();
+            this.chkUseCTFamiliarUI = new DevComponents.DotNetBar.Controls.CheckBoxX();
+            this.lblDamageSkinNumber = new DevComponents.DotNetBar.LabelX();
+            this.txtDamageSkinNumber = new DevComponents.DotNetBar.Controls.TextBoxX();
             this.checkBoxX7 = new DevComponents.DotNetBar.Controls.CheckBoxX();
             this.superTabItem4 = new DevComponents.DotNetBar.SuperTabItem();
             this.panelEx1 = new DevComponents.DotNetBar.PanelEx();
@@ -95,6 +106,8 @@
             this.superTabItem5 = new DevComponents.DotNetBar.SuperTabItem();
             this.superTabItem6 = new DevComponents.DotNetBar.SuperTabItem();
             this.superTabItem7 = new DevComponents.DotNetBar.SuperTabItem();
+            this.superTabItem8 = new DevComponents.DotNetBar.SuperTabItem();
+            this.superTabItem9 = new DevComponents.DotNetBar.SuperTabItem();
             this.comboBoxExQuestState = new DevComponents.DotNetBar.Controls.ComboBoxEx();
             this.comboItemQS0 = new DevComponents.Editors.ComboItem();
             this.comboItemQS1 = new DevComponents.Editors.ComboItem();
@@ -103,6 +116,7 @@
             this.labelXQSHint = new DevComponents.DotNetBar.LabelX();
             this.chkShowQuestObjectID = new DevComponents.DotNetBar.Controls.CheckBoxX();
             this.chkQAS = new DevComponents.DotNetBar.Controls.CheckBoxX();
+            this.chkUseAssembleUI = new DevComponents.DotNetBar.Controls.CheckBoxX();
             ((System.ComponentModel.ISupportInitialize)(this.superTabControl1)).BeginInit();
             this.superTabControl1.SuspendLayout();
             this.superTabControlPanel1.SuspendLayout();
@@ -112,6 +126,8 @@
             this.superTabControlPanel5.SuspendLayout();
             this.superTabControlPanel6.SuspendLayout();
             this.superTabControlPanel7.SuspendLayout();
+            this.superTabControlPanel8.SuspendLayout();
+            this.superTabControlPanel9.SuspendLayout();
             this.panelEx1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -137,6 +153,8 @@
             this.superTabControl1.Controls.Add(this.superTabControlPanel2);
             this.superTabControl1.Controls.Add(this.superTabControlPanel3);
             this.superTabControl1.Controls.Add(this.superTabControlPanel4);
+            this.superTabControl1.Controls.Add(this.superTabControlPanel9);
+            this.superTabControl1.Controls.Add(this.superTabControlPanel8);
             this.superTabControl1.Controls.Add(this.superTabControlPanel6);
             this.superTabControl1.Controls.Add(this.superTabControlPanel7);
             this.superTabControl1.Controls.Add(this.superTabControlPanel5);
@@ -155,6 +173,8 @@
             this.superTabItem2,
             this.superTabItem3,
             this.superTabItem4,
+            this.superTabItem9,
+            this.superTabItem8,
             this.superTabItem6,
             this.superTabItem7,
             this.superTabItem5,});
@@ -527,6 +547,7 @@
             // 
             // superTabControlPanel3
             // 
+            this.superTabControlPanel3.Controls.Add(this.chkUseAssembleUI);
             this.superTabControlPanel3.Controls.Add(this.checkBoxX23);
             this.superTabControlPanel3.Controls.Add(this.checkBoxX12);
             this.superTabControlPanel3.Controls.Add(this.checkBoxX9);
@@ -543,6 +564,21 @@
             this.superTabControlPanel3.TabIndex = 0;
             this.superTabControlPanel3.TabItem = this.superTabItem3;
             this.superTabControlPanel3.Visible = false;
+            // 
+            // chkUseAssembleUI
+            // 
+            this.chkUseAssembleUI.AutoSize = true;
+            this.chkUseAssembleUI.BackColor = System.Drawing.Color.Transparent;
+            // 
+            // 
+            // 
+            this.chkUseAssembleUI.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
+            this.chkUseAssembleUI.Location = new System.Drawing.Point(13, 179);
+            this.chkUseAssembleUI.Name = "chkUseAssembleUI";
+            this.chkUseAssembleUI.Size = new System.Drawing.Size(126, 16);
+            this.chkUseAssembleUI.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
+            this.chkUseAssembleUI.TabIndex = 5;
+            this.chkUseAssembleUI.Text = "使用莲合行动版本UI";
             // 
             // checkBoxX23
             // 
@@ -988,8 +1024,121 @@
             this.chkShowQuestObjectID.TabIndex = 2;
             this.chkShowQuestObjectID.Text = "显示任务代码";
             // 
+            // superTabControlPanel8
+            // 
+            this.superTabControlPanel8.Controls.Add(this.txtDamageSkinNumber);
+            this.superTabControlPanel8.Controls.Add(this.lblDamageSkinNumber);
+            this.superTabControlPanel8.Controls.Add(this.chkAlwaysUseMseaFormat);
+            this.superTabControlPanel8.Controls.Add(this.chkUseMiniSize);
+            this.superTabControlPanel8.Controls.Add(this.chkShowDamageSkin);
+            this.superTabControlPanel8.Controls.Add(this.chkShowDamageSkinID);
+            this.superTabControlPanel8.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.superTabControlPanel8.Location = new System.Drawing.Point(62, 0);
+            this.superTabControlPanel8.Name = "superTabControlPanel8";
+            this.superTabControlPanel8.Size = new System.Drawing.Size(242, 211);
+            this.superTabControlPanel8.TabIndex = 0;
+            this.superTabControlPanel8.TabItem = this.superTabItem8;
+            this.superTabControlPanel8.Visible = false;
+            // 
+            // superTabItem8
+            // 
+            this.superTabItem8.AttachedControl = this.superTabControlPanel8;
+            this.superTabItem8.GlobalItem = false;
+            this.superTabItem8.Name = "superTabItem8";
+            this.superTabItem8.Text = "伤害皮肤";
+            // 
+            // txtDamageSkinNumber
+            // 
+            // 
+            // 
+            // 
+            this.txtDamageSkinNumber.Border.Class = "TextBoxBorder";
+            this.txtDamageSkinNumber.Border.CornerType = DevComponents.DotNetBar.eCornerType.Square;
+            this.txtDamageSkinNumber.Location = new System.Drawing.Point(86, 106);
+            this.txtDamageSkinNumber.Name = "txtDamageSkinNumber";
+            this.txtDamageSkinNumber.Size = new System.Drawing.Size(160, 23);
+            this.txtDamageSkinNumber.WatermarkText = "1234567890";
+            this.txtDamageSkinNumber.MaxLength = 18;
+            this.txtDamageSkinNumber.TextChanged += new System.EventHandler(this.txtDamageSkinNumber_TextChanged);
+            this.txtDamageSkinNumber.TabIndex = 6;
+            // 
+            // lblDamageSkinNumber
+            // 
+            this.lblDamageSkinNumber.AutoSize = true;
+            this.lblDamageSkinNumber.BackColor = System.Drawing.Color.Transparent;
+            // 
+            // 
+            // 
+            this.lblDamageSkinNumber.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
+            this.lblDamageSkinNumber.Location = new System.Drawing.Point(13, 107);
+            this.lblDamageSkinNumber.Name = "lblDamageSkinNumber";
+            this.lblDamageSkinNumber.Size = new System.Drawing.Size(87, 16);
+            this.lblDamageSkinNumber.TabIndex = 5;
+            this.lblDamageSkinNumber.Text = "伤害数值";
+            // 
+            // chkAlwaysUseMseaFormat
+            // 
+            this.chkAlwaysUseMseaFormat.AutoSize = true;
+            this.chkAlwaysUseMseaFormat.BackColor = System.Drawing.Color.Transparent;
+            // 
+            // 
+            // 
+            this.chkAlwaysUseMseaFormat.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
+            this.chkAlwaysUseMseaFormat.Location = new System.Drawing.Point(13, 84);
+            this.chkAlwaysUseMseaFormat.Name = "chkAlwaysUseMseaFormat";
+            this.chkAlwaysUseMseaFormat.Size = new System.Drawing.Size(133, 16);
+            this.chkAlwaysUseMseaFormat.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
+            this.chkAlwaysUseMseaFormat.TabIndex = 4;
+            this.chkAlwaysUseMseaFormat.Text = "使用千位分隔符";
+            // 
+            // chkUseMiniSize
+            // 
+            this.chkUseMiniSize.AutoSize = true;
+            this.chkUseMiniSize.BackColor = System.Drawing.Color.Transparent;
+            // 
+            // 
+            // 
+            this.chkUseMiniSize.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
+            this.chkUseMiniSize.Location = new System.Drawing.Point(13, 60);
+            this.chkUseMiniSize.Name = "chkUseMiniSize";
+            this.chkUseMiniSize.Size = new System.Drawing.Size(145, 16);
+            this.chkUseMiniSize.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
+            this.chkUseMiniSize.TabIndex = 3;
+            this.chkUseMiniSize.Text = "使用小型伤害皮肤";
+            // 
+            // chkShowDamageSkin
+            // 
+            this.chkShowDamageSkin.AutoSize = true;
+            this.chkShowDamageSkin.BackColor = System.Drawing.Color.Transparent;
+            // 
+            // 
+            // 
+            this.chkShowDamageSkin.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
+            this.chkShowDamageSkin.Location = new System.Drawing.Point(13, 36);
+            this.chkShowDamageSkin.Name = "chkShowDamageSkin";
+            this.chkShowDamageSkin.Size = new System.Drawing.Size(172, 16);
+            this.chkShowDamageSkin.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
+            this.chkShowDamageSkin.TabIndex = 2;
+            this.chkShowDamageSkin.Text = "显示伤害皮肤";
+            // 
+            // chkShowDamageSkinID
+            // 
+            this.chkShowDamageSkinID.AutoSize = true;
+            this.chkShowDamageSkinID.BackColor = System.Drawing.Color.Transparent;
+            // 
+            // 
+            // 
+            this.chkShowDamageSkinID.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
+            this.chkShowDamageSkinID.Location = new System.Drawing.Point(13, 12);
+            this.chkShowDamageSkinID.Name = "chkShowDamageSkinID";
+            this.chkShowDamageSkinID.Size = new System.Drawing.Size(117, 16);
+            this.chkShowDamageSkinID.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
+            this.chkShowDamageSkinID.TabIndex = 1;
+            this.chkShowDamageSkinID.Text = "显示代码";
+            // 
             // superTabControlPanel5
             // 
+            this.superTabControlPanel5.Controls.Add(this.chkShowAllIllustAtOnce);
             this.superTabControlPanel5.Controls.Add(this.chkEnable22AniStyle);
             this.superTabControlPanel5.Controls.Add(this.chkCopyParsedSkillString);
             this.superTabControlPanel5.Controls.Add(this.labelX4);
@@ -1001,6 +1150,55 @@
             this.superTabControlPanel5.TabIndex = 0;
             this.superTabControlPanel5.TabItem = this.superTabItem5;
             this.superTabControlPanel5.Visible = false;
+            //
+            // superTabControlPanel9
+            //
+            this.superTabControlPanel9.Controls.Add(this.chkUseCTFamiliarUI);
+            this.superTabControlPanel9.Controls.Add(this.chkAllowFamiliarOutOfBounds);
+            this.superTabControlPanel9.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.superTabControlPanel9.Location = new System.Drawing.Point(62, 0);
+            this.superTabControlPanel9.Name = "superTabControlPanel9";
+            this.superTabControlPanel9.Size = new System.Drawing.Size(242, 211);
+            this.superTabControlPanel9.TabIndex = 0;
+            this.superTabControlPanel9.TabItem = this.superTabItem9;
+            this.superTabControlPanel9.Visible = false;
+            // 
+            // superTabItem9
+            // 
+            this.superTabItem9.AttachedControl = this.superTabControlPanel9;
+            this.superTabItem9.GlobalItem = false;
+            this.superTabItem9.Name = "superTabItem9";
+            this.superTabItem9.Text = "怪怪";
+            // 
+            // chkUseCTFamiliarUI
+            // 
+            this.chkUseCTFamiliarUI.AutoSize = true;
+            this.chkUseCTFamiliarUI.BackColor = System.Drawing.Color.Transparent;
+            // 
+            // 
+            // 
+            this.chkUseCTFamiliarUI.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
+            this.chkUseCTFamiliarUI.Location = new System.Drawing.Point(13, 36);
+            this.chkUseCTFamiliarUI.Name = "chkUseCTFamiliarUI";
+            this.chkUseCTFamiliarUI.Size = new System.Drawing.Size(172, 16);
+            this.chkUseCTFamiliarUI.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
+            this.chkUseCTFamiliarUI.TabIndex = 2;
+            this.chkUseCTFamiliarUI.Text = "使用CMS/TMS样式UI";
+            // 
+            // chkAllowFamiliarOutOfBounds
+            // 
+            this.chkAllowFamiliarOutOfBounds.AutoSize = true;
+            this.chkAllowFamiliarOutOfBounds.BackColor = System.Drawing.Color.Transparent;
+            // 
+            // 
+            // 
+            this.chkAllowFamiliarOutOfBounds.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
+            this.chkAllowFamiliarOutOfBounds.Location = new System.Drawing.Point(13, 12);
+            this.chkAllowFamiliarOutOfBounds.Name = "chkAllowFamiliarOutOfBounds";
+            this.chkAllowFamiliarOutOfBounds.Size = new System.Drawing.Size(117, 16);
+            this.chkAllowFamiliarOutOfBounds.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
+            this.chkAllowFamiliarOutOfBounds.TabIndex = 1;
+            this.chkAllowFamiliarOutOfBounds.Text = "图像超出边界";
             // 
             // superTabItem5
             // 
@@ -1051,6 +1249,21 @@
             this.cmbPreferredStringCopyMethod.Size = new System.Drawing.Size(160, 19);
             this.cmbPreferredStringCopyMethod.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
             this.cmbPreferredStringCopyMethod.TabIndex = 3;
+            // 
+            // chkShowAllIllustAtOnce
+            // 
+            this.chkShowAllIllustAtOnce.AutoSize = true;
+            this.chkShowAllIllustAtOnce.BackColor = System.Drawing.Color.Transparent;
+            // 
+            // 
+            // 
+            this.chkShowAllIllustAtOnce.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
+            this.chkShowAllIllustAtOnce.Location = new System.Drawing.Point(13, 83);
+            this.chkShowAllIllustAtOnce.Name = "chkShowAllIllustAtOnce";
+            this.chkShowAllIllustAtOnce.Size = new System.Drawing.Size(145, 16);
+            this.chkShowAllIllustAtOnce.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
+            this.chkShowAllIllustAtOnce.TabIndex = 5;
+            this.chkShowAllIllustAtOnce.Text = "显示全部NPC插画";
             // 
             // chkEnable22AniStyle
             // 
@@ -1119,6 +1332,12 @@
             this.superTabControlPanel5.PerformLayout();
             this.superTabControlPanel6.ResumeLayout(false);
             this.superTabControlPanel6.PerformLayout();
+            this.superTabControlPanel7.ResumeLayout(false);
+            this.superTabControlPanel7.PerformLayout();
+            this.superTabControlPanel8.ResumeLayout(false);
+            this.superTabControlPanel8.PerformLayout();
+            this.superTabControlPanel9.ResumeLayout(false);
+            this.superTabControlPanel9.PerformLayout();
             this.panelEx1.ResumeLayout(false);
             this.ResumeLayout(false);
 
@@ -1164,6 +1383,10 @@
         private DevComponents.DotNetBar.SuperTabItem superTabItem6;
         private DevComponents.DotNetBar.SuperTabControlPanel superTabControlPanel7;
         private DevComponents.DotNetBar.SuperTabItem superTabItem7;
+        private DevComponents.DotNetBar.SuperTabControlPanel superTabControlPanel8;
+        private DevComponents.DotNetBar.SuperTabItem superTabItem8;
+        private DevComponents.DotNetBar.SuperTabControlPanel superTabControlPanel9;
+        private DevComponents.DotNetBar.SuperTabItem superTabItem9;
         private DevComponents.DotNetBar.Controls.CheckBoxX checkBoxX6;
         private DevComponents.DotNetBar.Controls.CheckBoxX checkBoxX7;
         private DevComponents.DotNetBar.Controls.CheckBoxX checkBoxX9;
@@ -1181,7 +1404,16 @@
         private DevComponents.DotNetBar.LabelX labelX4;
         private DevComponents.DotNetBar.LabelX labelX14;
         private DevComponents.DotNetBar.LabelX labelX15;
+        private DevComponents.DotNetBar.Controls.CheckBoxX chkShowAllIllustAtOnce;
         private DevComponents.DotNetBar.Controls.CheckBoxX chkEnable22AniStyle;
+        private DevComponents.DotNetBar.Controls.CheckBoxX chkShowDamageSkinID;
+        private DevComponents.DotNetBar.Controls.CheckBoxX chkShowDamageSkin;
+        private DevComponents.DotNetBar.Controls.CheckBoxX chkUseMiniSize;
+        private DevComponents.DotNetBar.Controls.CheckBoxX chkAlwaysUseMseaFormat;
+        private DevComponents.DotNetBar.Controls.CheckBoxX chkAllowFamiliarOutOfBounds;
+        private DevComponents.DotNetBar.Controls.CheckBoxX chkUseCTFamiliarUI;
+        private DevComponents.DotNetBar.LabelX lblDamageSkinNumber;
+        private DevComponents.DotNetBar.Controls.TextBoxX txtDamageSkinNumber;
         private DevComponents.DotNetBar.Controls.CheckBoxX chkShowMiniMap;
         private DevComponents.DotNetBar.Controls.CheckBoxX chkShowMapObjectID;
         private DevComponents.DotNetBar.Controls.CheckBoxX chkShowMobNpcObjectID;
@@ -1201,5 +1433,6 @@
         private DevComponents.DotNetBar.LabelX labelXQSHint;
         private DevComponents.DotNetBar.Controls.CheckBoxX chkShowQuestObjectID;
         private DevComponents.DotNetBar.Controls.CheckBoxX chkQAS;
+        private DevComponents.DotNetBar.Controls.CheckBoxX chkUseAssembleUI;
     }
 }

@@ -48,5 +48,16 @@ namespace WzComparerR2.Properties {
                 this["APIKey"] = value;
             }
         }
+        public string APIKey3
+        {
+            get
+            {
+                return ((string)(this["APIKey"]));
+            }
+            set
+            {
+                this["APIKey"] = value;
+            }
+        }
     }
 }

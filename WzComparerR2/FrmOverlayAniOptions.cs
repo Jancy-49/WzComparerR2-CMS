@@ -40,6 +40,8 @@ namespace WzComparerR2
             this.txtGoX.Value = 0;
             this.txtGoY.Value = 0;
             this.chkFullMove.Checked = true;
+            this.chkFlipX.Checked = false;
+            this.chkFlipY.Checked = false;
 
             if (isPngFrameAni)
             {
@@ -60,24 +62,45 @@ namespace WzComparerR2
             return ret;
         }
 
-        public void GetValues(out int delayOffset, out int moveX, out int moveY, out int frameStart, out int frameEnd, out int speedX, out int speedY, out int goX, out int goY, out bool fullMove, out int pngDelay)
+        public void SetSpine()
         {
-            delayOffset = this.txtDelayOffset.ValueObject as int? ?? 0;
-            moveX = this.txtMoveX.ValueObject as int? ?? 0;
-            moveY = this.txtMoveY.ValueObject as int? ?? 0;
-            frameStart = this.txtFrameStart.ValueObject as int? ?? -1;
-            frameEnd = this.txtFrameEnd.ValueObject as int? ?? -1;
-            speedX = this.txtSpeedX.ValueObject as int? ?? 0;
-            speedY = this.txtSpeedY.ValueObject as int? ?? 0;
-            goX = this.txtGoX.ValueObject as int? ?? 0;
-            goY = this.txtGoY.ValueObject as int? ?? 0;
-            fullMove = this.chkFullMove.Checked;
-            pngDelay = this.txtPngDelay.ValueObject as int? ?? 0;
+            this.txtFrameStart.Enabled = false;
+            this.txtFrameEnd.Enabled = false;
+            this.txtSpeedX.Enabled = false;
+            this.txtSpeedY.Enabled = false;
+            this.txtGoX.Enabled = false;
+            this.txtGoY.Enabled = false;
+            this.chkFullMove.Enabled = false;
+            this.chkFlipX.Enabled = false;
+            this.chkFlipY.Enabled = false;
+        }
 
-            delayOffset = delayOffset / 10 * 10;
-            pngDelay = pngDelay / 10 * 10;
+        public OverlayOptions GetValues()
+        {
+            var ret = new OverlayOptions()
+            {
+                AniOffset = this.txtDelayOffset.ValueObject as int? ?? 0,
+                AniStart = this.txtFrameStart.ValueObject as int? ?? -1,
+                AniEnd = this.txtFrameEnd.ValueObject as int? ?? -1,
+                PosX = this.txtMoveX.ValueObject as int? ?? 0,
+                PosY = this.txtMoveY.ValueObject as int? ?? 0,
 
-            return;
+                PngDelay = this.txtPngDelay.ValueObject as int? ?? 0,
+
+                FullMove = this.chkFullMove.Checked,
+                FlipX = this.chkFlipX.Checked,
+                FlipY = this.chkFlipY.Checked,
+
+                SpeedX = this.txtSpeedX.ValueObject as int? ?? 0,
+                SpeedY = this.txtSpeedY.ValueObject as int? ?? 0,
+                GoX = this.txtGoX.ValueObject as int? ?? 0,
+                GoY = this.txtGoY.ValueObject as int? ?? 0
+            };
+
+            ret.AniOffset = ret.AniOffset / 10 * 10;
+            ret.PngDelay = ret.PngDelay / 10 * 10;
+
+            return ret;
         }
     }
 }

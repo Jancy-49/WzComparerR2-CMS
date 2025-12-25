@@ -277,8 +277,9 @@ namespace WzComparerR2.MapRender
             }
 
             allItems.Clear();
-            var origin = this.renderEnv.Camera.Origin.ToPoint();
-            this.batcher.Begin(Matrix.CreateTranslation(new Vector3(-origin.X, -origin.Y, 0)));
+            var camera = this.renderEnv.Camera;
+            var origin = camera.Origin;
+            this.batcher.Begin(origin, (float)(gameTime.TotalGameTime.TotalSeconds % 1000));
             Rectangle[] rects = null;
             //绘制场景
             foreach (var kv in GetDrawableItems(this.mapData.Scene))
@@ -300,8 +301,8 @@ namespace WzComparerR2.MapRender
                     {
                         for (int i = 0; i < rectCount; i++)
                         {
-                            rects[i].X -= origin.X;
-                            rects[i].Y -= origin.Y;
+                            rects[i].X -= (int)origin.X;
+                            rects[i].Y -= (int)origin.Y;
                             allItems.Add(new ItemRect() { item = kv.Key, rect = rects[i] });
                         }
                     }

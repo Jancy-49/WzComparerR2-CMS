@@ -35,14 +35,14 @@ namespace WzComparerR2.MapRender
         protected override void OnLoad()
         {
 #if MapRenderV1
-            this.bar = Context.AddRibbonBar("Modules", "MapRender");
-            btnItemMapRender = new ButtonItem("", "Map Render");
+            this.bar = Context.AddRibbonBar("Modules", "地图渲染");
+            btnItemMapRender = new ButtonItem("", "地图渲染");
             btnItemMapRender.Click += btnItem_Click;
             bar.Items.Add(btnItemMapRender);
 #endif
 
-            this.bar2 = Context.AddRibbonBar("Modules", "MapRender");
-            btnItemMapRenderV2 = new ButtonItem("", "MapRender");
+            this.bar2 = Context.AddRibbonBar("Modules", "地图渲染");
+            btnItemMapRenderV2 = new ButtonItem("", "地图渲染");
             btnItemMapRenderV2.Click += btnItem_Click;
             bar2.Items.Add(btnItemMapRenderV2);
 

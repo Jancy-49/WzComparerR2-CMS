@@ -30,6 +30,7 @@ namespace WzComparerR2.CharaSimControl
         private Point baseOffset;
         private Point newLocation;
         private Character character;
+        private ContextMenuStrip menu;
         private ACtrlButton btnClose;
         private ACtrlButton btnAttacker;
         private ACtrlButton btnArtifact;
@@ -147,6 +148,11 @@ namespace WzComparerR2.CharaSimControl
 
         private void InitUnion()
         {
+            this.menu = new ContextMenuStrip();
+            this.menu.Items.Add(new ToolStripMenuItem("复制", null, tsmiCopy_Click));
+            this.menu.Items.Add(new ToolStripMenuItem("保存PNG", null, tsmiSave_Click));
+            this.MouseClick += AfrmUnion_MouseClick;
+
             this.btnClose = new ACtrlButton(); //主页关闭按钮
             this.btnClose.Normal = new BitmapOrigin(Resource.mapleUnion_attackerSetting_buttonclose_normal_0);
             this.btnClose.Pressed = new BitmapOrigin(Resource.mapleUnion_attackerSetting_buttonclose_pressed_0);
@@ -604,11 +610,13 @@ namespace WzComparerR2.CharaSimControl
                         string block_subfix = "sub_0";
                         switch(block_type)
                         {
-                            case "전사": block_subfix = "main_0_0"; break;
-                            case "마법사": block_subfix = "main_2_0"; break;
-                            case "궁수": block_subfix = "main_3_0"; break;
-                            case "도적": block_subfix = "main_4_0"; break;
-                            case "해적": block_subfix = "main_5_0"; break;
+                            case "劍士": case "Warrior": case "전사": block_subfix = "main_0_0"; break;
+                            case "法師": case "Magician": case "마법사": block_subfix = "main_2_0"; break;
+                            case "弓箭手": case "Bowman ": case "궁수": block_subfix = "main_3_0"; break;
+                            case "盜賊": case "Thief": case "도적": block_subfix = "main_4_0"; break;
+                            case "海盜": case "Pirate": case "해적": block_subfix = "main_5_0"; break;
+                            case "米納爾森林": block_subfix = "main_-1002_0"; break;
+                            case "冰原雪域": block_subfix = "main_-1003_0"; break;
                             case "메이플 M 캐릭터": block_subfix = "main_M_0"; break;
                             default: block_subfix = "sub_0"; break;
                         }
@@ -650,14 +658,14 @@ namespace WzComparerR2.CharaSimControl
                         string stat_field_effect = stat_field.stat_field_effect;
                         switch (stat_field_effect)
                         {
-                            case "Union STR": case "유니온 STR": this.btnSTR.Location = areaPos[stat_field_id]; this.btnSTR.Visible = true; break;
-                            case "Union DEX": case "유니온 DEX": this.btnDEX.Location = areaPos[stat_field_id]; this.btnDEX.Visible = true; break;
-                            case "Union INT": case "유니온 INT": this.btnINT.Location = areaPos[stat_field_id]; this.btnINT.Visible = true; break;
-                            case "Union LUK": case "유니온 LUK": this.btnLUK.Location = areaPos[stat_field_id]; this.btnLUK.Visible = true; break;
-                            case "Union Max HP": case "유니온 최대 HP": this.btnHP.Location = areaPos[stat_field_id]; this.btnHP.Visible = true; break;
-                            case "Union Max MP":  case "유니온 최대 MP": this.btnMP.Location = areaPos[stat_field_id]; this.btnMP.Visible = true; break;
-                            case "Union ATT":  case "유니온 공격력": this.btnPAD.Location = areaPos[stat_field_id]; this.btnPAD.Visible = true; break;
-                            case "Union MATT": case "유니온 마력": this.btnMAD.Location = areaPos[stat_field_id]; this.btnMAD.Visible = true; break;
+                            case "聯盟STR": case "Union STR": case "유니온 STR": this.btnSTR.Location = areaPos[stat_field_id]; this.btnSTR.Visible = true; break;
+                            case "聯盟DEX": case "Union DEX": case "유니온 DEX": this.btnDEX.Location = areaPos[stat_field_id]; this.btnDEX.Visible = true; break;
+                            case "聯盟INT": case "Union INT": case "유니온 INT": this.btnINT.Location = areaPos[stat_field_id]; this.btnINT.Visible = true; break;
+                            case "聯盟LUK": case "Union LUK": case "유니온 LUK": this.btnLUK.Location = areaPos[stat_field_id]; this.btnLUK.Visible = true; break;
+                            case "聯盟最大HP": case "Union Max HP": case "유니온 최대 HP": this.btnHP.Location = areaPos[stat_field_id]; this.btnHP.Visible = true; break;
+                            case "聯盟最大MP": case "Union Max MP":  case "유니온 최대 MP": this.btnMP.Location = areaPos[stat_field_id]; this.btnMP.Visible = true; break;
+                            case "聯盟攻擊力": case "Union ATT":  case "유니온 공격력": this.btnPAD.Location = areaPos[stat_field_id]; this.btnPAD.Visible = true; break;
+                            case "聯盟魔力": case "Union MATT": case "유니온 마력": this.btnMAD.Location = areaPos[stat_field_id]; this.btnMAD.Visible = true; break;
                             default: break;
                         }
                     }
@@ -715,50 +723,7 @@ namespace WzComparerR2.CharaSimControl
         private void rendervalue(Graphics g)
         {
             g.TranslateTransform(baseOffset.X, baseOffset.Y);
-            switch (union_grade)
-            {
-                case "Grand Master Union 1":
-                case "그랜드 마스터 유니온 1":
-                    g.DrawImage(Resource.mapleUnion_unionInfo_title_3_0, 670, 17);
-                    g.DrawImage(Resource.mapleUnion_unionInfo_symbol_3_0, 657, 95); attackers = "36"; break;
-                case "Grand Master Union 2":
-                case "그랜드 마스터 유니온 2":
-                    g.DrawImage(Resource.mapleUnion_unionInfo_title_3_1, 670, 17);
-                    g.DrawImage(Resource.mapleUnion_unionInfo_symbol_3_2, 657, 95); attackers = "37"; break;
-                case "Grand Master Union 3":
-                case "그랜드 마스터 유니온 3":
-                    g.DrawImage(Resource.mapleUnion_unionInfo_title_3_3, 670, 17);
-                    g.DrawImage(Resource.mapleUnion_unionInfo_symbol_3_3, 657, 95); attackers = "38"; break;
-                case "Grand Master Union 4":
-                case "그랜드 마스터 유니온 4":
-                    g.DrawImage(Resource.mapleUnion_unionInfo_title_3_3, 670, 17);
-                    g.DrawImage(Resource.mapleUnion_unionInfo_symbol_3_3, 657, 95); attackers = "39"; break;
-                case "Grand Master Union 5":
-                case "그랜드 마스터 유니온 5":
-                    g.DrawImage(Resource.mapleUnion_unionInfo_title_3_4, 670, 17);
-                    g.DrawImage(Resource.mapleUnion_unionInfo_symbol_3_4, 657, 95); attackers = "40"; break;
-                case "Supreme Union 1": 
-                case "슈프림 유니온 1": 
-                    g.DrawImage(Resource.mapleUnion_unionInfo_title_4_0, 671, 11);
-                    g.DrawImage(Resource.mapleUnion_unionInfo_symbol_4_0, 657, 92); attackers = "41"; break;
-                case "Supreme Union 2":
-                case "슈프림 유니온 2":
-                    g.DrawImage(Resource.mapleUnion_unionInfo_title_4_1, 671, 11);
-                    g.DrawImage(Resource.mapleUnion_unionInfo_symbol_4_1, 657, 92); attackers = "42"; break;
-                case "Supreme Union 3":
-                case "슈프림 유니온 3":
-                    g.DrawImage(Resource.mapleUnion_unionInfo_title_4_2, 671, 11);
-                    g.DrawImage(Resource.mapleUnion_unionInfo_symbol_4_2, 657, 92); attackers = "43"; break;
-                case "Supreme Union 4":
-                case "슈프림 유니온 4":
-                    g.DrawImage(Resource.mapleUnion_unionInfo_title_4_3, 671, 11);
-                    g.DrawImage(Resource.mapleUnion_unionInfo_symbol_4_3, 657, 92); attackers = "44"; break;
-                case "Supreme Union 5":
-                case "슈프림 유니온 5":
-                    g.DrawImage(Resource.mapleUnion_unionInfo_title_4_4, 671, 11);
-                    g.DrawImage(Resource.mapleUnion_unionInfo_symbol_4_4, 657, 92); attackers = "45"; break;
-                default: break;
-            }
+            rendersymbol(g);
             string union_num = union_block.Count(block => block.block_type != "메이플 M 캐릭터").ToString();
             int artifact_max_ap = union_artifact_level <= 30 ? 10000 + 100 * union_artifact_level : union_artifact_level <= 50 ? 13000 + 200 * union_artifact_level : 17000 + 300 * union_artifact_level;
             DrawText(g, "mapleUnion_unionInfo_numberSources_large_", union_level, 987, 114, true);
@@ -819,6 +784,94 @@ namespace WzComparerR2.CharaSimControl
                 }
             }
             g.ResetTransform();
+        }
+
+        private void rendersymbol(Graphics g)
+        {
+            switch (union_grade)
+            {
+                case "新手戰地聯盟 1":
+                case "Novice Union 1":
+                    g.DrawImage(Resource.mapleUnion_unionInfo_title_0_0, 670, 11); g.DrawImage(Resource.mapleUnion_unionInfo_symbol_0_0, 674, 109); attackers = "9"; break;
+                case "新手戰地聯盟 2":
+                case "Novice Union 2":
+                    g.DrawImage(Resource.mapleUnion_unionInfo_title_0_1, 670, 11); g.DrawImage(Resource.mapleUnion_unionInfo_symbol_0_1, 674, 109); attackers = "10"; break;
+                case "新手戰地聯盟 3":
+                case "Novice Union 3":
+                    g.DrawImage(Resource.mapleUnion_unionInfo_title_0_2, 670, 11); g.DrawImage(Resource.mapleUnion_unionInfo_symbol_0_2, 674, 109); attackers = "11"; break;
+                case "新手戰地聯盟 4":
+                case "Novice Union 4":
+                    g.DrawImage(Resource.mapleUnion_unionInfo_title_0_3, 670, 11); g.DrawImage(Resource.mapleUnion_unionInfo_symbol_0_3, 674, 109); attackers = "12"; break;
+                case "新手戰地聯盟 5":
+                case "Novice Union 5":
+                    g.DrawImage(Resource.mapleUnion_unionInfo_title_0_4, 670, 11); g.DrawImage(Resource.mapleUnion_unionInfo_symbol_0_4, 674, 109); attackers = "13"; break;
+                case "Veteran Union 1":
+                    g.DrawImage(Resource.mapleUnion_unionInfo_title_1_0, 670, 11); g.DrawImage(Resource.mapleUnion_unionInfo_symbol_1_0, 665, 109); attackers = "18"; break;
+                case "Veteran Union 2":
+                    g.DrawImage(Resource.mapleUnion_unionInfo_title_1_0, 670, 11); g.DrawImage(Resource.mapleUnion_unionInfo_symbol_1_0, 665, 109); attackers = "19"; break;
+                case "Veteran Union 3":
+                    g.DrawImage(Resource.mapleUnion_unionInfo_title_1_0, 670, 11); g.DrawImage(Resource.mapleUnion_unionInfo_symbol_1_0, 665, 109); attackers = "20"; break;
+                case "Veteran Union 4":
+                    g.DrawImage(Resource.mapleUnion_unionInfo_title_1_0, 670, 11); g.DrawImage(Resource.mapleUnion_unionInfo_symbol_1_0, 665, 109); attackers = "21"; break;
+                case "Veteran Union 5":
+                    g.DrawImage(Resource.mapleUnion_unionInfo_title_1_0, 670, 11); g.DrawImage(Resource.mapleUnion_unionInfo_symbol_1_0, 665, 109); attackers = "22"; break;
+                case "Master Union 1":
+                case "마스터 유니온 1":
+                    g.DrawImage(Resource.mapleUnion_unionInfo_title_1_0, 670, 11); g.DrawImage(Resource.mapleUnion_unionInfo_symbol_1_0, 655, 109); attackers = "27"; break;
+                case "Master Union 2":
+                case "마스터 유니온 2":
+                    g.DrawImage(Resource.mapleUnion_unionInfo_title_1_0, 670, 11); g.DrawImage(Resource.mapleUnion_unionInfo_symbol_1_0, 655, 109); attackers = "28"; break;
+                case "Master Union 3":
+                case "마스터 유니온 3":
+                    g.DrawImage(Resource.mapleUnion_unionInfo_title_1_0, 670, 11); g.DrawImage(Resource.mapleUnion_unionInfo_symbol_1_0, 655, 109); attackers = "29"; break;
+                case "Master Union 4":
+                case "마스터 유니온 4":
+                    g.DrawImage(Resource.mapleUnion_unionInfo_title_1_0, 670, 11); g.DrawImage(Resource.mapleUnion_unionInfo_symbol_1_0, 655, 109); attackers = "30"; break;
+                case "Master Union 5":
+                case "마스터 유니온 5":
+                    g.DrawImage(Resource.mapleUnion_unionInfo_title_1_0, 670, 11); g.DrawImage(Resource.mapleUnion_unionInfo_symbol_1_0, 655, 109); attackers = "31"; break;
+                case "宗師戰地聯盟 1":
+                case "Grand Master Union 1":
+                case "그랜드 마스터 유니온 1":
+                    g.DrawImage(Resource.mapleUnion_unionInfo_title_3_0, 670, 17); g.DrawImage(Resource.mapleUnion_unionInfo_symbol_3_0, 657, 95); attackers = "36"; break;
+                case "宗師戰地聯盟 2":
+                case "Grand Master Union 2":
+                case "그랜드 마스터 유니온 2":
+                    g.DrawImage(Resource.mapleUnion_unionInfo_title_3_1, 670, 17); g.DrawImage(Resource.mapleUnion_unionInfo_symbol_3_2, 657, 95); attackers = "37"; break;
+                case "宗師戰地聯盟 3":
+                case "Grand Master Union 3":
+                case "그랜드 마스터 유니온 3":
+                    g.DrawImage(Resource.mapleUnion_unionInfo_title_3_3, 670, 17); g.DrawImage(Resource.mapleUnion_unionInfo_symbol_3_3, 657, 95); attackers = "38"; break;
+                case "宗師戰地聯盟 4":
+                case "Grand Master Union 4":
+                case "그랜드 마스터 유니온 4":
+                    g.DrawImage(Resource.mapleUnion_unionInfo_title_3_3, 670, 17); g.DrawImage(Resource.mapleUnion_unionInfo_symbol_3_3, 657, 95); attackers = "39"; break;
+                case "宗師戰地聯盟 5":
+                case "Grand Master Union 5":
+                case "그랜드 마스터 유니온 5":
+                    g.DrawImage(Resource.mapleUnion_unionInfo_title_3_4, 670, 17); g.DrawImage(Resource.mapleUnion_unionInfo_symbol_3_4, 657, 95); attackers = "40"; break;
+                case "總司令聯盟 1":
+                case "Supreme Union 1":
+                case "슈프림 유니온 1":
+                    g.DrawImage(Resource.mapleUnion_unionInfo_title_4_0, 671, 11); g.DrawImage(Resource.mapleUnion_unionInfo_symbol_4_0, 657, 92); attackers = "41"; break;
+                case "總司令聯盟 2":
+                case "Supreme Union 2":
+                case "슈프림 유니온 2":
+                    g.DrawImage(Resource.mapleUnion_unionInfo_title_4_1, 671, 11); g.DrawImage(Resource.mapleUnion_unionInfo_symbol_4_1, 657, 92); attackers = "42"; break;
+                case "總司令聯盟 3":
+                case "Supreme Union 3":
+                case "슈프림 유니온 3":
+                    g.DrawImage(Resource.mapleUnion_unionInfo_title_4_2, 671, 11); g.DrawImage(Resource.mapleUnion_unionInfo_symbol_4_2, 657, 92); attackers = "43"; break;
+                case "總司令聯盟 4":
+                case "Supreme Union 4":
+                case "슈프림 유니온 4":
+                    g.DrawImage(Resource.mapleUnion_unionInfo_title_4_3, 671, 11); g.DrawImage(Resource.mapleUnion_unionInfo_symbol_4_3, 657, 92); attackers = "44"; break;
+                case "總司令聯盟 5":
+                case "Supreme Union 5":
+                case "슈프림 유니온 5":
+                    g.DrawImage(Resource.mapleUnion_unionInfo_title_4_4, 671, 11); g.DrawImage(Resource.mapleUnion_unionInfo_symbol_4_4, 657, 92); attackers = "45"; break;
+                default: break;
+            }
         }
 
         private void DrawText(Graphics g, string resourceName, string text, int x, int y, bool reverse)
@@ -899,6 +952,13 @@ namespace WzComparerR2.CharaSimControl
                     g.DrawImage(img, baseX + badgeOffsetX[j], badgeY);
                 }
             }
+        }
+
+        private void render_bitmap(Graphics g, string nodepath, int x, int y)
+        {
+            Wz_Node Node = PluginBase.PluginManager.FindWz(nodepath);
+            Bitmap image = BitmapOrigin.CreateFromNode(Node, PluginBase.PluginManager.FindWz).Bitmap;
+            g.DrawImage(image, x, y);
         }
 
         private void btnAttacker_MouseClick(object sender, EventArgs e)
@@ -1125,6 +1185,115 @@ namespace WzComparerR2.CharaSimControl
             }
 
             base.OnMouseWheel(e);
+        }
+
+        void AfrmUnion_MouseClick(object sender, System.Windows.Forms.MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Right)
+            {
+                this.menu.Show(this, e.Location);
+            }
+        }
+
+        void tsmiCopy_Click(object sender, EventArgs e)
+        {
+            if (this.Bitmap != null)
+            {
+                using (System.IO.MemoryStream stream = new System.IO.MemoryStream())
+                {
+                    var dataObj = new DataObject();
+                    dataObj.SetData(DataFormats.Bitmap, this.Bitmap);
+                    Byte[] dibData = ConvertToDib(this.Bitmap);
+                    stream.Write(dibData, 0, dibData.Length);
+                    dataObj.SetData(DataFormats.Dib, stream);
+                    Clipboard.SetDataObject(dataObj, true);
+                }
+            }
+        }
+
+        void tsmiSave_Click(object sender, EventArgs e)
+        {
+            if (this.Bitmap != null)
+            {
+                using (SaveFileDialog dlg = new SaveFileDialog())
+                {
+                    dlg.Filter = "PNG (*.png)|*.png|*.*|*.*";
+                    dlg.FileName = "Union UI Preview";
+
+                    if (dlg.ShowDialog() == DialogResult.OK)
+                    {
+                        this.Bitmap.Save(dlg.FileName, System.Drawing.Imaging.ImageFormat.Png);
+                    }
+                }
+            }
+        }
+
+        private Byte[] ConvertToDib(Image image) // https://stackoverflow.com/a/46424800
+        {
+            Byte[] bm32bData;
+            Int32 width = image.Width;
+            Int32 height = image.Height;
+            // Ensure image is 32bppARGB by painting it on a new 32bppARGB image.
+            using (Bitmap bm32b = new Bitmap(image.Width, image.Height, System.Drawing.Imaging.PixelFormat.Format32bppArgb))
+            {
+                using (Graphics gr = Graphics.FromImage(bm32b))
+                    gr.DrawImage(image, new Rectangle(0, 0, bm32b.Width, bm32b.Height));
+                // Bitmap format has its lines reversed.
+                bm32b.RotateFlip(RotateFlipType.Rotate180FlipX);
+                Int32 stride;
+                bm32bData = GetImageData(bm32b, out stride);
+            }
+            // BITMAPINFOHEADER struct for DIB.
+            Int32 hdrSize = 0x28;
+            Byte[] fullImage = new Byte[hdrSize + 12 + bm32bData.Length];
+            //Int32 biSize;
+            WriteIntToByteArray(fullImage, 0x00, 4, true, (UInt32)hdrSize);
+            //Int32 biWidth;
+            WriteIntToByteArray(fullImage, 0x04, 4, true, (UInt32)width);
+            //Int32 biHeight;
+            WriteIntToByteArray(fullImage, 0x08, 4, true, (UInt32)height);
+            //Int16 biPlanes;
+            WriteIntToByteArray(fullImage, 0x0C, 2, true, 1);
+            //Int16 biBitCount;
+            WriteIntToByteArray(fullImage, 0x0E, 2, true, 32);
+            //BITMAPCOMPRESSION biCompression = BITMAPCOMPRESSION.BITFIELDS;
+            WriteIntToByteArray(fullImage, 0x10, 4, true, 3);
+            //Int32 biSizeImage;
+            WriteIntToByteArray(fullImage, 0x14, 4, true, (UInt32)bm32bData.Length);
+            // These are all 0. Since .net clears new arrays, don't bother writing them.
+            //Int32 biXPelsPerMeter = 0;
+            //Int32 biYPelsPerMeter = 0;
+            //Int32 biClrUsed = 0;
+            //Int32 biClrImportant = 0;
+
+            // The aforementioned "BITFIELDS": colour masks applied to the Int32 pixel value to get the R, G and B values.
+            WriteIntToByteArray(fullImage, hdrSize + 0, 4, true, 0x00FF0000);
+            WriteIntToByteArray(fullImage, hdrSize + 4, 4, true, 0x0000FF00);
+            WriteIntToByteArray(fullImage, hdrSize + 8, 4, true, 0x000000FF);
+            Array.Copy(bm32bData, 0, fullImage, hdrSize + 12, bm32bData.Length);
+            return fullImage;
+        }
+
+        private void WriteIntToByteArray(Byte[] data, Int32 startIndex, Int32 bytes, Boolean littleEndian, UInt32 value) // https://stackoverflow.com/a/46424800
+        {
+            Int32 lastByte = bytes - 1;
+            if (data.Length < startIndex + bytes)
+                throw new ArgumentOutOfRangeException("startIndex", "Data array is too small to write a " + bytes + "-byte value at offset " + startIndex + ".");
+            for (Int32 index = 0; index < bytes; index++)
+            {
+                Int32 offs = startIndex + (littleEndian ? index : lastByte - index);
+                data[offs] = (Byte)(value >> (8 * index) & 0xFF);
+            }
+        }
+
+        private Byte[] GetImageData(Bitmap sourceImage, out Int32 stride) // https://stackoverflow.com/a/43706643
+        {
+            System.Drawing.Imaging.BitmapData sourceData = sourceImage.LockBits(new Rectangle(0, 0, sourceImage.Width, sourceImage.Height), System.Drawing.Imaging.ImageLockMode.ReadOnly, sourceImage.PixelFormat);
+            stride = sourceData.Stride;
+            Byte[] data = new Byte[stride * sourceImage.Height];
+            System.Runtime.InteropServices.Marshal.Copy(sourceData.Scan0, data, 0, data.Length);
+            sourceImage.UnlockBits(sourceData);
+            return data;
         }
     }
 }

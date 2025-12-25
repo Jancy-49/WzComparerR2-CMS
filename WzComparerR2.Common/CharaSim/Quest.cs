@@ -133,7 +133,7 @@ namespace WzComparerR2.CharaSim
                             var npcID = propNode.GetValueEx<int>(0);
                             Wz_Node npcNode = findNode2.Invoke(string.Format("Npc/{0:D7}.img", npcID), wzf);
                             if (npcNode == null) npcNode = findNode2.Invoke("Npc/0002007.img", wzf); // Use Maple GM or Event Guide (イベントガイド) as placeholder NPC when NPC IMG does not exist
-                            quest.Check0Npc = Npc.CreateFromNode(npcNode, findNode); break;
+                            quest.Check0Npc = Npc.CreateFromNode(npcNode, findNode, findNode2, wzf); break;
                         case "lvmin":
                             quest.Lvmin = propNode.GetValueEx<int>(0); break;
                         case "lvmax":

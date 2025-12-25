@@ -1,4 +1,6 @@
-﻿namespace WzComparerR2
+﻿using DevComponents.DotNetBar;
+
+namespace WzComparerR2
 {
     partial class FrmOverlayAniOptions // base code from FrmGifClipOptions
     {
@@ -29,6 +31,8 @@
         private void InitializeComponent()
         {
             DevComponents.DotNetBar.SuperTooltipInfo superTooltipInfo2 = new DevComponents.DotNetBar.SuperTooltipInfo();
+            DevComponents.DotNetBar.SuperTooltipInfo superTooltipInfo3 = new DevComponents.DotNetBar.SuperTooltipInfo();
+            DevComponents.DotNetBar.SuperTooltipInfo superTooltipInfo4 = new DevComponents.DotNetBar.SuperTooltipInfo();
             DevComponents.DotNetBar.SuperTooltipInfo superTooltipInfo1 = new DevComponents.DotNetBar.SuperTooltipInfo();
             this.buttonOK = new DevComponents.DotNetBar.ButtonX();
             this.buttonCancel = new DevComponents.DotNetBar.ButtonX();
@@ -53,6 +57,8 @@
             this.txtGoY = new DevComponents.Editors.IntegerInput();
             this.txtPngDelay = new DevComponents.Editors.IntegerInput();
             this.chkFullMove = new DevComponents.DotNetBar.Controls.CheckBoxX();
+            this.chkFlipX = new DevComponents.DotNetBar.Controls.CheckBoxX();
+            this.chkFlipY = new DevComponents.DotNetBar.Controls.CheckBoxX();
             this.superTooltip1 = new DevComponents.DotNetBar.SuperTooltip();
             this.tableLayoutPanel2 = new System.Windows.Forms.TableLayoutPanel();
             this.tableLayoutPanel1.SuspendLayout();
@@ -127,6 +133,8 @@
             this.tableLayoutPanel1.Controls.Add(this.txtGoY, 4, 5);
             this.tableLayoutPanel1.Controls.Add(this.txtPngDelay, 2, 8);
             this.tableLayoutPanel1.Controls.Add(this.chkFullMove, 2, 6);
+            this.tableLayoutPanel1.Controls.Add(this.chkFlipX, 2, 8);
+            this.tableLayoutPanel1.Controls.Add(this.chkFlipY, 2, 9);
             this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel1.Location = new System.Drawing.Point(9, 8);
             this.tableLayoutPanel1.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
@@ -520,6 +528,38 @@
             this.superTooltip1.SetSuperTooltip(this.chkFullMove, superTooltipInfo2);
             this.chkFullMove.TabIndex = 9;
             // 
+            // chkFlipX
+            // 
+            // 
+            // 
+            // 
+            this.chkFlipX.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
+            this.chkFlipX.Location = new System.Drawing.Point(206, 173);
+            this.chkFlipX.Name = "chkFlipX";
+            this.chkFlipX.Size = new System.Drawing.Size(19, 15);
+            this.chkFlipX.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
+            superTooltipInfo3.BodyText = "左右范围";
+            superTooltipInfo3.Color = DevComponents.DotNetBar.eTooltipColor.System;
+            superTooltipInfo3.FooterVisible = false;
+            this.superTooltip1.SetSuperTooltip(this.chkFlipX, superTooltipInfo3);
+            this.chkFlipX.TabIndex = 10;
+            // 
+            // chkFlipY
+            // 
+            // 
+            // 
+            // 
+            this.chkFlipY.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
+            this.chkFlipY.Location = new System.Drawing.Point(206, 198);
+            this.chkFlipY.Name = "chkFlipY";
+            this.chkFlipY.Size = new System.Drawing.Size(57, 15);
+            this.chkFlipY.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
+            superTooltipInfo4.BodyText = "上下范围";
+            superTooltipInfo4.Color = DevComponents.DotNetBar.eTooltipColor.System;
+            superTooltipInfo4.FooterVisible = false;
+            this.superTooltip1.SetSuperTooltip(this.chkFlipY, superTooltipInfo4);
+            this.chkFlipY.TabIndex = 11;
+            // 
             // superTooltip1
             // 
             this.superTooltip1.DefaultTooltipSettings = superTooltipInfo1;
@@ -602,6 +642,8 @@
         private DevComponents.DotNetBar.LabelX labelX9;
         private DevComponents.DotNetBar.LabelX labelX10;
         private DevComponents.DotNetBar.Controls.CheckBoxX chkFullMove;
+        private DevComponents.DotNetBar.Controls.CheckBoxX chkFlipX;
+        private DevComponents.DotNetBar.Controls.CheckBoxX chkFlipY;
         private DevComponents.DotNetBar.SuperTooltip superTooltip1;
     }
 }

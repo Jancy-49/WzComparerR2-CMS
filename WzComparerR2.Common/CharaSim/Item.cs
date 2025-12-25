@@ -17,9 +17,13 @@ namespace WzComparerR2.CharaSim
             this.CoreSpecs = new Dictionary<ItemCoreSpecType, Wz_Node>();
             this.AddTooltips = new List<int>();
             this.Recipes = new List<int>();
+            this.Grade = 0;
         }
 
         public int Level { get; set; }
+        public int? DamageSkinID { get; set; }
+        public int? FamiliarID { get; set; }
+        public int Grade { get; set; }
         public string ConsumableFrom { get; set; }
         public string EndUseDate { get; set; }
         public string SamplePath { get; set; }
@@ -33,9 +37,17 @@ namespace WzComparerR2.CharaSim
         public List<int> AddTooltips { get; internal set; } // Additional Tooltips
         public List<int> Recipes { get; private set; }
         public Bitmap AvatarBitmap { get; set; }
+        public Bitmap DamageSkinSampleNonCriticalBitmap { get; set; }
+        public Bitmap DamageSkinSampleCriticalBitmap { get; set; }
+        public Bitmap DamageSkinExtraBitmap { get; set; }
         public bool Cash
         {
             get { return GetBooleanValue(ItemPropType.cash); }
+        }
+
+        public bool Pachinko
+        {
+            get { return GetBooleanValue(ItemPropType.pachinko); }
         }
 
         public bool TimeLimited
@@ -128,6 +140,43 @@ namespace WzComparerR2.CharaSim
 
                         case "lv":
                             item.Level = Convert.ToInt32(subNode.Value);
+                            break;
+
+                        case "damageSkinID":
+                            item.DamageSkinID = Convert.ToInt32(subNode.Value);
+                            break;
+
+                        case "familiarID":
+                            item.FamiliarID = Convert.ToInt32(subNode.Value);
+                            break;
+
+                        case "grade":
+                            if (int.TryParse(Convert.ToString(subNode.Value), out _))
+                            {
+                                item.Grade = Convert.ToInt32(subNode.Value);
+                            }
+                            else
+                            {
+                                switch (Convert.ToString(subNode.Value))
+                                {
+                                    default:
+                                    case "normal":
+                                        item.Grade = 0;
+                                        break;
+                                    case "rare":
+                                        item.Grade = 1;
+                                        break;
+                                    case "epic":
+                                        item.Grade = 2;
+                                        break;
+                                    case "unique":
+                                        item.Grade = 3;
+                                        break;
+                                    case "legendary":
+                                        item.Grade = 4;
+                                        break;
+                                }
+                            }
                             break;
 
                         case "consumableFrom":

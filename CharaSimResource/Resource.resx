@@ -577,18 +577,6 @@
   <data name="Item_BtSmall_pressed_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>Resources\Item.BtSmall.pressed.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="Item_BtGather_disabled_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\Item.AutoBuild.buttonGather.disabled.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="Item_BtGather_mouseOver_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\Item.AutoBuild.buttonGather.mouseOver.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="Item_BtGather_normal_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\Item.AutoBuild.buttonGather.normal.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="Item_BtGather_pressed_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\Item.AutoBuild.buttonGather.pressed.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
   <data name="Item_BtSort_disabled_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>Resources\Item.AutoBuild.buttonSort.disabled.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
@@ -1569,18 +1557,6 @@
   </data>
   <data name="Item_BtExtract4_pressed_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>Resources\Item.FullAutoBuild.buttonExtract.pressed.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="Item_BtPoint_disabled_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\Item.AutoBuild.buttonPoint.disabled.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="Item_BtPoint_mouseOver_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\Item.AutoBuild.buttonPoint.mouseOver.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="Item_BtPoint_normal_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\Item.AutoBuild.buttonPoint.normal.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="Item_BtPoint_pressed_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\Item.AutoBuild.buttonPoint.pressed.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="Item_BtPot3_disabled_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>Resources\Item.BtPot3.disabled.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
@@ -3721,6 +3697,9 @@
 <data name="mapleUnion_attackerSetting_Board_sector_char_main_-1002_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
 	<value>Resources\mapleUnion.attackerSetting.Board.sector.char_main.-1002.0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
 </data>
+<data name="mapleUnion_attackerSetting_Board_sector_char_main_-1003_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
+	<value>Resources\mapleUnion.attackerSetting.Board.sector.char_main.-1003.0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+</data>
 <data name="mapleUnion_attackerSetting_Board_sector_fill_hori" type="System.Resources.ResXFileRef, System.Windows.Forms">
 	<value>Resources\mapleUnion.attackerSetting.Board.sector.fill.hori.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
 </data>
@@ -4206,18 +4185,6 @@
   </data>
   <data name="UIInventory_img_Inventory_AutoBuild_buttonclose_mouseOver_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>Resources\UIInventory.img.Inventory.AutoBuild.buttonclose.mouseOver.0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="UIInventory_img_Inventory_AutoBuild_buttonfull_normal_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\UIInventory.img.Inventory.AutoBuild.buttonfull.normal.0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="UIInventory_img_Inventory_AutoBuild_buttonfull_pressed_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\UIInventory.img.Inventory.AutoBuild.buttonfull.pressed.0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="UIInventory_img_Inventory_AutoBuild_buttonfull_disabled_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\UIInventory.img.Inventory.AutoBuild.buttonfull.disabled.0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="UIInventory_img_Inventory_AutoBuild_buttonfull_mouseOver_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\UIInventory.img.Inventory.AutoBuild.buttonfull.mouseOver.0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="UIInventory_img_Inventory_AutoBuild_buttonmin_normal_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>Resources\UIInventory.img.Inventory.AutoBuild.buttonmin.normal.0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
@@ -5125,6 +5092,18 @@
   <data name="UIInventory_img_Equip_EquipTab_presetSelected_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>Resources\UIEquip.img.Equip.EquipTab.presetSelected.0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="UIEquip_img_Equip_EquipTab_buttonEffectSetting_normal_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Resources\UIEquip.img.Equip.EquipTab.buttonEffectSetting.normal.0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="UIEquip_img_Equip_EquipTab_buttonEffectSetting_pressed_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Resources\UIEquip.img.Equip.EquipTab.buttonEffectSetting.pressed.0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="UIEquip_img_Equip_EquipTab_buttonEffectSetting_mouseOver_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Resources\UIEquip.img.Equip.EquipTab.buttonEffectSetting.mouseOver.0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="UIEquip_img_Equip_EquipTab_buttonEffectSetting_disabled_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Resources\UIEquip.img.Equip.EquipTab.buttonEffectSetting.disabled.0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
   <data name="UIInventory_img_Deco_main_tabdetailTab_normal_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>Resources\UIEquip.img.Deco.main.tabdetailTab.normal.0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
@@ -5224,326 +5203,14 @@
   <data name="ClassSelect_back_2_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>Resources\ClassSelect.back.2.0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="ClassSelect_layeraboveSpine" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\ClassSelect.layeraboveSpine.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
   <data name="ClassSelect_list_spritebackgrnd1_0_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>Resources\ClassSelect.list.spritebackgrnd1.0.0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="ClassSelect_list_backgrnd1_0_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\ClassSelect.list.backgrnd1.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ClassSelect_list_class_buttonclassEnabled_110_normal_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\ClassSelect.list.class.buttonclassEnabled.110.normal.0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ClassSelect_list_class_buttonclassEnabled_120_normal_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\ClassSelect.list.class.buttonclassEnabled.120.normal.0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ClassSelect_list_class_buttonclassEnabled_130_normal_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\ClassSelect.list.class.buttonclassEnabled.130.normal.0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ClassSelect_list_class_buttonclassEnabled_210_normal_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\ClassSelect.list.class.buttonclassEnabled.210.normal.0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ClassSelect_list_class_buttonclassEnabled_220_normal_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\ClassSelect.list.class.buttonclassEnabled.220.normal.0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ClassSelect_list_class_buttonclassEnabled_230_normal_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\ClassSelect.list.class.buttonclassEnabled.230.normal.0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ClassSelect_list_class_buttonclassEnabled_310_normal_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\ClassSelect.list.class.buttonclassEnabled.310.normal.0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ClassSelect_list_class_buttonclassEnabled_320_normal_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\ClassSelect.list.class.buttonclassEnabled.320.normal.0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ClassSelect_list_class_buttonclassEnabled_330_normal_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\ClassSelect.list.class.buttonclassEnabled.330.normal.0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ClassSelect_list_class_buttonclassEnabled_410_normal_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\ClassSelect.list.class.buttonclassEnabled.410.normal.0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ClassSelect_list_class_buttonclassEnabled_420_normal_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\ClassSelect.list.class.buttonclassEnabled.420.normal.0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ClassSelect_list_class_buttonclassEnabled_430_normal_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\ClassSelect.list.class.buttonclassEnabled.430.normal.0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ClassSelect_list_class_buttonclassEnabled_510_normal_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\ClassSelect.list.class.buttonclassEnabled.510.normal.0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ClassSelect_list_class_buttonclassEnabled_520_normal_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\ClassSelect.list.class.buttonclassEnabled.520.normal.0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ClassSelect_list_class_buttonclassEnabled_530_normal_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\ClassSelect.list.class.buttonclassEnabled.530.normal.0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ClassSelect_list_class_buttonclassEnabled_1100_normal_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\ClassSelect.list.class.buttonclassEnabled.1100.normal.0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ClassSelect_list_class_buttonclassEnabled_1200_normal_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\ClassSelect.list.class.buttonclassEnabled.1200.normal.0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ClassSelect_list_class_buttonclassEnabled_1300_normal_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\ClassSelect.list.class.buttonclassEnabled.1300.normal.0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ClassSelect_list_class_buttonclassEnabled_1400_normal_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\ClassSelect.list.class.buttonclassEnabled.1400.normal.0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ClassSelect_list_class_buttonclassEnabled_1500_normal_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\ClassSelect.list.class.buttonclassEnabled.1500.normal.0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ClassSelect_list_class_buttonclassEnabled_2100_normal_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\ClassSelect.list.class.buttonclassEnabled.2100.normal.0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ClassSelect_list_class_buttonclassEnabled_2200_normal_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\ClassSelect.list.class.buttonclassEnabled.2200.normal.0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ClassSelect_list_class_buttonclassEnabled_2300_normal_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\ClassSelect.list.class.buttonclassEnabled.2300.normal.0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ClassSelect_list_class_buttonclassEnabled_2400_normal_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\ClassSelect.list.class.buttonclassEnabled.2400.normal.0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ClassSelect_list_class_buttonclassEnabled_2500_normal_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\ClassSelect.list.class.buttonclassEnabled.2500.normal.0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ClassSelect_list_class_buttonclassEnabled_2700_normal_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\ClassSelect.list.class.buttonclassEnabled.2700.normal.0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ClassSelect_list_class_buttonclassEnabled_3100_normal_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\ClassSelect.list.class.buttonclassEnabled.3100.normal.0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ClassSelect_list_class_buttonclassEnabled_3101_normal_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\ClassSelect.list.class.buttonclassEnabled.3101.normal.0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ClassSelect_list_class_buttonclassEnabled_3200_normal_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\ClassSelect.list.class.buttonclassEnabled.3200.normal.0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ClassSelect_list_class_buttonclassEnabled_3300_normal_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\ClassSelect.list.class.buttonclassEnabled.3300.normal.0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ClassSelect_list_class_buttonclassEnabled_3500_normal_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\ClassSelect.list.class.buttonclassEnabled.3500.normal.0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ClassSelect_list_class_buttonclassEnabled_3600_normal_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\ClassSelect.list.class.buttonclassEnabled.3600.normal.0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ClassSelect_list_class_buttonclassEnabled_3700_normal_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\ClassSelect.list.class.buttonclassEnabled.3700.normal.0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ClassSelect_list_class_buttonclassEnabled_4100_normal_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\ClassSelect.list.class.buttonclassEnabled.4100.normal.0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ClassSelect_list_class_buttonclassEnabled_4200_normal_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\ClassSelect.list.class.buttonclassEnabled.4200.normal.0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ClassSelect_list_class_buttonclassEnabled_5100_normal_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\ClassSelect.list.class.buttonclassEnabled.5100.normal.0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ClassSelect_list_class_buttonclassEnabled_6100_normal_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\ClassSelect.list.class.buttonclassEnabled.6100.normal.0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ClassSelect_list_class_buttonclassEnabled_6300_normal_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\ClassSelect.list.class.buttonclassEnabled.6300.normal.0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ClassSelect_list_class_buttonclassEnabled_6400_normal_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\ClassSelect.list.class.buttonclassEnabled.6400.normal.0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ClassSelect_list_class_buttonclassEnabled_6500_normal_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\ClassSelect.list.class.buttonclassEnabled.6500.normal.0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ClassSelect_list_class_buttonclassEnabled_10100_normal_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\ClassSelect.list.class.buttonclassEnabled.10100.normal.0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ClassSelect_list_class_buttonclassEnabled_13100_normal_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\ClassSelect.list.class.buttonclassEnabled.13100.normal.0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ClassSelect_list_class_buttonclassEnabled_13500_normal_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\ClassSelect.list.class.buttonclassEnabled.13500.normal.0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ClassSelect_list_class_buttonclassEnabled_14200_normal_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\ClassSelect.list.class.buttonclassEnabled.14200.normal.0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ClassSelect_list_class_buttonclassEnabled_15100_normal_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\ClassSelect.list.class.buttonclassEnabled.15100.normal.0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ClassSelect_list_class_buttonclassEnabled_15200_normal_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\ClassSelect.list.class.buttonclassEnabled.15200.normal.0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ClassSelect_list_class_buttonclassEnabled_15400_normal_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\ClassSelect.list.class.buttonclassEnabled.15400.normal.0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ClassSelect_list_class_buttonclassEnabled_15500_normal_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\ClassSelect.list.class.buttonclassEnabled.15500.normal.0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ClassSelect_list_class_buttonclassEnabled_16200_normal_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\ClassSelect.list.class.buttonclassEnabled.16200.normal.0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ClassSelect_list_class_buttonclassEnabled_16400_normal_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\ClassSelect.list.class.buttonclassEnabled.16400.normal.0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ClassSelect_list_class_buttonclassEnabled_17200_normal_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\ClassSelect.list.class.buttonclassEnabled.17200.normal.0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ClassSelect_list_class_buttonclassEnabled_17500_normal_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\ClassSelect.list.class.buttonclassEnabled.17500.normal.0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ClassSelect_back_1_110_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\ClassSelect.back.1.110.0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ClassSelect_back_1_120_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\ClassSelect.back.1.120.0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ClassSelect_back_1_130_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\ClassSelect.back.1.130.0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ClassSelect_back_1_210_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\ClassSelect.back.1.210.0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ClassSelect_back_1_220_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\ClassSelect.back.1.220.0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ClassSelect_back_1_230_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\ClassSelect.back.1.230.0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ClassSelect_back_1_310_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\ClassSelect.back.1.310.0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ClassSelect_back_1_320_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\ClassSelect.back.1.320.0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ClassSelect_back_1_330_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\ClassSelect.back.1.330.0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ClassSelect_back_1_410_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\ClassSelect.back.1.410.0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ClassSelect_back_1_420_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\ClassSelect.back.1.420.0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ClassSelect_back_1_430_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\ClassSelect.back.1.430.0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ClassSelect_back_1_510_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\ClassSelect.back.1.410.0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ClassSelect_back_1_520_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\ClassSelect.back.1.520.0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ClassSelect_back_1_530_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\ClassSelect.back.1.530.0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ClassSelect_back_1_1100_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\ClassSelect.back.1.1100.0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ClassSelect_back_1_1200_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\ClassSelect.back.1.1200.0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ClassSelect_back_1_1300_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\ClassSelect.back.1.1300.0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ClassSelect_back_1_1400_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\ClassSelect.back.1.1400.0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ClassSelect_back_1_1500_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\ClassSelect.back.1.1500.0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ClassSelect_back_1_2100_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\ClassSelect.back.1.2100.0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ClassSelect_back_1_2200_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\ClassSelect.back.1.2200.0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ClassSelect_back_1_2300_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\ClassSelect.back.1.2300.0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ClassSelect_back_1_2400_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\ClassSelect.back.1.2400.0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ClassSelect_back_1_2500_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\ClassSelect.back.1.2500.0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ClassSelect_back_1_2700_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\ClassSelect.back.1.2700.0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ClassSelect_back_1_3100_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\ClassSelect.back.1.3100.0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ClassSelect_back_1_3101_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\ClassSelect.back.1.3101.0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ClassSelect_back_1_3200_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\ClassSelect.back.1.3200.0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ClassSelect_back_1_3300_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\ClassSelect.back.1.3300.0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ClassSelect_back_1_3500_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\ClassSelect.back.1.3500.0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ClassSelect_back_1_3600_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\ClassSelect.back.1.3600.0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ClassSelect_back_1_3700_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\ClassSelect.back.1.3700.0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ClassSelect_back_1_4100_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\ClassSelect.back.1.4100.0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ClassSelect_back_1_4200_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\ClassSelect.back.1.4200.0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ClassSelect_back_1_5100_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\ClassSelect.back.1.5100.0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ClassSelect_back_1_6100_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\ClassSelect.back.1.6100.0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ClassSelect_back_1_6300_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\ClassSelect.back.1.6300.0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ClassSelect_back_1_6400_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\ClassSelect.back.1.6400.0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ClassSelect_back_1_6500_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\ClassSelect.back.1.6500.0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ClassSelect_back_1_10100_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\ClassSelect.back.1.10100.0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ClassSelect_back_1_13100_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\ClassSelect.back.1.13100.0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ClassSelect_back_1_13500_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\ClassSelect.back.1.13500.0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ClassSelect_back_1_14200_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\ClassSelect.back.1.14200.0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ClassSelect_back_1_15100_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\ClassSelect.back.1.15100.0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ClassSelect_back_1_15200_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\ClassSelect.back.1.15200.0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ClassSelect_back_1_15400_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\ClassSelect.back.1.15400.0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ClassSelect_back_1_15500_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\ClassSelect.back.1.15500.0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ClassSelect_back_1_16200_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\ClassSelect.back.1.16200.0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ClassSelect_back_1_16400_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\ClassSelect.back.1.16400.0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ClassSelect_back_1_17200_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\ClassSelect.back.1.17200.0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ClassSelect_back_1_17500_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\ClassSelect.back.1.17500.0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="ClassSelect_list_pagePrev_11" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Resources\ClassSelect.list.pagePrev.11.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="ClassSelect_list_pageNext_11" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Resources\ClassSelect.list.pageNext.11.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="ClassSelect_list_class_layerclassCover" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>Resources\ClassSelect.list.class.layerclassCover.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
@@ -5587,4 +5254,268 @@
   <data name="Login_img_Notice_New_notice_image_1_buttonNo_disabled_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>Resources\Login.img.Notice_New.notice_image.1.buttonNo.disabled.0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+	<data name="PachinkoItem_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
+		<value>Resources\PachinkoItem.0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+	</data>
+	<data name="UIFamiliar_img_familiarCard_backgrnd" type="System.Resources.ResXFileRef, System.Windows.Forms">
+		<value>Resources\UIFamiliar.img.familiarCard.backgrnd.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+	</data>
+	<data name="UIFamiliar_img_familiarCard_base" type="System.Resources.ResXFileRef, System.Windows.Forms">
+		<value>Resources\UIFamiliar.img.familiarCard.base.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+	</data>
+	<data name="UIFamiliar_img_familiarCard_name" type="System.Resources.ResXFileRef, System.Windows.Forms">
+		<value>Resources\UIFamiliar.img.familiarCard.name.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+	</data>
+	<data name="UIFamiliar_img_jewel_backgrnd" type="System.Resources.ResXFileRef, System.Windows.Forms">
+		<value>Resources\UIFamiliar.img.jewel.backgrnd.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+	</data>
+	<data name="UIFamiliar_img_jewel_normal_5" type="System.Resources.ResXFileRef, System.Windows.Forms">
+		<value>Resources\UIFamiliar.img.jewel.normal.5.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+	</data>
+	<data name="Familiar__InfoWnd_backgrnd" type="System.Resources.ResXFileRef, System.Windows.Forms">
+		<value>Resources\Familiar.@InfoWnd.backgrnd.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+	</data>
+	<data name="Familiar__InfoWnd_backgrnd2" type="System.Resources.ResXFileRef, System.Windows.Forms">
+		<value>Resources\Familiar.@InfoWnd.backgrnd2.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+	</data>
+	<data name="Familiar__InfoWnd_gradeside_backgrnd" type="System.Resources.ResXFileRef, System.Windows.Forms">
+		<value>Resources\Familiar.@InfoWnd.gradeside.backgrnd.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+	</data>
+	<data name="Familiar__InfoWnd_gradename__0" type="System.Resources.ResXFileRef, System.Windows.Forms">
+		<value>Resources\Familiar.@InfoWnd.gradeName.#0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+	</data>
+	<data name="Familiar__InfoWnd_gradeside_graderank__0" type="System.Resources.ResXFileRef, System.Windows.Forms">
+		<value>Resources\Familiar.@InfoWnd.gradeside.graderank.#0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+	</data>
+	<data name="Familiar__InfoWnd_level_lv_base" type="System.Resources.ResXFileRef, System.Windows.Forms">
+		<value>Resources\Familiar.@InfoWnd.level.lv_base.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+	</data>
+	<data name="Familiar__InfoWnd_level_Lv_" type="System.Resources.ResXFileRef, System.Windows.Forms">
+		<value>Resources\Familiar.@InfoWnd.level.Lv..png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+	</data>
+	<data name="Familiar__InfoWnd_Attribute_base" type="System.Resources.ResXFileRef, System.Windows.Forms">
+		<value>Resources\Familiar.@InfoWnd.Attribute.base.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+	</data>
+	<data name="Familiar__InfoWnd_Attribute_AttrVariation_Dark" type="System.Resources.ResXFileRef, System.Windows.Forms">
+		<value>Resources\Familiar.@InfoWnd.Attribute.AttrVariation.Dark.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+	</data>
+	<data name="Familiar__InfoWnd_Attribute_AttrVariation_Fire" type="System.Resources.ResXFileRef, System.Windows.Forms">
+		<value>Resources\Familiar.@InfoWnd.Attribute.AttrVariation.None.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+	</data>
+	<data name="Familiar__InfoWnd_Attribute_AttrVariation_Holy" type="System.Resources.ResXFileRef, System.Windows.Forms">
+		<value>Resources\Familiar.@InfoWnd.Attribute.AttrVariation.Holy.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+	</data>
+	<data name="Familiar__InfoWnd_Attribute_AttrVariation_Ice" type="System.Resources.ResXFileRef, System.Windows.Forms">
+		<value>Resources\Familiar.@InfoWnd.Attribute.AttrVariation.Ice.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+	</data>
+	<data name="Familiar__InfoWnd_Attribute_AttrVariation_Lighting" type="System.Resources.ResXFileRef, System.Windows.Forms">
+		<value>Resources\Familiar.@InfoWnd.Attribute.AttrVariation.Lighting.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+	</data>
+	<data name="Familiar__InfoWnd_Attribute_AttrVariation_Poison" type="System.Resources.ResXFileRef, System.Windows.Forms">
+		<value>Resources\Familiar.@InfoWnd.Attribute.AttrVariation.Poison.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+	</data>
+	<data name="Familiar__InfoWnd_gradegauge_info_base" type="System.Resources.ResXFileRef, System.Windows.Forms">
+		<value>Resources\Familiar.@InfoWnd.gradegauge_info_base.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+	</data>
+	<data name="Familiar__InfoWnd_gradejewel_info_common_1" type="System.Resources.ResXFileRef, System.Windows.Forms">
+		<value>Resources\Familiar.@InfoWnd.gradejewel_info.common.1.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+	</data>
+	<data name="Familiar__InfoWnd_bt_Addtional_normal_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
+		<value>Resources\Familiar.@InfoWnd.bt_Addtional.normal.0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+	</data>
+	<data name="Familiar__InfoWnd_att" type="System.Resources.ResXFileRef, System.Windows.Forms">
+		<value>Resources\Familiar.@InfoWnd.att.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+	</data>
+	<data name="Familiar__InfoWnd_def" type="System.Resources.ResXFileRef, System.Windows.Forms">
+		<value>Resources\Familiar.@InfoWnd.def.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+	</data>
+	<data name="Familiar__InfoWnd_kind_KindVariation_Human" type="System.Resources.ResXFileRef, System.Windows.Forms">
+		<value>Resources\Familiar.@InfoWnd.kind.KindVariation.Human.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+	</data>
+	<data name="Familiar__InfoWnd_kind_KindVariation_Beast" type="System.Resources.ResXFileRef, System.Windows.Forms">
+		<value>Resources\Familiar.@InfoWnd.kind.KindVariation.Beast.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+	</data>
+	<data name="Familiar__InfoWnd_kind_KindVariation_Plant" type="System.Resources.ResXFileRef, System.Windows.Forms">
+		<value>Resources\Familiar.@InfoWnd.kind.KindVariation.Plant.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+	</data>
+	<data name="Familiar__InfoWnd_kind_KindVariation_Fish" type="System.Resources.ResXFileRef, System.Windows.Forms">
+		<value>Resources\Familiar.@InfoWnd.kind.KindVariation.Fish.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+	</data>
+	<data name="Familiar__InfoWnd_kind_KindVariation_Reptile" type="System.Resources.ResXFileRef, System.Windows.Forms">
+		<value>Resources\Familiar.@InfoWnd.kind.KindVariation.Reptile.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+	</data>
+	<data name="Familiar__InfoWnd_kind_KindVariation_Nymph" type="System.Resources.ResXFileRef, System.Windows.Forms">
+		<value>Resources\Familiar.@InfoWnd.kind.KindVariation.Nymph.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+	</data>
+	<data name="Familiar__InfoWnd_kind_KindVariation_Devil" type="System.Resources.ResXFileRef, System.Windows.Forms">
+		<value>Resources\Familiar.@InfoWnd.kind.KindVariation.Devil.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+	</data>
+	<data name="Familiar__InfoWnd_kind_KindVariation_Undead" type="System.Resources.ResXFileRef, System.Windows.Forms">
+		<value>Resources\Familiar.@InfoWnd.kind.KindVariation.Undead.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+	</data>
+	<data name="Familiar__InfoWnd_kind_KindVariation_Machine" type="System.Resources.ResXFileRef, System.Windows.Forms">
+		<value>Resources\Familiar.@InfoWnd.kind.KindVariation.Machine.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+	</data>
+	<data name="Skill_main_Tab_enabled_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
+		<value>Resources\Skill.main.Tab.enabled.0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+	</data>
+	<data name="Skill_main_Tab_enabled_1" type="System.Resources.ResXFileRef, System.Windows.Forms">
+		<value>Resources\Skill.main.Tab.enabled.1.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+	</data>
+	<data name="Skill_main_Tab_enabled_2" type="System.Resources.ResXFileRef, System.Windows.Forms">
+		<value>Resources\Skill.main.Tab.enabled.2.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+	</data>
+	<data name="Skill_main_Tab_enabled_3" type="System.Resources.ResXFileRef, System.Windows.Forms">
+		<value>Resources\Skill.main.Tab.enabled.3.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+	</data>
+	<data name="Skill_main_Tab_enabled_4" type="System.Resources.ResXFileRef, System.Windows.Forms">
+		<value>Resources\Skill.main.Tab.enabled.4.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+	</data>
+	<data name="Skill_main_Tab_enabled_5" type="System.Resources.ResXFileRef, System.Windows.Forms">
+		<value>Resources\Skill.main.Tab.enabled.5.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+	</data>
+	<data name="Skill_main_Tab_enabled_6" type="System.Resources.ResXFileRef, System.Windows.Forms">
+		<value>Resources\Skill.main.Tab.enabled.6.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+	</data>
+	<data name="Skill_main_Tab_selected_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
+		<value>Resources\Skill.main.Tab.selected.0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+	</data>
+	<data name="Skill_main_Tab_selected_1" type="System.Resources.ResXFileRef, System.Windows.Forms">
+		<value>Resources\Skill.main.Tab.selected.1.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+	</data>
+	<data name="Skill_main_Tab_selected_2" type="System.Resources.ResXFileRef, System.Windows.Forms">
+		<value>Resources\Skill.main.Tab.selected.2.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+	</data>
+	<data name="Skill_main_Tab_selected_3" type="System.Resources.ResXFileRef, System.Windows.Forms">
+		<value>Resources\Skill.main.Tab.selected.3.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+	</data>
+	<data name="Skill_main_Tab_selected_4" type="System.Resources.ResXFileRef, System.Windows.Forms">
+		<value>Resources\Skill.main.Tab.selected.4.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+	</data>
+	<data name="Skill_main_Tab_selected_5" type="System.Resources.ResXFileRef, System.Windows.Forms">
+		<value>Resources\Skill.main.Tab.selected.5.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+	</data>
+	<data name="Skill_main_Tab_selected_6" type="System.Resources.ResXFileRef, System.Windows.Forms">
+		<value>Resources\Skill.main.Tab.selected.6.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+	</data>
+	<data name="Skill_main_Tab_DualTab_enabled_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
+		<value>Resources\Skill.main.Tab.DualTab.enabled.0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+	</data>
+	<data name="Skill_main_Tab_DualTab_enabled_1" type="System.Resources.ResXFileRef, System.Windows.Forms">
+		<value>Resources\Skill.main.Tab.DualTab.enabled.1.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+	</data>
+	<data name="Skill_main_Tab_DualTab_enabled_2" type="System.Resources.ResXFileRef, System.Windows.Forms">
+		<value>Resources\Skill.main.Tab.DualTab.enabled.2.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+	</data>
+	<data name="Skill_main_Tab_DualTab_enabled_3" type="System.Resources.ResXFileRef, System.Windows.Forms">
+		<value>Resources\Skill.main.Tab.DualTab.enabled.3.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+	</data>
+	<data name="Skill_main_Tab_DualTab_enabled_4" type="System.Resources.ResXFileRef, System.Windows.Forms">
+		<value>Resources\Skill.main.Tab.DualTab.enabled.4.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+	</data>
+	<data name="Skill_main_Tab_DualTab_enabled_5" type="System.Resources.ResXFileRef, System.Windows.Forms">
+		<value>Resources\Skill.main.Tab.DualTab.enabled.5.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+	</data>
+	<data name="Skill_main_Tab_DualTab_enabled_6" type="System.Resources.ResXFileRef, System.Windows.Forms">
+		<value>Resources\Skill.main.Tab.DualTab.enabled.6.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+	</data>
+	<data name="Skill_main_Tab_DualTab_enabled_7" type="System.Resources.ResXFileRef, System.Windows.Forms">
+		<value>Resources\Skill.main.Tab.DualTab.enabled.7.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+	</data>
+	<data name="Skill_main_Tab_DualTab_enabled_8" type="System.Resources.ResXFileRef, System.Windows.Forms">
+		<value>Resources\Skill.main.Tab.DualTab.enabled.8.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+	</data>
+	<data name="Skill_main_Tab_DualTab_selected_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
+		<value>Resources\Skill.main.Tab.DualTab.selected.0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+	</data>
+	<data name="Skill_main_Tab_DualTab_selected_1" type="System.Resources.ResXFileRef, System.Windows.Forms">
+		<value>Resources\Skill.main.Tab.DualTab.selected.1.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+	</data>
+	<data name="Skill_main_Tab_DualTab_selected_2" type="System.Resources.ResXFileRef, System.Windows.Forms">
+		<value>Resources\Skill.main.Tab.DualTab.selected.2.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+	</data>
+	<data name="Skill_main_Tab_DualTab_selected_3" type="System.Resources.ResXFileRef, System.Windows.Forms">
+		<value>Resources\Skill.main.Tab.DualTab.selected.3.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+	</data>
+	<data name="Skill_main_Tab_DualTab_selected_4" type="System.Resources.ResXFileRef, System.Windows.Forms">
+		<value>Resources\Skill.main.Tab.DualTab.selected.4.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+	</data>
+	<data name="Skill_main_Tab_DualTab_selected_5" type="System.Resources.ResXFileRef, System.Windows.Forms">
+		<value>Resources\Skill.main.Tab.DualTab.selected.5.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+	</data>
+	<data name="Skill_main_Tab_DualTab_selected_6" type="System.Resources.ResXFileRef, System.Windows.Forms">
+		<value>Resources\Skill.main.Tab.DualTab.selected.6.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+	</data>
+	<data name="Skill_main_Tab_DualTab_selected_7" type="System.Resources.ResXFileRef, System.Windows.Forms">
+		<value>Resources\Skill.main.Tab.DualTab.selected.7.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+	</data>
+	<data name="Skill_main_Tab_DualTab_selected_8" type="System.Resources.ResXFileRef, System.Windows.Forms">
+		<value>Resources\Skill.main.Tab.DualTab.selected.8.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+	</data>
+	<data name="SkillEx_main_Tab_enabled_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
+		<value>Resources\SkillEx.main.Tab.enabled.0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+	</data>
+	<data name="SkillEx_main_Tab_enabled_1" type="System.Resources.ResXFileRef, System.Windows.Forms">
+		<value>Resources\SkillEx.main.Tab.enabled.1.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+	</data>
+	<data name="SkillEx_main_Tab_enabled_2" type="System.Resources.ResXFileRef, System.Windows.Forms">
+		<value>Resources\SkillEx.main.Tab.enabled.2.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+	</data>
+	<data name="SkillEx_main_Tab_enabled_3" type="System.Resources.ResXFileRef, System.Windows.Forms">
+		<value>Resources\SkillEx.main.Tab.enabled.3.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+	</data>
+	<data name="SkillEx_main_Tab_enabled_4" type="System.Resources.ResXFileRef, System.Windows.Forms">
+		<value>Resources\SkillEx.main.Tab.enabled.4.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+	</data>
+	<data name="SkillEx_main_Tab_enabled_5" type="System.Resources.ResXFileRef, System.Windows.Forms">
+		<value>Resources\SkillEx.main.Tab.enabled.5.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+	</data>
+	<data name="SkillEx_main_Tab_enabled_6" type="System.Resources.ResXFileRef, System.Windows.Forms">
+		<value>Resources\SkillEx.main.Tab.enabled.6.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+	</data>
+	<data name="SkillEx_main_Tab_selected_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
+		<value>Resources\SkillEx.main.Tab.selected.0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+	</data>
+	<data name="SkillEx_main_Tab_selected_1" type="System.Resources.ResXFileRef, System.Windows.Forms">
+		<value>Resources\SkillEx.main.Tab.selected.1.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+	</data>
+	<data name="SkillEx_main_Tab_selected_2" type="System.Resources.ResXFileRef, System.Windows.Forms">
+		<value>Resources\SkillEx.main.Tab.selected.2.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+	</data>
+	<data name="SkillEx_main_Tab_selected_3" type="System.Resources.ResXFileRef, System.Windows.Forms">
+		<value>Resources\SkillEx.main.Tab.selected.3.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+	</data>
+	<data name="SkillEx_main_Tab_selected_4" type="System.Resources.ResXFileRef, System.Windows.Forms">
+		<value>Resources\SkillEx.main.Tab.selected.4.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+	</data>
+	<data name="SkillEx_main_Tab_selected_5" type="System.Resources.ResXFileRef, System.Windows.Forms">
+		<value>Resources\SkillEx.main.Tab.selected.5.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+	</data>
+	<data name="SkillEx_main_Tab_selected_6" type="System.Resources.ResXFileRef, System.Windows.Forms">
+		<value>Resources\SkillEx.main.Tab.selected.6.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+	</data>
+	<data name="SkillZero_main_Tab_selected_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
+		<value>Resources\SkillZero.main.Tab.selected.0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+	</data>
+	<data name="SkillZero_main_Tab_selected_1" type="System.Resources.ResXFileRef, System.Windows.Forms">
+		<value>Resources\SkillZero.main.Tab.selected.1.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+	</data>
+	<data name="SkillZero_main_Tab_selected_2" type="System.Resources.ResXFileRef, System.Windows.Forms">
+		<value>Resources\SkillZero.main.Tab.selected.2.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+	</data>
+	<data name="SkillZero_main_Tab_selected_3" type="System.Resources.ResXFileRef, System.Windows.Forms">
+		<value>Resources\SkillZero.main.Tab.selected.3.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+	</data>
+	<data name="SkillZero_main_Tab_enabled_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
+		<value>Resources\SkillZero.main.Tab.enabled.0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+	</data>
+	<data name="SkillZero_main_Tab_enabled_1" type="System.Resources.ResXFileRef, System.Windows.Forms">
+		<value>Resources\SkillZero.main.Tab.enabled.1.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+	</data>
+	<data name="SkillZero_main_Tab_enabled_2" type="System.Resources.ResXFileRef, System.Windows.Forms">
+		<value>Resources\SkillZero.main.Tab.enabled.2.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+	</data>
+	<data name="SkillZero_main_Tab_enabled_3" type="System.Resources.ResXFileRef, System.Windows.Forms">
+		<value>Resources\SkillZero.main.Tab.enabled.3.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+	</data>
 </root>

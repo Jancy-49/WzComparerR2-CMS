@@ -11,6 +11,7 @@ using SharpDX.XAudio2;
 using System.Threading.Tasks;
 using System.Threading;
 using WzComparerR2.Properties;
+using System.IO;
 
 namespace WzComparerR2.CharaSimControl
 {
@@ -21,7 +22,7 @@ namespace WzComparerR2.CharaSimControl
             this.menu = new ContextMenuStrip();
             this.menu.Items.Add(new ToolStripMenuItem("复制", null, tsmiCopy_Click));
             this.menu.Items.Add(new ToolStripMenuItem("保存PNG", null, tsmiSave_Click));
-            this.menu.Items.Add(new ToolStripMenuItem("保存纸娃娃", null, tsmiAvatarSave_Click));
+            this.menu.Items.Add(new ToolStripMenuItem("保存样式", null, tsmiSampleAssetSave_Click));
             this.menu.Items.Add(new ToolStripSeparator());
             this.menu.Items.Add(new ToolStripMenuItem("复制文本", null, tsmiCopyText_Click));
             this.menu.Items.Add(new ToolStripMenuItem("翻译并复制", null, tsmiCopyTranslate_Click));
@@ -34,6 +35,7 @@ namespace WzComparerR2.CharaSimControl
             this.GearRender = new GearTooltipRender2();
             this.GearRender22 = new GearTooltipRender22();
             this.ItemRender = new ItemTooltipRender2();
+            this.ItemRender3 = new ItemTooltipRender3();
             this.SkillRender = new SkillTooltipRender2();
             this.RecipeRender = new RecipeTooltipRender();
             this.MapRender = new MapTooltipRenderer();
@@ -44,6 +46,8 @@ namespace WzComparerR2.CharaSimControl
             this.SetItemRender = new SetItemTooltipRender();
             this.SetItemRender22 = new SetItemTooltipRender22();
             this.AchievementRender = new AchievementTooltipRenderer();
+            this.FamiliarRender = new FamiliarTooltipRenderer(); // used in CMS/TMS
+            this.FamiliarRender2 = new FamiliarTooltipRenderer2(); // used in GMS/JMS
             this.SizeChanged += AfrmTooltip_SizeChanged;
 
             this.MouseClick += AfrmTooltip_MouseClick;
@@ -56,9 +60,15 @@ namespace WzComparerR2.CharaSimControl
         private bool showID;
 
         public bool Enable22AniStyle { get; set; }
+        public bool EnableAssembleTooltip { get; set; }
+        public bool UseCTFamiliarUI { get; set; }
         public bool ShowParameters { get; set; }
 
         private Bitmap AvatarBitmap;
+        private Bitmap SampleBitmap;
+        private Bitmap DamageSkinSampleNonCriticalBitmap;
+        private Bitmap DamageSkinSampleCriticalBitmap;
+        private Bitmap DamageSkinExtraBitmap;
         private FrmWaiting WaitingForm = new FrmWaiting();
         private static readonly SemaphoreSlim TranslateSemaphore = new SemaphoreSlim(1, 1);
 
@@ -74,6 +84,7 @@ namespace WzComparerR2.CharaSimControl
         public GearTooltipRender2 GearRender { get; private set; }
         public GearTooltipRender22 GearRender22 { get; private set; }
         public ItemTooltipRender2 ItemRender { get; private set; }
+        public ItemTooltipRender3 ItemRender3 { get; private set; }
         public SkillTooltipRender2 SkillRender { get; private set; }
         public RecipeTooltipRender RecipeRender { get; private set; }
         public MapTooltipRenderer MapRender { get; private set; }
@@ -84,6 +95,8 @@ namespace WzComparerR2.CharaSimControl
         public SetItemTooltipRender SetItemRender { get; private set; }
         public SetItemTooltipRender22 SetItemRender22 { get; private set; }
         public AchievementTooltipRenderer AchievementRender { get; private set; }
+        public FamiliarTooltipRenderer FamiliarRender { get; private set; }
+        public FamiliarTooltipRenderer2 FamiliarRender2 { get; private set; }
 
 
         public string ImageFileName { get; set; }
@@ -110,11 +123,13 @@ namespace WzComparerR2.CharaSimControl
                 this.GearRender22.ShowObjectID = value;
                 this.MapRender.ShowObjectID = value;
                 this.ItemRender.ShowObjectID = value;
-                // this.ItemRender3.ShowObjectID = value;
+                this.ItemRender3.ShowObjectID = value;
                 this.QuestRender.ShowObjectID = value;
                 this.SkillRender.ShowObjectID = value;
                 this.RecipeRender.ShowObjectID = value;
                 this.AchievementRender.ShowObjectID = value;
+                this.FamiliarRender.ShowObjectID = value;
+                this.FamiliarRender2.ShowObjectID = value;
             }
         }
 
@@ -163,9 +178,17 @@ namespace WzComparerR2.CharaSimControl
             TooltipRender renderer;
             if (item is Item)
             {
-                renderer = ItemRender;
-                ItemRender.Item = this.item as Item;
-                ItemRender.Enable22AniStyle = this.Enable22AniStyle;
+                if (EnableAssembleTooltip)
+                {
+                    renderer = ItemRender3;
+                    ItemRender3.Item = this.item as Item;
+                }
+                else
+                {
+                    renderer = ItemRender;
+                    ItemRender.Item = this.item as Item;
+                    ItemRender.Enable22AniStyle = this.Enable22AniStyle;
+                }
             }
             else if (item is Gear)
             {
@@ -217,6 +240,19 @@ namespace WzComparerR2.CharaSimControl
                     //g.AdditionalOptions[0] = Potential.LoadFromWz(32086, 10);
                     //g.AdditionalOptions[1] = Potential.LoadFromWz(32086, 10);
                     //g.AdditionalOptions[2] = Potential.LoadFromWz(32086, 10);
+                }
+            }
+            else if (item is Familiar)
+            {
+                if (this.UseCTFamiliarUI)
+                {
+                    renderer = FamiliarRender;
+                    FamiliarRender.Familiar = this.item as Familiar;
+                }
+                else
+                {
+                    renderer = FamiliarRender2;
+                    FamiliarRender2.Familiar = this.item as Familiar;
                 }
             }
             else if (item is Skill)
@@ -300,7 +336,17 @@ namespace WzComparerR2.CharaSimControl
             {
                 this.Bitmap = renderer.Render();
             }
-            if (item is Item) AvatarBitmap = (this.TargetItem as Item).AvatarBitmap;
+            if (item is Item)
+            {
+                AvatarBitmap = (this.TargetItem as Item).AvatarBitmap;
+                SampleBitmap = (this.TargetItem as Item).Sample.Bitmap;
+                if ((this.TargetItem as Item).DamageSkinID != null)
+                {
+                    DamageSkinSampleNonCriticalBitmap = (this.TargetItem as Item).DamageSkinSampleNonCriticalBitmap;
+                    DamageSkinSampleCriticalBitmap = (this.TargetItem as Item).DamageSkinSampleCriticalBitmap;
+                    DamageSkinExtraBitmap = (this.TargetItem as Item).DamageSkinExtraBitmap;
+                }
+            }
             if (item is Gear) AvatarBitmap = (this.TargetItem as Gear).AndroidBitmap;
             if (item is Npc) AvatarBitmap = (this.TargetItem as Npc).AvatarBitmap;
         }
@@ -599,18 +645,77 @@ namespace WzComparerR2.CharaSimControl
             }
         }
 
-        void tsmiAvatarSave_Click(object sender, EventArgs e)
+        void tsmiSampleAssetSave_Click(object sender, EventArgs e)
         {
-            if (this.AvatarBitmap != null && this.item != null)
+            if (this.item != null)
             {
-                using (SaveFileDialog dlg = new SaveFileDialog())
+                if (this.DamageSkinSampleNonCriticalBitmap != null && this.DamageSkinSampleCriticalBitmap != null && this.item is Item)
                 {
-                    dlg.Filter = "PNG (*.png)|*.png|*.*|*.*";
-                    dlg.FileName = this.ImageFileName.Replace("eqp", "avatar");
-
-                    if (dlg.ShowDialog() == DialogResult.OK)
+                    using (FolderBrowserDialog dlg = new FolderBrowserDialog())
                     {
-                        this.AvatarBitmap.Save(dlg.FileName, System.Drawing.Imaging.ImageFormat.Png);
+                        dlg.Description = "请选择要保存伤害皮肤样式的文件夹。";
+                        string fileName1 = this.ImageFileName.Replace("item", "DamageSkinSample");
+                        string fileName2 = this.ImageFileName.Replace("item", "DamageSkinCriticalSample");
+                        string fileName3 = this.ImageFileName.Replace("item", "DamageSkinExtraEffectSample");
+                        //string fileName4 = this.ImageFileName.Replace("item", "DamageSkinUnitSample");
+                        if (dlg.ShowDialog() == DialogResult.OK)
+                        {
+                            this.DamageSkinSampleNonCriticalBitmap.Save(Path.Combine(dlg.SelectedPath, fileName1), System.Drawing.Imaging.ImageFormat.Png);
+                            this.DamageSkinSampleCriticalBitmap.Save(Path.Combine(dlg.SelectedPath, fileName2), System.Drawing.Imaging.ImageFormat.Png);
+                            if (this.DamageSkinExtraBitmap != null)
+                            {
+                                this.DamageSkinExtraBitmap.Save(Path.Combine(dlg.SelectedPath, fileName3), System.Drawing.Imaging.ImageFormat.Png);
+                            }
+                            //if (this.DamageSkinUnitBitmap != null)
+                            //{
+                            //    this.DamageSkinUnitBitmap.Save(Path.Combine(dlg.SelectedPath, fileName4), System.Drawing.Imaging.ImageFormat.Png);
+                            //}
+                        }
+                    }
+                }
+                else if (this.AvatarBitmap != null && this.item is Gear)
+                {
+                    using (SaveFileDialog dlg = new SaveFileDialog())
+                    {
+                        dlg.Filter = "PNG (*.png)|*.png|*.*|*.*";
+                        dlg.FileName = this.ImageFileName.Replace("eqp", "avatar");
+                        if (dlg.ShowDialog() == DialogResult.OK)
+                        {
+                            this.AvatarBitmap.Save(dlg.FileName, System.Drawing.Imaging.ImageFormat.Png);
+                        }
+                    }
+                }
+                else if (this.item is Npc)
+                {
+                    if ((this.TargetItem as Npc).Illustration2Bitmaps.Count == 0)
+                    {
+                        return;
+                    }
+                    using (FolderBrowserDialog dlg = new FolderBrowserDialog())
+                    {
+                        dlg.Description = "请选择要保存插图的文件夹。";
+                        if (dlg.ShowDialog() == DialogResult.OK)
+                        {
+                            int idx = 1;
+                            foreach (var ib in (this.TargetItem as Npc).Illustration2Bitmaps)
+                            {
+                                string fileName = this.ImageFileName.Replace("npc", "npcillust").Replace(".png", $" ({idx}).png");
+                                ib.Save(Path.Combine(dlg.SelectedPath, fileName), System.Drawing.Imaging.ImageFormat.Png);
+                                idx++;
+                            }
+                        }
+                    }
+                }
+                else if (this.SampleBitmap != null)
+                {
+                    using (SaveFileDialog dlg = new SaveFileDialog())
+                    {
+                        dlg.Filter = "PNG (*.png)|*.png|*.*|*.*";
+                        dlg.FileName = this.ImageFileName.Replace("eqp", "sample").Replace("item", "sample");
+                        if (dlg.ShowDialog() == DialogResult.OK)
+                        {
+                            this.SampleBitmap.Save(dlg.FileName, System.Drawing.Imaging.ImageFormat.Png);
+                        }
                     }
                 }
             }

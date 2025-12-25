@@ -97,5 +97,17 @@ namespace WzComparerR2.Rendering
             }
         }
 
+        public void End(bool disposeSprite)
+        {
+            if (disposeSprite)
+            {
+                this.sprite.Dispose();
+            }
+            // 检查spineRenderer是否实现了IDisposable接口
+            if (this.spineRenderer is IDisposable disposableRenderer)
+            {
+                disposableRenderer.Dispose();
+            }
+        }
     }
 }

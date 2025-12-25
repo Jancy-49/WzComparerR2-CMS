@@ -46,6 +46,7 @@ namespace WzComparerR2.CharaSimControl
         private ACtrlButton btnPreset2;
         private ACtrlButton btnPreset3;
         private ACtrlButton btnPresetApply;
+        private ACtrlButton btnEffectSetting;
         private ACtrlButton btnPet;
         private ACtrlButton btnDragon;
         private ACtrlButton btnMechanic;
@@ -305,7 +306,7 @@ namespace WzComparerR2.CharaSimControl
             this.btnTitle.Pressed = new BitmapOrigin(Resource.UIInventory_img_Equip_EquipTab_buttontitleSkin_pressed_0);
             this.btnTitle.MouseOver = new BitmapOrigin(Resource.UIInventory_img_Equip_EquipTab_buttontitleSkin_mouseOver_0);
             this.btnTitle.Disabled = new BitmapOrigin(Resource.UIInventory_img_Equip_EquipTab_buttontitleSkin_disabled_0);
-            this.btnTitle.Location = new Point(11, 414);
+            this.btnTitle.Location = new Point(11, 443);
             this.btnTitle.Size = new Size(84, 23);
             this.btnTitle.Visible = true;
             this.btnTitle.ButtonStateChanged += new EventHandler(aCtrl_RefreshCall);
@@ -316,7 +317,7 @@ namespace WzComparerR2.CharaSimControl
             this.btnTotem.Pressed = new BitmapOrigin(Resource.UIInventory_img_Equip_EquipTab_buttontotem_pressed_0);
             this.btnTotem.MouseOver = new BitmapOrigin(Resource.UIInventory_img_Equip_EquipTab_buttontotem_mouseOver_0);
             this.btnTotem.Disabled = new BitmapOrigin(Resource.UIInventory_img_Equip_EquipTab_buttontotem_disabled_0);
-            this.btnTotem.Location = new Point(98, 414);
+            this.btnTotem.Location = new Point(98, 443);
             this.btnTotem.Size = new Size(84, 23);
             this.btnTotem.Visible = true;
             this.btnTotem.ButtonStateChanged += new EventHandler(aCtrl_RefreshCall);
@@ -327,7 +328,7 @@ namespace WzComparerR2.CharaSimControl
             this.btnSymbol.Pressed = new BitmapOrigin(Resource.UIInventory_img_Equip_EquipTab_buttonsymbol_pressed_0);
             this.btnSymbol.MouseOver = new BitmapOrigin(Resource.UIInventory_img_Equip_EquipTab_buttonsymbol_mouseOver_0);
             this.btnSymbol.Disabled = new BitmapOrigin(Resource.UIInventory_img_Equip_EquipTab_buttonsymbol_disabled_0);
-            this.btnSymbol.Location = new Point(272, 414);
+            this.btnSymbol.Location = new Point(272, 443);
             this.btnSymbol.Size = new Size(84, 23);
             this.btnSymbol.Visible = true;
             this.btnSymbol.ButtonStateChanged += new EventHandler(aCtrl_RefreshCall);
@@ -344,12 +345,23 @@ namespace WzComparerR2.CharaSimControl
             this.btnPet.ButtonStateChanged += new EventHandler(aCtrl_RefreshCall);
             this.btnPet.MouseClick += new System.Windows.Forms.MouseEventHandler(btnPet_MouseClick);
 
+            this.btnEffectSetting = new ACtrlButton();
+            this.btnEffectSetting.Normal = new BitmapOrigin(Resource.UIEquip_img_Equip_EquipTab_buttonEffectSetting_normal_0);
+            this.btnEffectSetting.Pressed = new BitmapOrigin(Resource.UIEquip_img_Equip_EquipTab_buttonEffectSetting_pressed_0);
+            this.btnEffectSetting.MouseOver = new BitmapOrigin(Resource.UIEquip_img_Equip_EquipTab_buttonEffectSetting_mouseOver_0);
+            this.btnEffectSetting.Disabled = new BitmapOrigin(Resource.UIEquip_img_Equip_EquipTab_buttonEffectSetting_disabled_0);
+            this.btnEffectSetting.Location = new Point(248, 376);
+            this.btnEffectSetting.Size = new Size(92, 25);
+            this.btnEffectSetting.Visible = true;
+            this.btnEffectSetting.ButtonStateChanged += new EventHandler(aCtrl_RefreshCall);
+            //this.btnEffectSetting.MouseClick += new System.Windows.Forms.MouseEventHandler(btnEffectSetting_MouseClick);
+
             this.btnPresetApply = new ACtrlButton();
             this.btnPresetApply.Normal = new BitmapOrigin(Resource.UIInventory_img_Equip_EquipTab_buttonpresetApplication_normal_0);
             this.btnPresetApply.Pressed = new BitmapOrigin(Resource.UIInventory_img_Equip_EquipTab_buttonpresetApplication_pressed_0);
             this.btnPresetApply.MouseOver = new BitmapOrigin(Resource.UIInventory_img_Equip_EquipTab_buttonpresetApplication_mouseOver_0);
             this.btnPresetApply.Disabled = new BitmapOrigin(Resource.UIInventory_img_Equip_EquipTab_buttonpresetApplication_disabled_0);
-            this.btnPresetApply.Location = new Point(282, 376);
+            this.btnPresetApply.Location = new Point(282, 404);
             this.btnPresetApply.Size = new Size(58, 25);
             this.btnPresetApply.Visible = false;
             this.btnPresetApply.ButtonStateChanged += new EventHandler(aCtrl_RefreshCall);
@@ -359,7 +371,7 @@ namespace WzComparerR2.CharaSimControl
             this.btnPreset1.Normal = new BitmapOrigin(Resource.UIInventory_img_Equip_EquipTab_buttonpreset1_normal_0);
             this.btnPreset1.Pressed = new BitmapOrigin(Resource.UIInventory_img_Equip_EquipTab_buttonpreset1_pressed_0);
             this.btnPreset1.MouseOver = new BitmapOrigin(Resource.UIInventory_img_Equip_EquipTab_buttonpreset1_mouseOver_0);
-            this.btnPreset1.Location = new Point(184, 379);
+            this.btnPreset1.Location = new Point(184, 407);
             this.btnPreset1.Size = new Size(18, 18);
             this.btnPreset1.ButtonStateChanged += new EventHandler(aCtrl_RefreshCall);
             this.btnPreset1.MouseClick += new System.Windows.Forms.MouseEventHandler(btnPreset1_MouseClick);
@@ -368,7 +380,7 @@ namespace WzComparerR2.CharaSimControl
             this.btnPreset2.Normal = new BitmapOrigin(Resource.UIInventory_img_Equip_EquipTab_buttonpreset2_normal_0);
             this.btnPreset2.Pressed = new BitmapOrigin(Resource.UIInventory_img_Equip_EquipTab_buttonpreset2_pressed_0);
             this.btnPreset2.MouseOver = new BitmapOrigin(Resource.UIInventory_img_Equip_EquipTab_buttonpreset2_mouseOver_0);
-            this.btnPreset2.Location = new Point(214, 379);
+            this.btnPreset2.Location = new Point(214, 407);
             this.btnPreset2.Size = new Size(18, 18);
             this.btnPreset2.ButtonStateChanged += new EventHandler(aCtrl_RefreshCall);
             this.btnPreset2.MouseClick += new System.Windows.Forms.MouseEventHandler(btnPreset2_MouseClick);
@@ -377,7 +389,7 @@ namespace WzComparerR2.CharaSimControl
             this.btnPreset3.Normal = new BitmapOrigin(Resource.UIInventory_img_Equip_EquipTab_buttonpreset3_normal_0);
             this.btnPreset3.Pressed = new BitmapOrigin(Resource.UIInventory_img_Equip_EquipTab_buttonpreset3_pressed_0);
             this.btnPreset3.MouseOver = new BitmapOrigin(Resource.UIInventory_img_Equip_EquipTab_buttonpreset3_mouseOver_0);
-            this.btnPreset3.Location = new Point(244, 379);
+            this.btnPreset3.Location = new Point(244, 407);
             this.btnPreset3.Size = new Size(18, 18);
             this.btnPreset3.ButtonStateChanged += new EventHandler(aCtrl_RefreshCall);
             this.btnPreset3.MouseClick += new System.Windows.Forms.MouseEventHandler(btnPreset3_MouseClick);
@@ -582,13 +594,14 @@ namespace WzComparerR2.CharaSimControl
                 {
                     this.btnDeco.Visible = true;
                     this.btnEquip.Visible = false;
-                    this.btnTotem.Location = new Point(98, 414);
+                    this.btnTotem.Location = new Point(98, 443);
                     this.btnTotem.Visible = true;
                     this.btnTitle.Visible = true;
                     this.btnSymbol.Visible = true;
                     this.btnPreset1.Visible = true;
                     this.btnPreset2.Visible = true;
                     this.btnPreset3.Visible = true;
+                    this.btnEffectSetting.Visible = true;
                     if (this.currentPreset == this.checkPreset)
                         this.btnPresetApply.Visible = false;
                     else
@@ -616,6 +629,7 @@ namespace WzComparerR2.CharaSimControl
                     this.btnPreset2.Visible = false;
                     this.btnPreset3.Visible = false;
                     this.btnPresetApply.Visible = false;
+                    this.btnEffectSetting.Visible = false;
                 }
                 this.btnEquipTab.Visible = true;
                 this.btnPetTab.Visible = true;
@@ -676,6 +690,7 @@ namespace WzComparerR2.CharaSimControl
                 this.btnPreset2.Visible = false;
                 this.btnPreset3.Visible = false;
                 this.btnPresetApply.Visible = false;
+                this.btnEffectSetting.Visible = false;
                 this.TitleMedalVisble = false;
                 this.SymbolVisible = false;
             }
@@ -728,12 +743,12 @@ namespace WzComparerR2.CharaSimControl
                     g.DrawImage(Resource.UIInventory_img_Equip_EquipTab_canvasequip2, 12, 61);
 
                 if (this.checkPreset == this.currentPreset)
-                    g.DrawImage(Resource.UIInventory_img_Equip_EquipTab_buttonpresetApplication_disabled_0, 282, 376);
+                    g.DrawImage(Resource.UIInventory_img_Equip_EquipTab_buttonpresetApplication_disabled_0, 282, 404);
                 switch (checkPreset)
                 {
-                    case 1: g.DrawImage(Resource.UIInventory_img_Equip_EquipTab_presetSelected_0, 182, 379 - 15); break;
-                    case 2: g.DrawImage(Resource.UIInventory_img_Equip_EquipTab_presetSelected_0, 212, 379 - 15); break;
-                    case 3: g.DrawImage(Resource.UIInventory_img_Equip_EquipTab_presetSelected_0, 242, 379 - 15); break;
+                    case 1: g.DrawImage(Resource.UIInventory_img_Equip_EquipTab_presetSelected_0, 182, 407 - 15); break;
+                    case 2: g.DrawImage(Resource.UIInventory_img_Equip_EquipTab_presetSelected_0, 212, 407 - 15); break;
+                    case 3: g.DrawImage(Resource.UIInventory_img_Equip_EquipTab_presetSelected_0, 242, 407 - 15); break;
                 }
                 if (this.character != null) //绘制装备
                 {
@@ -971,6 +986,7 @@ namespace WzComparerR2.CharaSimControl
                 yield return btnPreset2;
                 yield return btnPreset3;
                 yield return btnPresetApply;
+                yield return btnEffectSetting;
                 yield return btnDragon;
                 yield return btnMechanic;
                 yield return btnTitle;

@@ -11,6 +11,8 @@ using WzComparerR2.Common;
 using WzComparerR2.Controls;
 using WzComparerR2.PluginBase;
 using System.Security.Cryptography;
+using DevComponents.AdvTree;
+using System.Security.Policy;
 
 namespace WzComparerR2.CharaSimControl
 {
@@ -20,11 +22,6 @@ namespace WzComparerR2.CharaSimControl
         {
             this.AllowDrop = true;
             initCtrl();
-            this.job_list = new List<int>()
-            {
-            110, 120, 130, 210, 220, 230, 310, 320, 330, 410, 420, 430, 510, 520, 530, 1100, 1200, 1300, 1400, 1500, 2100, 2200, 2300, 2400, 2500, 2700,
-            3100, 3101, 3200, 3300, 3500, 3600, 3700, 4100, 4200, 5100, 6100, 6300, 6400, 6500, 10100, 14200, 15100, 15200, 15400, 15500, 16200, 16400, 17200, 17500
-            };
         }
         private Point baseOffset;
         private Point newLocation;
@@ -32,15 +29,18 @@ namespace WzComparerR2.CharaSimControl
         private Character character;
 
         private ACtrlHScroll hScroll;
-        private ACtrlButton btnYes;
+        public ACtrlButton btnYes;
         private ACtrlButton btnNo;
+        private ACtrlButton pagePrev;
+        private ACtrlButton pageNext;
         private List<ACtrlButton> btnSelectedJobs = new List<ACtrlButton>();
 
-        public int jobIndex = 0;
-        public int selectIndex = 0;
-        private int pageIndex = 0;
+        public int jobIndex = 0; //最终选择的职业索引
+        private int selectIndex = 0; //当前选择的职业索引
+        private int pageIndex = 0; //当前页码索引
+        private int scrollValue = 0;
+        public int selectJob { get; private set; } //最终选择的职业ID
         public List<int> job_list = new List<int>();
-
 
         public Character Character
         {
@@ -100,6 +100,27 @@ namespace WzComparerR2.CharaSimControl
             this.btnNo.ButtonStateChanged += new EventHandler(aCtrl_RefreshCall);
             this.btnNo.MouseClick += new MouseEventHandler(btnNo_MouseClick);
 
+            this.pagePrev = new ACtrlButton();
+            this.pagePrev.Normal = new BitmapOrigin(Resource.ClassSelect_list_pagePrev_11);
+            this.pagePrev.MouseOver = new BitmapOrigin(Resource.ClassSelect_list_pagePrev_11);
+            this.pagePrev.Pressed = new BitmapOrigin(Resource.ClassSelect_list_pagePrev_11);
+            this.pagePrev.Disabled = new BitmapOrigin(Resource.ClassSelect_list_pagePrev_11);
+            this.pagePrev.Location = new Point(378, 685);
+            this.pagePrev.Size = new Size(16, 15);
+            this.pagePrev.Visible = false;
+            this.pagePrev.ButtonStateChanged += new EventHandler(aCtrl_RefreshCall);
+            this.pagePrev.MouseClick += new MouseEventHandler(pagePrev_MouseClick);
+
+            this.pageNext = new ACtrlButton();
+            this.pageNext.Normal = new BitmapOrigin(Resource.ClassSelect_list_pageNext_11);
+            this.pageNext.MouseOver = new BitmapOrigin(Resource.ClassSelect_list_pageNext_11);
+            this.pageNext.Pressed = new BitmapOrigin(Resource.ClassSelect_list_pageNext_11);
+            this.pageNext.Disabled = new BitmapOrigin(Resource.ClassSelect_list_pageNext_11);
+            this.pageNext.Location = new Point(1319, 685);
+            this.pageNext.Size = new Size(16, 15);
+            this.pageNext.ButtonStateChanged += new EventHandler(aCtrl_RefreshCall);
+            this.pageNext.MouseClick += new MouseEventHandler(pageNext_MouseClick);
+
             btns();
             for (int i = 0; i < btnSelectedJobs.Count; i++)
             {
@@ -116,6 +137,7 @@ namespace WzComparerR2.CharaSimControl
         {
             for (int i = 0; i < 42; i++)
             {
+                //if ((pageIndex * 7 + i + 1) > job_list.Count) continue;
                 var btnSelectedJob = new ACtrlButton();
                 btnSelectedJob.Location = new Point(375 + 161 * (i / 7), 113 + 81 * (i % 7));
                 btnSelectedJobs.Add(btnSelectedJob);
@@ -141,6 +163,8 @@ namespace WzComparerR2.CharaSimControl
             this.newLocation = new Point(this.Location.X + this.baseOffset.X,
                 this.Location.Y + this.baseOffset.Y);
 
+            control_event();
+
             //绘制图像
             Bitmap bitmap = new Bitmap(size.Width, size.Height);
             Graphics g = Graphics.FromImage(bitmap);
@@ -150,24 +174,36 @@ namespace WzComparerR2.CharaSimControl
             this.Bitmap = bitmap;
         }
 
+        private void control_event()
+        {
+            if (pageIndex != 0)
+                pagePrev.Visible = true;
+            else
+                pagePrev.Visible = false;
+            if ((pageIndex * 7 + 42) >= job_list.Count)
+                pageNext.Visible = false;
+            else
+                pageNext.Visible = true;
+            this.hScroll.Maximum = 2;
+        }
+
         private void renderBase(Graphics g)
         {
             g.TranslateTransform(baseOffset.X, baseOffset.Y);
-            g.DrawImage(Resource.ClassSelect_back_0_1_0, 0, 0);
-            var charObj = Resource.ResourceManager.GetObject("ClassSelect_back_1_" + job_list[selectIndex].ToString() + "_0");
-            Bitmap charBitmap = charObj as Bitmap;
-            if (charBitmap != null) // 确保转换成功
-            {
-                g.DrawImage(charBitmap, (1366 - charBitmap.Width) / 2, 0);
-            }
-            g.DrawImage(Resource.ClassSelect_layeraboveSpine, 0, 0);
+            render_bitmap(g, "UI/Login.img/ClassSelect/back/0/1/0", 0, 0);
+            Wz_Node charnode = PluginBase.PluginManager.FindWz($"UI/Login.img/ClassSelect/back/1/{job_list[selectIndex].ToString()}/0");
+            Bitmap charBitmap = BitmapOrigin.CreateFromNode(charnode, PluginBase.PluginManager.FindWz).Bitmap;
+            g.DrawImage(charBitmap, (1366 - charBitmap.Width) / 2, 0);
+            render_bitmap(g, "UI/_Canvas/Login.img/ClassSelect/layer:aboveSpine", 0, 0);
+            render_bitmap(g, "UI/Login.img/ClassSelect/list/backgrnd1", 378, 81);
             g.DrawImage(Resource.ClassSelect_back_2_0, 50, 13);
-            g.DrawImage(Resource.ClassSelect_list_backgrnd1_0_0, 378, 81);
-            string subName = PluginManager.FindWz($@"UI/Login.img/ClassSelect/desc/info/" + job_list[selectIndex].ToString() + "/subName").GetValueEx<string>(null);
-            string desc = PluginManager.FindWz($@"UI/Login.img/ClassSelect/desc/info/" + job_list[selectIndex].ToString() + "/desc").GetValueEx<string>(null).Replace("\\n", "\r\n");
-            string race = PluginManager.FindWz($@"UI/Login.img/ClassSelect/desc/info/" + job_list[selectIndex].ToString() + "/race").GetValueEx<string>(null).Replace("\\n", "\r\n");
-            string move = PluginManager.FindWz($@"UI/Login.img/ClassSelect/desc/info/" + job_list[selectIndex].ToString() + "/move").GetValueEx<string>(null).Replace("\\n", "\r\n");
-            string stat = PluginManager.FindWz($@"UI/Login.img/ClassSelect/desc/info/" + job_list[selectIndex].ToString() + "/stat").GetValueEx<string>(null).Replace("\\n", "\r\n");
+            render_bitmap(g, $"UI/Login.img/ClassSelect/desc/info/{job_list[selectIndex].ToString()}/className", 48, 44);
+            render_bitmap(g, $"UI/Login.img/ClassSelect/desc/info/{job_list[selectIndex].ToString()}/jobMark", 50, 169);
+            string subName = PluginManager.FindWz($@"UI/Login.img/ClassSelect/desc/info/{job_list[selectIndex].ToString()}/subName").GetValueEx<string>(null);
+            string desc = PluginManager.FindWz($@"UI/Login.img/ClassSelect/desc/info/{job_list[selectIndex].ToString()}/desc").GetValueEx<string>(null).Replace("\\n", "\r\n");
+            string race = PluginManager.FindWz($@"UI/Login.img/ClassSelect/desc/info/{job_list[selectIndex].ToString()}/race").GetValueEx<string>(null).Replace("\\n", "\r\n");
+            string move = PluginManager.FindWz($@"UI/Login.img/ClassSelect/desc/info/{job_list[selectIndex].ToString()}/move").GetValueEx<string>(null).Replace("\\n", "\r\n");
+            string stat = PluginManager.FindWz($@"UI/Login.img/ClassSelect/desc/info/{job_list[selectIndex].ToString()}/stat").GetValueEx<string>(null).Replace("\\n", "\r\n");
             g.DrawString(subName, GearGraphics.ClassSelectFontBold, GearGraphics.WhiteBrush, 48f, 223f);
             int picH = 263;
             GearGraphics.DrawPlainText(g, desc, GearGraphics.ClassSelectDescFont, Color.FromArgb(255, 255, 255), 50, 345, ref picH, 16);
@@ -176,18 +212,23 @@ namespace WzComparerR2.CharaSimControl
             g.DrawString(stat, GearGraphics.ClassSelectDescFont, GearGraphics.WhiteBrush, 143f, 447f);
             for (int i = pageIndex * 7; i < 42 + pageIndex * 7; i++)
             {
-                if (pageIndex >= job_list.Count) continue;
-                string jobID = job_list[i].ToString();
-                var imgObj = Resource.ResourceManager.GetObject("ClassSelect_list_class_buttonclassEnabled_" + jobID + "_normal_0");
-                if (imgObj is Bitmap bitmap) g.DrawImage(bitmap, 378 + 161 * (i / 7), 116 + 81 * (i % 7));
+                if ((i + 1) > job_list.Count) continue;
+                render_bitmap(g, $"UI/Login.img/ClassSelect/list/class/button:classEnabled/{job_list[i].ToString()}/normal/0", 378 + 161 * (i / 7 - pageIndex), 116 + 81 * (i % 7));
             }
-            g.DrawImage(Resource.ClassSelect_list_class_layerclassCover, 375 + 161 * (selectIndex / 7), 113 + 81 * (selectIndex % 7));
+            g.DrawImage(Resource.ClassSelect_list_class_layerclassCover, 375 + 161 * (selectIndex / 7 - pageIndex), 113 + 81 * (selectIndex % 7));
             g.DrawString(job_list.Count.ToString(), GearGraphics.ClassSelectDescFont, GearGraphics.WhiteBrush, 1111f, 16f);
             foreach (AControl aCtrl in this.aControls)
             {
                 aCtrl.Draw(g);
             }
             g.ResetTransform();
+        }
+
+        private void render_bitmap(Graphics g, string nodepath, int x, int y)
+        {
+            Wz_Node Node = PluginBase.PluginManager.FindWz(nodepath);
+            Bitmap image = BitmapOrigin.CreateFromNode(Node, PluginBase.PluginManager.FindWz).Bitmap;
+            g.DrawImage(image, x, y);
         }
 
         private IEnumerable<AControl> aControls
@@ -197,6 +238,8 @@ namespace WzComparerR2.CharaSimControl
                 yield return hScroll;
                 yield return btnYes;
                 yield return btnNo;
+                yield return pagePrev;
+                yield return pageNext;
                 foreach (var btn in btnSelectedJobs)
                 {
                     yield return btn;
@@ -225,8 +268,13 @@ namespace WzComparerR2.CharaSimControl
 
         private void btnYes_MouseClick(object sender, MouseEventArgs e)
         {
-            this.jobIndex = selectIndex + pageIndex * 7;
+            this.jobIndex = selectIndex;
+            this.selectJob = job_list[jobIndex];
             this.Visible = false;
+            if (this.Owner is MainForm mainForm)
+            {
+                mainForm.buttonJobSelect.Checked = false;
+            }
         }
 
         private void btnNo_MouseClick(object sender, MouseEventArgs e)
@@ -234,8 +282,27 @@ namespace WzComparerR2.CharaSimControl
             this.Visible = false;
         }
 
+        private void pagePrev_MouseClick(object sender, MouseEventArgs e)
+        {
+            pageIndex -= 1;
+            if (selectIndex >= ((pageIndex + 5) * 7 - 1) && selectIndex < (pageIndex + 6) * 7)
+                selectIndex -= 7;
+            waitForRefresh = true;
+            Refresh();
+        }
+
+        private void pageNext_MouseClick(object sender, MouseEventArgs e)
+        {
+            pageIndex += 1;
+            if (selectIndex >= 0 && selectIndex < (pageIndex + 1) * 7)
+                selectIndex += 7;
+            waitForRefresh = true;
+            Refresh();
+        }
+
         private void hScroll_ValueChanged(object sender, EventArgs e)
         {
+            this.scrollValue = this.hScroll.Value;
             this.waitForRefresh = true;
         }
 

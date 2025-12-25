@@ -217,6 +217,62 @@ namespace WzComparerR2
         }
 
         [Link]
+        public bool Item_UseAssembleUI
+        {
+            get { return chkUseAssembleUI.Checked; }
+            set { chkUseAssembleUI.Checked = value; }
+        }
+
+        [Link]
+        public bool DamageSkin_ShowDamageSkinID
+        {
+            get { return chkShowDamageSkinID.Checked; }
+            set { chkShowDamageSkinID.Checked = value; }
+        }
+
+        [Link]
+        public bool DamageSkin_ShowDamageSkin
+        {
+            get { return chkShowDamageSkin.Checked; }
+            set { chkShowDamageSkin.Checked = value; }
+        }
+
+        [Link]
+        public bool DamageSkin_UseMiniSize
+        {
+            get { return chkUseMiniSize.Checked; }
+            set { chkUseMiniSize.Checked = value; }
+        }
+
+        [Link]
+        public bool DamageSkin_AlwaysUseMseaFormat
+        {
+            get { return chkAlwaysUseMseaFormat.Checked; }
+            set { chkAlwaysUseMseaFormat.Checked = value; }
+        }
+
+        [Link]
+        public long DamageSkin_DamageSkinNumber
+        {
+            get { return long.TryParse(txtDamageSkinNumber.Text, out long val) ? val : 0; }
+            set { txtDamageSkinNumber.Text = value.ToString(); }
+        }
+
+        [Link]
+        public bool Familiar_AllowOutOfBounds
+        {
+            get { return chkAllowFamiliarOutOfBounds.Checked; }
+            set { chkAllowFamiliarOutOfBounds.Checked = value; }
+        }
+
+        [Link]
+        public bool Familiar_UseCTFamiliarUI
+        {
+            get { return chkUseCTFamiliarUI.Checked; }
+            set { chkUseCTFamiliarUI.Checked = value; }
+        }
+
+        [Link]
         public bool Map_ShowMiniMap
         {
             get { return chkShowMiniMap.Checked; }
@@ -242,6 +298,13 @@ namespace WzComparerR2
         {
             get { return chkShowBgmName.Checked; }
             set { chkShowBgmName.Checked = value; }
+        }
+
+        [Link]
+        public bool Npc_ShowAllIllustAtOnce
+        {
+            get { return chkShowAllIllustAtOnce.Checked; }
+            set { chkShowAllIllustAtOnce.Checked = value; }
         }
 
         [Link]
@@ -376,6 +439,35 @@ namespace WzComparerR2
             this.comboBoxExQuestState.Enabled = !this.chkQAS.Checked;
             this.labelXQS.Enabled = !this.chkQAS.Checked;
             this.labelXQSHint.Enabled = !this.chkQAS.Checked;
+        }
+
+        private void txtDamageSkinNumber_TextChanged(object sender, EventArgs e)
+        {
+            // 过滤非数字字符
+            string digitsOnly = new string(txtDamageSkinNumber.Text.Where(char.IsDigit).ToArray());
+
+            if (txtDamageSkinNumber.Text != digitsOnly)
+            {
+                int cursorPos = txtDamageSkinNumber.SelectionStart;
+                txtDamageSkinNumber.Text = digitsOnly;
+                txtDamageSkinNumber.SelectionStart = Math.Min(cursorPos, txtDamageSkinNumber.Text.Length);
+            }
+
+            // 检查按钮启用条件
+            bool isEnabled = !string.IsNullOrEmpty(txtDamageSkinNumber.Text) &&
+                             txtDamageSkinNumber.Text != "0" &&
+                             long.TryParse(txtDamageSkinNumber.Text, out long number) &&
+                             number > 0 && number < 700000000000L;
+
+            this.buttonX1.Enabled = isEnabled;
+            //this.buttonX1.Enabled = !(string.IsNullOrEmpty(txtDamageSkinNumber.Text) || txtDamageSkinNumber.Text == "0");
+
+            if (txtDamageSkinNumber.Text != digitsOnly)
+            {
+                int cursorPos = txtDamageSkinNumber.SelectionStart;
+                txtDamageSkinNumber.Text = digitsOnly;
+                txtDamageSkinNumber.SelectionStart = Math.Min(cursorPos, txtDamageSkinNumber.Text.Length);
+            }
         }
 
         private sealed class LinkAttribute : Attribute

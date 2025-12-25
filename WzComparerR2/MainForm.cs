@@ -62,9 +62,10 @@ namespace WzComparerR2
             loadUIState();
             textBoxAPIKey.Text = Properties.Settings.Default.APIKey;
             textBoxAPIKey2.Text = Properties.Settings.Default.APIKey2;
+            textBoxAPIKey3.Text = Properties.Settings.Default.APIKey3;
         }
 
-        List<Wz_Structure> openedWz;
+        public List<Wz_Structure> openedWz;
         StringLinker stringLinker;
         HistoryList<Node> historyNodeList;
         bool historySelecting;
@@ -86,7 +87,14 @@ namespace WzComparerR2
 
         //countdownTimer
         private double remainingTime;
+        private List<string> skillList = new List<string>();
+        private string skillname;
+        private string randomcode;
+        private int correctCount = 0;
+        private int wrongCount = 0;
 
+        //selectJob
+        public int selectJob = 110;
         private void initFields()
         {
             openedWz = new List<Wz_Structure>();
@@ -114,6 +122,8 @@ namespace WzComparerR2
             charaSimCtrl.UIUnion.VisibleChanged += new EventHandler(afrm_VisibleChanged);
             charaSimCtrl.UIJob.Visible = false;
             charaSimCtrl.UIJob.VisibleChanged += new EventHandler(afrm_VisibleChanged);
+            charaSimCtrl.UISkill.Visible = false;
+            charaSimCtrl.UISkill.VisibleChanged += new EventHandler(afrm_VisibleChanged);
 
             string[] images = new string[] { "dir", "mp3", "num", "png", "str", "uol", "vector", "img", "rawdata", "convex", "video" };
             foreach (string img in images)
@@ -155,6 +165,7 @@ namespace WzComparerR2
             // 保存 APIKey 值
             Properties.Settings.Default.APIKey = textBoxAPIKey.Text;
             Properties.Settings.Default.APIKey2 = textBoxAPIKey2.Text;
+            Properties.Settings.Default.APIKey3 = textBoxAPIKey3.Text;
             Properties.Settings.Default.Save();
         }
 
@@ -291,6 +302,35 @@ namespace WzComparerR2
             tooltipQuickView.ItemRender.CosmeticHairColor = Setting.Item.CosmeticHairColor;
             tooltipQuickView.ItemRender.CosmeticFaceColor = Setting.Item.CosmeticFaceColor;
             tooltipQuickView.ItemRender.Enable22AniStyle = Setting.Enable22AniStyle;
+            tooltipQuickView.ItemRender.ShowDamageSkin = Setting.DamageSkin.ShowDamageSkin;
+            tooltipQuickView.ItemRender.ShowDamageSkinID = Setting.DamageSkin.ShowDamageSkinID;
+            tooltipQuickView.ItemRender.UseMiniSizeDamageSkin = Setting.DamageSkin.UseMiniSize;
+            tooltipQuickView.ItemRender.AlwaysUseMseaFormatDamageSkin = Setting.DamageSkin.AlwaysUseMseaFormat;
+            tooltipQuickView.ItemRender.DamageSkinNumber = Setting.DamageSkin.DamageSkinNumber;
+            tooltipQuickView.ItemRender.AllowFamiliarOutOfBounds = Setting.Familiar.AllowOutOfBounds;
+            tooltipQuickView.ItemRender.UseCTFamiliarRender = Setting.Familiar.UseCTFamiliarUI;
+
+            tooltipQuickView.ItemRender3.ShowObjectID = Setting.Item.ShowID;
+            tooltipQuickView.ItemRender3.LinkRecipeInfo = Setting.Item.LinkRecipeInfo;
+            tooltipQuickView.ItemRender3.LinkRecipeItem = Setting.Item.LinkRecipeItem;
+            tooltipQuickView.ItemRender3.ShowLevelOrSealed = Setting.Gear.ShowLevelOrSealed;
+            tooltipQuickView.ItemRender3.ShowNickTag = Setting.Item.ShowNickTag;
+            //tooltipQuickView.ItemRender3.ShowSoldPrice = Setting.Item.ShowSoldPrice;
+            tooltipQuickView.ItemRender3.ShowCashPurchasePrice = Setting.Item.ShowCashPurchasePrice;
+            tooltipQuickView.ItemRender3.ShowLinkedTamingMob = Setting.Item.ShowLinkedTamingMob;
+            tooltipQuickView.ItemRender3.CosmeticHairColor = Setting.Item.CosmeticHairColor;
+            tooltipQuickView.ItemRender3.CosmeticFaceColor = Setting.Item.CosmeticFaceColor;
+            tooltipQuickView.ItemRender3.ShowDamageSkin = Setting.DamageSkin.ShowDamageSkin;
+            tooltipQuickView.ItemRender3.ShowDamageSkinID = Setting.DamageSkin.ShowDamageSkinID;
+            tooltipQuickView.ItemRender3.UseMiniSizeDamageSkin = Setting.DamageSkin.UseMiniSize;
+            tooltipQuickView.ItemRender3.AlwaysUseMseaFormatDamageSkin = Setting.DamageSkin.AlwaysUseMseaFormat;
+            tooltipQuickView.ItemRender3.DamageSkinNumber = Setting.DamageSkin.DamageSkinNumber;
+            tooltipQuickView.ItemRender3.AllowFamiliarOutOfBounds = Setting.Familiar.AllowOutOfBounds;
+            tooltipQuickView.ItemRender3.UseCTFamiliarRender = Setting.Familiar.UseCTFamiliarUI;
+            tooltipQuickView.UseCTFamiliarUI = Setting.Familiar.UseCTFamiliarUI;
+            tooltipQuickView.FamiliarRender.AllowOutOfBounds = Setting.Familiar.AllowOutOfBounds;
+            tooltipQuickView.FamiliarRender2.AllowOutOfBounds = Setting.Familiar.AllowOutOfBounds;
+            tooltipQuickView.EnableAssembleTooltip = Setting.Item.UseAssembleUI;
 
             tooltipQuickView.MapRender.ShowMiniMap = Setting.Map.ShowMiniMap;
             tooltipQuickView.MapRender.ShowObjectID = Setting.Map.ShowMapObjectID;
@@ -301,6 +341,7 @@ namespace WzComparerR2
             tooltipQuickView.MapRender.ShowMiniMapPortal = Setting.Map.ShowMiniMapPortal;
             tooltipQuickView.MapRender.ShowBgmName = Setting.Map.ShowBgmName;
 
+            tooltipQuickView.NpcRender.ShowAllIllustAtOnce = Setting.Npc.ShowAllIllustAtOnce;
             tooltipQuickView.QuestRender.ShowObjectID = Setting.Quest.ShowID;
             tooltipQuickView.QuestRender.DefaultState = Setting.Quest.DefaultState;
             tooltipQuickView.QuestRender.ShowAllStates = Setting.Quest.ShowAllStates;
@@ -705,11 +746,13 @@ namespace WzComparerR2
         private void buttonItemGif2_Click(object sender, EventArgs e)
         {
             // code from buttonItemGif_Click()
+            // Todo: reimplement overall overlay feature
+            // keep each animation item instead of merge them into one
             if (advTree3.SelectedNode == null)
                 return;
 
             Wz_Node node = advTree3.SelectedNode.AsWzNode();
-            string aniName = "嵌套_" + GetSelectedNodeImageName();
+            string aniName = "중첩_" + GetSelectedNodeImageName();
 
             if (node.Value is Wz_Png)
             {
@@ -727,7 +770,8 @@ namespace WzComparerR2
             }
             else if (node.Value is Wz_Video)
             {
-                var videoFrameData = this.pictureBoxEx1.LoadVideo(node.Value as Wz_Video);
+                var origin = node.FindNodeByPath("origin").GetValueEx<Wz_Vector>(null);
+                var videoFrameData = this.pictureBoxEx1.LoadVideo(node.Value as Wz_Video, origin);
 
                 if (videoFrameData != null)
                 {
@@ -744,11 +788,12 @@ namespace WzComparerR2
             if (spineDetectResult.Success)
             {
                 var spineData = this.pictureBoxEx1.LoadSpineAnimation(spineDetectResult);
+
                 if (spineData != null)
                 {
                     var aniItem = spineData.CreateAnimator() as AnimationItem;
 
-                    var frmOverlayAniOptions = new FrmOverlaySpineOptions((aniItem as ISpineAnimator).Animations.ToArray(), (aniItem as ISpineAnimator).Skins.ToArray());
+                    var frmOverlayAniOptions = new FrmOverlaySpineOptions(aniItem);
                     var name = "";
                     var skin = "";
                     var delay = 0;
@@ -756,17 +801,17 @@ namespace WzComparerR2
                     if (frmOverlayAniOptions.ShowDialog() == DialogResult.OK)
                     {
                         frmOverlayAniOptions.GetValues(out name, out skin, out delay);
+                        this.pictureBoxEx1.ShowSpineOverlayAnimation(aniItem, delay);
+                        this.cmbItemAniNames.Items.Clear();
+                        this.cmbItemSkins.Visible = false;
+                        this.pictureBoxEx1.PictureName = $"{aniName}_{name}";
+                    }
+                    else
+                    {
+                        this.pictureBoxEx1.DisposeAnimationItem(aniItem);
                     }
 
-                    if (!string.IsNullOrEmpty(name))
-                    {
-                        (aniItem as ISpineAnimator).SelectedAnimationName = name;
-                    }
-                    if (!string.IsNullOrEmpty(skin))
-                    {
-                        (aniItem as ISpineAnimator).SelectedSkin = skin;
-                    }
-
+                    /*
                     var frameData = this.pictureBoxEx1.ConvertSpineToFrameAnimation(aniItem, delay);
 
                     if (frameData != null)
@@ -776,12 +821,14 @@ namespace WzComparerR2
                         this.cmbItemSkins.Visible = false;
                         this.pictureBoxEx1.PictureName = name;
                     }
+                    */
                 }
                 return;
             }
             else
             {
-                var frameData = this.pictureBoxEx1.LoadFrameAnimation(node);
+                var options = (sender == this.buttonOverlayExtractGifEx) ? FrameAnimationCreatingOptions.ScanAllChildrenFrames : default;
+                var frameData = this.pictureBoxEx1.LoadFrameAnimation(node, options);
 
                 if (frameData != null)
                 {
@@ -793,8 +840,42 @@ namespace WzComparerR2
                 else
                 {
                     var multiData = this.pictureBoxEx1.LoadMultiFrameAnimation(node);
+
                     if (multiData != null)
                     {
+                        var aniItem = new MultiFrameAnimator(multiData);
+
+                        var frmOverlayAniOptions = new FrmOverlaySpineOptions(aniItem);
+                        var name = "";
+                        var skin = "";
+                        var delay = 0;
+
+                        if (frmOverlayAniOptions.ShowDialog() == DialogResult.OK)
+                        {
+                            frmOverlayAniOptions.GetValues(out name, out skin, out delay);
+
+                            foreach (var kv_frames in aniItem.Data.Frames)
+                            {
+                                var selectedFrameData = new FrameAnimationData(kv_frames.Value);
+                                if (kv_frames.Key == name)
+                                {
+                                    this.pictureBoxEx1.ShowOverlayAnimation(new FrameAnimationData(aniItem.Data.Frames[name]), multiFrameInfo: name);
+                                    this.cmbItemAniNames.Items.Clear();
+                                    this.cmbItemSkins.Visible = false;
+                                    this.pictureBoxEx1.PictureName = $"{aniName}_{name}";
+                                }
+                                else
+                                {
+                                    this.pictureBoxEx1.DisposeAnimationItem(new FrameAnimator(selectedFrameData));
+                                }
+                            }
+                        }
+                        else
+                        {
+                            this.pictureBoxEx1.DisposeAnimationItem(aniItem);
+                        }
+
+                        /*
                         foreach (var kv_frames in multiData.Frames)
                         {
                             var selectedFrameData = new FrameAnimationData(kv_frames.Value);
@@ -804,6 +885,7 @@ namespace WzComparerR2
                         this.cmbItemAniNames.Items.Clear();
                         this.cmbItemSkins.Visible = false;
                         this.pictureBoxEx1.PictureName = aniName;
+                        */
                     }
 
                     return;
@@ -811,6 +893,7 @@ namespace WzComparerR2
             }
             //this.pictureBoxEx1.PictureName = aniName;
         }
+
 
         private void OverlayMultiFrameWithKey(object sender, EventArgs e)
         {
@@ -894,7 +977,9 @@ namespace WzComparerR2
         {
             if (this.pictureBoxEx1.ShowOverlayAni)
             {
-                this.pictureBoxEx1.AddHitboxOverlay();
+                Wz_Node node = advTree3.SelectedNode?.AsWzNode() ?? null;
+                var frameData = this.pictureBoxEx1.LoadFrameAnimation(node, loadTexture: false);
+                this.pictureBoxEx1.AddHitboxOverlay(frameData);
             }
         }
 
@@ -958,10 +1043,11 @@ namespace WzComparerR2
                 return;
             }
 
-            var aniItem = this.pictureBoxEx1.Items[0];
-            var frameData = (aniItem as FrameAnimator)?.Data;
-            if (frameData != null && frameData.Frames.Count == 1
-                && frameData.Frames[0].A0 == 255 && frameData.Frames[0].A1 == 255 && frameData.Frames[0].Delay == 0)
+            var aniItem = this.pictureBoxEx1.Items;
+            var aniItemTime = this.pictureBoxEx1.ItemTimes;
+            var frameData = (aniItem?.FirstOrDefault(item => item is FrameAnimator) as FrameAnimator)?.Data;
+            if (aniItem.Count == 1 && frameData != null && frameData.Frames.Count == 1
+                && frameData.Frames[0].A0 == 255 && frameData.Frames[0].A1 == 255 && (frameData.Frames[0].Delay == 0 || pictureBoxEx1.ShowOverlayAni))
             {
                 // save still picture as png
                 this.OnSavePngFile(frameData.Frames[0]);
@@ -969,7 +1055,7 @@ namespace WzComparerR2
             else
             {
                 // save as gif/apng
-                this.OnSaveGifFile(aniItem, options);
+                this.OnSaveGifFile(aniItem, aniItemTime, options);
             }
         }
 
@@ -1049,7 +1135,7 @@ namespace WzComparerR2
 
 
 
-        private void OnSaveGifFile(AnimationItem aniItem, bool options)
+        private void OnSaveGifFile(IEnumerable<AnimationItem> aniItem, IEnumerable<Tuple<int, int>> aniItemTime, bool options)
         {
             var config = ImageHandlerConfig.Default;
             using var encoder = AnimateEncoderFactory.CreateEncoder(config);
@@ -1086,8 +1172,8 @@ namespace WzComparerR2
                 aniFileName = dlg.FileName;
             }
 
-            var clonedAniItem = (AnimationItem)aniItem.Clone();
-            if (this.pictureBoxEx1.SaveAsGif(clonedAniItem, aniFileName, config, encoder, options))
+            var clonedAniItem = aniItem.Select(aniItem => (AnimationItem)aniItem.Clone());
+            if (this.pictureBoxEx1.SaveAsGif(clonedAniItem, aniItemTime, aniFileName, config, encoder, options))
             {
                 labelItemStatus.Text = "导出动画完毕: " + aniFileName;
             }
@@ -1176,6 +1262,7 @@ namespace WzComparerR2
             catch (FileNotFoundException)
             {
                 MessageBoxEx.Show(LocalizedString_CN.MAINFORM_COMMON_FILENOTFOUND, LocalizedString_CN.COMMON_ERROR);
+                WcR2Config.Default.RecentDocuments.Remove(wzFilePath);
             }
             catch (Exception ex)
             {
@@ -1398,6 +1485,20 @@ namespace WzComparerR2
                 this.tsmi1UpdateStringLinker});
             }
             else if (this.advTree1.ContextMenuStrip.Items.Contains(this.tsmi1UpdateStringLinker))
+            {
+                for (int i = 0; i < 2; i++)
+                {
+                    this.advTree1.ContextMenuStrip.Items.RemoveAt(this.advTree1.ContextMenuStrip.Items.Count - 1);
+                }
+            }
+
+            if (selectedNode.FullPathToFile.Contains("Sound"))
+            {
+                this.advTree1.ContextMenuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+                this.toolStripMenuItem5,
+                this.tsmi1ExportSound});
+            }
+            else if (this.advTree1.ContextMenuStrip.Items.Contains(this.tsmi1ExportSound))
             {
                 for (int i = 0; i < 2; i++)
                 {
@@ -2474,6 +2575,121 @@ namespace WzComparerR2
             }
         }
 
+        private async void tsmi1ExportSound_Click(object sender, EventArgs e)
+        {
+            Wz_Node soundNode = advTree1.SelectedNode?.AsWzNode();
+            if (soundNode != null && soundNode.Value is Wz_Image)
+            {
+                FolderBrowserDialog dlg = new FolderBrowserDialog();
+                dlg.Description = "选择导出的文件夹。";
+                if (dlg.ShowDialog(this) != DialogResult.OK)
+                {
+                    return;
+                }
+                string exportedFolder = Path.Combine(dlg.SelectedPath, soundNode.FullPathToFile);
+                if (!Directory.Exists(exportedFolder))
+                {
+                    Directory.CreateDirectory(exportedFolder);
+                }
+                FrmWaiting WaitingForm = new FrmWaiting();
+                WaitingForm.UpdateMessage("正在导出");
+                WaitingForm.Show(this);
+                await Task.Run(() =>
+                {
+                    BatchExportSound(soundNode.GetValue<Wz_Image>().Node, exportedFolder, WaitingForm);
+                });
+                WaitingForm.Close();
+                labelItemStatus.Text = "已导出: " + exportedFolder;
+            }
+            else
+            {
+                using (FrmSoundExport frm = new FrmSoundExport(styleManager1.ManagerStyle == eStyle.VisualStudio2012Dark))
+                {
+                    foreach (var img in soundNode.Nodes)
+                    {
+                        frm.AddSoundEntry(img.Text);
+                    }
+                    if (frm.ShowDialog() == DialogResult.OK)
+                    {
+                        string exportedFolder = Path.Combine(frm.ExportFolderPath, soundNode.FullPathToFile);
+                        if (!Directory.Exists(exportedFolder))
+                        {
+                            Directory.CreateDirectory(exportedFolder);
+                        }
+                        FrmWaiting WaitingForm = new FrmWaiting();
+                        WaitingForm.UpdateMessage("正在导出");
+                        WaitingForm.Show(this);
+                        await Task.Run(() =>
+                        {
+                            foreach (var img in soundNode.Nodes)
+                            {
+                                if (!frm.SelectedSoundCodes.Contains(img.Text))
+                                {
+                                    continue;
+                                }
+                                Wz_Image image = img.GetValue<Wz_Image>();
+                                if (image.TryExtract())
+                                {
+                                    if (!Directory.Exists(Path.Combine(exportedFolder, img.Text)))
+                                    {
+                                        Directory.CreateDirectory(Path.Combine(exportedFolder, img.Text));
+                                    }
+                                    BatchExportSound(image.Node, Path.Combine(exportedFolder, img.Text), WaitingForm);
+                                }
+                            }
+                        });
+                        WaitingForm.Close();
+                        labelItemStatus.Text = "已导出: " + exportedFolder;
+                    }
+                }
+            }
+        }
+
+        private void BatchExportSound(Wz_Node node, string path, FrmWaiting waiting)
+        {
+            foreach (Wz_Node child in node.Nodes)
+            {
+                if (child.Value is Wz_Sound sound)
+                {
+                    string soundName = child.Text;
+                    waiting.UpdateMessage($"正在导出: {soundName}");
+                    byte[] soundData = sound.ExtractSound();
+                    if (soundData == null || soundData.Length <= 0)
+                    {
+                        continue;
+                    }
+                    switch (sound.SoundType)
+                    {
+                        case Wz_SoundType.Mp3: soundName += ".mp3"; break;
+                        case Wz_SoundType.Pcm: soundName += ".wav"; break;
+                    }
+
+                    FileStream fs = null;
+                    try
+                    {
+                        fs = new FileStream(Path.Combine(path, RemoveInvalidFileNameChars(soundName)), FileMode.Create, FileAccess.Write);
+                        fs.Write(soundData, 0, soundData.Length);
+                    }
+                    catch
+                    {
+                    }
+                    finally
+                    {
+                        fs?.Close();
+                    }
+                }
+                else if (child.Value == null && child.Nodes.Count > 0)
+                {
+                    string subDirPath = Path.Combine(path, RemoveInvalidFileNameChars(child.Text));
+                    if (!Directory.Exists(subDirPath))
+                    {
+                        Directory.CreateDirectory(subDirPath);
+                    }
+                    BatchExportSound(child, subDirPath, waiting);
+                }
+            }
+        }
+
         private void tsmi1SaveImgList_Click(object sender, EventArgs e)
         {
             Wz_Node node = advTree1.SelectedNode?.AsWzNode();
@@ -2898,6 +3114,134 @@ namespace WzComparerR2
             else
             {
                 MessageBoxEx.Show("StringLinker初始化失败。", "错误");
+            }
+        }
+
+        private void buttonPathSearch_Click(object sender, EventArgs e)
+        {
+            if (openedWz.Count > 0)
+            {
+                if (pathSearchForm.ShowDialog() == DialogResult.OK)
+                {
+                    string path = textBoxPath.Text;
+                    string pattern = @"^[^/]+(?:/[^/]+)*$";
+
+                    if (string.IsNullOrWhiteSpace(path))
+                    {
+                        MessageBoxEx.Show("路径不能为空", "错误");
+                        return;
+                    }
+                    if (path.StartsWith("/") || path.EndsWith("/"))
+                    {
+                        MessageBoxEx.Show("路径不能以斜杠开头或结尾", "错误");
+                        return;
+                    }
+
+                    if (path.Contains("//"))
+                    {
+                        MessageBoxEx.Show("路径中不能包含连续的斜杠", "错误");
+                        return;
+                    }
+                    if (!System.Text.RegularExpressions.Regex.IsMatch(path, pattern))
+                    {
+                        MessageBoxEx.Show("路径格式不正确！\n" +
+                                         "格式应为: xxx/xxx/xxx/xxx\n" +
+                                         "示例: Base/Character/00002000.img/face\n" +
+                                         "注意: 不能以斜杠开头或结尾，也不能包含连续的斜杠", "错误");
+                        return;
+                    }
+
+                    // 分割路径
+                    string[] pathArray = path.Split('/');
+
+                    // 查找Wz_Type
+                    Wz_Type wzType = ParseType(pathArray[0]);
+                    if (wzType == Wz_Type.Unknown)
+                    {
+                        MessageBoxEx.Show("无法识别的WZ类型: " + pathArray[0], "错误");
+                        return;
+                    }
+
+                    // 查找所有对应的Wz_File节点
+                    List<Wz_Node> allWzFile = new List<Wz_Node>();
+                    foreach (var wzs in this.openedWz)
+                    {
+                        foreach (var wzf in wzs.wz_files)
+                        {
+                            if (wzf.Type == wzType && wzf.OwnerWzFile == null)
+                            {
+                                allWzFile.Add(wzf.Node);
+                            }
+                        }
+                    }
+
+                    // 搜索节点
+                    foreach (var wzFileNode in allWzFile)
+                    {
+                        Wz_Node node = wzFileNode;
+                        int foundDepth = 0;
+                        // 逐级查找，找到最深的存在节点
+                        for (int i = 1; i < pathArray.Length; i++)
+                        {
+                            var next = node.Nodes[pathArray[i]];
+                            if (next != null)
+                            {
+                                node = next;
+                                foundDepth = i;
+                                // 如果是Wz_Image节点，尝试提取
+                                if (node.Value is Wz_Image img)
+                                {
+                                    if (img.TryExtract())
+                                    {
+                                        node = img.Node;
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                break;
+                            }
+                        }
+                        // node为当前能找到的最深节点
+                        // 在advTree1中选中对应的Node
+                        // 先找到根节点
+                        Node treeNode = findWzFileTreeNode(wzFileNode.Value as Wz_File);
+                        if (treeNode == null)
+                            continue;
+                        // 逐级在advTree1中查找
+                        Node advNode = treeNode;
+                        for (int i = 1; i <= foundDepth; i++)
+                        {
+                            Node next = null;
+                            foreach (Node child in advNode.Nodes)
+                            {
+                                if (child.Text == pathArray[i])
+                                {
+                                    next = child;
+                                    break;
+                                }
+                            }
+                            if (next == null)
+                                break;
+                            advNode = next;
+                        }
+                        if (advNode != null)
+                        {
+                            advTree1.SelectedNode = advNode;
+                            advNode.Expand();
+                            labelItemStatus.Text = "已跳转到节点: " + string.Join("/", pathArray.Take(foundDepth + 1));
+                            return;
+                        }
+                    }
+
+                    // 未找到
+                    labelItemStatus.Text = "未找到节点: " + path;
+                    MessageBoxEx.Show("未找到该路径对应的节点。", "提示");
+                }
+            }
+            else
+            {
+                MessageBoxEx.Show("请先打开WZ文件。", "提示");
             }
         }
 
@@ -3517,21 +3861,44 @@ namespace WzComparerR2
             switch (wzf.Type)
             {
                 case Wz_Type.Character:
+                    if (!selectedNode.FullPathToFile.Contains(".img")) return;
+                    string[] characterNodePath = selectedNode.FullPathToFile.Split('\\');
+                    string characterImgStr = characterNodePath.LastOrDefault(part => part.EndsWith(".img")).Replace(".img", String.Empty);
+                    if (!Int64.TryParse(characterImgStr, out _)) return; // Ignore Non-numeral img to prevent Auto Preview crash
                     if ((image = selectedNode.GetValue<Wz_Image>()) == null || !image.TryExtract())
                         return;
                     CharaSimLoader.LoadSetItemsIfEmpty();
                     CharaSimLoader.LoadExclusiveEquipsIfEmpty();
                     CharaSimLoader.LoadCommoditiesIfEmpty();
-                    var gear = Gear.CreateFromNode(image.Node, PluginManager.FindWz);
-                    obj = gear;
-                    if (stringLinker == null || !stringLinker.StringEqp.TryGetValue(gear.ItemID, out sr))
+                    if (characterNodePath.Contains("Familiar"))
                     {
-                        sr = new StringResult();
-                        sr.Name = "未知装备";
+                        var familiar = Familiar.CreateFromNode(image.Node, PluginManager.FindWz);
+                        obj = familiar;
+                        if (stringLinker == null || !stringLinker.StringMob.TryGetValue(familiar.MobID, out sr))
+                        {
+                            sr = new StringResult();
+                            sr.Name = "未知怪怪";
+                        }
+                        if (familiar != null)
+                        {
+                            fileName = "familiar_" + familiar.FamiliarID + "_" + RemoveInvalidFileNameChars(sr.Name) + ".png";
+                            tooltipQuickView.NodeID = familiar.FamiliarID;
+                        }
                     }
-                    if (gear != null)
+                    else
                     {
-                        fileName = gear.ItemID + ".png";
+                        var gear = Gear.CreateFromNode(image.Node, PluginManager.FindWz);
+                        obj = gear;
+                        if (stringLinker == null || !stringLinker.StringEqp.TryGetValue(gear.ItemID, out sr))
+                        {
+                            sr = new StringResult();
+                            sr.Name = "未知装备";
+                        }
+                        if (gear != null)
+                        {
+                            fileName = "eqp_" + gear.ItemID + "_" + RemoveInvalidFileNameChars(sr.Name) + ".png";
+                            tooltipQuickView.NodeID = gear.ItemID;
+                        }
                     }
                     break;
                 case Wz_Type.Item:
@@ -3592,7 +3959,7 @@ namespace WzComparerR2
                     }
                     else if (Regex.IsMatch(skillNode.FullPathToFile, @"^Skill\d*\\\d+.img\\skill\\\d+$"))
                     {
-                        Skill skill = Skill.CreateFromNode(skillNode, PluginManager.FindWz);
+                        Skill skill = Skill.CreateFromNode(skillNode, PluginBase.PluginManager.FindWz, PluginBase.PluginManager.FindWz);
                         if (skill != null)
                         {
                             switch (this.skillDefaultLevel)
@@ -3652,7 +4019,7 @@ namespace WzComparerR2
                 case Wz_Type.Npc:
                     if ((image = selectedNode.GetValue<Wz_Image>()) == null || !image.TryExtract())
                         return;
-                    var npc = Npc.CreateFromNode(image.Node, PluginManager.FindWz);
+                    var npc = Npc.CreateFromNode(image.Node, PluginManager.FindWz, PluginManager.FindWz, getSpineDefaultFunc: this.pictureBoxEx1.GetSpineDefault);
                     obj = npc;
                     if (stringLinker == null || !stringLinker.StringNpc.TryGetValue(npc.ID, out sr))
                     {
@@ -3804,9 +4171,25 @@ namespace WzComparerR2
 
         private void buttonItemCharItem_CheckedChanged(object sender, EventArgs e)
         {
-            if (buttonItemCharItem.Checked)
-                this.charaSimCtrl.UIItem.Refresh();
-            this.charaSimCtrl.UIItem.Visible = buttonItemCharItem.Checked;
+            if (openedWz.Count > 0)
+            {
+                //if (buttonItemCharItem.Checked)
+                //    this.charaSimCtrl.UIItem.Refresh();
+                //this.charaSimCtrl.UIItem.Visible = buttonItemCharItem.Checked;
+                AfrmItem itemForm = new AfrmItem();
+                itemForm.VisibleChanged += (s, args) =>
+                {
+                    if (!itemForm.Visible)
+                    {
+                        buttonItemCharItem.Checked = false;
+                    }
+                };
+                itemForm.Refresh();
+            }
+            else
+            {
+                MessageBoxEx.Show("请先打开WZ文件。", "提示");
+            }
         }
 
         private void buttonItemAddItem_Click(object sender, EventArgs e)
@@ -3892,6 +4275,26 @@ namespace WzComparerR2
                 }
             }
 
+
+            Npc npc = frm.TargetItem as Npc;
+            if (npc != null)
+            {
+                switch (e.KeyCode)
+                {
+                    case Keys.Oemplus:
+                    case Keys.Add:
+                        npc.IllustIndex += 1;
+                        frm.Refresh();
+                        return;
+
+                    case Keys.OemMinus:
+                    case Keys.Subtract:
+                        npc.IllustIndex -= 1;
+                        frm.Refresh();
+                        return;
+                }
+            }
+
             switch (e.KeyCode)
             {
                 case Keys.Escape:
@@ -3952,11 +4355,18 @@ namespace WzComparerR2
 
         private void buttonItemCharaEquip_CheckedChanged(object sender, EventArgs e)
         {
-            if (buttonItemCharaEquip.Checked)
+            if (openedWz.Count > 0)
             {
-                this.charaSimCtrl.UIEquip.Refresh();
+                if (buttonItemCharaEquip.Checked)
+                {
+                    this.charaSimCtrl.UIEquip.Refresh();
+                }
+                this.charaSimCtrl.UIEquip.Visible = buttonItemCharaEquip.Checked;
             }
-            this.charaSimCtrl.UIEquip.Visible = buttonItemCharaEquip.Checked;
+            else
+            {
+                MessageBoxEx.Show("请先打开WZ文件。", "提示");
+            }
         }
 
         private void buttonJobSelect_CheckedChanged(object sender, EventArgs e)
@@ -3965,9 +4375,58 @@ namespace WzComparerR2
             {
                 if (buttonJobSelect.Checked)
                 {
-                    this.charaSimCtrl.UIJob.Refresh();
+                    //this.charaSimCtrl.UIJob.Refresh();
+                    //this.charaSimCtrl.UIJob.Visible = buttonJobSelect.Checked;
+                    AfrmJob jobForm = new AfrmJob();
+                    List<int> job_list = new List<int>();
+                    foreach (Wz_Node wz_Node in PluginManager.FindWz("UI/Login.img/ClassSelect/order/common").Nodes)
+                    {
+                        int jobid = wz_Node.GetValueEx<Int32>(110);
+                        job_list.Add(jobid);
+                    }
+                    jobForm.job_list = job_list;
+                    jobForm.Owner = this;
+                    jobForm.KeyDown += new KeyEventHandler(this.charaSimCtrl.afrm_KeyDown);
+                    jobForm.VisibleChanged += (s, args) =>
+                    {
+                        if (!jobForm.Visible)
+                        {
+                            this.selectJob = jobForm.selectJob;
+                            buttonJobSelect.Checked = false;
+                        }
+                    };
+                    jobForm.Refresh();
                 }
-                this.charaSimCtrl.UIJob.Visible = buttonJobSelect.Checked;
+            }
+            else
+            {
+                MessageBoxEx.Show("请先打开WZ文件。", "提示");
+            }
+        }
+
+        private void buttonSkill_CheckedChanged(object sender, EventArgs e)
+        {
+            if (openedWz.Count > 0)
+            {
+                if (buttonSkill.Checked)
+                {
+                    //this.charaSimCtrl.UISkill.Refresh();
+                    //this.charaSimCtrl.UISkill.Visible = buttonSkill.Checked;
+                    AfrmSkill afrmSkill = new AfrmSkill();
+                    afrmSkill.selectJob = this.selectJob;
+                    afrmSkill.Owner = this;
+                    afrmSkill.KeyDown += new KeyEventHandler(this.charaSimCtrl.afrm_KeyDown);
+                    afrmSkill.ObjectMouseMove += new ObjectMouseEventHandler(this.charaSimCtrl.frmSkill_ObjectMouseMove);
+                    afrmSkill.ObjectMouseLeave += new EventHandler(this.charaSimCtrl.frmSkill_ObjectMouseLeave);
+                    afrmSkill.VisibleChanged += (s, args) =>
+                    {
+                        if (!afrmSkill.Visible)
+                        {
+                            buttonSkill.Checked = false;
+                        }
+                    };
+                    afrmSkill.Refresh();
+                }
             }
             else
             {
@@ -4194,8 +4653,16 @@ namespace WzComparerR2
                     comparer.ShowChangeType = chkShowChangeType.Checked;
                     comparer.ShowLinkedTamingMob = chkShowLinkedTamingMob.Checked;
                     comparer.SkipKMSContent = chkSkipKMSContent.Checked;
+                    comparer.SkipGodChangseopDuplicatedNodes = chkSkipGodChangseopDuplicatedNodes.Checked;
                     comparer.QuestState = tooltipQuickView.QuestRender.DefaultState;
                     comparer.Enable22AniStyle = GearGraphics.is22aniStyle;
+                    comparer.EnableAssembleTooltip = CharaSimConfig.Default.Item.UseAssembleUI;
+                    //comparer.ShowDamageSkin = CharaSimConfig.Default.DamageSkin.ShowDamageSkin;
+                    //comparer.UseMiniSizeDamageSkin = CharaSimConfig.Default.DamageSkin.UseMiniSize;
+                    //comparer.AlwaysUseMseaFormatDamageSkin = CharaSimConfig.Default.DamageSkin.AlwaysUseMseaFormat;
+                    //comparer.DamageSkinNumber = CharaSimConfig.Default.DamageSkin.DamageSkinNumber;
+                    comparer.AllowFamiliarOutOfBounds = CharaSimConfig.Default.Familiar.AllowOutOfBounds;
+                    comparer.UseCTFamiliarUI = CharaSimConfig.Default.Familiar.UseCTFamiliarUI;
                     comparer.StateInfoChanged += new EventHandler(comparer_StateInfoChanged);
                     comparer.StateDetailChanged += new EventHandler(comparer_StateDetailChanged);
                     try
@@ -4235,6 +4702,7 @@ namespace WzComparerR2
                                     chkHashPngFileName.Enabled = false;
                                     chkShowLinkedTamingMob.Enabled = false;
                                     chkSkipKMSContent.Enabled = false;
+                                    chkSkipGodChangseopDuplicatedNodes.Enabled = false;
                                     btnRootNode.Enabled = false;
                                     btnPreset.Enabled = false;
                                     clbRootNode.Enabled = false;
@@ -4303,6 +4771,7 @@ namespace WzComparerR2
                         chkHashPngFileName.Enabled = true;
                         chkShowLinkedTamingMob.Enabled = true;
                         chkSkipKMSContent.Enabled = true;
+                        chkSkipGodChangseopDuplicatedNodes.Enabled = true;
                         btnRootNode.Enabled = true;
                         btnPreset.Enabled = true;
                         clbRootNode.Enabled = true;
@@ -4541,15 +5010,17 @@ namespace WzComparerR2
                         listViewExNotice.Items.Clear();
                         foreach (var newsDiv in newsDivs)
                         {
-                            string server = newsDiv.SelectSingleNode(".//p[@class='tag']").InnerText;
+                            string server = newsDiv.SelectSingleNode(".//span[@class='tag']").InnerText;
+                            string category = newsDiv.SelectSingleNode(".//span[@class='category']").InnerText;
                             string title = newsDiv.SelectSingleNode(".//p[@class='title']").InnerText;
                             string taskid = newsDiv.GetAttributeValue("id", string.Empty);
                             string detecttime = newsDiv.SelectSingleNode(".//p[@class='time']").InnerText;
                             string link = newsDiv.SelectSingleNode(".//p/a").GetAttributeValue("href", string.Empty);
-                            var listViewItem = new ListViewItem(new[] { server, title, taskid, detecttime});
+                            var listViewItem = new ListViewItem(new[] { server, category, title, taskid, detecttime});
                             listViewItem.Tag = link;
                             listViewExNotice.Items.Add(listViewItem);
                         }
+                        dockContainerItem3.RaiseClick();
                         labelItemStatus.Text = "公告导入完毕";
                     }
                     else
@@ -4687,6 +5158,60 @@ namespace WzComparerR2
             Process.Start("https://jancy-49.github.io/Papulatus-Daily/index.html");
 #endif
         }
+
+        private void buttonDiscord_Click(object sender, EventArgs e)
+        {
+#if NET6_0_OR_GREATER
+            Process.Start(new ProcessStartInfo
+            {
+                UseShellExecute = true,
+                FileName = "https://discord.com/invite/RdcSpFy6d4",
+            });
+#else
+                Process.Start("https://discord.com/invite/RdcSpFy6d4");
+#endif
+        }
+
+        private void buttonQQ_Click(object sender, EventArgs e)
+        {
+            if (correctCount >= 5)
+            {
+#if NET6_0_OR_GREATER
+            Process.Start(new ProcessStartInfo
+            {
+                UseShellExecute = true,
+                FileName = "https://qm.qq.com/q/wNuMrecuZy",
+            });
+#else
+                Process.Start("https://qm.qq.com/q/wNuMrecuZy");
+#endif
+            }
+            else
+            {
+                MessageBoxEx.Show("请在小游戏正确回答至少5题。", "提示");
+            }
+        }
+
+        private void buttonQQChannel_Click(object sender, EventArgs e)
+        {
+            if (correctCount >= 5)
+            {
+#if NET6_0_OR_GREATER
+            Process.Start(new ProcessStartInfo
+            {
+                UseShellExecute = true,
+                FileName = "https://pd.qq.com/s/3vqkg5vx4",
+            });
+#else
+                Process.Start("https://pd.qq.com/s/3vqkg5vx4");
+#endif
+            }
+            else
+            {
+                MessageBoxEx.Show("请在小游戏正确回答至少5题。", "提示");
+            }
+        }
+
 
         private void btnItemOptions_Click(object sender, System.EventArgs e)
         {
@@ -4920,9 +5445,9 @@ namespace WzComparerR2
 
         private void btnIGN_Click(object sender, System.EventArgs e)
         {
-            string x_nxopen_api_key = cmbMode.Text == "KMS" ? textBoxAPIKey.Text : textBoxAPIKey2.Text;
+            string x_nxopen_api_key = cmbMode.Text == "KMS" ? textBoxAPIKey.Text : cmbMode.Text == "MSEA" ? textBoxAPIKey2.Text : textBoxAPIKey3.Text;
             string charName = textBoxIGN.Text;
-            string Mode = cmbMode.Text == "KMS" ? "maplestory" : "maplestorysea";
+            string Mode = cmbMode.Text == "KMS" ? "maplestory" : cmbMode.Text == "MSEA"? "maplestorysea" : "maplestorytw";
             string url = $"https://open.api.nexon.com/{Mode}/v1/id?character_name={charName}";
             WebRequest request = WebRequest.Create(url);
             request.Headers.Add("x-nxopen-api-key", x_nxopen_api_key);
@@ -4952,7 +5477,7 @@ namespace WzComparerR2
 
         private void btnExecute_Click(object sender, System.EventArgs e)
         {
-            string x_nxopen_api_key = cmbMode.Text == "KMS" ? textBoxAPIKey.Text : textBoxAPIKey2.Text;
+            string x_nxopen_api_key = cmbMode.Text == "KMS" ? textBoxAPIKey.Text : cmbMode.Text == "MSEA" ? textBoxAPIKey2.Text : textBoxAPIKey3.Text;
             string ocid = textBoxocid.Text;
             string count = textBoxcount.Text;
             string Date = textBoxDate.Text;
@@ -4966,7 +5491,7 @@ namespace WzComparerR2
             string ranking_type = cmbRankingType.Text;
             string difficulty = cmbDifficulty.Text;
             string page = textBoxPage.Text;
-            string Mode = cmbMode.Text == "KMS" ? "maplestory" : "maplestorysea";
+            string Mode = cmbMode.Text == "KMS" ? "maplestory" : cmbMode.Text == "MSEA" ? "maplestorysea" : "maplestorytw";
             Dictionary<string, string> urls = new Dictionary<string, string>
             {
                 { "基础信息", $"https://open.api.nexon.com/{Mode}/v1/character/basic?ocid={ocid}&date={Date}" },
@@ -5040,7 +5565,15 @@ namespace WzComparerR2
                             }
                             else if (InfoType == "公告" || InfoType == "更新公告" || InfoType == "活动公告" || InfoType == "现金商城公告")
                             {
-                                textBoxResult.Text = responseText;
+                                try
+                                {
+                                    var parsedJson = Newtonsoft.Json.Linq.JToken.Parse(responseText);
+                                    textBoxResult.Text = parsedJson.ToString(Newtonsoft.Json.Formatting.Indented);
+                                }
+                                catch
+                                {
+                                    textBoxResult.Text = responseText;
+                                }
                                 JObject jsonResponse = JObject.Parse(responseText);
                                 JArray notices = null;
                                 JArray resultArray = null;
@@ -5078,7 +5611,15 @@ namespace WzComparerR2
                             }
                             else if (InfoType == "联盟" || InfoType == "联盟突袭者" || InfoType == "联盟神器" || InfoType == "联盟冠军")
                             {
-                                textBoxResult.Text = responseText;
+                                try
+                                {
+                                    var parsedJson = Newtonsoft.Json.Linq.JToken.Parse(responseText);
+                                    textBoxResult.Text = parsedJson.ToString(Newtonsoft.Json.Formatting.Indented);
+                                }
+                                catch
+                                {
+                                    textBoxResult.Text = responseText;
+                                }
                                 AfrmUnion afrmUnion = this.charaSimCtrl.UIUnion;
                                 switch (InfoType)
                                 {
@@ -5132,7 +5673,15 @@ namespace WzComparerR2
                             }
                             else
                             {
-                                textBoxResult.Text = responseText;
+                                try
+                                {
+                                    var parsedJson = Newtonsoft.Json.Linq.JToken.Parse(responseText);
+                                    textBoxResult.Text = parsedJson.ToString(Newtonsoft.Json.Formatting.Indented);
+                                }
+                                catch
+                                {
+                                    textBoxResult.Text = responseText;
+                                }
                             }
                         }
                     }
@@ -5192,6 +5741,7 @@ namespace WzComparerR2
             {
                 this.textBoxAPIKey.Visible = true;
                 this.textBoxAPIKey2.Visible = false;
+                this.textBoxAPIKey3.Visible = false;
                 this.cmbSearchContent.Items.Clear();
                 this.cmbSearchContent.Items.Add("角色");
                 this.cmbSearchContent.Items.Add("个人");
@@ -5226,6 +5776,7 @@ namespace WzComparerR2
             {
                 this.textBoxAPIKey.Visible = false;
                 this.textBoxAPIKey2.Visible = true;
+                this.textBoxAPIKey3.Visible = false;
                 this.cmbSearchContent.Items.Clear();
                 this.cmbSearchContent.Items.Add("角色");
                 this.cmbSearchContent.Items.Add("公会");
@@ -5234,6 +5785,24 @@ namespace WzComparerR2
                 this.cmbWorldName.Items.Add("Bootes");
                 this.cmbWorldName.Items.Add("Cassiopeia");
                 this.cmbWorldName.Items.Add("Draco");
+            }
+            else if (this.cmbMode.Text == "TMS")
+            {
+                this.textBoxAPIKey.Visible = false;
+                this.textBoxAPIKey2.Visible = false;
+                this.textBoxAPIKey3.Visible = true;
+                this.cmbSearchContent.Items.Clear();
+                this.cmbSearchContent.Items.Add("角色");
+                this.cmbSearchContent.Items.Add("公会");
+                this.cmbWorldName.Items.Clear();
+                this.cmbWorldName.Items.Add("艾麗亞");
+                this.cmbWorldName.Items.Add("普力特");
+                this.cmbWorldName.Items.Add("琉德");
+                this.cmbWorldName.Items.Add("愛麗西亞");
+                this.cmbWorldName.Items.Add("米特拉");
+                this.cmbWorldName.Items.Add("挑戰者");
+                this.cmbWorldName.Items.Add("殺人鯨");
+                this.cmbWorldName.Items.Add("賽蓮");
             }
         }
 
@@ -5266,7 +5835,8 @@ namespace WzComparerR2
                     this.cmbCharInfo.Items.Add("联盟");
                     this.cmbCharInfo.Items.Add("联盟突袭者");
                     this.cmbCharInfo.Items.Add("联盟神器");
-                    this.cmbCharInfo.Items.Add("联盟冠军");
+                    if (this.cmbMode.Text == "KMS")
+                        this.cmbCharInfo.Items.Add("联盟冠军");
                     this.labelSearchContent.Visible = true;
                     this.cmbCharInfo.Visible = true;
                     this.btnExecute.Visible = true;
@@ -5529,6 +6099,20 @@ namespace WzComparerR2
             if (openedWz.Count > 0)
             {
                 remainingTime = 60.0;
+                correctCount = 0;
+                wrongCount = 0;
+                foreach (Wz_Node wz_Node in PluginManager.FindWz($@"Skill").Nodes)
+                {
+                    string Node = wz_Node.Text;
+                    if (Regex.Match(Node, @"^(\d+)\.img$").Success && !Node.StartsWith("7") && !Node.StartsWith("8") && !Node.StartsWith("9"))
+                    {
+                        foreach (Wz_Node skillNode in PluginManager.FindWz($@"Skill/{Node}/skill").Nodes)
+                        {
+                            skillList.Add(skillNode.Text);
+                        }
+                    }
+                }
+                reroll_answer(skillList);
                 countdownTimer.Start();
                 btnGameStart.Visible = false;
                 textBoxAnswer.Visible = true;
@@ -5540,6 +6124,39 @@ namespace WzComparerR2
             }
         }
 
+        private void btnAnswer_Click(object sender, EventArgs e)
+        {
+            if (textBoxAnswer.Text.Trim() == skillname)
+            {
+                correctCount++;
+                reroll_answer(skillList);
+            }
+            else
+            {
+                wrongCount++;
+                labelHint.Text = $"请根据提示技能图标回答技能名。（已正确回答：{correctCount}题，回答错误{wrongCount}次）";
+            }
+            if (wrongCount == 1)
+                labelHint.Text = $"请根据提示技能图标回答技能名。（提示：{skillname.Length}个字。已正确回答：{correctCount}题，回答错误{wrongCount}次）";
+            if (wrongCount == 2)
+                labelHint.Text = $"请根据提示技能图标回答技能名。（提示：{skillname.Length}个字，节点{randomcode.Remove(randomcode.Length - 4)}.img。已正确回答：{correctCount}题，回答错误{wrongCount}次）";
+            if (wrongCount == 3)
+                reroll_answer(skillList);
+        }
+
+        private void reroll_answer(List<string> skillList)
+        {
+            Random random = new Random();
+            int randomIndex = random.Next(skillList.Count);
+            randomcode = skillList[randomIndex];
+            skillname = PluginManager.FindWz($@"String/Skill.img/{randomcode}/name").GetValueEx<string>(null);
+            string _outlink = PluginManager.FindWz($@"Skill/{randomcode.Remove(randomcode.Length - 4)}.img/skill/{randomcode}/icon/_outlink").GetValue<string>(null);
+            Wz_Png png = PluginManager.FindWz(_outlink).GetValueEx<Wz_Png>(null);
+            pictureBoxEx2.ShowImage(png);
+            labelHint.Text = $"请根据提示技能图标回答技能名。（已正确回答：{correctCount}题）";
+            wrongCount = 0;
+        }
+
         private void CountdownTimer_Tick(object sender, EventArgs e)
         {
             remainingTime -= countdownTimer.Interval / 1000.0; // 减去已过去的时间
@@ -5548,7 +6165,8 @@ namespace WzComparerR2
             {
                 remainingTime = 0;
                 countdownTimer.Stop();
-                labelTimer.Text = "时间到";
+                labelTimer.Text = $"时间到。您共正确回答{correctCount}题。";
+                labelHint.Text = "";
                 btnGameStart.Visible = true;
                 textBoxAnswer.Visible = false;
                 btnAnswer.Visible = false;
@@ -5562,6 +6180,7 @@ namespace WzComparerR2
             string regexPattern = $"[{Regex.Escape(invalidChars)}]";
             return Regex.Replace(fileName, regexPattern, "_");
         }
+
         private async void MainForm_Shown(object sender, EventArgs e)
         {
             //Automatic Update Check

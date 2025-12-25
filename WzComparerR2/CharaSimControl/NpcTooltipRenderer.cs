@@ -27,6 +27,7 @@ namespace WzComparerR2.CharaSimControl
         }
 
         public Npc NpcInfo { get; set; }
+        public bool ShowAllIllustAtOnce { get; set; }
         private AvatarCanvasManager avatar { get; set; }
         public override Bitmap Render()
         {
@@ -47,11 +48,11 @@ namespace WzComparerR2.CharaSimControl
                 string mobName = GetNpcName(NpcInfo.ID);
                 var block = PrepareText(g, mobName ?? "(null)", GearGraphics.ItemNameFont2, Brushes.White, 0, 0);
                 titleBlocks.Add(block);
-                block = PrepareText(g, "ID:" + NpcInfo.ID, GearGraphics.ItemDetailFont, Brushes.White, block.Size.Width + 4, 4);
+                block = PrepareText(g, "ID:" + NpcInfo.ID, GearGraphics.ItemDetailFont, Brushes.White, block.Size.Width + 6, 0);
                 titleBlocks.Add(block);
             }
 
-            propBlocks.Add(PrepareText(g, "登场位置 :", GearGraphics.ItemDetailFont, GearGraphics.GearNameBrushG, 0, 0));
+            propBlocks.Add(PrepareText(g, "登场位置:", GearGraphics.ItemDetailFont, GearGraphics.GearNameBrushG, 0, 0));
             if (NpcInfo?.ID != null)
             {
                 var locNode = PluginBase.PluginManager.FindWz("Etc\\NpcLocation.img\\" + NpcInfo.ID.ToString());
@@ -65,7 +66,7 @@ namespace WzComparerR2.CharaSimControl
                         {
                             mapName = GetMapName(mapID);
                         }
-                        string npcLoc = string.Format(" {0}({1})", mapName ?? "null", locMapNode.Text);
+                        string npcLoc = string.Format("{0}({1})", mapName ?? "null", locMapNode.Text);//{0}  ({1}) in the quotations for both location and mapID
 
                         propBlocks.Add(PrepareText(g, npcLoc, GearGraphics.ItemDetailFont, Brushes.White, 0, picY += 16));
                     }
@@ -74,7 +75,7 @@ namespace WzComparerR2.CharaSimControl
 
             if (propBlocks.Count == 1) //获取地区失败
             {
-                propBlocks.Add(PrepareText(g, " 不明", GearGraphics.ItemDetailFont, Brushes.White, 0, picY += 16));
+                propBlocks.Add(PrepareText(g, "不明", GearGraphics.ItemDetailFont, Brushes.White, 0, picY += 16));
             }
 
             //计算大小
@@ -88,13 +89,16 @@ namespace WzComparerR2.CharaSimControl
                 {
                     this.avatar = new AvatarCanvasManager();
                 }
+
                 var skin = NpcInfo.Component.Nodes["skin"].GetValueEx<int>(0);
                 this.avatar.AddBodyFromSkin3(skin);
+
                 foreach (var node in NpcInfo.Component.Nodes)
                 {
                     var gearID = node.GetValueEx<int>(0);
                     this.avatar.AddGear(gearID);
                 }
+
                 var img = this.avatar.GetBitmapOrigin();
                 if (img.Bitmap != null)
                 {
@@ -106,6 +110,7 @@ namespace WzComparerR2.CharaSimControl
                     npcImg = img.Bitmap;
                     NpcInfo.AvatarBitmap = npcImg;
                 }
+
                 this.avatar.ClearCanvas();
             }
             if (npcImg != null)
@@ -121,6 +126,7 @@ namespace WzComparerR2.CharaSimControl
                 }
             }
 
+            Bitmap illustration2Tooltip = drawIllustration2SetTooltip(NpcInfo.Illustration2Bitmaps, 8, 4, NpcInfo.IllustIndex);
             //布局 
             //水平排列
             int width = 0;
@@ -166,27 +172,154 @@ namespace WzComparerR2.CharaSimControl
                 DrawText(g, item, textRect.Location);
             }
             g.Dispose();
-            return bmp;
+            if (illustration2Tooltip != null)
+            {
+                Point illustration2Origin = new Point(bmp.Width, 0);
+                int totalWidth = bmp.Width + illustration2Tooltip.Width;
+                int totalHeight = Math.Max(bmp.Height, illustration2Tooltip.Height);
+                Bitmap newTooltip = new Bitmap(totalWidth, totalHeight, PixelFormat.Format32bppArgb);
+                Graphics g2 = Graphics.FromImage(newTooltip);
+                g2.DrawImage(bmp, 0, 0);
+                g2.DrawImage(illustration2Tooltip, illustration2Origin);
+                g2.Dispose();
+                bmp.Dispose();
+                illustration2Tooltip.Dispose();
+                return newTooltip;
+            }
+            else
+            {
+                return bmp;
+            }
+        }
+
+        private Bitmap drawIllustration2SetTooltip(List<Bitmap> bitmaps, int margin, int perLineCount, int npcIndex)
+        {
+            if (bitmaps == null || bitmaps.Count == 0)
+            {
+                return null;
+            }
+
+            if (ShowAllIllustAtOnce)
+            {
+                int requiredLines = (int)Math.Ceiling(bitmaps.Count / (double)perLineCount);
+
+                int width = 0;
+                int height = 0;
+
+                int currentLineWidth = 0;
+                int currentLineHeight = 0;
+                int lineCount = 0;
+                List<int> maxLineHeights = new List<int>();
+                foreach (var bmp in bitmaps)
+                {
+                    if (bmp != null)
+                    {
+                        currentLineWidth += bmp.Width + margin;
+                        currentLineHeight = Math.Max(currentLineHeight, bmp.Height);
+                    }
+                    if (bitmaps.IndexOf(bmp) % perLineCount == perLineCount - 1)
+                    {
+                        width = Math.Max(width, currentLineWidth);
+                        height += currentLineHeight + margin;
+
+                        maxLineHeights.Add(currentLineHeight + margin);
+                        currentLineWidth = 0;
+                        currentLineHeight = 0;
+                        lineCount++;
+                    }
+                }
+                if (lineCount < requiredLines)
+                {
+                    width = Math.Max(width, currentLineWidth);
+                    height += currentLineHeight + margin;
+                    currentLineWidth = 0;
+                }
+                maxLineHeights.Add(currentLineHeight + margin);
+                Bitmap result = new Bitmap(width + 30, height + 30, PixelFormat.Format32bppArgb);
+                using (Graphics g = Graphics.FromImage(result))
+                {
+                    GearGraphics.DrawNewTooltipBack(g, 0, 0, result.Width, result.Height);
+
+                    int x = 15;
+                    int y = 15;
+
+                    int row = 0;
+                    int maxLineHeight = maxLineHeights[0];
+                    foreach (var bmp in bitmaps)
+                    {
+                        if (bmp != null)
+                        {
+                            g.DrawImage(bmp, x, y + maxLineHeight - bmp.Height);
+                            x += bmp.Width + margin;
+                        }
+                        if (bitmaps.IndexOf(bmp) % perLineCount == perLineCount - 1)
+                        {
+                            x = 15;
+                            y += maxLineHeight;
+                            if (++row <= maxLineHeights.Count - 1)
+                                maxLineHeight = maxLineHeights[row];
+                        }
+                    }
+
+                    // Draw Illust Info
+                    int picH = 2;
+                    GearGraphics.DrawPlainText(g, $"插画: {bitmaps.Count}张", GearGraphics.ItemDetailFont, Color.FromArgb(255, 255, 255), 2, 80, ref picH, 13);
+                }
+                return result;
+            }
+            else
+            {
+                Bitmap targetIllust = bitmaps[npcIndex];
+                Bitmap result = new Bitmap(targetIllust.Width + 30, targetIllust.Height + 60, PixelFormat.Format32bppArgb);
+                using (Graphics g = Graphics.FromImage(result))
+                {
+                    GearGraphics.DrawNewTooltipBack(g, 0, 0, result.Width, result.Height);
+                    g.DrawImage(targetIllust, 15, 15);
+
+                    // Draw Illust Info
+                    int picH = 2;
+                    GearGraphics.DrawPlainText(g, $"插画: {npcIndex + 1} / {bitmaps.Count}", GearGraphics.ItemDetailFont, Color.FromArgb(255, 255, 255), 2, 130, ref picH, 13);
+                    picH += targetIllust.Height + 12;
+                    if (bitmaps.Count > 1) GearGraphics.DrawPlainText(g, $"按下[-]/[+]可进行切换。", GearGraphics.ItemDetailFont, Color.FromArgb(255, 255, 255), 12, 260, ref picH, 13);
+                }
+                return result;
+            }
         }
 
         private string GetNpcName(int npcID)
         {
+            bool isTranslateRequired = Translator.IsTranslateEnabled;
             StringResult sr;
             if (this.StringLinker == null || !this.StringLinker.StringNpc.TryGetValue(npcID, out sr))
             {
                 return null;
             }
-            return sr.Name;
+            if (isTranslateRequired)
+            {
+                return Translator.MergeString(sr.Name, Translator.TranslateString(sr.Name, true), 0, false, true);
+            }
+            else
+            {
+                return sr.Name;
+            }
         }
 
         private string GetMapName(int mapID)
         {
+            bool isTranslateRequired = Translator.IsTranslateEnabled;
             StringResult sr;
             if (this.StringLinker == null || !this.StringLinker.StringMap.TryGetValue(mapID, out sr))
             {
                 return null;
             }
-            return sr.Name;
+            if (isTranslateRequired)
+            {
+                return Translator.MergeString(sr.Name, Translator.TranslateString(sr.Name, true), 0, false, true);
+            }
+            else
+            {
+                return sr.Name;
+            }
         }
     }
 }

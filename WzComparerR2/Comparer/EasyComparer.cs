@@ -96,6 +96,10 @@ namespace WzComparerR2.Comparer
         public bool ShowLinkedTamingMob { get; set; }
         public bool SkipKMSContent { get; set; }
         public bool DownloadKMSContentDB { get; set; }
+        public bool SkipGodChangseopDuplicatedNodes { get; set; }
+        public bool EnableAssembleTooltip { get; set; }
+        public bool AllowFamiliarOutOfBounds { get; set; }
+        public bool UseCTFamiliarUI { get; set; }
         public int QuestState { get; set; }
 
         public string StateInfo
@@ -161,8 +165,7 @@ namespace WzComparerR2.Comparer
                     StateInfo = "正在初始化5转技能应用职业代码...";
                     for (int i = 0; i < 2; i++)
                     {
-                        Wz_Node vCoreData = PluginManager.FindWz("Etc\\VCore.img\\CoreData", WzFileNewOld[i]);
-                        if (vCoreData == null) break;
+                        Wz_Node vCoreData = PluginManager.FindWz("Etc\\VcoreNew.img\\vSkill\\CoreData", WzFileNewOld[i]) ?? PluginManager.FindWz("Etc\\VCore.img\\CoreData", WzFileNewOld[i]); if (vCoreData == null) break;
 
                         foreach (Wz_Node data in vCoreData.Nodes)
                         {
@@ -593,6 +596,8 @@ namespace WzComparerR2.Comparer
                     this.EnableDarkMode ? "-EnableDarkMode" : null,
                     "-PngComparison " + this.Comparer.PngComparison,
                     this.Comparer.ResolvePngLink ? "-ResolvePngLink" : null,
+                    this.SkipKMSContent ? "-SkipKMSContent" : null,
+                    this.SkipGodChangseopDuplicatedNodes ? "-SkipGodChangseopDuplicatedNodes" : null,
                 }.Where(p => p != null)));
                 sw.WriteLine("</table>");
                 sw.WriteLine("</p>");
@@ -600,6 +605,8 @@ namespace WzComparerR2.Comparer
                 //输出目录
                 StringBuilder[] sb = { new StringBuilder(), new StringBuilder(), new StringBuilder() };
                 int[] count = new int[6];
+                List<CompareDifference> kmsContent = new List<CompareDifference> { };
+                List<CompareDifference> godChangseopNode = new List<CompareDifference> { };
                 string[] diffStr = { "变更", "新增", "删除" };
                 foreach (CompareDifference diff in diffLst)
                 {
@@ -609,10 +616,30 @@ namespace WzComparerR2.Comparer
                     {
                         case DifferenceType.Changed:
                             idx = 0;
+                            if (SkipKMSContent && (isKMSNode(diff.NodeNew) || isKMSNode(diff.NodeOld)))
+                            {
+                                kmsContent.Add(diff);
+                                continue;
+                            }
+                            if (SkipGodChangseopDuplicatedNodes && (isGodChangseopNode(diff.NodeNew) || isGodChangseopNode(diff.NodeOld)))
+                            {
+                                godChangseopNode.Add(diff);
+                                continue;
+                            }
                             detail = string.Format("<a name=\"m_{1}_{2}\" href=\"#a_{1}_{2}\">{0}</a>", diff.NodeNew.FullPathToFile, idx, count[idx]);
                             break;
                         case DifferenceType.Append:
                             idx = 1;
+                            if (SkipKMSContent && isKMSNode(diff.NodeNew))
+                            {
+                                kmsContent.Add(diff);
+                                continue;
+                            }
+                            if (SkipGodChangseopDuplicatedNodes && isGodChangseopNode(diff.NodeNew))
+                            {
+                                godChangseopNode.Add(diff);
+                                continue;
+                            }
                             if (this.OutputAddedImg)
                             {
                                 detail = string.Format("<a name=\"m_{1}_{2}\" href=\"#a_{1}_{2}\">{0}</a>", diff.NodeNew.FullPathToFile, idx, count[idx]);
@@ -624,6 +651,16 @@ namespace WzComparerR2.Comparer
                             break;
                         case DifferenceType.Remove:
                             idx = 2;
+                            if (SkipKMSContent && isKMSNode(diff.NodeOld))
+                            {
+                                kmsContent.Add(diff);
+                                continue;
+                            }
+                            if (SkipGodChangseopDuplicatedNodes && isGodChangseopNode(diff.NodeOld))
+                            {
+                                godChangseopNode.Add(diff);
+                                continue;
+                            }
                             if (this.OutputRemovedImg)
                             {
                                 detail = string.Format("<a name=\"m_{1}_{2}\" href=\"#a_{1}_{2}\">{0}</a>", diff.NodeOld.FullPathToFile, idx, count[idx]);
@@ -660,6 +697,18 @@ namespace WzComparerR2.Comparer
 
                 foreach (CompareDifference diff in diffLst)
                 {
+                    if (kmsContent.Contains(diff))
+                    {
+                        StateInfo = string.Format("{0}/{1} 变更: {2}", count[0], count[3], "KMS内容");
+                        count[0]++;
+                        continue;
+                    }
+                    if (godChangseopNode.Contains(diff))
+                    {
+                        StateInfo = string.Format("{0}/{1} 变更: {2}", count[0], count[3], "神昌燮重复节点");
+                        count[0]++;
+                        continue;
+                    }
                     OnPatchingStateChanged(new Patcher.PatchingEventArgs(part, Patcher.PatchingState.TempFileBuildProcessChanged, count[0] + count[1] + count[2]));
                     switch (diff.DifferenceType)
                     {
@@ -759,7 +808,14 @@ namespace WzComparerR2.Comparer
                 {
                     Directory.CreateDirectory(itemTooltipPath);
                 }
-                saveTooltip2(itemTooltipPath);
+                if (this.EnableAssembleTooltip)
+                {
+                    saveTooltip22(itemTooltipPath);
+                }
+                else
+                {
+                    saveTooltip2(itemTooltipPath);
+                }
             }
             if (saveEqpTooltip && type.ToString() == "String" && eqpTooltipInfo != null)
             {
@@ -929,7 +985,7 @@ namespace WzComparerR2.Comparer
                     int width = 0;
 
                     // 变更后Tooltip图像生成
-                    Skill skillNew = Skill.CreateFromNode(PluginManager.FindWz("Skill" + skillNodePath, wzNew.GetNodeWzFile()), PluginManager.FindWz, wzNew?.GetNodeWzFile());
+                    Skill skillNew = Skill.CreateFromNode(PluginManager.FindWz("Skill" + skillNodePath, wzNew.GetNodeWzFile()), PluginManager.FindWz, PluginManager.FindWz, wzNew?.GetNodeWzFile());
                     if (skillNew != null)
                     {
                         skillNew.Level = skillNew.MaxLevel;
@@ -939,7 +995,7 @@ namespace WzComparerR2.Comparer
                         heightNew = skillImageNew.Height;
                     }
                     // 变更前Tooltip图像生成
-                    Skill skillOld = Skill.CreateFromNode(PluginManager.FindWz("Skill" + skillNodePath, wzOld.GetNodeWzFile()), PluginManager.FindWz, wzOld?.GetNodeWzFile());
+                    Skill skillOld = Skill.CreateFromNode(PluginManager.FindWz("Skill" + skillNodePath, wzOld.GetNodeWzFile()), PluginManager.FindWz, PluginManager.FindWz, wzOld?.GetNodeWzFile());
                     if (skillOld != null)
                     {
                         skillOld.Level = skillOld.MaxLevel;
@@ -1063,7 +1119,7 @@ namespace WzComparerR2.Comparer
                     {
                         itemNodePath = String.Format(@"Item\Etc\0{0:D}.img\{1:D}", int.Parse(itemID) / 10000, itemID);
                     }
-                    else if (itemID.StartsWith("05")) // 判断第1位是否是02
+                    else if (itemID.StartsWith("05")) // 判断第1位是否是05
                     {
                         itemNodePath = String.Format(@"Item\Cash\0{0:D}.img\{1:D}", int.Parse(itemID) / 10000, itemID);
                     }
@@ -1125,6 +1181,194 @@ namespace WzComparerR2.Comparer
                 catch (Exception ex)
                 {
                     FailToExportTooltips.Add("Item Tooltip: " + itemID, ex.Message);
+                }
+            }
+            itemTooltipInfo.Clear();
+            diffItemTags.Clear();
+        }
+
+        private void saveTooltip22(string itemTooltipPath)
+        {
+            ItemTooltipRender3[] itemRenderNewOld = new ItemTooltipRender3[2];
+            int count = 0;
+            int allCount = itemTooltipInfo.Count;
+            var itemTypeFont = new Font("宋体", 11f, GraphicsUnit.Pixel);
+
+            for (int i = 0; i < 2; i++) // 0: New, 1: Old
+            {
+                this.StringWzNewOld[i] = WzNewOld[i]?.FindNodeByPath("String").GetNodeWzFile();
+                this.ItemWzNewOld[i] = WzNewOld[i]?.FindNodeByPath("Item").GetNodeWzFile();
+                this.EtcWzNewOld[i] = WzNewOld[i]?.FindNodeByPath("Etc").GetNodeWzFile();
+                this.QuestWzNewOld[i] = WzNewOld[i]?.FindNodeByPath("Quest").GetNodeWzFile();
+
+                itemRenderNewOld[i] = new ItemTooltipRender3();
+                itemRenderNewOld[i].StringLinker = new StringLinker();
+                itemRenderNewOld[i].StringLinker.Load(StringWzNewOld[i], ItemWzNewOld[i], EtcWzNewOld[i], QuestWzNewOld[i]);
+                itemRenderNewOld[i].ShowObjectID = this.ShowObjectID;
+                itemRenderNewOld[i].ShowLinkedTamingMob = this.ShowLinkedTamingMob;
+                itemRenderNewOld[i].AllowFamiliarOutOfBounds = this.AllowFamiliarOutOfBounds;
+                itemRenderNewOld[i].UseCTFamiliarRender = this.UseCTFamiliarUI;
+                itemRenderNewOld[i].CompareMode = true;
+            }
+            diffHtml["Item"] = new Dictionary<string, List<string>> { { "变更", new List<string>() }, { "新增", new List<string>() }, { "删除", new List<string>() } };
+
+            foreach (var itemID in itemTooltipInfo)
+            {
+                try
+                {
+
+                    StateInfo = string.Format("{0}/{1} 道具: {2}", ++count, allCount, itemID);
+                    StateDetail = "正在以Tooltip图像处理道具变更点...";
+                    bool[] isItemNull = new bool[2] { false, false };
+                    string itemType = "";
+                    string itemNodePath = null;
+                    string categoryPath = "";
+
+                    if (!int.TryParse(itemID, out _)) continue;
+                    if (SkipKMSContent && KMSContentID["Item"].Contains((Int32.Parse(itemID)))) continue;
+
+                    if (itemID.StartsWith("03015")) // 判断开头是否是03015
+                    {
+                        itemNodePath = String.Format(@"Item\Install\0{0:D}.img\{1:D}", int.Parse(itemID) / 100, itemID);
+                    }
+                    else if (itemID.StartsWith("0301")) // 判断开头是否是0301
+                    {
+                        itemNodePath = String.Format(@"Item\Install\0{0:D}.img\{1:D}", int.Parse(itemID) / 1000, itemID);
+                    }
+                    else if (itemID.StartsWith("500")) // 判断开头是否是0500
+                    {
+                        itemNodePath = String.Format(@"Item\Pet\{0:D}.img", itemID);
+                    }
+                    else if (itemID.StartsWith("02")) // 判断第1位是否是02
+                    {
+                        itemNodePath = String.Format(@"Item\Consume\0{0:D}.img\{1:D}", int.Parse(itemID) / 10000, itemID);
+                    }
+                    else if (itemID.StartsWith("03")) // 判断第1位是否是03
+                    {
+                        itemNodePath = String.Format(@"Item\Install\0{0:D}.img\{1:D}", int.Parse(itemID) / 10000, itemID);
+                    }
+                    else if (itemID.StartsWith("04")) // 判断第1位是否是04
+                    {
+                        itemNodePath = String.Format(@"Item\Etc\0{0:D}.img\{1:D}", int.Parse(itemID) / 10000, itemID);
+                    }
+                    else if (itemID.StartsWith("05")) // 判断第1位是否是05
+                    {
+                        itemNodePath = String.Format(@"Item\Cash\0{0:D}.img\{1:D}", int.Parse(itemID) / 10000, itemID);
+                    }
+
+                    StringResult sr;
+                    string ItemName;
+                    if (itemRenderNewOld[1].StringLinker == null || !itemRenderNewOld[1].StringLinker.StringItem.TryGetValue(int.Parse(itemID), out sr))
+                    {
+                        sr = new StringResult();
+                        sr.Name = "未知道具";
+                    }
+                    ItemName = sr.Name;
+                    if (itemRenderNewOld[0].StringLinker == null || !itemRenderNewOld[0].StringLinker.StringItem.TryGetValue(int.Parse(itemID), out sr))
+                    {
+                        sr = new StringResult();
+                        sr.Name = "未知道具";
+                    }
+                    if (ItemName != sr.Name && ItemName != "未知道具" && sr.Name != "未知道具")
+                    {
+                        ItemName += "_" + sr.Name;
+                    }
+                    else if (ItemName == "未知道具")
+                    {
+                        ItemName = sr.Name;
+                    }
+                    if (String.IsNullOrEmpty(ItemName)) ItemName = "未知道具";
+                    ItemName = RemoveInvalidFileNameChars(ItemName);
+                    int nullItemIdx = 0;
+
+                    // 変更前後のツールチップ画像の作成
+                    for (int i = 0; i < 2; i++) // 0: New, 1: Old
+                    {
+                        Item item = Item.CreateFromNode(PluginManager.FindWz(itemNodePath, WzFileNewOld[i]), PluginManager.FindWz);
+
+                        if (item != null)
+                        {
+                            itemRenderNewOld[i].Item = item;
+                        }
+                        else
+                        {
+                            isItemNull[i] = true;
+                            nullItemIdx = i + 1;
+                        }
+                    }
+
+                    // ツールチップ画像を合わせる
+                    Bitmap resultImage = null;
+                    Graphics g = null;
+
+                    switch (nullItemIdx)
+                    {
+                        case 0: // change
+                            itemType = "变更";
+
+
+                            Bitmap ImageNew = itemRenderNewOld[0].Render();
+                            Bitmap ImageOld = itemRenderNewOld[1].Render();
+                            if (GetBitmapHash(ImageNew) == GetBitmapHash(ImageOld)) continue;
+                            if (ShowChangeType)
+                            {
+                                int picHchange = ShowObjectID ? 13 : 1;
+                                Graphics[] gNewOld = new Graphics[] { Graphics.FromImage(ImageNew), Graphics.FromImage(ImageOld) };
+                                GearGraphics.DrawPlainText(gNewOld[1], "变更前", itemTypeFont, Color.FromArgb(255, 255, 255), 2, 64, ref picHchange, 10);
+                                picHchange = ShowObjectID ? 13 : 1;
+                                GearGraphics.DrawPlainText(gNewOld[0], "变更后", itemTypeFont, Color.FromArgb(255, 255, 255), 2, 64, ref picHchange, 10);
+                            }
+                            resultImage = new Bitmap(ImageNew.Width + ImageOld.Width, Math.Max(ImageNew.Height, ImageOld.Height));
+                            g = Graphics.FromImage(resultImage);
+
+                            g.DrawImage(ImageOld, 0, 0);
+                            g.DrawImage(ImageNew, ImageOld.Width, 0);
+                            break;
+
+                        case 1: // delete
+                            itemType = "删除";
+                            if (isItemNull[1]) continue;
+                            resultImage = itemRenderNewOld[1].Render();
+                            g = Graphics.FromImage(resultImage);
+                            break;
+
+                        case 2: // add
+                            itemType = "新增";
+                            if (isItemNull[0]) continue;
+                            resultImage = itemRenderNewOld[0].Render();
+                            g = Graphics.FromImage(resultImage);
+                            break;
+
+                        default:
+                            break;
+                    }
+
+                    if (resultImage == null || g == null)
+                    {
+                        continue;
+                    }
+
+                    if (!Directory.Exists(Path.Combine(itemTooltipPath, categoryPath)))
+                    {
+                        Directory.CreateDirectory(Path.Combine(itemTooltipPath, categoryPath));
+                    }
+
+                    var itemTypeTextInfo = g.MeasureString(itemType, GearGraphics.ItemDetailFont);
+                    int picH = ShowObjectID ? 13 : 1;
+                    if (ShowChangeType && nullItemIdx != 0) GearGraphics.DrawPlainText(g, itemType, itemTypeFont, Color.FromArgb(255, 255, 255), 2, (int)Math.Ceiling(itemTypeTextInfo.Width) + 2, ref picH, 10);
+
+                    string imageName = Path.Combine(itemTooltipPath, categoryPath, "Item_" + itemID + "_" + itemType + ".png");
+                    diffHtml["Item"][itemType].Add("Item_" + itemID + "_" + itemType + ".png");
+                    if (!File.Exists(imageName))
+                    {
+                        resultImage.Save(imageName, System.Drawing.Imaging.ImageFormat.Png);
+                    }
+                    resultImage.Dispose();
+                    g.Dispose();
+                }
+                catch (Exception ex)
+                {
+                    FailToExportTooltips.Add("Item Tooltip 3: " + itemID, ex.Message);
                 }
             }
             itemTooltipInfo.Clear();
@@ -1454,6 +1698,8 @@ namespace WzComparerR2.Comparer
             slOld.Load(stringWzOld, itemWzOld, etcWzOld, questWzOld);
             npcRenderNew.StringLinker = slNew;
             npcRenderOld.StringLinker = slOld;
+            npcRenderNew.ShowAllIllustAtOnce = true;
+            npcRenderOld.ShowAllIllustAtOnce = true;
             npcRenderNew.ShowObjectID = true;
             npcRenderOld.ShowObjectID = true;
             diffHtml["Npc"] = new Dictionary<string, List<string>> { { "变更", new List<string>() }, { "新增", new List<string>() }, { "删除", new List<string>() } };
@@ -1473,7 +1719,7 @@ namespace WzComparerR2.Comparer
                     int heightNew = 0, heightOld = 0;
                     int width = 0;
                     // 变更后Tooltip图像生成
-                    Npc npcNew = Npc.CreateFromNode(PluginManager.FindWz(npcNodePath, wzNew?.GetNodeWzFile()), PluginManager.FindWz);
+                    Npc npcNew = Npc.CreateFromNode(PluginManager.FindWz(npcNodePath, wzNew?.GetNodeWzFile()), PluginManager.FindWz, PluginManager.FindWz);
                     if (npcNew != null)
                     {
                         npcRenderNew.NpcInfo = npcNew;
@@ -1483,7 +1729,7 @@ namespace WzComparerR2.Comparer
                     }
                     if (width == 0) continue;
                     // 变更前Tooltip图像生成
-                    Npc npcOld = Npc.CreateFromNode(PluginManager.FindWz(npcNodePath, wzOld?.GetNodeWzFile()), PluginManager.FindWz);
+                    Npc npcOld = Npc.CreateFromNode(PluginManager.FindWz(npcNodePath, wzOld?.GetNodeWzFile()), PluginManager.FindWz, PluginManager.FindWz);
                     if (npcOld != null)
                     {
                         npcRenderOld.NpcInfo = npcOld;
@@ -2810,7 +3056,14 @@ namespace WzComparerR2.Comparer
                         }
                         catch (Exception ex)
                         {
-                            FailToExportNodes.Add(colName + ": " + fullPath.Replace('\\', '/'), ex.Message);
+                            if (!FailToExportNodes.ContainsKey(colName + ": " + fullPath.Replace('\\', '/')))
+                            {
+                                FailToExportNodes.Add(colName + ": " + fullPath.Replace('\\', '/'), ex.Message);
+                            }
+                            else
+                            {
+                                FailToExportNodes[colName + ": " + fullPath.Replace('\\', '/')] = ex.Message;
+                            }
                             return string.Format("无法解析的PNG数据 {0} bytes", png.DataLength);
                         }
                         return string.Format("<img src=\"{0}/{1}\" />", (isCanvas && !this.Comparer.ResolvePngLink) ? Path.Combine(outputDirName, canvas) : outputDirName, WebUtility.UrlEncode(fileName));
@@ -2850,7 +3103,14 @@ namespace WzComparerR2.Comparer
                         }
                         catch (Exception ex)
                         {
-                            FailToExportNodes.Add(colName + ": " + fullPath.Replace('\\', '/'), ex.ToString());
+                            if (!FailToExportNodes.ContainsKey(colName + ": " + fullPath.Replace('\\', '/')))
+                            {
+                                FailToExportNodes.Add(colName + ": " + fullPath.Replace('\\', '/'), ex.Message);
+                            }
+                            else
+                            {
+                                FailToExportNodes[colName + ": " + fullPath.Replace('\\', '/')] = ex.Message;
+                            }
                             return string.Format("无法解析的音频数据 {0} bytes", sound.DataLength);
                         }
                         return string.Format("<audio controls src=\"{0}\" type=\"audio/mpeg\">audio {1} ms\n</audio>", Path.Combine(new DirectoryInfo(outputDir).Name, filePath), sound.Ms);
@@ -3241,6 +3501,15 @@ namespace WzComparerR2.Comparer
             }
         }
 
+        private bool isGodChangseopNode(Wz_Node node)
+        {
+            if (node == null)
+                return false;
+            string[] nodePath = node.FullPathToFile.Split('\\');
+            string imgStr = nodePath.LastOrDefault(part => part.EndsWith(".img"));
+            if (string.IsNullOrEmpty(imgStr)) return false;
+            return imgStr.EndsWith("_.img");
+        }
         private bool isKMSSkillID(int skillID)
         {
             switch (skillID / 10000000)
