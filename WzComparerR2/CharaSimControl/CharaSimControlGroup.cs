@@ -19,7 +19,7 @@ namespace WzComparerR2.CharaSimControl
         }
 
         private AfrmTooltip quickView;
-        private AfrmTooltip tooltip;
+        public AfrmTooltip tooltip;
         private AfrmItem frmItem;
         private AfrmStat frmStat;
         private AfrmEquip frmEquip;
@@ -355,6 +355,7 @@ namespace WzComparerR2.CharaSimControl
                     PluginBase.PluginManager.FindWz(Wz_Type.Item).GetValueEx<Wz_File>(null),
                     PluginBase.PluginManager.FindWz(Wz_Type.Etc).GetValueEx<Wz_File>(null),
                     PluginBase.PluginManager.FindWz(Wz_Type.Quest).GetValueEx<Wz_File>(null));
+                tooltip.SkillRender.InputMode = true;
             }
             if (e.Obj == null)
             {
@@ -366,7 +367,7 @@ namespace WzComparerR2.CharaSimControl
                 tooltip.TargetItem = e.Obj;
                 tooltip.Refresh();
             }
-            Point pos = frmSkill.PointToScreen(e.Location);
+            Point pos = Control.MousePosition;
             pos.Offset(5, 5);
             tooltip.Location = pos;
             tooltip.Visible = true;
@@ -402,17 +403,17 @@ namespace WzComparerR2.CharaSimControl
             tooltip.Visible = false;
         }
 
-        private void frmEquip_MouseDown(object sender, MouseEventArgs e)
+        public void frmEquip_MouseDown(object sender, MouseEventArgs e)
         {
             //throw new NotImplementedException();
         }
 
-        private void frmEquip_DragOver(object sender, DragEventArgs e)
+        public void frmEquip_DragOver(object sender, DragEventArgs e)
         {
             //throw new NotImplementedException();
         }
 
-        private void frmEquip_DragDrop(object sender, DragEventArgs e)
+        public void frmEquip_DragDrop(object sender, DragEventArgs e)
         {
             //throw new NotImplementedException();
         }

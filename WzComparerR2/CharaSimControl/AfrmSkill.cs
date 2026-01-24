@@ -30,6 +30,7 @@ namespace WzComparerR2.CharaSimControl
         private Point newLocation;
         private bool waitForRefresh;
         private ACtrlVScroll vScroll;
+        private ACtrlVScroll vScroll2;//超级技能
         private Character character;
 
         private ContextMenuStrip menu;
@@ -65,25 +66,56 @@ namespace WzComparerR2.CharaSimControl
         private ACtrlButton btnCooltimeAlarm;
         private ACtrlButton btnDlg;//龙神对话
         private ACtrlButton btnEx;//神之子超越者技能
+        private ACtrlButton btnPassive;
+        private ACtrlButton btnActive;
+        private ACtrlButton btnReset;
 
         public Skill Skill { get; set; }
         public int selectJob;
         private int selectedTab = 0;
+        private int hyperselectedTab = 1;
         private int ScrollMaxValue = 0;
+        private int ScrollMaxValue2 = 0;
         private int scrollValue = 0;
+        private int scrollValue2 = 0;
         private bool normalmode = true;
         private bool dualblademode = false;
         private bool evanmode = false;
         private bool zeromode = false;
         private bool yetipbmode = false;
+        private bool HyperStatVisible = false;
+        private bool ZeroexVisible = false;
         BitmapOrigin icon = new BitmapOrigin();
         private List<string> tab_list = new List<string>();
         private List<Tuple<BitmapOrigin, string , string, string>> skillList = new List<Tuple<BitmapOrigin, string, string, string>>();
+        private List<Tuple<BitmapOrigin, string , string, string>> skillList2 = new List<Tuple<BitmapOrigin, string, string, string>>();//超级技能
+        private List<Tuple<BitmapOrigin, string , string, string>> skillList3 = new List<Tuple<BitmapOrigin, string, string, string>>();//左列神之子技能
+        private List<Tuple<BitmapOrigin, string , string, string>> skillList4 = new List<Tuple<BitmapOrigin, string, string, string>>();//右列神之子技能
         private List<Tuple<BitmapOrigin, string, string, string>> scrollList = new List<Tuple<BitmapOrigin, string, string, string>>();
+        private List<Tuple<BitmapOrigin, string, string, string>> scrollList2 = new List<Tuple<BitmapOrigin, string, string, string>>();//超级技能
         private string jobtab;
-
         public event ObjectMouseEventHandler ObjectMouseMove;
         public event EventHandler ObjectMouseLeave;
+
+        private Rectangle HyperSkillRect
+        {
+            get
+            {
+                return new Rectangle(new Point(baseOffset.X - BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIWindow2.img/HyperSkill/main/backgrnd"), PluginBase.PluginManager.FindWz).Bitmap.Width - 1, 
+                    baseOffset.Y),
+                    BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIWindow2.img/HyperSkill/main/backgrnd"), PluginBase.PluginManager.FindWz).Bitmap.Size);
+            }
+        }
+
+        private Rectangle ZeroexRect
+        {
+            get
+            {
+                return new Rectangle(new Point(baseOffset.X - BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIWindow2.img/SkillZeroEx/main/backgrnd"), PluginBase.PluginManager.FindWz).Bitmap.Width - 1, 
+                    baseOffset.Y),
+                    BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIWindow2.img/SkillZeroEx/main/backgrnd"), PluginBase.PluginManager.FindWz).Bitmap.Size);
+            }
+        }
 
         private void initCtrl()
         {
@@ -118,6 +150,33 @@ namespace WzComparerR2.CharaSimControl
             this.vScroll.Visible = true;
             this.vScroll.ValueChanged += new EventHandler(vScroll_ValueChanged);
             this.vScroll.ChildButtonStateChanged += new EventHandler(aCtrl_RefreshCall);
+
+            this.vScroll2 = new ACtrlVScroll();  //超级技能鼠标滑轮区域
+
+            this.vScroll2.PicBase.Normal = new BitmapOrigin(Resource.VScr9_enabled_base);
+            this.vScroll2.PicBase.Disabled = new BitmapOrigin(Resource.VScr9_disabled_base);
+
+            this.vScroll2.BtnPrev.Normal = new BitmapOrigin(Resource.VScr9_enabled_prev0);
+            this.vScroll2.BtnPrev.Pressed = new BitmapOrigin(Resource.VScr9_enabled_prev1);
+            this.vScroll2.BtnPrev.MouseOver = new BitmapOrigin(Resource.VScr9_enabled_prev2);
+            this.vScroll2.BtnPrev.Disabled = new BitmapOrigin(Resource.VScr9_enabled_prev0);
+            this.vScroll2.BtnPrev.Size = this.vScroll.BtnPrev.Normal.Bitmap.Size;
+            this.vScroll2.BtnPrev.Location = new Point(0, 0);
+
+            this.vScroll2.BtnNext.Normal = new BitmapOrigin(Resource.VScr9_enabled_next0);
+            this.vScroll2.BtnNext.Pressed = new BitmapOrigin(Resource.VScr9_enabled_next1);
+            this.vScroll2.BtnNext.MouseOver = new BitmapOrigin(Resource.VScr9_enabled_next2);
+            this.vScroll2.BtnNext.Disabled = new BitmapOrigin(Resource.VScr9_enabled_next0);
+            this.vScroll2.BtnNext.Size = this.vScroll.BtnNext.Normal.Bitmap.Size;
+
+            this.vScroll2.BtnThumb.Normal = new BitmapOrigin(Resource.VScr9_enabled_thumb0);
+            this.vScroll2.BtnThumb.Pressed = new BitmapOrigin(Resource.VScr9_enabled_thumb1);
+            this.vScroll2.BtnThumb.MouseOver = new BitmapOrigin(Resource.VScr9_enabled_thumb2);
+            this.vScroll2.BtnThumb.Size = this.vScroll.BtnThumb.Normal.Bitmap.Size;
+
+            this.vScroll2.Visible = true;
+            this.vScroll2.ValueChanged += new EventHandler(vScroll2_ValueChanged);
+            this.vScroll2.ChildButtonStateChanged += new EventHandler(aCtrl_RefreshCall);
 
             this.btnClose = new ACtrlButton();
             this.btnClose.Normal = new BitmapOrigin(Resource.BtClose3_normal_0);
@@ -196,7 +255,7 @@ namespace WzComparerR2.CharaSimControl
             this.btnHyper.Location = new Point(8, 335);
             this.btnHyper.Size = new Size(50, 16);
             this.btnHyper.ButtonStateChanged += new EventHandler(aCtrl_RefreshCall);
-            //this.btnHyper.MouseClick += new MouseEventHandler(btnHyper_MouseClick);
+            this.btnHyper.MouseClick += new MouseEventHandler(btnHyper_MouseClick);
 
             this.btnHyper2 = new ACtrlButton();
             this.btnHyper2.Normal = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIWindow2.img/SkillEx/main/BtHyper/normal/0"), PluginBase.PluginManager.FindWz);
@@ -206,7 +265,7 @@ namespace WzComparerR2.CharaSimControl
             this.btnHyper2.Location = new Point(10, 387);
             this.btnHyper2.Size = new Size(44, 16);
             this.btnHyper2.ButtonStateChanged += new EventHandler(aCtrl_RefreshCall);
-            //this.btnHyper2.MouseClick += new MouseEventHandler(btnHyper2_MouseClick);
+            this.btnHyper2.MouseClick += new MouseEventHandler(btnHyper_MouseClick);
 
             this.btnGuildSkill = new ACtrlButton();
             this.btnGuildSkill.Normal = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIWindow2.img/Skill/main/BtGuildSkill/normal/0"), PluginBase.PluginManager.FindWz);
@@ -237,10 +296,10 @@ namespace WzComparerR2.CharaSimControl
             //this.btnRide2.MouseClick += new MouseEventHandler(btnRide2_MouseClick);
 
             this.btnRide3 = new ACtrlButton();
-            this.btnRide3.Normal = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIWindow2.img/SkillZero/main/BtRide/normal/0"), PluginBase.PluginManager.FindWz);
-            this.btnRide3.Pressed = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIWindow2.img/SkillZero/main/BtRide/pressed/0"), PluginBase.PluginManager.FindWz);
-            this.btnRide3.MouseOver = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIWindow2.img/SkillZero/main/BtRide/mouseOver/0"), PluginBase.PluginManager.FindWz);
-            this.btnRide3.Disabled = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIWindow2.img/SkillZero/main/BtRide/disabled/0"), PluginBase.PluginManager.FindWz);
+            this.btnRide3.Normal = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIWindow2.img/Skill/main/BtRide/normal/0"), PluginBase.PluginManager.FindWz);
+            this.btnRide3.Pressed = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIWindow2.img/Skill/main/BtRide/pressed/0"), PluginBase.PluginManager.FindWz);
+            this.btnRide3.MouseOver = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIWindow2.img/Skill/main/BtRide/mouseOver/0"), PluginBase.PluginManager.FindWz);
+            this.btnRide3.Disabled = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIWindow2.img/Skill/main/BtRide/disabled/0"), PluginBase.PluginManager.FindWz);
             this.btnRide3.Location = new Point(140, 387);
             this.btnRide3.Size = new Size(50, 16);
             this.btnRide3.ButtonStateChanged += new EventHandler(aCtrl_RefreshCall);
@@ -333,7 +392,15 @@ namespace WzComparerR2.CharaSimControl
             this.btnEx.Location = new Point(12, 387);
             this.btnEx.Size = new Size(72, 16);
             this.btnEx.ButtonStateChanged += new EventHandler(aCtrl_RefreshCall);
-            //this.btnEx.MouseClick += new MouseEventHandler(btnEx_MouseClick);
+            this.btnEx.MouseClick += new MouseEventHandler(btnEx_MouseClick);
+
+            this.btnReset = new ACtrlButton();
+            this.btnReset.Normal = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIWindow2.img/HyperSkill/main/BtReset/normal/0"), PluginBase.PluginManager.FindWz);
+            this.btnReset.Pressed = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIWindow2.img/HyperSkill/main/BtReset/pressed/0"), PluginBase.PluginManager.FindWz);
+            this.btnReset.MouseOver = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIWindow2.img/HyperSkill/main/BtReset/mouseOver/0"), PluginBase.PluginManager.FindWz);
+            this.btnReset.Disabled = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIWindow2.img/HyperSkill/main/BtReset/disabled/0"), PluginBase.PluginManager.FindWz);
+            this.btnReset.Size = new Size(50, 16);
+            this.btnReset.ButtonStateChanged += new EventHandler(aCtrl_RefreshCall);
 
             this.btnTab0 = new ACtrlButton();
             this.btnTab0.ButtonStateChanged += new EventHandler(aCtrl_RefreshCall);
@@ -378,6 +445,16 @@ namespace WzComparerR2.CharaSimControl
             this.btnTab8.Size = new Size(25, 18);
             this.btnTab8.ButtonStateChanged += new EventHandler(aCtrl_RefreshCall);
             this.btnTab8.MouseClick += new MouseEventHandler(btnTab8_MouseClick);
+
+            this.btnPassive = new ACtrlButton();
+            this.btnPassive.Location = new Point(10, 27);
+            this.btnPassive.Size = new Size(77, 23);
+            this.btnPassive.MouseClick += new MouseEventHandler(btnPassive_MouseClick);
+
+            this.btnActive = new ACtrlButton();
+            this.btnActive.Location = new Point(88, 29);
+            this.btnActive.Size = new Size(77, 23);
+            this.btnActive.MouseClick += new MouseEventHandler(btnActive_MouseClick);
         }
 
         public override void Refresh()
@@ -399,19 +476,29 @@ namespace WzComparerR2.CharaSimControl
         {
             if (Bitmap != null)
                 Bitmap.Dispose();
+            control_event();
             //计算图像大小
+            Point baseOffsetnew = calcRenderBaseOffset();
             Size size = new Size(0, 0);
+            size.Width += baseOffsetnew.X;
             if (normalmode || dualblademode || yetipbmode)
                 size = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/UIWindow2.img/Skill/main/backgrnd"), PluginBase.PluginManager.FindWz).Bitmap.Size;
             else if (evanmode)
                 size = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/UIWindow2.img/SkillEx/main/backgrnd"), PluginBase.PluginManager.FindWz).Bitmap.Size;
             else if (zeromode)
                 size = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/UIWindow2.img/SkillZero/main/backgrnd"), PluginBase.PluginManager.FindWz).Bitmap.Size;
+            if (HyperStatVisible)
+                size.Width += BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIWindow2.img/HyperSkill/main/backgrnd"), PluginBase.PluginManager.FindWz).Bitmap.Width + 1;
+            else if (ZeroexVisible)
+                size.Width += BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIWindow2.img/SkillZeroEx/main/backgrnd"), PluginBase.PluginManager.FindWz).Bitmap.Width + 1;
             //处理偏移
             this.newLocation = new Point(this.Location.X + this.baseOffset.X,
                 this.Location.Y + this.baseOffset.Y);
 
-            control_event();
+            //处理偏移
+            this.newLocation = new Point(this.Location.X + this.baseOffset.X - baseOffsetnew.X,
+                this.Location.Y + this.baseOffset.Y - baseOffsetnew.Y);
+            this.baseOffset = baseOffsetnew;
 
             //绘制图像
             Bitmap bitmap = new Bitmap(size.Width, size.Height);
@@ -422,8 +509,23 @@ namespace WzComparerR2.CharaSimControl
                 render_evan(g);
             else if (zeromode)
                 render_zero(g);
+            if (HyperStatVisible)
+                render_hyperskill(g);
+            else if (ZeroexVisible)
+                render_zeroex(g);
+
             g.Dispose();
             this.Bitmap = bitmap;
+        }
+
+        private Point calcRenderBaseOffset()
+        {
+            if (HyperStatVisible)
+                return new Point(BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIWindow2.img/HyperSkill/main/backgrnd"), PluginBase.PluginManager.FindWz).Bitmap.Width, 0);
+            else if (ZeroexVisible)
+                return new Point(BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIWindow2.img/SkillZeroEx/main/backgrnd"), PluginBase.PluginManager.FindWz).Bitmap.Width, 0);
+            else
+                return new Point(0, 0);
         }
 
         private void control_event()
@@ -465,6 +567,15 @@ namespace WzComparerR2.CharaSimControl
                 this.vScroll.Size = new Size(11, 235);
                 this.vScroll.ScrollableLocation = new Point(5, 12);
                 this.vScroll.ScrollableSize = new Size(11, 199);
+                this.vScroll2.BtnNext.Location = new Point(0, 223);
+                this.vScroll2.Location = new Point(153, 93);
+                this.vScroll2.Size = new Size(11, 235);
+                this.vScroll2.ScrollableLocation = new Point(5, 12);
+                this.vScroll2.ScrollableSize = new Size(11, 199);
+                this.btnReset.Location = new Point(10, 335);
+                this.btnHyper.Visible = true;
+                this.btnHyper2.Visible = false;
+                this.btnEx.Visible = false;
             }
             else if (evanmode)
             {
@@ -483,11 +594,20 @@ namespace WzComparerR2.CharaSimControl
                     case 6: btnVMatrix2.Visible = false; btnHexaMatrix2.Visible = true; break;
                     default: btnVMatrix2.Visible = false; btnHexaMatrix2.Visible = false; break;
                 }
-                this.vScroll.BtnNext.Location = new Point(0, 153);
+                this.vScroll.BtnNext.Location = new Point(0, 151);
                 this.vScroll.Location = new Point(265, 218);
-                this.vScroll.Size = new Size(11, 164);
+                this.vScroll.Size = new Size(11, 162);
                 this.vScroll.ScrollableLocation = new Point(5, 12);
-                this.vScroll.ScrollableSize = new Size(11, 142);
+                this.vScroll.ScrollableSize = new Size(11, 140);
+                this.vScroll2.BtnNext.Location = new Point(0, 276);
+                this.vScroll2.Location = new Point(153, 93);
+                this.vScroll2.Size = new Size(11, 287);
+                this.vScroll2.ScrollableLocation = new Point(5, 12);
+                this.vScroll2.ScrollableSize = new Size(11, 265);
+                this.btnReset.Location = new Point(10, 387);
+                this.btnHyper.Visible = false;
+                this.btnHyper2.Visible = true;
+                this.btnEx.Visible = false;
             }
             else if (zeromode)
             {
@@ -508,8 +628,17 @@ namespace WzComparerR2.CharaSimControl
                 this.vScroll.Size = new Size(11, 238);
                 this.vScroll.ScrollableLocation = new Point(5, 12);
                 this.vScroll.ScrollableSize = new Size(11, 216);
+                this.vScroll2.BtnNext.Location = new Point(0, 148);
+                this.vScroll2.Location = new Point(153, 93);
+                this.vScroll2.Size = new Size(11, 160);
+                this.vScroll2.ScrollableLocation = new Point(5, 12);
+                this.vScroll2.ScrollableSize = new Size(11, 136);
+                this.btnHyper.Visible = false;
+                this.btnHyper2.Visible = false;
+                this.btnEx.Visible = true;
             }
             this.vScroll.BtnThumb.Visible = (this.ScrollMaxValue > 0);
+            this.vScroll2.BtnThumb.Visible = (this.ScrollMaxValue2 > 0);
         }
 
         private void renderBase(Graphics g) //绘制普通模式技能界面
@@ -615,7 +744,6 @@ namespace WzComparerR2.CharaSimControl
             render_bitmap(g, "UI/UIWindow2.img/SkillZero/main/backgrnd", 0, 0);
             render_bitmap(g, "UI/UIWindow2.img/SkillZero/main/backgrnd2", 8, 23);
             render_bitmap(g, "UI/UIWindow2.img/SkillZero/main/tabLine", 9, 47);
-            if (selectedTab < 2) render_bitmap(g, "UI/UIWindow2.img/SkillZero/main/backgrnd3", 12, 52);
             switch (selectedTab)
             {
                 case 0: render_bitmap(g, "UI/UIWindow2.img/SkillZero/main/backgrnd5", 15, 91); render_bitmap(g, "UI/UIWindow2.img/SkillZero/main/skillPoint", 63, 355); break;
@@ -626,31 +754,129 @@ namespace WzComparerR2.CharaSimControl
             }
             for (int i = 0; i < 4; i++) //绘制技能栏标签
             {
-                var tabSelObj = Resource.ResourceManager.GetObject(i == selectedTab ? "SkillZero_main_Tab_selected_" + i : "SkillZero_main_Tab_enabled_" + i);
-                if (tabSelObj is Bitmap selBitmap) g.DrawImage(selBitmap, 12 + 73 * i, i == selectedTab ? (i > 1 ? 29: 27) : (i > 1 ? 31 : 29));
+                render_bitmap(g, String.Format(@"UI/_Canvas/UIWindow2.img/SkillZero/main/Tab/{0}/{1}", i == selectedTab ? "selected" : "enabled", i), 12 + 73 * i, i == selectedTab ? (i > 1 ? 29 : 27) : (i > 1 ? 31 : 29));
             }
-            if (selectedTab > 1)
+            if (selectedTab < 2)
+            {
+                render_bitmap(g, "UI/UIWindow2.img/SkillZero/main/backgrnd3", 12, 52);
+                render_bitmap(g, "Skill/_Canvas/000.img/info/icon", 17, 57);
+                string bookName = selectedTab == 0 ? "通用" : "神之子";
+                g.DrawString(bookName, GearGraphics.ItemDetailFont2, GearGraphics.WhiteBrush, (345f - g.MeasureString(bookName, GearGraphics.ItemDetailFont2).Width) / 2, 67f);
+                g.DrawString("0", GearGraphics.ItemDetailFont2, GearGraphics.GrayBrush, 144, 357);
+                g.DrawString("0", GearGraphics.ItemDetailFont2, GearGraphics.GrayBrush, 300, 357);
+                get_zeroskill();
+            }                
+            else if (selectedTab > 1)
             {
                 get_skilllist(tab_list[selectedTab]);
-                for (int i = 0; i < 12; i++) //绘制技能栏
+            }
+            for (int i = 0; i < 12; i++) //绘制技能栏
+            {
+                if (scrollList[i].Item2 != string.Empty)
                 {
-                    if (scrollList[i].Item2 != string.Empty)
-                    {
-                        render_bitmap(g, "UI/UIWindow2.img/SkillZero/main/skill1", 19 + 154 * (i % 2), 114 + 40 * (i / 2));
-                        if (i < 10) render_bitmap(g, "UI/UIWindow2.img/SkillZero/main/line", 19 + 154 * (i % 2), 151 + 40 * (i / 2));
-                        Bitmap skillIcon = scrollList[i].Item1.Bitmap;
-                        string skillname = scrollList[i].Item2;
-                        string maxLevel = scrollList[i].Item3;
-                        if (skillIcon != null)
-                            g.DrawImage(skillIcon, 21 + 154 * (i % 2), 115 + 40 * (i / 2), 32, 32);
-                        g.DrawString(skillname, GearGraphics.ItemDetailFont2, GearGraphics.GrayBrush, 57 + 154 * (i % 2), 117 + 40 * (i / 2));
-                        g.DrawString(maxLevel, GearGraphics.ItemDetailFont2, GearGraphics.GrayBrush, 57 + 154 * (i % 2), 135 + 40 * (i / 2));
-                    }
+                    render_bitmap(g, "UI/UIWindow2.img/SkillZero/main/skill1", 19 + 154 * (i % 2), 114 + 40 * (i / 2));
+                    if (i < 10) render_bitmap(g, "UI/UIWindow2.img/SkillZero/main/line", 19 + 154 * (i % 2), 151 + 40 * (i / 2));
+                    Bitmap skillIcon = scrollList[i].Item1.Bitmap;
+                    string skillname = scrollList[i].Item2;
+                    string maxLevel = scrollList[i].Item3;
+                    if (skillIcon != null)
+                        g.DrawImage(skillIcon, 21 + 154 * (i % 2), 115 + 40 * (i / 2), 32, 32);
+                    g.DrawString(skillname, GearGraphics.ItemDetailFont2, GearGraphics.GrayBrush, 57 + 154 * (i % 2), 117 + 40 * (i / 2));
+                    g.DrawString(maxLevel, GearGraphics.ItemDetailFont2, GearGraphics.GrayBrush, 57 + 154 * (i % 2), 135 + 40 * (i / 2));
                 }
             }
             foreach (AControl zeroCtrl in this.zeroControls)
             {
                 zeroCtrl.Draw(g);
+            }
+            g.ResetTransform();
+        }
+
+        private void render_hyperskill(Graphics g)
+        {
+            Rectangle rect = this.HyperSkillRect;
+            g.TranslateTransform(rect.X, rect.Y);
+            if (normalmode || dualblademode)
+            {
+                render_bitmap(g, "UI/_Canvas/UIWindow2.img/HyperSkill/main/backgrnd", 1, 0);
+                render_bitmap(g, "UI/_Canvas/UIWindow2.img/HyperSkill/main/backgrnd2", 5, 22);
+                g.DrawString("0", GearGraphics.ItemDetailFont, GearGraphics.GrayBrush, 150, 337);
+            }
+            if (evanmode)
+            {
+                render_bitmap(g, "UI/_Canvas/UIWindow2.img/HyperSkill/main/bg_evan/backgrnd", 1, 0);
+                render_bitmap(g, "UI/_Canvas/UIWindow2.img/HyperSkill/main/bg_evan/backgrnd2", 5, 22);
+                g.DrawString("0", GearGraphics.ItemDetailFont, GearGraphics.GrayBrush, 150, 390);
+            }
+            render_bitmap(g, "UI/_Canvas/UIWindow2.img/SkillZeroEx/main/backgrnd3", 7, 47);
+            switch (hyperselectedTab)
+            {
+                case 1:
+                    render_bitmap(g, "UI/_Canvas/UIWindow2.img/HyperSkill/main/Tab/enabled/0", 10, 25);
+                    render_bitmap(g, "UI/_Canvas/UIWindow2.img/HyperSkill/main/Tab/disabled/1", 88, 27);
+                    render_bitmap(g, "UI/_Canvas/UIWindow2.img/HyperSkill/main/TypeIcon/1", 15, 55);
+                    g.DrawString("技能强化(被动)", GearGraphics.ItemDetailFont, GearGraphics.WhiteBrush, 104 - g.MeasureString("技能强化(被动)", GearGraphics.ItemDetailFont2).Width / 2, 65);
+                    break;
+                case 2:
+                    render_bitmap(g, "UI/_Canvas/UIWindow2.img/HyperSkill/main/Tab/disabled/0", 10, 27);
+                    render_bitmap(g, "UI/_Canvas/UIWindow2.img/HyperSkill/main/Tab/enabled/1", 88, 25);
+                    render_bitmap(g, "UI/_Canvas/UIWindow2.img/HyperSkill/main/TypeIcon/2", 15, 55);
+                    g.DrawString("攻击/增益(主动)", GearGraphics.ItemDetailFont, GearGraphics.WhiteBrush, 104 - g.MeasureString("攻击/增益(主动)", GearGraphics.ItemDetailFont2).Width / 2, 65);
+                    break;
+            }
+            if (normalmode || evanmode)
+                get_hyperskill(tab_list[4]);
+            else if (dualblademode)
+                get_hyperskill(tab_list[6]);
+            for (int i = 0; i < (evanmode ? 7 : 6); i++)
+            {
+                if (scrollList2[i].Item2 != string.Empty)
+                {
+                    render_bitmap(g, "UI/_Canvas/UIWindow2.img/SkillZeroEx/main/skill1", 10, 93 + 40 * i);
+                    Bitmap skillIcon = scrollList2[i].Item1.Bitmap;
+                    string skillname = scrollList2[i].Item2;
+                    string maxLevel = scrollList2[i].Item3;
+                    if (skillIcon != null)
+                        g.DrawImage(skillIcon, 12, 94 + 40 * i, 32, 32);
+                    g.DrawString(skillname, GearGraphics.ItemDetailFont2, GearGraphics.GrayBrush, 48, 96 + 40 * i);
+                    g.DrawString(maxLevel, GearGraphics.ItemDetailFont2, GearGraphics.GrayBrush, 48, 114 + 40 * i);
+                }
+            }
+            foreach (AControl hyperCtrl in this.hyperControls)
+            {
+                hyperCtrl.Draw(g);
+            }
+            g.ResetTransform();
+        }
+
+        private void render_zeroex(Graphics g)
+        {
+            Rectangle rect = this.ZeroexRect;
+            g.TranslateTransform(rect.X, rect.Y);
+            render_bitmap(g, "UI/_Canvas/UIWindow2.img/SkillZeroEx/main/backgrnd", 1, 0);
+            render_bitmap(g, "UI/_Canvas/UIWindow2.img/SkillZeroEx/main/backgrnd2", 7, 22);
+            render_bitmap(g, "UI/_Canvas/UIWindow2.img/SkillZeroEx/main/backgrnd3", 8, 47);
+            render_bitmap(g, "UI/_Canvas/UIWindow2.img/SkillZeroEx/main/Tab/enabled/0", 11, 27);
+            render_bitmap(g, "UI/_Canvas/UIWindow2.img/SkillZeroEx/main/TypeIcon/0", 16, 55);
+            g.DrawString("超越者", GearGraphics.ItemDetailFont2, GearGraphics.WhiteBrush, 24f + (160f - g.MeasureString("超越者", GearGraphics.ItemDetailFont2).Width) / 2, 65f);
+            get_transcendentskill();
+            for (int i = 0; i < 4; i++)
+            {
+                if (scrollList2[i].Item2 != string.Empty)
+                {
+                    render_bitmap(g, "UI/_Canvas/UIWindow2.img/SkillZeroEx/main/skill1", 10, 93 + 40 * i);
+                    Bitmap skillIcon = scrollList2[i].Item1.Bitmap;
+                    string skillname = scrollList2[i].Item2;
+                    string maxLevel = scrollList2[i].Item3;
+                    if (skillIcon != null)
+                        g.DrawImage(skillIcon, 12, 94 + 40 * i, 32, 32);
+                    g.DrawString(skillname, GearGraphics.ItemDetailFont2, GearGraphics.GrayBrush, 48, 96 + 40 * i);
+                    g.DrawString(maxLevel, GearGraphics.ItemDetailFont2, GearGraphics.GrayBrush, 48, 114 + 40 * i);
+                }
+            }
+            foreach (AControl zeroexrCtrl in this.zeroexControls)
+            {
+                zeroexrCtrl.Draw(g);
             }
             g.ResetTransform();
         }
@@ -665,19 +891,15 @@ namespace WzComparerR2.CharaSimControl
         private void get_skilllist(string jobtab)
         {
             skillList.Clear();
-            if (((normalmode || evanmode || yetipbmode) && selectedTab != 5) || (dualblademode && selectedTab != 7) || (zeromode && selectedTab == 3)) //绘制非5转技能
+            skillList3.Clear();
+            skillList4.Clear();
+            if (((normalmode || evanmode || yetipbmode) && selectedTab < 5) || (dualblademode && selectedTab < 7)) //绘制非5转技能
             {
                 foreach (Wz_Node wz_Node in PluginManager.FindWz($@"Skill/{jobtab}.img/skill").Nodes)
                 {
-                    string skillid = wz_Node.Text;
-                    Wz_Node skillNode = PluginBase.PluginManager.FindWz(string.Format(@"Skill\{0}.img\skill\{1}", jobtab, wz_Node.Text));
-                    Skill skill = Skill.CreateFromNode(skillNode, PluginBase.PluginManager.FindWz, PluginBase.PluginManager.FindWz);
-                    if (skill.Invisible || skill.HyperStat || skill.TimeLimited) continue;
-                    icon = skill.Icon;
-                    Bitmap skillIcon = icon.Bitmap;
-                    string skillname = PluginManager.FindWz($@"String/Skill.img/{wz_Node.Text}/name").GetValueEx<string>(null);
-                    string maxLevel = skill.MaxLevel.ToString();
-                    skillList.Add(new Tuple<BitmapOrigin, string, string, string>(icon, skillname, maxLevel, skillid));
+                    Skill skill = Skill.CreateFromNode(wz_Node, PluginBase.PluginManager.FindWz, PluginBase.PluginManager.FindWz);
+                    if (skill.Invisible || skill.Hyper != HyperSkillType.None || skill.TimeLimited) continue;
+                    load_list(skill, wz_Node.Text);
                 }
             }
             if (((normalmode || evanmode) && selectedTab == 5) || (dualblademode && selectedTab == 7) || (zeromode && selectedTab == 2)) //绘制5转技能
@@ -711,12 +933,13 @@ namespace WzComparerR2.CharaSimControl
                 }
                 catch
                 {
-                    foreach (Wz_Node wz_Node in PluginManager.FindWz($@"Etc/VcoreNew.img/vSkill/coreGroup/{tab}").Nodes)
+                    Wz_Node Vcore = PluginManager.FindWz($@"Etc/VcoreNew.img/vSkill/coreGroup/{tab}") ?? PluginManager.FindWz($@"Etc/VCore.img/vSkill/coreGroup/{tab}");
+                    foreach (Wz_Node wz_Node in Vcore.Nodes)
                     {
                         foreach (Wz_Node wz_Node2 in wz_Node.Nodes)
                         {
                             string tabnode = wz_Node2.GetValueEx<Int32>(400001000).ToString();
-                            string skillid = PluginManager.FindWz($@"Etc/VcoreNew.img/vSkill/CoreData/{tabnode}/connectSkill/0").GetValueEx<Int32>(400001000).ToString();
+                            string skillid = PluginManager.FindWz(string.Format(@"Etc/{0}.img/vSkill/CoreData/{1}/connectSkill/0", Vcore.FullPath.Contains("VcoreNew") ? "VcoreNew" : "VCore", tabnode)).GetValueEx<Int32>(400001000).ToString();
                             Wz_Node skillNode = PluginBase.PluginManager.FindWz(string.Format(@"Skill\{0}.img\skill\{1}", skillid.Remove(skillid.Length - 4), skillid));
                             Skill skill = Skill.CreateFromNode(skillNode, PluginBase.PluginManager.FindWz, PluginBase.PluginManager.FindWz);
                             if (skill.Invisible || skillList.Exists(t => t.Item4 == skillid)) continue;
@@ -724,7 +947,22 @@ namespace WzComparerR2.CharaSimControl
                         }
 
                     }
-                    //MessageBoxEx.Show($"韩服VCore路径已更换至VcoreNew", "提示");
+                }
+            }
+            if (((normalmode || evanmode) && selectedTab == 6) || (dualblademode && selectedTab == 8) || (zeromode && selectedTab == 3))//绘制6转技能
+            {
+                string tab = zeromode ? tab_list[1] : (dualblademode ? tab_list[6] : tab_list[4]);
+                foreach (Wz_Node wz_Node in PluginManager.FindWz($@"Etc/HexaCore.img/hexaSkill/jobCore/{tab}").Nodes)
+                {
+                    foreach (Wz_Node wz_Node2 in wz_Node.Nodes)
+                    {
+                        string tabnode = wz_Node2.GetValueEx<Int32>(400001000).ToString();
+                        string skillid = PluginManager.FindWz($"Etc/HexaCore.img/hexaSkill/coreData/{tabnode}/connectSkill/0").GetValueEx<Int32>(400001000).ToString();
+                        Wz_Node skillNode = PluginBase.PluginManager.FindWz(string.Format(@"Skill\{0}.img\skill\{1}", skillid.Remove(skillid.Length - 4), skillid));
+                        Skill skill = Skill.CreateFromNode(skillNode, PluginBase.PluginManager.FindWz, PluginBase.PluginManager.FindWz);
+                        if (skill.Invisible || skillList.Exists(t => t.Item4 == skillid)) continue;
+                        load_list(skill, skillid);
+                    }
                 }
             }
             // 计算最大滚动值
@@ -753,13 +991,157 @@ namespace WzComparerR2.CharaSimControl
             }
         }
 
+        private void get_zeroskill()
+        {
+            skillList.Clear();
+            skillList3.Clear();
+            skillList4.Clear();
+            List<string> zeroimg = new List<string>(){"10100", "10110", "10111", "10112"};
+            if (selectedTab == 0)
+            {
+                foreach (Wz_Node wz_Node in PluginManager.FindWz("Skill/10000.img/skill").Nodes)
+                {
+                    string skillid = wz_Node.Text;
+                    Skill skill = Skill.CreateFromNode(wz_Node, PluginBase.PluginManager.FindWz, PluginBase.PluginManager.FindWz);
+                    if (skill.Invisible || (skill.Hasreq && !skill.HasreqLevel)) continue;
+                    string skillname = PluginManager.FindWz($@"String/Skill.img/{skillid}/name").GetValueEx<string>(null);
+                    if (skill.categoryIndex == 1 && skill.tabIndex == 0)
+                        skillList4.Add(new Tuple<BitmapOrigin, string, string, string>(skill.Icon, skillname, skill.MaxLevel.ToString(), skillid));
+                    else
+                        skillList3.Add(new Tuple<BitmapOrigin, string, string, string>(skill.Icon, skillname, skill.MaxLevel.ToString(), skillid));
+                }
+            }
+            else if (selectedTab == 1)
+            {
+                foreach (string node in zeroimg)
+                {
+                    foreach (Wz_Node wz_Node in PluginManager.FindWz($"Skill/{node}.img/skill").Nodes)
+                    {
+                        string skillid = wz_Node.Text;
+                        Skill skill = Skill.CreateFromNode(wz_Node, PluginBase.PluginManager.FindWz, PluginBase.PluginManager.FindWz);
+                        if (skill.Invisible) continue;
+                        string skillname = PluginManager.FindWz($@"String/Skill.img/{skillid}/name").GetValueEx<string>(null);
+                        if (skill.categoryIndex == 1 && skill.tabIndex == 1)
+                            skillList4.Add(new Tuple<BitmapOrigin, string, string, string>(skill.Icon, skillname, skill.MaxLevel.ToString(), skillid));
+                        else if (skill.categoryIndex == 0 && skill.tabIndex == 1)
+                            skillList3.Add(new Tuple<BitmapOrigin, string, string, string>(skill.Icon, skillname, skill.MaxLevel.ToString(), skillid));
+                    }
+                }
+            }
+            int pageSize = 6;
+            int maxScroll = Math.Max(skillList3.Count, skillList4.Count) > pageSize ? Math.Max(skillList3.Count, skillList4.Count) - pageSize : 0;
+            this.ScrollMaxValue = Math.Max(0, maxScroll);
+            this.vScroll.Maximum = maxScroll;
+            int startIdx = scrollValue;
+            if (this.scrollValue > this.ScrollMaxValue)
+            {
+                this.scrollValue = this.ScrollMaxValue;
+            }
+            scrollList.Clear();
+            for (int i = 0; i < 12; i++)
+            {
+                if (i % 2 == 0) // 奇数位置：从skillList3取
+                {
+                    int index3 = startIdx + i / 2;
+                    if (index3 < skillList3.Count)
+                    {
+                        scrollList.Add(skillList3[index3]);
+                    }
+                    else
+                    {
+                        scrollList.Add(new Tuple<BitmapOrigin, string, string, string>(new BitmapOrigin(), string.Empty, string.Empty, string.Empty));
+                    }
+                }
+                else// 偶数位置：从skillList4取
+                {
+                    int index4 = startIdx + i / 2;
+                    if (index4 < skillList4.Count)
+                    {
+                        scrollList.Add(skillList4[index4]);
+                    }
+                    else
+                    {
+                        scrollList.Add(new Tuple<BitmapOrigin, string, string, string>(new BitmapOrigin(), string.Empty, string.Empty, string.Empty));
+                    }
+                }
+            }
+        }
+
+        private void get_hyperskill(string jobtab)
+        {
+            skillList2.Clear();
+            foreach (Wz_Node wz_Node in PluginManager.FindWz($@"Skill/{jobtab}.img/skill").Nodes)
+            {
+                string skillid = wz_Node.Text;
+                Skill skill = Skill.CreateFromNode(wz_Node, PluginBase.PluginManager.FindWz, PluginBase.PluginManager.FindWz);
+                if (skill.Invisible || skill.Hyper == HyperSkillType.None || skill.HyperSkill != hyperselectedTab) continue;
+                string skillname = PluginManager.FindWz($@"String/Skill.img/{wz_Node.Text}/name").GetValueEx<string>(null);
+                skillList2.Add(new Tuple<BitmapOrigin, string, string, string>(skill.Icon, skillname, skill.MaxLevel.ToString(), skillid));
+            }
+            int pageSize = evanmode ? 7 : 6;
+            int maxScroll = skillList2.Count > pageSize ? skillList2.Count - pageSize : 0;
+            this.ScrollMaxValue2 = Math.Max(0, maxScroll);
+            this.vScroll2.Maximum = maxScroll;
+            if (this.scrollValue2 > this.ScrollMaxValue2)
+            {
+                this.scrollValue2 = this.ScrollMaxValue2;
+            }
+            scrollList2.Clear();
+            int startIdx = scrollValue2;
+            for (int i = 0; i < pageSize; i++)
+            {
+                int idx = startIdx + i;
+                if (idx < skillList2.Count)
+                {
+                    scrollList2.Add(skillList2[idx]);
+                }
+                else
+                {
+                    scrollList2.Add(new Tuple<BitmapOrigin, string, string, string>(new BitmapOrigin(), string.Empty, string.Empty, string.Empty));
+                }
+            }
+        }
+
+        private void get_transcendentskill()
+        {
+            skillList2.Clear();
+            foreach (Wz_Node wz_Node in PluginManager.FindWz("Skill/10000.img/skill").Nodes)
+            {
+                string skillid = wz_Node.Text;
+                Skill skill = Skill.CreateFromNode(wz_Node, PluginBase.PluginManager.FindWz, PluginBase.PluginManager.FindWz);
+                if (skill.Invisible) continue;
+                string skillname = PluginManager.FindWz($@"String/Skill.img/{skillid}/name").GetValueEx<string>(null);
+                if (skill.Hasreq && !skill.HasreqLevel)
+                    skillList2.Add(new Tuple<BitmapOrigin, string, string, string>(skill.Icon, skillname, skill.MaxLevel.ToString(), skillid));
+            }
+            int pageSize = 4;
+            int maxScroll = skillList2.Count > pageSize ? skillList2.Count - pageSize : 0;
+            this.ScrollMaxValue2 = Math.Max(0, maxScroll);
+            this.vScroll2.Maximum = maxScroll;
+            if (this.scrollValue2 > this.ScrollMaxValue2)
+            {
+                this.scrollValue2 = this.ScrollMaxValue2;
+            }
+            scrollList2.Clear();
+            int startIdx = scrollValue2;
+            for (int i = 0; i < pageSize; i++)
+            {
+                int idx = startIdx + i;
+                if (idx < skillList2.Count)
+                {
+                    scrollList2.Add(skillList2[idx]);
+                }
+                else
+                {
+                    scrollList2.Add(new Tuple<BitmapOrigin, string, string, string>(new BitmapOrigin(), string.Empty, string.Empty, string.Empty));
+                }
+            }
+        }
+
         private void load_list(Skill skill, string skillid)
         {
-            icon = skill.Icon;
-            Bitmap skillIcon = icon.Bitmap;
             string skillname = PluginManager.FindWz($@"String/Skill.img/{skillid}/name").GetValueEx<string>(null);
-            string maxLevel = skill.MaxLevel.ToString();
-            skillList.Add(new Tuple<BitmapOrigin, string, string, string>(icon, skillname, maxLevel, skillid));
+            skillList.Add(new Tuple<BitmapOrigin, string, string, string>(skill.Icon, skillname, skill.MaxLevel.ToString(), skillid));
         }
 
         public int GetSlotIndexByPoint(Point point)
@@ -768,11 +1150,10 @@ namespace WzComparerR2.CharaSimControl
             int baseX = zeromode ? 19 : 10;
             int baseY = evanmode? 219 : zeromode ? 114 : 93;
             int slotWidth = evanmode ? 124 : zeromode ? 141 : 140;
-            int slotHeight = (evanmode || zeromode ) ? 35 : 40;
+            int slotHeight = (evanmode) ? 35 : 40;
             int columns = 2;
             int rows = evanmode? 4 : 6;
 
-            // 先减去偏移
             Point p = new Point(point.X - baseX, point.Y - baseY);
             if (p.X < 0 || p.Y < 0)
                 return -1;
@@ -788,9 +1169,39 @@ namespace WzComparerR2.CharaSimControl
             return -1;
         }
 
+        public int GetSlotIndexByPoint2(Point point)
+        {
+            int baseX = 10 - baseOffset.X;
+            int baseY = 93 - baseOffset.Y;
+            int slotWidth = 140;
+            int slotHeight = 40;
+            int rows = evanmode ? 7 : ZeroexVisible ? 4 : 6;
+
+            // 先减去偏移
+            Point p = new Point(point.X - baseX, point.Y - baseY);
+            if (p.X < 0 || p.Y < 0)
+                return -1;
+
+            int col = p.X / slotWidth;
+            int row = p.Y / slotHeight;
+            if (col < 0 || col >= 1 || row < 0 || row >= rows)
+                return -1;
+
+            int idx = row + col;
+            if (idx >= 0 && idx < rows)
+                return idx;
+            return -1;
+        }
+
         public int GetSkillIndexByPoint(Point point)
         {
             int slotIdx = GetSlotIndexByPoint(point);
+            return slotIdx;
+        }
+
+        public int GetSkillIndexByPoint2(Point point)
+        {
+            int slotIdx = GetSlotIndexByPoint2(point);
             return slotIdx;
         }
 
@@ -802,7 +1213,23 @@ namespace WzComparerR2.CharaSimControl
                 string skillId = scrollList[idx].Item4;
                 Wz_Node skillNode = PluginBase.PluginManager.FindWz($"Skill/{skillId.Substring(0, skillId.Length - 4)}.img/skill/{skillId}");
                 if (skillNode != null)
-                    return Skill.CreateFromNode(skillNode, PluginBase.PluginManager.FindWz, PluginBase.PluginManager.FindWz);
+                {
+                    var skill = Skill.CreateFromNode(skillNode, PluginBase.PluginManager.FindWz, PluginBase.PluginManager.FindWz);
+                    skill.Level = skill.MaxLevel;
+                    return skill;
+                }
+            }
+            int idx2 = GetSkillIndexByPoint2(point);
+            if (idx2 >= 0 && idx2 < scrollList2.Count && scrollList2[idx2].Item2 != string.Empty)
+            {
+                string skillId = scrollList2[idx2].Item4;
+                Wz_Node skillNode = PluginBase.PluginManager.FindWz($"Skill/{skillId.Substring(0, skillId.Length - 4)}.img/skill/{skillId}");
+                if (skillNode != null)
+                {
+                    var skill = Skill.CreateFromNode(skillNode, PluginBase.PluginManager.FindWz, PluginBase.PluginManager.FindWz);
+                    skill.Level = skill.MaxLevel;
+                    return skill;
+                }
             }
             return null;
         }
@@ -953,6 +1380,25 @@ namespace WzComparerR2.CharaSimControl
             }
         }
 
+        private IEnumerable<AControl> hyperControls //超级技能专用控件
+        {
+            get
+            {
+                yield return vScroll2;
+                yield return btnPassive;
+                yield return btnActive;
+                yield return btnReset;
+            }
+        }
+
+        private IEnumerable <AControl> zeroexControls //神之子女神技能专用控件
+        {
+            get
+            {
+                yield return vScroll2;
+            }
+        }
+
         private void aCtrl_RefreshCall(object sender, EventArgs e)
         {
             this.waitForRefresh = true;
@@ -961,6 +1407,12 @@ namespace WzComparerR2.CharaSimControl
         private void vScroll_ValueChanged(object sender, EventArgs e)
         {
             this.scrollValue = this.vScroll.Value;
+            this.waitForRefresh = true;
+        }
+
+        private void vScroll2_ValueChanged(object sender, EventArgs e)
+        {
+            this.scrollValue2 = this.vScroll2.Value;
             this.waitForRefresh = true;
         }
 
@@ -1026,6 +1478,32 @@ namespace WzComparerR2.CharaSimControl
             this.waitForRefresh = true;
         }
 
+        private void btnHyper_MouseClick(object sender, MouseEventArgs e)
+        {
+            this.HyperStatVisible = !this.HyperStatVisible;
+            this.ZeroexVisible = false;
+            this.waitForRefresh = true;
+        }
+
+        private void btnPassive_MouseClick(object sender, MouseEventArgs e)
+        {
+            this.hyperselectedTab = 1;
+            this.waitForRefresh = true;
+        }
+
+        private void btnActive_MouseClick(object sender, MouseEventArgs e)
+        {
+            this.hyperselectedTab = 2;
+            this.waitForRefresh = true;
+        }
+
+        private void btnEx_MouseClick(object sender, MouseEventArgs e)
+        {
+            this.ZeroexVisible = !this.ZeroexVisible;
+            this.HyperStatVisible = false;
+            this.waitForRefresh = true;
+        }
+
         protected override void OnMouseMove(MouseEventArgs e)
         {
             MouseEventArgs childArgs = new MouseEventArgs(e.Button, e.Clicks, e.X - baseOffset.X, e.Y - baseOffset.Y, e.Delta);
@@ -1045,6 +1523,20 @@ namespace WzComparerR2.CharaSimControl
                 ctrl.OnMouseMove(childArgs);
             }
 
+            MouseEventArgs hyperSkillChildArgs = new MouseEventArgs(e.Button, e.Clicks, e.X - HyperSkillRect.X, e.Y - HyperSkillRect.Y, e.Delta);
+
+            foreach (AControl ctrl in this.hyperControls)
+            {
+                ctrl.OnMouseMove(hyperSkillChildArgs);
+            }
+
+            MouseEventArgs zeroexSkillChildArgs = new MouseEventArgs(e.Button, e.Clicks, e.X - ZeroexRect.X, e.Y - ZeroexRect.Y, e.Delta);
+
+            foreach (AControl ctrl in this.zeroControls)
+            {
+                ctrl.OnMouseMove(zeroexSkillChildArgs);
+            }
+
             if (this.waitForRefresh)
             {
                 this.Refresh();
@@ -1053,7 +1545,7 @@ namespace WzComparerR2.CharaSimControl
 
             base.OnMouseMove(e);
 
-            object obj = GetSkillByPoint(e.Location);
+            object obj = GetSkillByPoint(new Point(e.Location.X - baseOffset.X, e.Location.Y - baseOffset.Y));
             if (obj != null)
                 this.OnObjectMouseMove(new ObjectMouseEventArgs(e, obj));
             else
@@ -1077,6 +1569,20 @@ namespace WzComparerR2.CharaSimControl
             foreach (AControl ctrl in this.zeroControls)
             {
                 ctrl.OnMouseDown(childArgs);
+            }
+
+            MouseEventArgs hyperSkillChildArgs = new MouseEventArgs(e.Button, e.Clicks, e.X - HyperSkillRect.X, e.Y - HyperSkillRect.Y, e.Delta);
+
+            foreach (AControl ctrl in this.hyperControls)
+            {
+                ctrl.OnMouseDown(hyperSkillChildArgs);
+            }
+
+            MouseEventArgs zeroexSkillChildArgs = new MouseEventArgs(e.Button, e.Clicks, e.X - ZeroexRect.X, e.Y - ZeroexRect.Y, e.Delta);
+
+            foreach (AControl ctrl in this.zeroexControls)
+            {
+                ctrl.OnMouseDown(zeroexSkillChildArgs);
             }
 
             if (this.waitForRefresh)
@@ -1107,6 +1613,20 @@ namespace WzComparerR2.CharaSimControl
                 ctrl.OnMouseUp(childArgs);
             }
 
+            MouseEventArgs hyperSkillChildArgs = new MouseEventArgs(e.Button, e.Clicks, e.X - HyperSkillRect.X, e.Y - HyperSkillRect.Y, e.Delta);
+
+            foreach (AControl ctrl in this.hyperControls)
+            {
+                ctrl.OnMouseUp(hyperSkillChildArgs);
+            }
+
+            MouseEventArgs zeroexSkillChildArgs = new MouseEventArgs(e.Button, e.Clicks, e.X - ZeroexRect.X, e.Y - ZeroexRect.Y, e.Delta);
+
+            foreach (AControl ctrl in this.zeroexControls)
+            {
+                ctrl.OnMouseUp(zeroexSkillChildArgs);
+            }
+
             if (this.waitForRefresh)
             {
                 this.Refresh();
@@ -1133,6 +1653,20 @@ namespace WzComparerR2.CharaSimControl
             foreach (AControl ctrl in this.zeroControls)
             {
                 ctrl.OnMouseClick(childArgs);
+            }
+
+            MouseEventArgs hyperSkillChildArgs = new MouseEventArgs(e.Button, e.Clicks, e.X - HyperSkillRect.X, e.Y - HyperSkillRect.Y, e.Delta);
+
+            foreach (AControl ctrl in this.hyperControls)
+            {
+                ctrl.OnMouseClick(hyperSkillChildArgs);
+            }
+
+            MouseEventArgs zeroexSkillChildArgs = new MouseEventArgs(e.Button, e.Clicks, e.X - ZeroexRect.X, e.Y - ZeroexRect.Y, e.Delta);
+
+            foreach (AControl ctrl in this.zeroexControls)
+            {
+                ctrl.OnMouseClick(zeroexSkillChildArgs);
             }
 
             if (this.waitForRefresh)

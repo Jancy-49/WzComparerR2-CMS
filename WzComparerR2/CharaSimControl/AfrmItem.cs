@@ -81,6 +81,10 @@ namespace WzComparerR2.CharaSimControl
         private ACtrlButton btnFilterFullApply;
         private ACtrlButton btnFilterFullMax;
         private ACtrlButton btnFilterFullMaxApply;
+        private ACtrlButton btnBossReward;
+        private ACtrlButton btnBossRewardFull;
+        private ACtrlButton btnTrunk;
+        private ACtrlButton btnTrunkFull;
         private ACtrlButton btnEquipFull;
         private ACtrlButton btnShopFull;
         private ACtrlButton btnBagFull;
@@ -222,10 +226,10 @@ namespace WzComparerR2.CharaSimControl
             this.btnFull.ButtonStateChanged += new EventHandler(aCtrl_RefreshCall);
 
             this.btnFullMax = new ACtrlButton();  //大屏转最大屏
-            this.btnFullMax.Normal = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIInventory.img/Inventory/FullAutoBuild/button:fullMax/avatar/normal/0"), PluginBase.PluginManager.FindWz);
-            this.btnFullMax.Pressed = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIInventory.img/Inventory/FullAutoBuild/button:fullMax/avatar/pressed/0"), PluginBase.PluginManager.FindWz);
-            this.btnFullMax.MouseOver = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIInventory.img/Inventory/FullAutoBuild/button:fullMax/avatar/mouseOver/0"), PluginBase.PluginManager.FindWz);
-            this.btnFullMax.Disabled = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIInventory.img/Inventory/FullAutoBuild/button:fullMax/avatar/disabled/0"), PluginBase.PluginManager.FindWz);
+            this.btnFullMax.Normal = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIInventory.img/Inventory/FullAutoBuild/button:fullMax_avatar/normal/0"), PluginBase.PluginManager.FindWz);
+            this.btnFullMax.Pressed = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIInventory.img/Inventory/FullAutoBuild/button:fullMax_avatar/pressed/0"), PluginBase.PluginManager.FindWz);
+            this.btnFullMax.MouseOver = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIInventory.img/Inventory/FullAutoBuild/button:fullMax_avatar/mouseOver/0"), PluginBase.PluginManager.FindWz);
+            this.btnFullMax.Disabled = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIInventory.img/Inventory/FullAutoBuild/button:fullMax_avatar/disabled/0"), PluginBase.PluginManager.FindWz);
             this.btnFullMax.Location = new Point(357, 474);
             this.btnFullMax.Size = new Size(80, 17);
             this.btnFullMax.MouseClick += new MouseEventHandler(btnFullMax_MouseClick);
@@ -587,7 +591,7 @@ namespace WzComparerR2.CharaSimControl
             this.btnEquip.Pressed = new BitmapOrigin(Resource.UIInventory_img_Inventory_AutoBuild_buttonequip_pressed_0);
             this.btnEquip.MouseOver = new BitmapOrigin(Resource.UIInventory_img_Inventory_AutoBuild_buttonequip_mouseOver_0);
             this.btnEquip.Disabled = new BitmapOrigin(Resource.UIInventory_img_Inventory_AutoBuild_buttonequip_disabled_0);
-            this.btnEquip.Location = new Point(155, 563);
+            this.btnEquip.Location = new Point(101, 563);
             this.btnEquip.Size = new Size(24, 24);
             this.btnEquip.ButtonStateChanged += new EventHandler(aCtrl_RefreshCall);
             this.btnEquip.MouseClick += new MouseEventHandler(btnEquip_MouseClick);
@@ -597,7 +601,7 @@ namespace WzComparerR2.CharaSimControl
             this.btnEquipFull.Pressed = new BitmapOrigin(Resource.UIInventory_img_Inventory_FullAutoBuild_buttonequip_pressed_0);
             this.btnEquipFull.MouseOver = new BitmapOrigin(Resource.UIInventory_img_Inventory_FullAutoBuild_buttonequip_mouseOver_0);
             this.btnEquipFull.Disabled = new BitmapOrigin(Resource.UIInventory_img_Inventory_FullAutoBuild_buttonequip_disabled_0);
-            this.btnEquipFull.Location = new Point(551, 515);
+            this.btnEquipFull.Location = new Point(391, 515);
             this.btnEquipFull.Size = new Size(76, 24);
             this.btnEquipFull.ButtonStateChanged += new EventHandler(aCtrl_RefreshCall);
             this.btnEquipFull.MouseClick += new MouseEventHandler(btnEquip_MouseClick);
@@ -607,7 +611,7 @@ namespace WzComparerR2.CharaSimControl
             this.btnShop.Pressed = new BitmapOrigin(Resource.UIInventory_img_Inventory_AutoBuild_buttonshop_pressed_0);
             this.btnShop.MouseOver = new BitmapOrigin(Resource.UIInventory_img_Inventory_AutoBuild_buttonshop_mouseOver_0);
             this.btnShop.Disabled = new BitmapOrigin(Resource.UIInventory_img_Inventory_AutoBuild_buttonshop_disabled_0);
-            this.btnShop.Location = new Point(181, 563);
+            this.btnShop.Location = new Point(129, 563);
             this.btnShop.Size = new Size(24, 24);
             this.btnShop.ButtonStateChanged += new EventHandler(aCtrl_RefreshCall);
 
@@ -616,7 +620,7 @@ namespace WzComparerR2.CharaSimControl
             this.btnShopFull.Pressed = new BitmapOrigin(Resource.UIInventory_img_Inventory_FullAutoBuild_buttonshop_pressed_0);
             this.btnShopFull.MouseOver = new BitmapOrigin(Resource.UIInventory_img_Inventory_FullAutoBuild_buttonshop_mouseOver_0);
             this.btnShopFull.Disabled = new BitmapOrigin(Resource.UIInventory_img_Inventory_FullAutoBuild_buttonshop_disabled_0);
-            this.btnShopFull.Location = new Point(631, 515);
+            this.btnShopFull.Location = new Point(471, 515);
             this.btnShopFull.Size = new Size(76, 24);
             this.btnShopFull.ButtonStateChanged += new EventHandler(aCtrl_RefreshCall);
 
@@ -698,6 +702,42 @@ namespace WzComparerR2.CharaSimControl
             this.btnFilterFullMaxApply.ButtonStateChanged += new EventHandler(aCtrl_RefreshCall);
             this.btnFilterFullMaxApply.MouseClick += new MouseEventHandler(btnfilter_MouseClick);
 
+            this.btnBossReward = new ACtrlButton();  //小屏首领怪奖励
+            this.btnBossReward.Normal = new BitmapOrigin(Resource.UIInventory_img_Inventory_AutoBuild_button_bossreward_normal_0);
+            this.btnBossReward.Pressed = new BitmapOrigin(Resource.UIInventory_img_Inventory_AutoBuild_button_bossreward_pressed_0);
+            this.btnBossReward.MouseOver = new BitmapOrigin(Resource.UIInventory_img_Inventory_AutoBuild_button_bossreward_mouseOver_0);
+            this.btnBossReward.Disabled = new BitmapOrigin(Resource.UIInventory_img_Inventory_AutoBuild_button_bossreward_disabled_0);
+            this.btnBossReward.Location = new Point(181, 563);
+            this.btnBossReward.Size = new Size(24, 24);
+            this.btnBossReward.ButtonStateChanged += new EventHandler(aCtrl_RefreshCall);
+
+            this.btnBossRewardFull = new ACtrlButton();  //大屏首领怪奖励
+            this.btnBossRewardFull.Normal = new BitmapOrigin(Resource.UIInventory_img_Inventory_FullAutoBuild_button_bossreward_normal_0);
+            this.btnBossRewardFull.Pressed = new BitmapOrigin(Resource.UIInventory_img_Inventory_FullAutoBuild_button_bossreward_pressed_0);
+            this.btnBossRewardFull.MouseOver = new BitmapOrigin(Resource.UIInventory_img_Inventory_FullAutoBuild_button_bossreward_mouseOver_0);
+            this.btnBossRewardFull.Disabled = new BitmapOrigin(Resource.UIInventory_img_Inventory_FullAutoBuild_button_bossreward_disabled_0);
+            this.btnBossRewardFull.Location = new Point(631, 515);
+            this.btnBossRewardFull.Size = new Size(76, 24);
+            this.btnBossRewardFull.ButtonStateChanged += new EventHandler(aCtrl_RefreshCall);
+
+            this.btnTrunk = new ACtrlButton();  //小屏仓库
+            this.btnTrunk.Normal = new BitmapOrigin(Resource.UIInventory_img_Inventory_AutoBuild_button_trunk_normal_0);
+            this.btnTrunk.Pressed = new BitmapOrigin(Resource.UIInventory_img_Inventory_AutoBuild_button_trunk_pressed_0);
+            this.btnTrunk.MouseOver = new BitmapOrigin(Resource.UIInventory_img_Inventory_AutoBuild_button_trunk_mouseOver_0);
+            this.btnTrunk.Disabled = new BitmapOrigin(Resource.UIInventory_img_Inventory_AutoBuild_button_trunk_disabled_0);
+            this.btnTrunk.Location = new Point(155, 563);
+            this.btnTrunk.Size = new Size(24, 24);
+            this.btnTrunk.ButtonStateChanged += new EventHandler(aCtrl_RefreshCall);
+
+            this.btnTrunkFull = new ACtrlButton();  //大屏仓库
+            this.btnTrunkFull.Normal = new BitmapOrigin(Resource.UIInventory_img_Inventory_FullAutoBuild_button_trunk_normal_0);
+            this.btnTrunkFull.Pressed = new BitmapOrigin(Resource.UIInventory_img_Inventory_FullAutoBuild_button_trunk_pressed_0);
+            this.btnTrunkFull.MouseOver = new BitmapOrigin(Resource.UIInventory_img_Inventory_FullAutoBuild_button_trunk_mouseOver_0);
+            this.btnTrunkFull.Disabled = new BitmapOrigin(Resource.UIInventory_img_Inventory_FullAutoBuild_button_trunk_disabled_0);
+            this.btnTrunkFull.Location = new Point(551, 515);
+            this.btnTrunkFull.Size = new Size(76, 24);
+            this.btnTrunkFull.ButtonStateChanged += new EventHandler(aCtrl_RefreshCall);
+
             this.btnSearchFull = new ACtrlButton();  //大屏搜索
             this.btnSearchFull.Normal = new BitmapOrigin(Resource.UIInventory_img_Inventory_FullAutoBuild_buttonsearch_normal_0);
             this.btnSearchFull.Pressed = new BitmapOrigin(Resource.UIInventory_img_Inventory_FullAutoBuild_buttonsearch_pressed_0);
@@ -771,6 +811,10 @@ namespace WzComparerR2.CharaSimControl
                 this.btnEquipFull.Visible = false;
                 this.btnShopFull.Visible = false;
                 this.btnBagFull.Visible = false;
+                this.btnTrunk.Visible = false;
+                this.btnTrunkFull.Visible = false;
+                this.btnBossReward.Visible = false;
+                this.btnBossRewardFull.Visible = false;
                 if (this.filter)
                 {
                     this.btnFilterFullMaxApply.Visible = true;
@@ -866,6 +910,10 @@ namespace WzComparerR2.CharaSimControl
                 this.btnBagFull.Visible = true;
                 this.btnSearchFull.Location = new Point(246, 519);
                 this.btnSearchFull.Visible = true;
+                this.btnTrunk.Visible = false;
+                this.btnTrunkFull.Visible = true;
+                this.btnBossReward.Visible = false;
+                this.btnBossRewardFull.Visible = true;
                 renderFull();
             }
             else if (this.smallMode)
@@ -890,7 +938,7 @@ namespace WzComparerR2.CharaSimControl
                 this.btnSmall.Visible = false;
                 this.btnSmallMax.Visible = false;
                 this.vScroll.Visible = true;
-                this.vScroll.Maximum = this.SelectedTab.ScrollMaxValue - 6;
+                this.vScroll.Maximum = this.SelectedTab.ScrollMaxValue - 8;
                 this.vScroll.Value = this.SelectedTab.ScrollValue;
                 this.btnCoin3.Visible = true;
                 this.btnCoin4.Visible = false;
@@ -942,15 +990,18 @@ namespace WzComparerR2.CharaSimControl
                 this.btnFilterFullMax.Visible = false;
                 this.btnFilterFullMaxApply.Visible = false;
                 this.btnSearchFull.Visible = false;
+                this.btnTrunk.Visible = true;
+                this.btnTrunkFull.Visible = false;
+                this.btnBossReward.Visible = true;
+                this.btnBossRewardFull.Visible = false;
                 renderSmall();
             }
         }
 
         private void renderSmall()
         {
-            this.Bitmap = new Bitmap(Resource.UIInventory_img_Inventory_backgrnd);
+            this.Bitmap = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIInventory.img/Inventory/backgrnd"), PluginBase.PluginManager.FindWz).Bitmap;
             Graphics g = Graphics.FromImage(this.Bitmap);
-            //g.DrawImage(Resource.UIInventory_img_Inventory_AutoBuild_buttonmin_disabled_0, 171, 8);
             render_bitmap(g, "UI/_Canvas/UIInventory.img/Inventory/AutoBuild/button:min/disabled/0", 171, 8);
             renderTabs(g);
             foreach (AControl ctrl in this.aControls)
@@ -976,9 +1027,9 @@ namespace WzComparerR2.CharaSimControl
 
         private void renderFull()
         {
-            this.Bitmap = new Bitmap(Resource.UIInventory_img_Inventory_FullBackgrnd);
+            this.Bitmap = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIInventory.img/Inventory/FullBackgrnd"), PluginBase.PluginManager.FindWz).Bitmap;
             Graphics g = Graphics.FromImage(this.Bitmap);
-            render_bitmap(g, "UI/_Canvas/UIInventory.img/AutoBuild/button:full/disabled/0", 751, 8);
+            render_bitmap(g, "UI/_Canvas/UIInventory.img/Inventory/AutoBuild/button:full/disabled/0", 751, 8);
             renderTabs(g);
             foreach (AControl ctrl in this.aControls)
             {
@@ -1004,9 +1055,9 @@ namespace WzComparerR2.CharaSimControl
 
         private void renderFullMax()
         {
-            this.Bitmap = new Bitmap(Resource.UIInventory_img_Inventory_FullMaxBackgrnd);
+            this.Bitmap = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIInventory.img/Inventory/FullMaxBackgrnd"), PluginBase.PluginManager.FindWz).Bitmap;
             Graphics g = Graphics.FromImage(this.Bitmap);
-            render_bitmap(g, "UI/_Canvas/UIInventory.img/AutoBuild/button:full/disabled/0", 871, 26);
+            render_bitmap(g, "UI/_Canvas/UIInventory.img/Inventory/AutoBuild/button:full/disabled/0", 871, 26);
             renderTabs(g);
             foreach (AControl ctrl in this.aControls)
             {
@@ -1512,6 +1563,10 @@ namespace WzComparerR2.CharaSimControl
         private void btnClose_MouseClick(object sender, MouseEventArgs e)
         {
             this.Visible = false;
+            if (this.Owner is MainForm mainForm)
+            {
+                mainForm.buttonItemCharItem.Checked = false;
+            }
         }
 
         private void btnEquip_MouseClick(object sender, MouseEventArgs e)
@@ -1609,6 +1664,10 @@ namespace WzComparerR2.CharaSimControl
                 yield return this.btnFilterFullApply;
                 yield return this.btnFilterFullMax;
                 yield return this.btnFilterFullMaxApply;
+                yield return this.btnBossReward;
+                yield return this.btnBossRewardFull;
+                yield return this.btnTrunk;
+                yield return this.btnTrunkFull;
                 yield return this.btnEquipFull;
                 yield return this.btnShopFull;
                 yield return this.btnBagFull;

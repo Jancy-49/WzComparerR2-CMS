@@ -78,6 +78,8 @@ namespace WzComparerR2.CharaSimControl
         public static Font KMSAchievementTitleFont { get; private set; }
         public static Font FamiliarNameFont { get; private set; }
         public static Font FamiliarLevelFont { get; private set; }
+        public static Font NewCTFamiliarNameFont { get; private set; }
+        public static Font NewCTFamiliarLevelFont { get; private set; }
 
         public static void SetFontFamily(string fontName)
         {
@@ -126,7 +128,45 @@ namespace WzComparerR2.CharaSimControl
                 FamiliarLevelFont.Dispose();
                 FamiliarLevelFont = null;
             }
+
             FamiliarLevelFont = new Font(fontName, 13f, GraphicsUnit.Pixel);
+            if (NewCTFamiliarNameFont != null)
+            {
+                NewCTFamiliarNameFont.Dispose();
+                NewCTFamiliarNameFont = null;
+            }
+            switch (fontName)
+            {
+                case "MS Gothic":
+                case "MS PGothic":
+                case "Noto Sans JP":
+                case "Arial":
+                    NewCTFamiliarNameFont = new Font("Noto Sans JP", 15f, FontStyle.Bold, GraphicsUnit.Pixel);
+                    break;
+                case "Dotum":
+                case "Gulimche":
+                    NewCTFamiliarNameFont = new Font("Noto Sans KR", 15f, FontStyle.Bold, GraphicsUnit.Pixel);
+                    break;
+                case "SimSun":
+                    NewCTFamiliarNameFont = new Font("Noto Sans SC", 15f, FontStyle.Bold, GraphicsUnit.Pixel);
+                    break;
+            }
+            switch (fontName)
+            {
+                case "MS Gothic":
+                case "MS PGothic":
+                case "Noto Sans JP":
+                case "Arial":
+                    NewCTFamiliarLevelFont = new Font("Noto Sans JP", 12f, FontStyle.Bold, GraphicsUnit.Pixel);
+                    break;
+                case "Dotum":
+                case "Gulimche":
+                    NewCTFamiliarLevelFont = new Font("Noto Sans KR", 12f, FontStyle.Bold, GraphicsUnit.Pixel);
+                    break;
+                case "SimSun":
+                    NewCTFamiliarLevelFont = new Font("Noto Sans SC", 12f, FontStyle.Bold, GraphicsUnit.Pixel);
+                    break;
+            }
         }
 
         public static readonly Color GearBackColor = Color.FromArgb(204, 0, 51, 85);
@@ -153,6 +193,7 @@ namespace WzComparerR2.CharaSimControl
         public static readonly Brush PotentialLegendaryBrush = new SolidBrush(Color.FromArgb(204, 255, 0));
         public static readonly Color OrangeBrushColor = Color.FromArgb(255, 153, 0);
         public static readonly Brush LocationBrush = new SolidBrush(Color.FromArgb(209, 255, 50));
+        public static readonly Brush ItemPriceBrush = new SolidBrush(Color.FromArgb(119, 204, 255));
 
         public static readonly Brush Equip22BrushGray = new SolidBrush(Color.FromArgb(183, 191, 197));
         public static readonly Brush Equip22BrushDarkGray = new SolidBrush(Color.FromArgb(133, 145, 159));

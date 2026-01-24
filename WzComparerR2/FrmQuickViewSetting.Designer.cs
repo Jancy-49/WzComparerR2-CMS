@@ -31,7 +31,12 @@
             this.superTabControl1 = new DevComponents.DotNetBar.SuperTabControl();
             this.superTabControlPanel1 = new DevComponents.DotNetBar.SuperTabControlPanel();
             this.chkEnable22AniStyle = new DevComponents.DotNetBar.Controls.CheckBoxX();
+            this.chkLocatePetEquip = new DevComponents.DotNetBar.Controls.CheckBoxX();
+            this.chkShowNpcQuotes = new DevComponents.DotNetBar.Controls.CheckBoxX();
+            this.chkEnableMonsterBook = new DevComponents.DotNetBar.Controls.CheckBoxX();
+            this.chkEnableWorldArchive = new DevComponents.DotNetBar.Controls.CheckBoxX();
             this.chkShowAllIllustAtOnce = new DevComponents.DotNetBar.Controls.CheckBoxX();
+            this.chkShowAllSubMobAtOnce = new DevComponents.DotNetBar.Controls.CheckBoxX();
             this.chkShowMiniMap = new DevComponents.DotNetBar.Controls.CheckBoxX();
             this.chkShowMapObjectID = new DevComponents.DotNetBar.Controls.CheckBoxX();
             this.chkShowMobNpcObjectID = new DevComponents.DotNetBar.Controls.CheckBoxX();
@@ -1138,8 +1143,13 @@
             // 
             // superTabControlPanel5
             // 
+            this.superTabControlPanel5.Controls.Add(this.chkShowAllSubMobAtOnce);
             this.superTabControlPanel5.Controls.Add(this.chkShowAllIllustAtOnce);
             this.superTabControlPanel5.Controls.Add(this.chkEnable22AniStyle);
+            this.superTabControlPanel5.Controls.Add(this.chkLocatePetEquip);
+            this.superTabControlPanel5.Controls.Add(this.chkShowNpcQuotes);
+            this.superTabControlPanel5.Controls.Add(this.chkEnableMonsterBook);
+            this.superTabControlPanel5.Controls.Add(this.chkEnableWorldArchive);
             this.superTabControlPanel5.Controls.Add(this.chkCopyParsedSkillString);
             this.superTabControlPanel5.Controls.Add(this.labelX4);
             this.superTabControlPanel5.Controls.Add(this.cmbPreferredStringCopyMethod);
@@ -1264,6 +1274,84 @@
             this.chkShowAllIllustAtOnce.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
             this.chkShowAllIllustAtOnce.TabIndex = 5;
             this.chkShowAllIllustAtOnce.Text = "显示全部NPC插画";
+            // 
+            // chkShowAllSubMobAtOnce
+            // 
+            this.chkShowAllSubMobAtOnce.AutoSize = true;
+            this.chkShowAllSubMobAtOnce.BackColor = System.Drawing.Color.Transparent;
+            // 
+            // 
+            // 
+            this.chkShowAllSubMobAtOnce.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
+            this.chkShowAllSubMobAtOnce.Location = new System.Drawing.Point(13, 108);
+            this.chkShowAllSubMobAtOnce.Name = "chkShowAllSubMobAtOnce";
+            this.chkShowAllSubMobAtOnce.Size = new System.Drawing.Size(145, 16);
+            this.chkShowAllSubMobAtOnce.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
+            this.chkShowAllSubMobAtOnce.TabIndex = 6;
+            this.chkShowAllSubMobAtOnce.Text = "显示全部子怪物";
+            // 
+            // chkEnableWorldArchive
+            // 
+            this.chkEnableWorldArchive.AutoSize = true;
+            this.chkEnableWorldArchive.BackColor = System.Drawing.Color.Transparent;
+            // 
+            // 
+            // 
+            this.chkEnableWorldArchive.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
+            this.chkEnableWorldArchive.Location = new System.Drawing.Point(13, 132);
+            this.chkEnableWorldArchive.Name = "chkEnableWorldArchive";
+            this.chkEnableWorldArchive.Size = new System.Drawing.Size(145, 16);
+            this.chkEnableWorldArchive.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
+            this.chkEnableWorldArchive.TabIndex = 7;
+            this.chkEnableWorldArchive.Text = "启用世界档案";
+            this.chkEnableWorldArchive.CheckedChanged += chkEnableWorldArchive_CheckedChanged;
+            // 
+            // chkEnableMonsterBook
+            // 
+            this.chkEnableMonsterBook.AutoSize = true;
+            this.chkEnableMonsterBook.BackColor = System.Drawing.Color.Transparent;
+            // 
+            // 
+            // 
+            this.chkEnableMonsterBook.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
+            this.chkEnableMonsterBook.Location = new System.Drawing.Point(13, 156);
+            this.chkEnableMonsterBook.Name = "chkEnableMonsterBook";
+            this.chkEnableMonsterBook.Size = new System.Drawing.Size(145, 16);
+            this.chkEnableMonsterBook.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
+            this.chkEnableMonsterBook.TabIndex = 8;
+            this.chkEnableMonsterBook.Text = "启用怪物手册";
+            this.chkEnableMonsterBook.Click += chkEnableMonsterBook_Click;
+            this.chkEnableMonsterBook.CheckedChanged += chkEnableMonsterBook_CheckedChanged;
+            // 
+            // chkShowNpcQuotes
+            // 
+            this.chkShowNpcQuotes.AutoSize = true;
+            this.chkShowNpcQuotes.BackColor = System.Drawing.Color.Transparent;
+            // 
+            // 
+            // 
+            this.chkShowNpcQuotes.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
+            this.chkShowNpcQuotes.Location = new System.Drawing.Point(13, 180);
+            this.chkShowNpcQuotes.Name = "chkShowNpcQuotes";
+            this.chkShowNpcQuotes.Size = new System.Drawing.Size(145, 16);
+            this.chkShowNpcQuotes.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
+            this.chkShowNpcQuotes.TabIndex = 9;
+            this.chkShowNpcQuotes.Text = "显示NPC对话";
+            // 
+            // chkLocatePetEquip
+            // 
+            this.chkLocatePetEquip.AutoSize = true;
+            this.chkLocatePetEquip.BackColor = System.Drawing.Color.Transparent;
+            // 
+            // 
+            // 
+            this.chkLocatePetEquip.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
+            this.chkLocatePetEquip.Location = new System.Drawing.Point(13, 204);
+            this.chkLocatePetEquip.Name = "chkLocatePetEquip";
+            this.chkLocatePetEquip.Size = new System.Drawing.Size(145, 16);
+            this.chkLocatePetEquip.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
+            this.chkLocatePetEquip.TabIndex = 10;
+            this.chkLocatePetEquip.Text = "显示宠物可佩戴装备";
             // 
             // chkEnable22AniStyle
             // 
@@ -1406,6 +1494,11 @@
         private DevComponents.DotNetBar.LabelX labelX15;
         private DevComponents.DotNetBar.Controls.CheckBoxX chkShowAllIllustAtOnce;
         private DevComponents.DotNetBar.Controls.CheckBoxX chkEnable22AniStyle;
+        private DevComponents.DotNetBar.Controls.CheckBoxX chkLocatePetEquip;
+        private DevComponents.DotNetBar.Controls.CheckBoxX chkShowNpcQuotes;
+        private DevComponents.DotNetBar.Controls.CheckBoxX chkEnableMonsterBook;
+        private DevComponents.DotNetBar.Controls.CheckBoxX chkEnableWorldArchive;
+        private DevComponents.DotNetBar.Controls.CheckBoxX chkShowAllSubMobAtOnce;
         private DevComponents.DotNetBar.Controls.CheckBoxX chkShowDamageSkinID;
         private DevComponents.DotNetBar.Controls.CheckBoxX chkShowDamageSkin;
         private DevComponents.DotNetBar.Controls.CheckBoxX chkUseMiniSize;

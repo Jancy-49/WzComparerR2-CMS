@@ -7,6 +7,7 @@ using System.Drawing.Imaging;
 using WzComparerR2.CharaSim;
 using WzComparerR2.Common;
 using WzComparerR2.AvatarCommon;
+using WzComparerR2.PluginBase;
 using WzComparerR2.WzLib;
 using static WzComparerR2.CharaSimControl.RenderHelper;
 
@@ -28,7 +29,10 @@ namespace WzComparerR2.CharaSimControl
 
         public Npc NpcInfo { get; set; }
         public bool ShowAllIllustAtOnce { get; set; }
+        public bool EnableWorldArchive { get; set; }
+        public bool ShowNpcQuotes { get; set; }
         private AvatarCanvasManager avatar { get; set; }
+        private WorldArchiveTooltipRender WorldArchiveRender { get; set; }
         public override Bitmap Render()
         {
             if (NpcInfo == null)
@@ -52,12 +56,12 @@ namespace WzComparerR2.CharaSimControl
                 titleBlocks.Add(block);
             }
 
-            propBlocks.Add(PrepareText(g, "登场位置:", GearGraphics.ItemDetailFont, GearGraphics.GearNameBrushG, 0, 0));
             if (NpcInfo?.ID != null)
             {
                 var locNode = PluginBase.PluginManager.FindWz("Etc\\NpcLocation.img\\" + NpcInfo.ID.ToString());
                 if (locNode != null)
                 {
+                    propBlocks.Add(PrepareText(g, "登场位置:", GearGraphics.ItemDetailFont, GearGraphics.GearNameBrushG, 0, 0));
                     foreach (var locMapNode in locNode.Nodes)
                     {
                         int mapID;
@@ -184,12 +188,26 @@ namespace WzComparerR2.CharaSimControl
                 g2.Dispose();
                 bmp.Dispose();
                 illustration2Tooltip.Dispose();
-                return newTooltip;
+                bmp = newTooltip;
             }
-            else
+            string worldArchiveDesc = EnableWorldArchive ? GetWorldArchiveDesc(NpcInfo.ID) : null;
+            string npcQuoteMessage = ShowNpcQuotes ? GetNpcQuote(NpcInfo.ID) : null;
+            if (!string.IsNullOrEmpty(worldArchiveDesc) || !string.IsNullOrEmpty(npcQuoteMessage) && EnableWorldArchive)
             {
-                return bmp;
+                WorldArchiveRender = new WorldArchiveTooltipRender();
+                WorldArchiveRender.WorldArchiveMessage = worldArchiveDesc;
+                WorldArchiveRender.NpcQuoteMessage = npcQuoteMessage;
+                WorldArchiveRender.NpcID = NpcInfo.ID;
+                Bitmap waBitmap = WorldArchiveRender.Render();
+                Bitmap appendWaBitmap = new Bitmap(bmp.Width + waBitmap.Width, Math.Max(bmp.Height, waBitmap.Height));
+                using (g = Graphics.FromImage(appendWaBitmap))
+                {
+                    g.DrawImage(bmp, 0, 0, new Rectangle(0, 0, bmp.Width, bmp.Height), GraphicsUnit.Pixel);
+                    g.DrawImage(waBitmap, bmp.Width, 0, new Rectangle(0, 0, waBitmap.Width, waBitmap.Height), GraphicsUnit.Pixel);
+                }
+                bmp = appendWaBitmap;
             }
+            return bmp;
         }
 
         private Bitmap drawIllustration2SetTooltip(List<Bitmap> bitmaps, int margin, int perLineCount, int npcIndex)
@@ -319,6 +337,38 @@ namespace WzComparerR2.CharaSimControl
             else
             {
                 return sr.Name;
+            }
+        }
+
+        private string GetWorldArchiveDesc(int npcID)
+        {
+            StringResult sr;
+            if (this.StringLinker == null || !this.StringLinker.StringWorldArchiveNpc.TryGetValue(npcID, out sr))
+            {
+                return null;
+            }
+            return sr.Desc;
+        }
+
+        private string GetNpcQuote(int npcID)
+        {
+            NpcQuote quote = NpcQuote.CreateFromNode(PluginManager.FindWz($@"String\Npc.img\{npcID}"), PluginManager.FindWz, this.StringLinker);
+            if (quote == null)
+                return null;
+            else
+            {
+                HashSet<string> npcQuoteList = new HashSet<string>();
+                foreach (var kvp in quote.NQuote)
+                    npcQuoteList.Add(kvp.Value);
+                foreach (var kvp in quote.FQuote)
+                    npcQuoteList.Add(kvp.Value);
+                foreach (var kvp in quote.WQuote)
+                    npcQuoteList.Add(kvp.Value);
+                foreach (var kvp in quote.DQuote)
+                    npcQuoteList.Add(kvp.Value);
+                foreach (var kvp in quote.SpecialQuote)
+                    npcQuoteList.Add(kvp.Value);
+                return string.Join("\r\n", npcQuoteList);
             }
         }
     }

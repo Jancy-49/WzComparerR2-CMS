@@ -876,7 +876,8 @@ namespace WzComparerR2.CharaSim
 
                 case GearType.longSword: return "长剑";
                 case GearType.yeouiGem: return "如意宝珠";
-                
+                case GearType.astra: return "阿斯特拉辅助武器";
+
                 case GearType.memorialStaff: return "记忆长杖";
                 
                 case GearType.celestialLight: return "星光权杖";
@@ -1033,6 +1034,62 @@ namespace WzComparerR2.CharaSim
                 case GearType.celestialLight:
                 case GearType.compass: return GetExtraJobReqString(182);
                 default: return null;
+            }
+        }
+
+        public static string GetAstraWeaponType(int id)
+        {
+            int jobID = (id / 100) - 17200;
+            switch (jobID)
+            {
+                case 0: return GetGearTypeString(GearType.heroMedal);
+                case 1: return GetGearTypeString(GearType.rosario);
+                case 2: return GetGearTypeString(GearType.chain);
+                case 3:
+                case 4:
+                case 5: return GetGearTypeString(GearType.book1);
+                case 6: return GetGearTypeString(GearType.bowMasterFeather);
+                case 7: return GetGearTypeString(GearType.crossBowThimble);
+                case 8: return GetGearTypeString(GearType.relic);
+                case 9: return GetGearTypeString(GearType.nightLordPoutch);
+                case 10: return GetGearTypeString(GearType.shadowerSheath);
+                case 11: return GetGearTypeString(GearType.viperWristband);
+                case 12: return GetGearTypeString(GearType.captainSight);
+                case 13: return GetGearTypeString(GearType.cannonGunPowder);
+                case 14:
+                case 15:
+                case 16:
+                case 17:
+                case 18: return GetGearTypeString(GearType.cygnusGem);
+                case 19: return GetGearTypeString(GearType.aranPendulum);
+                case 20: return GetGearTypeString(GearType.evanPaper);
+                case 21: return GetGearTypeString(GearType.magicArrow);
+                case 22: return GetGearTypeString(GearType.card);
+                case 23: return GetGearTypeString(GearType.orb);
+                case 24: return GetGearTypeString(GearType.foxPearl);
+                case 25:
+                case 26: return GetGearTypeString(GearType.demonShield);
+                case 27: return GetGearTypeString(GearType.battlemageBall);
+                case 28: return GetGearTypeString(GearType.wildHunterArrowHead);
+                case 29: return GetGearTypeString(GearType.mailin);
+                case 30: return GetGearTypeString(GearType.controller);
+                case 31: return GetGearTypeString(GearType.ExplosivePill);
+                case 32: return GetGearTypeString(GearType.soulShield);
+                case 33: return GetGearTypeString(GearType.novaMarrow);
+                case 34: return GetGearTypeString(GearType.weaponBelt);
+                case 35: return GetGearTypeString(GearType.transmitter);
+                case 36: return GetGearTypeString(GearType.soulBangle);
+                case 37: return "砂時計";
+                case 38: return GetGearTypeString(GearType.chess);
+                case 39: return GetGearTypeString(GearType.bracelet);
+                case 40: return GetGearTypeString(GearType.magicWing);
+                case 41: return GetGearTypeString(GearType.hexSeeker);
+                case 42: return GetGearTypeString(GearType.pathOfAbyss);
+                case 43: return GetGearTypeString(GearType.yeouiGem);
+                case 44: return GetGearTypeString(GearType.ornament);
+                case 45: return GetGearTypeString(GearType.fanTassel);
+
+                default: return GetGearTypeString(GearType.astra);
             }
         }
 
@@ -1263,102 +1320,102 @@ namespace WzComparerR2.CharaSim
                 case 110: return "斗士";
                 case 111: return "勇士";
                 case 112: return "英雄";
-                case 114: return "英雄(6转)";
+                case 114: return "英雄";
                 case 120: return "准骑士";
                 case 121: return "骑士";
                 case 122: return "圣骑士";
-                case 124: return "圣骑士(6转)";
+                case 124: return "圣骑士";
                 case 130: return "枪战士";
                 case 131: return "龙骑士";
                 case 132: return "黑骑士";
-                case 134: return "黑骑士(6转)";
+                case 134: return "黑骑士";
                 case 200: return "魔法师";
                 case 210: return "法师(火毒)";
                 case 211: return "巫师(火毒)";
                 case 212: return "魔导师（火毒）";
-                case 214: return "魔导师（火毒）(6转)";
+                case 214: return "魔导师（火毒）";
                 case 220: return "法师(冰雷)";
                 case 221: return "巫师(冰雷)";
                 case 222: return "魔导师（冰雷）";
-                case 224: return "魔导师（冰雷）(6转)";
+                case 224: return "魔导师（冰雷）";
                 case 230: return "牧师";
                 case 231: return "祭司";
                 case 232: return "主教";
-                case 234: return "主教(6转)";
+                case 234: return "主教";
                 case 300: return "弓箭手";
                 case 301: return "弓箭手";
                 case 310: return "猎手";
                 case 311: return "游侠";
                 case 312: return "神射手";
-                case 314: return "神射手(6转)";
+                case 314: return "神射手";
                 case 320: return "弩弓手";
                 case 321: return "游侠";
                 case 322: return "箭神";
-                case 324: return "箭神(6转)";
+                case 324: return "箭神";
                 case 330: return "古迹猎人";
                 case 331: return "古迹猎人";
                 case 332: return "古迹猎人";
-                case 334: return "古迹猎人(6转)";
+                case 334: return "古迹猎人";
                 case 400: return "飞侠";
                 case 410: return "刺客";
                 case 411: return "无影人";
                 case 412: return "隐士";
-                case 414: return "隐士(6转)";
+                case 414: return "隐士";
                 case 420: return "飞侠";
                 case 421: return "独行客";
                 case 422: return "侠盗";
-                case 424: return "侠盗(6转)";
+                case 424: return "侠盗";
                 case 430: return "见习刀客";
                 case 431: return "双刀客";
                 case 432: return "双刀侠";
                 case 433: return "血刀";
                 case 434: return "暗影双刀";
-                case 436: return "暗影双刀(6转)";
+                case 436: return "暗影双刀";
                 case 500: return "海盗";
                 case 501: return "海盗";
                 case 510: return "拳手";
                 case 511: return "斗士";
                 case 512: return "冲锋队长";
-                case 514: return "冲锋队长(6转)";
+                case 514: return "冲锋队长";
                 case 520: return "火枪手";
                 case 521: return "大副";
                 case 522: return "船长";
-                case 524: return "船长(6转)";
+                case 524: return "船长";
                 case 530: return "火炮手";
                 case 531: return "毁灭炮手";
                 case 532: return "神炮王";
-                case 534: return "神炮王(6转)";
+                case 534: return "神炮王";
 
                 case 800: return "管理员";
                 case 900: return "管理员";
 
 
                 case 1000: return "初心者";
-                case 1100: return "魂骑士(1转)";
-                case 1110: return "魂骑士(2转)";
-                case 1111: return "魂骑士(3转)";
-                case 1112: return "魂骑士(4转)";
-                case 1114: return "魂骑士(6转)";
-                case 1200: return "炎术士(1转)";
-                case 1210: return "炎术士(2转)";
-                case 1211: return "炎术士(3转)";
-                case 1212: return "炎术士(4转)";
-                case 1214: return "炎术士(6转)";
-                case 1300: return "风灵使者(1转)";
-                case 1310: return "风灵使者(2转)";
-                case 1311: return "风灵使者(3转)";
-                case 1312: return "风灵使者(4转)";
-                case 1314: return "风灵使者(6转)";
-                case 1400: return "夜行者(1转)";
-                case 1410: return "夜行者(2转)";
-                case 1411: return "夜行者(3转)";
-                case 1412: return "夜行者(4转)";
-                case 1414: return "夜行者(6转)";
-                case 1500: return "奇袭者(1转)";
-                case 1510: return "奇袭者(2转)";
-                case 1511: return "奇袭者(3转)";
-                case 1512: return "奇袭者(4转)";
-                case 1514: return "奇袭者(6转)";
+                case 1100: return "魂骑士";
+                case 1110: return "魂骑士";
+                case 1111: return "魂骑士";
+                case 1112: return "魂骑士";
+                case 1114: return "魂骑士";
+                case 1200: return "炎术士";
+                case 1210: return "炎术士";
+                case 1211: return "炎术士";
+                case 1212: return "炎术士";
+                case 1214: return "炎术士";
+                case 1300: return "风灵使者";
+                case 1310: return "风灵使者";
+                case 1311: return "风灵使者";
+                case 1312: return "风灵使者";
+                case 1314: return "风灵使者";
+                case 1400: return "夜行者";
+                case 1410: return "夜行者";
+                case 1411: return "夜行者";
+                case 1412: return "夜行者";
+                case 1414: return "夜行者";
+                case 1500: return "奇袭者";
+                case 1510: return "奇袭者";
+                case 1511: return "奇袭者";
+                case 1512: return "奇袭者";
+                case 1514: return "奇袭者";
 
                 case 2000: return "战童";
                 case 2001: return "小不点";
@@ -1366,129 +1423,129 @@ namespace WzComparerR2.CharaSim
                 case 2003: return "幻影";
                 case 2004: return "夜光法师";
                 case 2005: return "隐月";
-                case 2100: return "战神(1转)";
-                case 2110: return "战神(2转)";
-                case 2111: return "战神(3转)";
-                case 2112: return "战神(4转)";
-                case 2114: return "战神(6转)";
+                case 2100: return "战神";
+                case 2110: return "战神";
+                case 2111: return "战神";
+                case 2112: return "战神";
+                case 2114: return "战神";
                 case 2200:
-                case 2210: return "龙神(1转)";
+                case 2210: return "龙神";
                 case 2211:
                 case 2212:
-                case 2213: return "龙神(2转)";
+                case 2213: return "龙神";
                 case 2214:
                 case 2215:
-                case 2216: return "龙神(3转)";
+                case 2216: return "龙神";
                 case 2217:
-                case 2218: return "龙神(4转)";
-                case 2220: return "龙神(6转)";
-                case 2300: return "双弩精灵(1转)";
-                case 2310: return "双弩精灵(2转)";
-                case 2311: return "双弩精灵(3转)";
-                case 2312: return "双弩精灵(4转)";
-                case 2314: return "双弩精灵(6转)";
-                case 2400: return "幻影(1转)";
-                case 2410: return "幻影(2转)";
-                case 2411: return "幻影(3转)";
-                case 2412: return "幻影(4转)";
-                case 2414: return "幻影(6转)";
-                case 2500: return "隐月(1转)";
-                case 2510: return "隐月(2转)";
-                case 2511: return "隐月(3转)";
-                case 2512: return "隐月(4转)";
-                case 2514: return "隐月(6转)";
-                case 2700: return "夜光法师(1转)";
-                case 2710: return "夜光法师(2转)";
-                case 2711: return "夜光法师(3转)";
-                case 2712: return "夜光法师(4转)";
-                case 2714: return "夜光法师(6转)";
+                case 2218: return "龙神";
+                case 2220: return "龙神";
+                case 2300: return "双弩精灵";
+                case 2310: return "双弩精灵";
+                case 2311: return "双弩精灵";
+                case 2312: return "双弩精灵";
+                case 2314: return "双弩精灵";
+                case 2400: return "幻影";
+                case 2410: return "幻影";
+                case 2411: return "幻影";
+                case 2412: return "幻影";
+                case 2414: return "幻影";
+                case 2500: return "隐月";
+                case 2510: return "隐月";
+                case 2511: return "隐月";
+                case 2512: return "隐月";
+                case 2514: return "隐月";
+                case 2700: return "夜光法师";
+                case 2710: return "夜光法师";
+                case 2711: return "夜光法师";
+                case 2712: return "夜光法师";
+                case 2714: return "夜光法师";
 
 
                 case 3000: return "市民";
                 case 3001: return "恶魔";
-                case 3100: return "恶魔猎手(1转)";
-                case 3110: return "恶魔猎手(2转)";
-                case 3111: return "恶魔猎手(3转)";
-                case 3112: return "恶魔猎手(4转)";
-                case 3114: return "恶魔猎手(6转)";
-                case 3101: return "恶魔复仇者(1转)";
-                case 3120: return "恶魔复仇者(2转)";
-                case 3121: return "恶魔复仇者(3转)";
-                case 3122: return "恶魔复仇者(4转)";
-                case 3124: return "恶魔复仇者(6转)";
-                case 3200: return "唤灵斗师(1转)";
-                case 3210: return "唤灵斗师(2转)";
-                case 3211: return "唤灵斗师(3转)";
-                case 3212: return "唤灵斗师(4转)";
-                case 3214: return "唤灵斗师(6转)";
-                case 3300: return "豹弩游侠(1转)";
-                case 3310: return "豹弩游侠(2转)";
-                case 3311: return "豹弩游侠(3转)";
-                case 3312: return "豹弩游侠(4转)";
-                case 3314: return "豹弩游侠(6转)";
-                case 3500: return "机械师(1转)";
-                case 3510: return "机械师(2转)";
-                case 3511: return "机械师(3转)";
-                case 3512: return "机械师(4转)";
-                case 3514: return "机械师(6转)";
+                case 3100: return "恶魔猎手";
+                case 3110: return "恶魔猎手";
+                case 3111: return "恶魔猎手";
+                case 3112: return "恶魔猎手";
+                case 3114: return "恶魔猎手";
+                case 3101: return "恶魔复仇者";
+                case 3120: return "恶魔复仇者";
+                case 3121: return "恶魔复仇者";
+                case 3122: return "恶魔复仇者";
+                case 3124: return "恶魔复仇者";
+                case 3200: return "唤灵斗师";
+                case 3210: return "唤灵斗师";
+                case 3211: return "唤灵斗师";
+                case 3212: return "唤灵斗师";
+                case 3214: return "唤灵斗师";
+                case 3300: return "豹弩游侠";
+                case 3310: return "豹弩游侠";
+                case 3311: return "豹弩游侠";
+                case 3312: return "豹弩游侠";
+                case 3314: return "豹弩游侠";
+                case 3500: return "机械师";
+                case 3510: return "机械师";
+                case 3511: return "机械师";
+                case 3512: return "机械师";
+                case 3514: return "机械师";
                 case 3002: return "尖兵";
-                case 3600: return "尖兵(1转)";
-                case 3610: return "尖兵(2转)";
-                case 3611: return "尖兵(3转)";
-                case 3612: return "尖兵(4转)";
-                case 3614: return "尖兵(6转)";
+                case 3600: return "尖兵";
+                case 3610: return "尖兵";
+                case 3611: return "尖兵";
+                case 3612: return "尖兵";
+                case 3614: return "尖兵";
                 case 3700: return "爆破手";
-                case 3710: return "爆破手(2转)";
-                case 3711: return "爆破手(3转)";
-                case 3712: return "爆破手(4转)";
-                case 3714: return "爆破手(6转)";
+                case 3710: return "爆破手";
+                case 3711: return "爆破手";
+                case 3712: return "爆破手";
+                case 3714: return "爆破手";
 
                 case 4001: return "阴阳师";
                 case 4002: return "阴阳师";
-                case 4100: return "剑豪(1转)";
-                case 4110: return "剑豪(2转)";
-                case 4111: return "剑豪(3转)";
-                case 4112: return "剑豪(4转)";
-                case 4114: return "剑豪(6转)";
-                case 4200: return "阴阳师(1转)";
-                case 4210: return "阴阳师(2转)";
-                case 4211: return "阴阳师(3转)";
-                case 4212: return "阴阳师(4转)";
-                case 4214: return "阴阳师(6转)";
+                case 4100: return "剑豪";
+                case 4110: return "剑豪";
+                case 4111: return "剑豪";
+                case 4112: return "剑豪";
+                case 4114: return "剑豪";
+                case 4200: return "阴阳师";
+                case 4210: return "阴阳师";
+                case 4211: return "阴阳师";
+                case 4212: return "阴阳师";
+                case 4214: return "阴阳师";
 
 
                 case 5000: return "米哈尔";
-                case 5100: return "米哈尔(1转)";
-                case 5110: return "米哈尔(2转)";
-                case 5111: return "米哈尔(3转)";
-                case 5112: return "米哈尔(4转)";
-                case 5114: return "米哈尔(6转)";
+                case 5100: return "米哈尔";
+                case 5110: return "米哈尔";
+                case 5111: return "米哈尔";
+                case 5112: return "米哈尔";
+                case 5114: return "米哈尔";
 
 
                 case 6000: return "狂龙战士";
                 case 6001: return "爆莉萌天使";
                 case 6002: return "魔链影士";
                 case 6003: return "炼狱黑客";
-                case 6100: return "狂龙战士(1转)";
-                case 6110: return "狂龙战士(2转)";
-                case 6111: return "狂龙战士(3转)";
-                case 6112: return "狂龙战士(4转)";
-                case 6114: return "狂龙战士(6转)";
-                case 6300: return "炼狱黑客(1转)";
-                case 6310: return "炼狱黑客(2转)";
-                case 6311: return "炼狱黑客(3转)";
-                case 6312: return "炼狱黑客(4转)";
-                case 6314: return "炼狱黑客(6转)";
-                case 6400: return "魔链影士(1转)";
-                case 6410: return "魔链影士(2转)";
-                case 6411: return "魔链影士(3转)";
-                case 6412: return "魔链影士(4转)";
-                case 6414: return "魔链影士(6转)";
-                case 6500: return "爆莉萌天使(1转)";
-                case 6510: return "爆莉萌天使(2转)";
-                case 6511: return "爆莉萌天使(3转)";
-                case 6512: return "爆莉萌天使(4转)";
-                case 6514: return "爆莉萌天使(6转)";
+                case 6100: return "狂龙战士";
+                case 6110: return "狂龙战士";
+                case 6111: return "狂龙战士";
+                case 6112: return "狂龙战士";
+                case 6114: return "狂龙战士";
+                case 6300: return "炼狱黑客";
+                case 6310: return "炼狱黑客";
+                case 6311: return "炼狱黑客";
+                case 6312: return "炼狱黑客";
+                case 6314: return "炼狱黑客";
+                case 6400: return "魔链影士";
+                case 6410: return "魔链影士";
+                case 6411: return "魔链影士";
+                case 6412: return "魔链影士";
+                case 6414: return "魔链影士";
+                case 6500: return "爆莉萌天使";
+                case 6510: return "爆莉萌天使";
+                case 6511: return "爆莉萌天使";
+                case 6512: return "爆莉萌天使";
+                case 6514: return "爆莉萌天使";
 
 
                 case 7000: return "内在能力";
@@ -1509,14 +1566,14 @@ namespace WzComparerR2.CharaSim
                 case 10110: return "神之子";
                 case 10111: return "神之子";
                 case 10112: return "神之子";
-                case 10114: return "神之子(6转)";
+                case 10114: return "神之子";
 
                 case 11000: return "林之灵";
-                case 11200: return "林之灵(1转)";
-                case 11210: return "林之灵(2转)";
-                case 11211: return "林之灵(3转)";
-                case 11212: return "林之灵(4转)";
-                case 11214: return "林之灵(6转)";
+                case 11200: return "林之灵";
+                case 11210: return "林之灵";
+                case 11211: return "林之灵";
+                case 11212: return "林之灵";
+                case 11214: return "林之灵";
 
                 case 12000: return "灶门炭治郎";
                 case 12100: return "灶门炭治郎";
@@ -1530,75 +1587,75 @@ namespace WzComparerR2.CharaSim
                 case 13500: return "白雪人";
 
                 case 14000: return "超能力者";
-                case 14200: return "超能力者(1转)";
-                case 14210: return "超能力者(2转)";
-                case 14211: return "超能力者(3转)";
-                case 14212: return "超能力者(4转)";
-                case 14214: return "超能力者(6转)";
+                case 14200: return "超能力者";
+                case 14210: return "超能力者";
+                case 14211: return "超能力者";
+                case 14212: return "超能力者";
+                case 14214: return "超能力者";
 
                 case 15000: return "圣晶使徒";
                 case 15001: return "影魂异人";
                 case 15002: return "御剑骑士";
                 case 15003: return "飞刃沙士";
-                case 15100: return "御剑骑士(1转)";
-                case 15110: return "御剑骑士(2转)";
-                case 15111: return "御剑骑士(3转)";
-                case 15112: return "御剑骑士(4转)";
-                case 15114: return "御剑骑士(6转)";
-                case 15200: return "圣晶使徒(1转)";
-                case 15210: return "圣晶使徒(2转)";
-                case 15211: return "圣晶使徒(3转)";
-                case 15212: return "圣晶使徒(4转)";
-                case 15214: return "圣晶使徒(6转)";
-                case 15400: return "飞刃沙士(1转)";
-                case 15410: return "飞刃沙士(2转)";
-                case 15411: return "飞刃沙士(3转)";
-                case 15412: return "飞刃沙士(4转)";
-                case 15414: return "飞刃沙士(6转)";
-                case 15500: return "影魂异人(1转)";
-                case 15510: return "影魂异人(2转)";
-                case 15511: return "影魂异人(3转)";
-                case 15512: return "影魂异人(4转)";
-                case 15514: return "影魂异人(6转)";
+                case 15100: return "御剑骑士";
+                case 15110: return "御剑骑士";
+                case 15111: return "御剑骑士";
+                case 15112: return "御剑骑士";
+                case 15114: return "御剑骑士";
+                case 15200: return "圣晶使徒";
+                case 15210: return "圣晶使徒";
+                case 15211: return "圣晶使徒";
+                case 15212: return "圣晶使徒";
+                case 15214: return "圣晶使徒";
+                case 15400: return "飞刃沙士";
+                case 15410: return "飞刃沙士";
+                case 15411: return "飞刃沙士";
+                case 15412: return "飞刃沙士";
+                case 15414: return "飞刃沙士";
+                case 15500: return "影魂异人";
+                case 15510: return "影魂异人";
+                case 15511: return "影魂异人";
+                case 15512: return "影魂异人";
+                case 15514: return "影魂异人";
 
                 case 16000: return "虎影";
                 case 16001: return "元素师";
                 case 16002: return "莲";
-                case 16100: return "莲(1转)";
-                case 16110: return "莲(2转)";
-                case 16111: return "莲(3转)";
-                case 16112: return "莲(4转)";
-                case 16114: return "莲(6转)";
-                case 16200: return "元素师(1转)";
-                case 16210: return "元素师(2转)";
-                case 16211: return "元素师(3转)";
-                case 16212: return "元素师(4转)";
-                case 16214: return "元素师(6转)";
-                case 16400: return "虎影(1转)";
-                case 16410: return "虎影(2转)";
-                case 16411: return "虎影(3转)";
-                case 16412: return "虎影(4转)";
-                case 16414: return "虎影(6转)";
+                case 16100: return "莲";
+                case 16110: return "莲";
+                case 16111: return "莲";
+                case 16112: return "莲";
+                case 16114: return "莲";
+                case 16200: return "元素师";
+                case 16210: return "元素师";
+                case 16211: return "元素师";
+                case 16212: return "元素师";
+                case 16214: return "元素师";
+                case 16400: return "虎影";
+                case 16410: return "虎影";
+                case 16411: return "虎影";
+                case 16412: return "虎影";
+                case 16414: return "虎影";
 
                 case 17000: return "墨玄";
                 case 17001: return "琳恩";
-                case 17200: return "琳恩(1转)";
-                case 17210: return "琳恩(2转)";
-                case 17211: return "琳恩(3转)";
-                case 17212: return "琳恩(4转)";
-                case 17214: return "琳恩(5转)";
-                case 17500: return "墨玄(1转)";
-                case 17510: return "墨玄(2转)";
-                case 17511: return "墨玄(3转)";
-                case 17512: return "墨玄(4转)";
-                case 17514: return "墨玄(6转)";
+                case 17200: return "琳恩";
+                case 17210: return "琳恩";
+                case 17211: return "琳恩";
+                case 17212: return "琳恩";
+                case 17214: return "琳恩";
+                case 17500: return "墨玄";
+                case 17510: return "墨玄";
+                case 17511: return "墨玄";
+                case 17512: return "墨玄";
+                case 17514: return "墨玄";
 
                 case 18000: return "施亚";
-                case 18200: return "施亚(1转)";
-                case 18210: return "施亚(2转)";
-                case 18211: return "施亚(3转)";
-                case 18212: return "施亚(4转)";
-                case 18214: return "施亚(6转)";
+                case 18200: return "施亚";
+                case 18210: return "施亚";
+                case 18211: return "施亚";
+                case 18212: return "施亚";
+                case 18214: return "施亚";
 
 
                 case 40000: return "5转";
@@ -1612,6 +1669,66 @@ namespace WzComparerR2.CharaSim
                 case 50007: return "6转";
             }
             return null;
+        }
+
+        public static int Get4thjob(int jobid)
+        {
+            switch (jobid)
+            {
+                case 110: return 112;
+                case 120: return 122;
+                case 130: return 132;
+                case 210: return 212;
+                case 220: return 222;
+                case 230: return 232;
+                case 310: return 312;
+                case 320: return 322;
+                case 330: return 332;
+                case 410: return 412;
+                case 420: return 422;
+                case 430: return 434;
+                case 510: return 512;
+                case 520: return 522;
+                case 530: return 532;
+                case 1100: return 1112;
+                case 1200: return 1212;
+                case 1300: return 1312;
+                case 1400: return 1412;
+                case 1500: return 1512;
+                case 2100: return 2112;
+                case 2200: return 2217;
+                case 2300: return 2312;
+                case 2400: return 2412;
+                case 2500: return 2512;
+                case 2700: return 2712;
+                case 3100: return 3112;
+                case 3101: return 3122;
+                case 3200: return 3212;
+                case 3300: return 3312;
+                case 3500: return 3512;
+                case 3600: return 3612;
+                case 3700: return 3712;
+                case 4100: return 4112;
+                case 4200: return 4212;
+                case 5100: return 5112;
+                case 6100: return 6112;
+                case 6300: return 6312;
+                case 6400: return 6412;
+                case 6500: return 6512;
+                case 10100: return 10112;
+                case 14200: return 14212;
+                case 15100: return 15112;
+                case 15200: return 15212;
+                case 15400: return 15412;
+                case 15500: return 15512;
+                case 16100: return 16112;
+                case 16200: return 16212;
+                case 16400: return 16412;
+                case 17200: return 17212;
+                case 17500: return 17512;
+                default: break;
+            }
+            return jobid;
         }
 
         public static string ToChineseNumberExpr(long value)

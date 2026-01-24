@@ -125,7 +125,7 @@ namespace WzComparerR2.CharaSimControl
             for (int i = 0; i < btnSelectedJobs.Count; i++)
             {
                 ACtrlButton btnSelectedJob = btnSelectedJobs[i];
-                btnSelectedJob.MouseOver = new BitmapOrigin(Resource.ClassSelect_list_class_layerclassCover);
+                btnSelectedJob.MouseOver = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/Login.img/ClassSelect/list/class/layer:classCover"), PluginBase.PluginManager.FindWz);
                 btnSelectedJob.Size = new Size(152, 74);
                 btnSelectedJob.Visible = true;
                 btnSelectedJob.ButtonStateChanged += new EventHandler(aCtrl_RefreshCall);
@@ -148,7 +148,7 @@ namespace WzComparerR2.CharaSimControl
         {
             this.preRender();
             this.SetBitmap(this.Bitmap);
-            this.CaptionRectangle = new Rectangle(this.baseOffset, new Size(Resource.ClassSelect_back_0_1_0.Width, Resource.ClassSelect_back_0_1_0.Height));
+            this.CaptionRectangle = new Rectangle(this.baseOffset, new Size(1366, 768));
             this.Location = newLocation;
             base.Refresh();
         }
@@ -157,7 +157,7 @@ namespace WzComparerR2.CharaSimControl
         {
             if (Bitmap != null)
                 Bitmap.Dispose();
-            Size size = Resource.ClassSelect_back_0_1_0.Size;
+            Size size = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/Login.img/ClassSelect/back/0/1/0"), PluginBase.PluginManager.FindWz).Bitmap.Size;
 
             //处理偏移
             this.newLocation = new Point(this.Location.X + this.baseOffset.X,
@@ -198,7 +198,7 @@ namespace WzComparerR2.CharaSimControl
             render_bitmap(g, "UI/Login.img/ClassSelect/list/backgrnd1", 378, 81);
             g.DrawImage(Resource.ClassSelect_back_2_0, 50, 13);
             render_bitmap(g, $"UI/Login.img/ClassSelect/desc/info/{job_list[selectIndex].ToString()}/className", 48, 44);
-            render_bitmap(g, $"UI/Login.img/ClassSelect/desc/info/{job_list[selectIndex].ToString()}/jobMark", 50, 169);
+            render_bitmap(g, $"UI/Login.img/ClassSelect/desc/info/{job_list[selectIndex].ToString()}/jobMark", 50, 199);
             string subName = PluginManager.FindWz($@"UI/Login.img/ClassSelect/desc/info/{job_list[selectIndex].ToString()}/subName").GetValueEx<string>(null);
             string desc = PluginManager.FindWz($@"UI/Login.img/ClassSelect/desc/info/{job_list[selectIndex].ToString()}/desc").GetValueEx<string>(null).Replace("\\n", "\r\n");
             string race = PluginManager.FindWz($@"UI/Login.img/ClassSelect/desc/info/{job_list[selectIndex].ToString()}/race").GetValueEx<string>(null).Replace("\\n", "\r\n");
@@ -215,7 +215,8 @@ namespace WzComparerR2.CharaSimControl
                 if ((i + 1) > job_list.Count) continue;
                 render_bitmap(g, $"UI/Login.img/ClassSelect/list/class/button:classEnabled/{job_list[i].ToString()}/normal/0", 378 + 161 * (i / 7 - pageIndex), 116 + 81 * (i % 7));
             }
-            g.DrawImage(Resource.ClassSelect_list_class_layerclassCover, 375 + 161 * (selectIndex / 7 - pageIndex), 113 + 81 * (selectIndex % 7));
+            render_bitmap(g, "UI/_Canvas/Login.img/ClassSelect/list/class/layer:classCover", 375 + 161 * (selectIndex / 7 - pageIndex), 113 + 81 * (selectIndex % 7));
+            //g.DrawImage(Resource.ClassSelect_list_class_layerclassCover, 375 + 161 * (selectIndex / 7 - pageIndex), 113 + 81 * (selectIndex % 7));
             g.DrawString(job_list.Count.ToString(), GearGraphics.ClassSelectDescFont, GearGraphics.WhiteBrush, 1111f, 16f);
             foreach (AControl aCtrl in this.aControls)
             {

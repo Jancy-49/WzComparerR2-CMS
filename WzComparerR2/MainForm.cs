@@ -285,6 +285,7 @@ namespace WzComparerR2
             tooltipQuickView.GearRender.ShowLevelOrSealed = Setting.Gear.ShowLevelOrSealed;
             tooltipQuickView.GearRender.ShowMedalTag = Setting.Gear.ShowMedalTag;
             tooltipQuickView.GearRender.AutoTitleWrap = Setting.Gear.AutoTitleWrap;
+            tooltipQuickView.GearRender.ShowApplicablePet = Setting.Misc.LocatePetEquip;
 
             tooltipQuickView.GearRender22.ShowObjectID = Setting.Gear.ShowID;
             tooltipQuickView.GearRender22.ShowSpeed = Setting.Gear.ShowWeaponSpeed;
@@ -292,6 +293,7 @@ namespace WzComparerR2
             tooltipQuickView.GearRender22.MaxStar25 = Setting.Gear.MaxStar25;
             tooltipQuickView.GearRender22.CosmeticHairColor = Setting.Item.CosmeticHairColor;
             tooltipQuickView.GearRender22.CosmeticFaceColor = Setting.Item.CosmeticFaceColor;
+            tooltipQuickView.GearRender22.ShowApplicablePet = Setting.Misc.LocatePetEquip;
 
             tooltipQuickView.ItemRender.ShowObjectID = Setting.Item.ShowID;
             tooltipQuickView.ItemRender.LinkRecipeInfo = Setting.Item.LinkRecipeInfo;
@@ -309,6 +311,7 @@ namespace WzComparerR2
             tooltipQuickView.ItemRender.DamageSkinNumber = Setting.DamageSkin.DamageSkinNumber;
             tooltipQuickView.ItemRender.AllowFamiliarOutOfBounds = Setting.Familiar.AllowOutOfBounds;
             tooltipQuickView.ItemRender.UseCTFamiliarRender = Setting.Familiar.UseCTFamiliarUI;
+            tooltipQuickView.ItemRender.ShowApplicablePetEquip = Setting.Misc.LocatePetEquip;
 
             tooltipQuickView.ItemRender3.ShowObjectID = Setting.Item.ShowID;
             tooltipQuickView.ItemRender3.LinkRecipeInfo = Setting.Item.LinkRecipeInfo;
@@ -318,6 +321,7 @@ namespace WzComparerR2
             //tooltipQuickView.ItemRender3.ShowSoldPrice = Setting.Item.ShowSoldPrice;
             tooltipQuickView.ItemRender3.ShowCashPurchasePrice = Setting.Item.ShowCashPurchasePrice;
             tooltipQuickView.ItemRender3.ShowLinkedTamingMob = Setting.Item.ShowLinkedTamingMob;
+            tooltipQuickView.ItemRender3.ShowApplicablePetEquip = Setting.Misc.LocatePetEquip;
             tooltipQuickView.ItemRender3.CosmeticHairColor = Setting.Item.CosmeticHairColor;
             tooltipQuickView.ItemRender3.CosmeticFaceColor = Setting.Item.CosmeticFaceColor;
             tooltipQuickView.ItemRender3.ShowDamageSkin = Setting.DamageSkin.ShowDamageSkin;
@@ -341,7 +345,15 @@ namespace WzComparerR2
             tooltipQuickView.MapRender.ShowMiniMapPortal = Setting.Map.ShowMiniMapPortal;
             tooltipQuickView.MapRender.ShowBgmName = Setting.Map.ShowBgmName;
 
+            tooltipQuickView.MobRender.MaxWidth = Screen.PrimaryScreen.Bounds.Width;
+            tooltipQuickView.MobRender.ShowAllSubMobAtOnce = Setting.Mob.ShowAllSubMobAtOnce;
+            tooltipQuickView.MobRender.EnableWorldArchive = Setting.Misc.EnableWorldArchive;
+            tooltipQuickView.MobRender.EnableMonsterBook = Setting.Mob.EnableMonsterBook;
+
             tooltipQuickView.NpcRender.ShowAllIllustAtOnce = Setting.Npc.ShowAllIllustAtOnce;
+            tooltipQuickView.NpcRender.ShowNpcQuotes = Setting.Npc.ShowNpcQuotes;
+            tooltipQuickView.NpcRender.EnableWorldArchive = Setting.Misc.EnableWorldArchive;
+
             tooltipQuickView.QuestRender.ShowObjectID = Setting.Quest.ShowID;
             tooltipQuickView.QuestRender.DefaultState = Setting.Quest.DefaultState;
             tooltipQuickView.QuestRender.ShowAllStates = Setting.Quest.ShowAllStates;
@@ -2891,6 +2903,7 @@ namespace WzComparerR2
         {
             if (e.KeyCode == Keys.Enter)
             {
+                if (!buttonItemSearchWz.Enabled) return;
                 buttonItemSearchWz_Click(buttonItemSearchWz, EventArgs.Empty);
             }
         }
@@ -3088,19 +3101,28 @@ namespace WzComparerR2
         {
             if (e.KeyCode == Keys.Enter)
             {
+                if (!buttonItemSearchString.Enabled) return;
                 buttonItemSearchString_Click(buttonItemSearchString, EventArgs.Empty);
             }
         }
 
         private void buttonItemSelectStringWz_Click(object sender, EventArgs e)
         {
+            buttonItemSearchString.Enabled = false;
+            Task.Run(() => selectStringWz());
+        }
+
+        private async void selectStringWz()
+        {
+            labelItemStatus.Text = "正在加载StringLinker...";
             Wz_File stringWzFile = advTree1.SelectedNode?.AsWzNode()?.FindNodeByPath("String").GetNodeWzFile();
             Wz_File itemWzFile = advTree1.SelectedNode?.AsWzNode()?.FindNodeByPath("Item").GetNodeWzFile();
             Wz_File etcWzFile = advTree1.SelectedNode?.AsWzNode()?.FindNodeByPath("Etc").GetNodeWzFile();
             Wz_File questWzFile = advTree1.SelectedNode?.AsWzNode()?.FindNodeByPath("Qeust").GetNodeWzFile();
             if (stringWzFile == null || itemWzFile == null || etcWzFile == null)
             {
-                MessageBoxEx.Show("请选择Base.wz。", "错误");
+                MessageBoxEx.Show(this, "请选择Base.wz。", "错误");
+                buttonItemSearchString.Enabled = true;
                 return;
             }
             QueryPerformance.Start();
@@ -3113,8 +3135,9 @@ namespace WzComparerR2
             }
             else
             {
-                MessageBoxEx.Show("StringLinker初始化失败。", "错误");
+                MessageBoxEx.Show(this, "StringLinker初始化失败。", "错误");
             }
+            buttonItemSearchString.Enabled = true;
         }
 
         private void buttonPathSearch_Click(object sender, EventArgs e)
@@ -3858,6 +3881,14 @@ namespace WzComparerR2
 
             StringResult sr = new StringResult();
             string altAutoDesc = null;
+            var wzfType = wzf.Type; // temp workaround
+            // temp workaround start
+            if (wzfType == Wz_Type.Unknown)
+            {
+                string[] path = selectedNode.FullPathToFile.Split('\\');
+                wzfType = ParseWzTypeManually(path[0]);
+            }
+            // temp workaround end
             switch (wzf.Type)
             {
                 case Wz_Type.Character:
@@ -3868,8 +3899,12 @@ namespace WzComparerR2
                     if ((image = selectedNode.GetValue<Wz_Image>()) == null || !image.TryExtract())
                         return;
                     CharaSimLoader.LoadSetItemsIfEmpty();
+                    CharaSimLoader.LoadAstraSubWeaponsIfEmpty();
+                    CharaSimLoader.LoadExclusiveEquipsIfEmpty();
                     CharaSimLoader.LoadExclusiveEquipsIfEmpty();
                     CharaSimLoader.LoadCommoditiesIfEmpty();
+                    CharaSimLoader.LoadMsnMintableItemListIfEmpty();
+                    if (CharaSimConfig.Default.Misc.LocatePetEquip) CharaSimLoader.LoadPetEquipInfoIfEmpty();
                     if (characterNodePath.Contains("Familiar"))
                     {
                         var familiar = Familiar.CreateFromNode(image.Node, PluginManager.FindWz);
@@ -3903,6 +3938,8 @@ namespace WzComparerR2
                     break;
                 case Wz_Type.Item:
                     CharaSimLoader.LoadCommoditiesIfEmpty();
+                    CharaSimLoader.LoadMsnMintableItemListIfEmpty();
+                    if (CharaSimConfig.Default.Misc.LocatePetEquip) CharaSimLoader.LoadPetEquipInfoIfEmpty(); CharaSimLoader.LoadCommoditiesIfEmpty();
                     Wz_Node itemNode = selectedNode;
                     if (Regex.IsMatch(itemNode.FullPathToFile, @"^Item\\(Cash|Consume|Etc|Install|Cash)\\\d{4,6}.img\\\d+$") || Regex.IsMatch(itemNode.FullPathToFile, @"^Item\\Special\\0910.img\\\d+$"))
                     {
@@ -4051,6 +4088,26 @@ namespace WzComparerR2
                     {
                         tooltipQuickView.NodeName = quest.Name;
                         tooltipQuickView.Desc = string.Join("\r\n", quest.Desc);
+                        if (quest.Desc.Count() == 3)
+                        {
+                            tooltipQuickView.QuestAvailable = quest.Desc[0];
+                            tooltipQuickView.QuestProgress = quest.Desc[1];
+                            tooltipQuickView.QuestComplete = quest.Desc[2];
+                        }
+                        else
+                        {
+                            tooltipQuickView.QuestAvailable = "";
+                            tooltipQuickView.QuestProgress = "";
+                            tooltipQuickView.QuestComplete = "";
+                        }
+                        if (quest.Category.Count() == 2)
+                        {
+                            tooltipQuickView.QuestCategory = "" + quest.Category[0] + "-" + quest.Category[1];
+                        }
+                        else
+                        {
+                            tooltipQuickView.QuestCategory = "0-0";
+                        }
                         tooltipQuickView.Pdesc = quest.DemandBase;
                         tooltipQuickView.Hdesc = quest.DemandSummary;
                         tooltipQuickView.AutoDesc = quest.PlaceSummary;
@@ -4101,14 +4158,52 @@ namespace WzComparerR2
             }
             if (obj != null)
             {
+                StringResult waSr = new StringResult();
+                StringResult mbSr = new StringResult();
+                StringBuilder npcQuoteSb = new StringBuilder();
                 if (tooltipQuickView.TargetItem != null)
                 {
                     switch (tooltipQuickView.TargetItem)
                     {
                         case Mob item:
+                            if (stringLinker == null || !stringLinker.StringWorldArchiveMob.TryGetValue(item.ID, out waSr))
+                            {
+                                waSr = new StringResult();
+                            }
+                            if (CharaSimConfig.Default.Mob.EnableMonsterBook)
+                            {
+                                if (stringLinker == null || !stringLinker.StringMonsterBook.TryGetValue(item.ID, out mbSr))
+                                {
+                                    mbSr = new StringResult();
+                                }
+                            }
                             item.Dispose();
                             break;
                         case Npc item:
+                            if (CharaSimConfig.Default.Misc.EnableWorldArchive)
+                            {
+                                if (stringLinker == null || !stringLinker.StringWorldArchiveNpc.TryGetValue(item.ID, out waSr))
+                                {
+                                    waSr = new StringResult();
+                                }
+                                if (CharaSimConfig.Default.Npc.ShowNpcQuotes)
+                                {
+                                    NpcQuote quote = NpcQuote.CreateFromNode(PluginManager.FindWz($@"String\Npc.img\{item.ID}"), PluginManager.FindWz, stringLinker);
+                                    if (quote != null)
+                                    {
+                                        foreach (var kvp in quote.NQuote)
+                                            npcQuoteSb.AppendLine($"n{kvp.Key}: {kvp.Value}");
+                                        foreach (var kvp in quote.FQuote)
+                                            npcQuoteSb.AppendLine($"f{kvp.Key}: {kvp.Value}");
+                                        foreach (var kvp in quote.WQuote)
+                                            npcQuoteSb.AppendLine($"w{kvp.Key}: {kvp.Value}");
+                                        foreach (var kvp in quote.DQuote)
+                                            npcQuoteSb.AppendLine($"d{kvp.Key}: {kvp.Value}");
+                                        foreach (var kvp in quote.SpecialQuote)
+                                            npcQuoteSb.AppendLine($"s{kvp.Key}: {kvp.Value}");
+                                    }
+                                }
+                            }
                             item.Dispose();
                             break;
                         case Quest item:
@@ -4122,7 +4217,7 @@ namespace WzComparerR2
                 {
                     tooltipQuickView.NodeName = sr.Name;
                     tooltipQuickView.Desc = sr.Desc;
-                    tooltipQuickView.Pdesc = sr.Pdesc;
+                    tooltipQuickView.Pdesc = sr.Pdesc ?? waSr.Desc;
                     tooltipQuickView.AutoDesc = altAutoDesc ?? sr.AutoDesc;
                     tooltipQuickView.Hdesc = sr["h"];
                     tooltipQuickView.DescLeftAlign = sr["desc_leftalign"];
@@ -4177,6 +4272,7 @@ namespace WzComparerR2
                 //    this.charaSimCtrl.UIItem.Refresh();
                 //this.charaSimCtrl.UIItem.Visible = buttonItemCharItem.Checked;
                 AfrmItem itemForm = new AfrmItem();
+                itemForm.Owner = this;
                 itemForm.VisibleChanged += (s, args) =>
                 {
                     if (!itemForm.Visible)
@@ -4235,6 +4331,16 @@ namespace WzComparerR2
                         skill.Level += this.skillInterval;
                         frm.Refresh();
                         return;
+
+                    case Keys.PageDown:
+                        skill.PerJobIndex += 1;
+                        frm.Refresh();
+                        return;
+
+                    case Keys.PageUp:
+                        skill.PerJobIndex -= 1;
+                        frm.Refresh();
+                        return;
                 }
                 frm.Refresh();
             }
@@ -4290,6 +4396,25 @@ namespace WzComparerR2
                     case Keys.OemMinus:
                     case Keys.Subtract:
                         npc.IllustIndex -= 1;
+                        frm.Refresh();
+                        return;
+                }
+            }
+
+            Mob mob = frm.TargetItem as Mob;
+            if (mob != null)
+            {
+                switch (e.KeyCode)
+                {
+                    case Keys.Oemplus:
+                    case Keys.Add:
+                        mob.MobGroupIndex += 1;
+                        frm.Refresh();
+                        return;
+
+                    case Keys.OemMinus:
+                    case Keys.Subtract:
+                        mob.MobGroupIndex -= 1;
                         frm.Refresh();
                         return;
                 }
@@ -4359,9 +4484,21 @@ namespace WzComparerR2
             {
                 if (buttonItemCharaEquip.Checked)
                 {
-                    this.charaSimCtrl.UIEquip.Refresh();
+                    AfrmEquip equipForm = new AfrmEquip();
+                    equipForm.KeyDown += new KeyEventHandler(this.charaSimCtrl.afrm_KeyDown);
+                    equipForm.MouseDown += new MouseEventHandler(this.charaSimCtrl.frmEquip_MouseDown);
+                    equipForm.DragOver += new DragEventHandler(this.charaSimCtrl.frmEquip_DragOver);
+                    equipForm.DragDrop += new DragEventHandler(this.charaSimCtrl.frmEquip_DragDrop);
+                    equipForm.VisibleChanged += (s, args) =>
+                    {
+                        if (!equipForm.Visible)
+                        {
+                            buttonItemCharaEquip.Checked = false;
+                        }
+                    };
+                    equipForm.jobID = this.selectJob;
+                    equipForm.Refresh();
                 }
-                this.charaSimCtrl.UIEquip.Visible = buttonItemCharaEquip.Checked;
             }
             else
             {
@@ -4414,6 +4551,7 @@ namespace WzComparerR2
                     //this.charaSimCtrl.UISkill.Visible = buttonSkill.Checked;
                     AfrmSkill afrmSkill = new AfrmSkill();
                     afrmSkill.selectJob = this.selectJob;
+                    this.charaSimCtrl.tooltip.SkillRender.selectJob = this.selectJob; 
                     afrmSkill.Owner = this;
                     afrmSkill.KeyDown += new KeyEventHandler(this.charaSimCtrl.afrm_KeyDown);
                     afrmSkill.ObjectMouseMove += new ObjectMouseEventHandler(this.charaSimCtrl.frmSkill_ObjectMouseMove);
@@ -4663,6 +4801,10 @@ namespace WzComparerR2
                     //comparer.DamageSkinNumber = CharaSimConfig.Default.DamageSkin.DamageSkinNumber;
                     comparer.AllowFamiliarOutOfBounds = CharaSimConfig.Default.Familiar.AllowOutOfBounds;
                     comparer.UseCTFamiliarUI = CharaSimConfig.Default.Familiar.UseCTFamiliarUI;
+                    comparer.EnableWorldArchive = CharaSimConfig.Default.Misc.EnableWorldArchive;
+                    comparer.ShowNpcQuotes = CharaSimConfig.Default.Npc.ShowNpcQuotes;
+                    comparer.EnableMonsterBook = CharaSimConfig.Default.Mob.EnableMonsterBook;
+                    comparer.LocatePetEquip = CharaSimConfig.Default.Misc.LocatePetEquip;
                     comparer.StateInfoChanged += new EventHandler(comparer_StateInfoChanged);
                     comparer.StateDetailChanged += new EventHandler(comparer_StateDetailChanged);
                     try
@@ -4843,6 +4985,47 @@ namespace WzComparerR2
             chkShowChangeType.Checked = true;
             chkShowLinkedTamingMob.Checked = false;
             chkSkipKMSContent.Checked = false;
+        }
+
+        private Wz_Type ParseWzTypeManually(string baseDir)
+        {
+            switch (baseDir)
+            {
+                case "Character":
+                    return Wz_Type.Character;
+                case "Effect":
+                    return Wz_Type.Effect;
+                case "Etc":
+                    return Wz_Type.Etc;
+                case "Item":
+                    return Wz_Type.Item;
+                case "Language":
+                    return Wz_Type.Language;
+                case "Map":
+                    return Wz_Type.Map;
+                case "Mob":
+                    return Wz_Type.Mob;
+                case "Morph":
+                    return Wz_Type.Morph;
+                case "Npc":
+                    return Wz_Type.Npc;
+                case "Quest":
+                    return Wz_Type.Quest;
+                case "Reactor":
+                    return Wz_Type.Reactor;
+                case "Skill":
+                    return Wz_Type.Skill;
+                case "Sound":
+                    return Wz_Type.Sound;
+                case "String":
+                    return Wz_Type.String;
+                case "TamingMob":
+                    return Wz_Type.TamingMob;
+                case "UI":
+                    return Wz_Type.UI;
+                default:
+                    return Wz_Type.Unknown;
+            }
         }
 
         private void btnSkillChangeInfo_Click(object sender, EventArgs e)

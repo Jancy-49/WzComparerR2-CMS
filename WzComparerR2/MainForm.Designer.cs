@@ -966,7 +966,7 @@ namespace WzComparerR2
             this.buttonJobSelect.AutoCheckOnClick = true;
             this.buttonJobSelect.Name = "buttonJobSelect";
             this.buttonJobSelect.Text = "选择职业";
-            this.buttonJobSelect.Tooltip = "选择职业。\r\n这将影响装备窗和技能窗的显示。\r\n请在开启非MSN和非KMS文件时使用。";
+            this.buttonJobSelect.Tooltip = "选择职业。\r\n这将影响装备窗和技能窗的显示。\r\n请在开启非MSN文件时使用。";
             this.buttonJobSelect.CheckedChanged += new System.EventHandler(this.buttonJobSelect_CheckedChanged);
             // 
             // itemContainer48
@@ -988,8 +988,8 @@ namespace WzComparerR2
             // 
             this.buttonSkill.AutoCheckOnClick = true;
             this.buttonSkill.Name = "buttonSkill";
-            this.buttonSkill.Text = "技能";
-            this.buttonSkill.Tooltip = "技能预览。\r\n显示选择职业对应的技能界面。\r\n请在开启非MSN文件时使用。";
+            this.buttonSkill.Text = "技能窗";
+            this.buttonSkill.Tooltip = "技能预览。\r\n显示选择职业对应的技能界面。\r\n请在开启非MSN文件时使用，使用前先选择职业。";
             this.buttonSkill.CheckedChanged += new System.EventHandler(this.buttonSkill_CheckedChanged);
             // 
             // itemContainer47
@@ -1178,7 +1178,7 @@ namespace WzComparerR2
             // checkBoxItemSoundLoop
             // 
             this.checkBoxItemSoundLoop.Name = "checkBoxItemSoundLoop";
-            this.checkBoxItemSoundLoop.Text = "重复";
+            this.checkBoxItemSoundLoop.Text = "循环";
             this.checkBoxItemSoundLoop.CheckedChanged += new DevComponents.DotNetBar.CheckBoxChangeEventHandler(this.checkBoxItemSoundLoop_CheckedChanged);
             // 
             // itemContainer18
@@ -1252,7 +1252,7 @@ namespace WzComparerR2
             // 
             this.sliderItemSoundVol.LabelWidth = 35;
             this.sliderItemSoundVol.Name = "sliderItemSoundVol";
-            this.sliderItemSoundVol.Text = "vol";
+            this.sliderItemSoundVol.Text = "音量";
             this.sliderItemSoundVol.Value = 100;
             this.sliderItemSoundVol.Width = 110;
             this.sliderItemSoundVol.ValueChanged += new System.EventHandler(this.sliderItemSoundVol_ValueChanged);
@@ -5345,7 +5345,7 @@ namespace WzComparerR2
         private DevComponents.DotNetBar.LabelItem labelItemAutoSaveFolder;
         private DevComponents.DotNetBar.ItemContainer itemContainer28;
         private DevComponents.DotNetBar.ItemContainer itemContainer29;
-        private DevComponents.DotNetBar.ButtonItem buttonItemCharItem;
+        public DevComponents.DotNetBar.ButtonItem buttonItemCharItem;
         private DevComponents.DotNetBar.ItemContainer itemContainer30;
         private DevComponents.DotNetBar.ButtonItem buttonItemCharaStat;
         private DevComponents.DotNetBar.ItemContainer itemContainer31;

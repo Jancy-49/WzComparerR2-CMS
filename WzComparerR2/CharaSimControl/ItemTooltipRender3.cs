@@ -48,6 +48,7 @@ namespace WzComparerR2.CharaSimControl
         public bool ShowNickTag { get; set; }
         public bool CompareMode { get; set; } = false;
         public bool ShowSoldPrice { get; set; }
+        public int LoadedCommoditiesSlot { get; set; } = 0;
         public bool ShowCashPurchasePrice { get; set; }
         public bool ShowLinkedTamingMob { get; set; }
         public bool ShowDamageSkin { get; set; }
@@ -56,6 +57,7 @@ namespace WzComparerR2.CharaSimControl
         public bool AlwaysUseMseaFormatDamageSkin { get; set; }
         public bool AllowFamiliarOutOfBounds { get; set; }
         public bool UseCTFamiliarRender { get; set; }
+        public bool ShowApplicablePetEquip { get; set; }
         public long DamageSkinNumber { get; set; }
         public int CosmeticHairColor { get; set; }
         public int CosmeticFaceColor { get; set; }
@@ -257,6 +259,15 @@ namespace WzComparerR2.CharaSimControl
                 }
             }
 
+            if (this.item.IsPet && ShowApplicablePetEquip)
+            {
+                List<int> petEquipList = GetApplicablePetEquip();
+                foreach (int itemID in petEquipList)
+                {
+                    AppendGearOrItem(itemID);
+                }
+            }
+
             //计算布局
             Size totalSize = new Size(itemBmp.Width, picHeight);
             Point recipeInfoOrigin = Point.Empty;
@@ -264,6 +275,18 @@ namespace WzComparerR2.CharaSimControl
             Point setItemOrigin = Point.Empty;
             Point levelOrigin = Point.Empty;
 
+            if (setItemBmp != null)
+            {
+                setItemOrigin = new Point(totalSize.Width, 0);
+                totalSize.Width += setItemBmp.Width;
+                totalSize.Height = Math.Max(totalSize.Height, Math.Max(picHeight + recipeInfoBmps.Sum(bmp => bmp.Height), recipeItemBmps.Sum(bmp => bmp.Height)));
+            }
+            if (levelBmp != null)
+            {
+                levelOrigin = new Point(totalSize.Width, 0);
+                totalSize.Width += levelBmp.Width;
+                totalSize.Height = Math.Max(totalSize.Height, Math.Max(picHeight, recipeItemBmps.Sum(bmp => bmp.Height)));
+            }
             if (recipeItemBmps.Count > 0)
             {
                 // layout:
@@ -291,18 +314,7 @@ namespace WzComparerR2.CharaSimControl
                 totalSize.Height = Math.Max(picHeight, recipeInfoBmps.Sum(bmp => bmp.Height));
                 recipeInfoOrigin.X = itemBmp.Width;
             }
-            if (setItemBmp != null)
-            {
-                setItemOrigin = new Point(totalSize.Width, 0);
-                totalSize.Width += setItemBmp.Width;
-                totalSize.Height = Math.Max(totalSize.Height, setItemBmp.Height);
-            }
-            if (levelBmp != null)
-            {
-                levelOrigin = new Point(totalSize.Width, 0);
-                totalSize.Width += levelBmp.Width;
-                totalSize.Height = Math.Max(totalSize.Height, levelHeight);
-            }
+
 
             //开始绘制
             Bitmap tooltip = new Bitmap(totalSize.Width, totalSize.Height);
@@ -344,6 +356,13 @@ namespace WzComparerR2.CharaSimControl
                 }
             }
 
+            //绘制套装
+            if (setItemBmp != null)
+            {
+                g.DrawImage(setItemBmp, setItemOrigin.X, setItemOrigin.Y,
+                    new Rectangle(Point.Empty, setItemBmp.Size), GraphicsUnit.Pixel);
+            }
+
             //绘制产出道具
             if (recipeItemBmps.Count > 0)
             {
@@ -353,13 +372,6 @@ namespace WzComparerR2.CharaSimControl
                         new Rectangle(Point.Empty, recipeItemBmps[i].Size), GraphicsUnit.Pixel);
                     y += recipeItemBmps[i].Height;
                 }
-            }
-
-            //绘制套装
-            if (setItemBmp != null)
-            {
-                g.DrawImage(setItemBmp, setItemOrigin.X, setItemOrigin.Y,
-                    new Rectangle(Point.Empty, setItemBmp.Size), GraphicsUnit.Pixel);
             }
 
             if (levelBmp != null)
@@ -1259,24 +1271,48 @@ namespace WzComparerR2.CharaSimControl
             //    }
             //}
 
-            // purchasePrice
-            //if (ShowCashPurchasePrice && !isMsnClient && item.Cash)
-            //{
-            //    Commodity commodityPackage = new Commodity();
-            //    if (CharaSimLoader.LoadedCommoditiesByItemId.ContainsKey(item.ItemID))
-            //    {
-            //        commodityPackage = CharaSimLoader.LoadedCommoditiesByItemId[item.ItemID];
-            //        if (commodityPackage.Price > 0)
-            //        {
-            //            tags.Add(string.Format(" · 購入価額：{0} ポイント", ItemStringHelper.ToCJKNumberExpr(commodityPackage.Price)));
-            //            if (Translator.DefaultDesiredCurrency != "none")
-            //            {
-            //                string exchangedPrice = Translator.GetConvertedCurrency(commodityPackage.Price, titleLanguage);
-            //                tags.Add(string.Format("    " + exchangedPrice));
-            //            }
-            //        }
-            //    }
-            //}
+            //purchasePrice
+            if (ShowCashPurchasePrice && !isMsnClient && item.Cash)
+            {
+                HashSet<string> priceList = new HashSet<string>();
+                if (CharaSimLoader.LoadedCommodityPricesByItemId[LoadedCommoditiesSlot].ContainsKey(item.ItemID))
+                {
+                    bool containRebootOnlyPrice = false;
+                    foreach (var i in CharaSimLoader.LoadedCommodityPricesByItemId[LoadedCommoditiesSlot][item.ItemID])
+                    {
+                        containRebootOnlyPrice = containRebootOnlyPrice || i.Meso;
+                    }
+                    foreach (var i in CharaSimLoader.LoadedCommodityPricesByItemId[LoadedCommoditiesSlot][item.ItemID])
+                    {
+                        if (i.Price == 0) continue;
+                        string currency = i.Meso ? "金币" : "冒险券";
+                        string rebootWorld = i.Reboot ? " (重启世界)" : (containRebootOnlyPrice ? " (普通世界)" : "");
+                        if (containRebootOnlyPrice && !i.Meso && i.Reboot) continue;
+                        string approxPrice = "";
+                        if (Translator.DefaultDesiredCurrency != "none" && !i.Meso)
+                        {
+                            approxPrice = $" ({Translator.GetConvertedCurrency(i.Price, titleLanguage)})";
+                            if (i.Reboot) rebootWorld += approxPrice;
+                        }
+                        priceList.Add(string.Format("#$S - {0}个 {1} {2}{3}#", i.Count, ItemStringHelper.ToCJKNumberExpr(i.Price), currency, rebootWorld));
+                    }
+                }
+                if (priceList.Count > 0)
+                {
+                    switch (priceList.Count)
+                    {
+                        /*
+                        case 1:
+                            tags.Add(" · 购买价格：" + priceList[0].Replace(" · 1个 ", "").Replace(" · ", ""));
+                            break;
+                        */
+                        default:
+                            tags.Add("#$S购买价格：#");
+                            tags.AddRange(priceList);
+                            break;
+                    }
+                }
+            }
 
             return tags;
         }
@@ -1314,7 +1350,8 @@ namespace WzComparerR2.CharaSimControl
             {
                 GearTooltipRender22 defaultRenderer = new GearTooltipRender22();
                 defaultRenderer.StringLinker = this.StringLinker;
-                defaultRenderer.ShowObjectID = false;
+                defaultRenderer.ShowObjectID = this.ShowObjectID;
+                defaultRenderer.ShowApplicablePet = false;
                 renderer = defaultRenderer;
             }
 
@@ -1348,7 +1385,7 @@ namespace WzComparerR2.CharaSimControl
             TooltipRender renderer = this.FamiliarRender;
             if (renderer == null)
             {
-                FamiliarTooltipRenderer defaultRenderer = new FamiliarTooltipRenderer();
+                FamiliarTooltipRender defaultRenderer = new FamiliarTooltipRender();
                 defaultRenderer.StringLinker = this.StringLinker;
                 defaultRenderer.ShowObjectID = this.ShowObjectID;
                 defaultRenderer.AllowOutOfBounds = this.AllowFamiliarOutOfBounds;
@@ -1364,7 +1401,7 @@ namespace WzComparerR2.CharaSimControl
             TooltipRender renderer = this.FamiliarRender;
             if (renderer == null)
             {
-                FamiliarTooltipRenderer2 defaultRenderer = new FamiliarTooltipRenderer2();
+                FamiliarTooltipRender2 defaultRenderer = new FamiliarTooltipRender2();
                 defaultRenderer.StringLinker = this.StringLinker;
                 defaultRenderer.ShowObjectID = this.ShowObjectID;
                 defaultRenderer.AllowOutOfBounds = this.AllowFamiliarOutOfBounds;
@@ -1442,6 +1479,16 @@ namespace WzComparerR2.CharaSimControl
 
             renderer.TargetItem = cashPackage;
             return renderer.Render();
+        }
+
+        private List<int> GetApplicablePetEquip()
+        {
+            List<int> petEquipList = new List<int>();
+            foreach (var i in CharaSimLoader.LoadedPetEquipInfo)
+            {
+                if (i.Value.Contains(item.ItemID)) petEquipList.Add(i.Key);
+            }
+            return petEquipList;
         }
 
         private Bitmap RenderLevel(out int picHeight)

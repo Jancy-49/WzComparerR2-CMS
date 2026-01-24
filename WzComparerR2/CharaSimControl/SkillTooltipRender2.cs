@@ -11,6 +11,7 @@ using WzComparerR2.WzLib;
 using WzComparerR2.Comparer;
 using WzComparerR2.PluginBase;
 using System.Text.RegularExpressions;
+using System.Security.Cryptography;
 
 namespace WzComparerR2.CharaSimControl
 {
@@ -37,6 +38,8 @@ namespace WzComparerR2.CharaSimControl
         public bool IsWideMode { get; set; } = true;
         public bool Enable22AniStyle { get; set; }
         public bool ShowParameters { get; set; } = false;
+        public bool InputMode { get; set; } = false;
+        public int selectJob;
         public Dictionary<string, List<string>> DiffSkillTags = new Dictionary<string, List<string>>();
         public Wz_Node wzNode { get; set; } = null;
 
@@ -57,6 +60,7 @@ namespace WzComparerR2.CharaSimControl
 
             CanvasRegion region = this.IsWideMode ? (this.Enable22AniStyle ? CanvasRegion._22AniWide : CanvasRegion.Wide) : (this.Enable22AniStyle ? CanvasRegion._22AniOriginal : CanvasRegion.Original);
             int picHeight;
+            int picH;
             List<int> splitterH;
             Bitmap originBmp = RenderSkill(region, out picHeight, out splitterH, doHighlight);
             Bitmap ridingGearBmp = null;
@@ -82,7 +86,13 @@ namespace WzComparerR2.CharaSimControl
 
             if ((Skill.Origin || Skill.Ascent) && !Skill.Invisible)
             {
-                origindescBmp = RenderOrigindesc(region);
+                origindescBmp = RenderOrigindesc(region, out picH);
+                Bitmap tempBmp = new Bitmap(originBmp.Width, picH);
+                Graphics g2 = Graphics.FromImage(tempBmp);
+                GearGraphics.DrawNewTooltipBack(g2, 0, 0, tempBmp.Width, picH);
+                g2.DrawImage(origindescBmp, 0, 0);
+                g2.Dispose();
+                origindescBmp = tempBmp;
             }
 
             Size totalSize = new Size(originBmp.Width, picHeight);
@@ -174,6 +184,17 @@ namespace WzComparerR2.CharaSimControl
                 sr.Name = "(null)";
             }
 
+            // Roguelike Check
+            if (Skill.IsRoguelikeSkill)
+            {
+                if (StringLinker == null || !(StringLinker.StringRoguelikeSkill.TryGetValue(Skill.SkillID, out StringResult _sr2) && _sr2 is StringResultSkill sr2))
+                {
+                    sr2 = new StringResultSkill();
+                    sr2.Name = "(null)";
+                }
+                sr = sr2;
+            }
+
             bool isTranslateRequired = Translator.IsTranslateEnabled;
             bool isNewLineRequired = false;
             string translatedSkillName = "";
@@ -260,7 +281,28 @@ namespace WzComparerR2.CharaSimControl
 
             if (sr.Desc != null)
             {
-                string hdesc = SummaryParser.GetSkillSummary(sr.Desc, Skill.Level, Skill.Common, SummaryParams.Default);
+                Dictionary<string, string> skillCommon = Skill.Common;
+                if (Skill.PerJobAttackInfo.Count > 0)
+                {
+                    if (!InputMode)
+                    {
+                        var perJobInfo = Skill.PerJobAttackInfo.Values.ToList()[Skill.PerJobIndex];
+                        foreach (var i in perJobInfo.Keys)
+                        {
+                            skillCommon[i] = perJobInfo[i];
+                        }
+                    }
+                    else
+                    {
+                        int jobID = ItemStringHelper.Get4thjob(selectJob);
+                        var perJobInfo = Skill.PerJobAttackInfo[jobID];
+                        foreach (var i in perJobInfo.Keys)
+                        {
+                            skillCommon[i] = perJobInfo[i];
+                        }
+                    }
+                }
+                string hdesc = SummaryParser.GetSkillSummary(sr.Desc, Skill.Level, skillCommon, SummaryParams.Default);
                 if (isTranslateRequired)
                 {
                     string mergedDescString = Translator.MergeString(hdesc, Translator.TranslateString(hdesc), 2);
@@ -488,6 +530,10 @@ namespace WzComparerR2.CharaSimControl
                 if (Skill.Invisible || Skill.invisible_tw)
                 {
                     attr.Add("隐藏技能");
+                }
+                if (Skill.IsRoguelikeSkill)
+                {
+                    attr.Add("肉鸽技能: " + (Skill.IsRedmoon ? "血月森林" : "法老的宝物"));
                 }
                 if (Skill.applyHyper)
                 {
@@ -799,6 +845,21 @@ namespace WzComparerR2.CharaSimControl
                 }
             }
 
+            if (Skill.PerJobAttackInfo.Count > 0)
+            {
+                if (!InputMode)
+                {
+                    int jobID = Skill.PerJobAttackInfo.Keys.ToList()[Skill.PerJobIndex];
+                    if (Skill.SkillID / 100000000 == 5) jobID += 2;
+                    skillDescEx.Add($"#c[适用职业] {ItemStringHelper.GetJobName(jobID)}#");
+                }
+                else
+                {
+                    int jobID = ItemStringHelper.Get4thjob(selectJob);
+                    skillDescEx.Add($"#c[适用职业] {ItemStringHelper.GetJobName(jobID)}#");
+                }
+            }
+
             if (Skill.LT.X != 0)
             {
                 skillDescEx.Add("#c[技能范围] LT(左上): (" + Skill.LT.X + "," + Skill.LT.Y + ")" + " / " + "RB(右下): (" + Skill.RB.X + "," + Skill.RB.Y + ")");
@@ -922,12 +983,11 @@ namespace WzComparerR2.CharaSimControl
             return renderer.Render();
         }
 
-        private Bitmap RenderOrigindesc(CanvasRegion region)
+        private Bitmap RenderOrigindesc(CanvasRegion region, out int picH)
         {
-            Bitmap bitmap = new Bitmap(430, Skill.Origin ? 120 : 300);
+            Bitmap bitmap = new Bitmap(430, DefaultPicHeight);
             Graphics g = Graphics.FromImage(bitmap);
-            GearGraphics.DrawNewTooltipBack(g, 0, 0, bitmap.Width, Skill.Origin ? 120 : 300);
-            int picH = 13;
+            picH = 13;
             if (Skill.Origin)
             {
                 string origin_skill_desc = PluginManager.FindWz($@"String\StringTable.img\SID_ORIGIN_SKILL_DESC").GetValueEx<string>(null).Replace("\\n", "\r\n");
@@ -940,10 +1000,11 @@ namespace WzComparerR2.CharaSimControl
                 {
                     GearGraphics.DrawPlainText(g, origin_skill_desc, GearGraphics.ItemDetailFont, Color.FromArgb(175, 173, 255), region.LevelDescLeft, region.TextRight, ref picH, 16);
                 }
-                picH += 19;
+                picH += 16;
                 DrawV6SkillDotline(g, region.SplitterX1, region.SplitterX2, picH);
                 picH += 16;
                 GearGraphics.DrawPlainText(g, origin_skill_h, GearGraphics.ItemDetailFont, Color.FromArgb(175, 173, 255), region.LevelDescLeft, region.TextRight, ref picH, 16);
+                picH += 16;
             }
             if (Skill.Ascent)
             {
@@ -954,6 +1015,7 @@ namespace WzComparerR2.CharaSimControl
                 DrawV6SkillDotline(g, region.SplitterX1, region.SplitterX2, picH);
                 picH += 16;
                 GearGraphics.DrawPlainText(g, ascent_skill_h, Translator.IsKoreanStringPresent(ascent_skill_h) ? GearGraphics.KMSItemDetailFont : GearGraphics.ItemDetailFont, Color.FromArgb(175, 173, 255), region.LevelDescLeft, region.TextRight, ref picH, 16);
+                picH += 16;
             }
             g.Dispose();
             return bitmap;

@@ -9,7 +9,9 @@ using WzComparerR2.CharaSim;
 using WzComparerR2.Common;
 using WzComparerR2.Controls;
 using WzComparerR2.CharaSimControl;
+using WzComparerR2.WzLib;
 using System.Security.Cryptography;
+using CsvHelper;
 
 namespace WzComparerR2.CharaSimControl
 {
@@ -39,18 +41,26 @@ namespace WzComparerR2.CharaSimControl
         private ACtrlButton btnEquip;
         private ACtrlButton btnEquipTab;
         private ACtrlButton btnPetTab;
+        private ACtrlButton btnEnhanceWeapon;
+        private ACtrlButton btnCube;
+        private ACtrlButton btnexOption;
+        private ACtrlButton btnInheritance;
+        private ACtrlButton btnNPC;
+        private ACtrlButton btnPotential;
         private ACtrlButton btnTitle;
         private ACtrlButton btnTotem;
         private ACtrlButton btnSymbol;
+        private ACtrlButton btnArc;
+        private ACtrlButton btnAut;
         private ACtrlButton btnPreset1;
         private ACtrlButton btnPreset2;
         private ACtrlButton btnPreset3;
         private ACtrlButton btnPresetApply;
         private ACtrlButton btnEffectSetting;
-        private ACtrlButton btnPet;
-        private ACtrlButton btnDragon;
-        private ACtrlButton btnMechanic;
-        private ACtrlButton btnAndroid;
+        private ACtrlButton btnDragonOpen;
+        private ACtrlButton btnDragonClose;
+        private ACtrlButton btnMechanicOpen;
+        private ACtrlButton btnMechanicClose;
         private ACtrlButton btnBeautyRoom;
         private ACtrlButton btnCoordiPreset;
         private ACtrlButton btnAndroidShop;
@@ -59,28 +69,37 @@ namespace WzComparerR2.CharaSimControl
         private ACtrlButton btnDamageSkinTab;
         private ACtrlButton btnHairTab;
         private ACtrlButton btnFaceTab;
+        private ACtrlButton btnSkinTab;
         private ACtrlButton btnHelp;
         private ACtrlButton btnClose;
 
+        private bool CMSMode = false;
+        private bool KMSMode = false;
+        private bool evanMode = false;
+        private bool mechanicMode = false;
+        private bool zeroMode = false;
         private bool showSpec = false;
         private bool equipVisible = true;
         private bool equipMode = true;
         private bool petMode = false;
+        private bool enchanceMode = false;
         private bool dressupMode = false;
         private bool androidMode = false;
         private bool damageSkinMode = false;
         private bool decoVisible = false;
+        private bool DragonVisible = false;
+        private bool MechanicVisible = false;
         private bool TitleMedalVisble = false;
         private bool BeautyRoomVisble = false;
         private bool CoordiPresetVisble = false;
-        private bool ArcMode = false;
-        private bool AutMode = false;
         private bool GrandAutMode = false;
-        private bool HairMode = false;
+        private bool HairMode = true;
         private bool FaceMode = false;
+        private bool SkinMode = false;
+        private int ArcAut = 1;
         private int currentPreset = 1;
         private int checkPreset = 1;
-        private int jobID;
+        public int jobID;
 
         public Character Character
         {
@@ -92,48 +111,6 @@ namespace WzComparerR2.CharaSimControl
         {
             get { return partVisible[sec[0]]; }
             private set { partVisible[sec[0]] = value; }
-        }
-
-        public bool DragonVisible
-        {
-            get { return partVisible[sec[1]]; }
-            private set
-            {
-                partVisible[sec[1]] = value;
-                if (value)
-                {
-                    partVisible[sec[2]] = false;
-                    partVisible[sec[3]] = false;
-                }
-            }
-        }
-
-        public bool MechanicVisible
-        {
-            get { return partVisible[sec[2]]; }
-            private set
-            {
-                partVisible[sec[2]] = value;
-                if (value)
-                {
-                    partVisible[sec[1]] = false;
-                    partVisible[sec[3]] = false;
-                }
-            }
-        }
-
-        public bool AndroidVisible
-        {
-            get { return partVisible[sec[3]]; }
-            private set
-            {
-                partVisible[sec[3]] = value;
-                if (value)
-                {
-                    partVisible[sec[1]] = false;
-                    partVisible[sec[2]] = false;
-                }
-            }
         }
 
         public bool TotemVisible
@@ -153,8 +130,9 @@ namespace WzComparerR2.CharaSimControl
             get
             {
                 return new Rectangle(
-                    new Point(baseOffset.X - Resource.Equip_dragon_backgrnd.Width, baseOffset.Y),
-                    Resource.Equip_dragon_backgrnd.Size);
+                    new Point(baseOffset.X - BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIEquip.img/Equip/EquipTab/dragonEquip/canvas:dragon"), PluginBase.PluginManager.FindWz).Bitmap.Width - 1,
+                    baseOffset.Y + 54),
+                    BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIEquip.img/Equip/EquipTab/dragonEquip/canvas:dragon"), PluginBase.PluginManager.FindWz).Bitmap.Size);
             }
         }
 
@@ -163,18 +141,9 @@ namespace WzComparerR2.CharaSimControl
             get
             {
                 return new Rectangle(
-                    new Point(baseOffset.X - Resource.Equip_mechanic_backgrnd.Width, baseOffset.Y),
-                    Resource.Equip_mechanic_backgrnd.Size);
-            }
-        }
-
-        private Rectangle AndroidRect
-        {
-            get
-            {
-                return new Rectangle(
-                    new Point(baseOffset.X - Resource.Equip_Android_backgrnd.Width, baseOffset.Y),
-                    Resource.Equip_Android_backgrnd.Size);
+                    new Point(baseOffset.X - BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIEquip.img/Equip/EquipTab/mechanicEquip/canvas:mechanic"), PluginBase.PluginManager.FindWz).Bitmap.Width - 1,
+                    baseOffset.Y + 54),
+                    BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIEquip.img/Equip/EquipTab/mechanicEquip/canvas:mechanic"), PluginBase.PluginManager.FindWz).Bitmap.Size);
             }
         }
 
@@ -184,7 +153,7 @@ namespace WzComparerR2.CharaSimControl
             {
                 return new Rectangle(
                     new Point(baseOffset.X,
-                        baseOffset.Y + Resource.UIInventory_img_Equip_main_backgrnd.Height + 1),
+                    baseOffset.Y + BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIEquip.img/Equip/main/backgrnd"), PluginBase.PluginManager.FindWz).Bitmap.Height + 1),
                     Resource.UIInventory_img_Equip_EquipTab_totemEquip_canvastotem.Size);
             }
         }
@@ -194,7 +163,7 @@ namespace WzComparerR2.CharaSimControl
             get
             {
                 return new Rectangle(
-                    new Point(baseOffset.X + Resource.UIInventory_img_Equip_main_backgrnd.Width + 1,
+                    new Point(baseOffset.X + BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIEquip.img/Equip/main/backgrnd"), PluginBase.PluginManager.FindWz).Bitmap.Width + 1,
                         baseOffset.Y + 53),
                     Resource.UIInventory_img_Equip_Symbol_backgrnd.Size);
             }
@@ -205,9 +174,9 @@ namespace WzComparerR2.CharaSimControl
             get
             {
                 return new Rectangle(
-                    new Point(baseOffset.X - Resource.UIWindow4_img_Equip_titleSkin_backgrnd.Width - 1,
+                    new Point(baseOffset.X - BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIWindow4.img/Equip/titleSkin/backgrnd"), PluginBase.PluginManager.FindWz).Bitmap.Width - 2,
                     baseOffset.Y + 53),
-                    Resource.UIWindow4_img_Equip_titleSkin_backgrnd.Size);
+                    BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIWindow4.img/Equip/titleSkin/backgrnd"), PluginBase.PluginManager.FindWz).Bitmap.Size);
             }
         }
 
@@ -216,9 +185,9 @@ namespace WzComparerR2.CharaSimControl
             get
             {
                 return new Rectangle(
-                    new Point(baseOffset.X - Resource.UIInventory_img_Deco_BeautyRoom_backgrnd.Width - 1,
+                    new Point(baseOffset.X - BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIEquip.img/Deco/BeautyRoom/backgrnd"), PluginBase.PluginManager.FindWz).Bitmap.Width - 1,
                     baseOffset.Y),
-                    Resource.UIInventory_img_Deco_BeautyRoom_backgrnd.Size);
+                    BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIEquip.img/Deco/BeautyRoom/backgrnd"), PluginBase.PluginManager.FindWz).Bitmap.Size);
             }
         }
 
@@ -227,19 +196,19 @@ namespace WzComparerR2.CharaSimControl
             get
             {
                 return new Rectangle(
-                    new Point(baseOffset.X + Resource.UIInventory_img_Equip_main_backgrnd.Width + 1,
-                    baseOffset.Y + Resource.UIInventory_img_Equip_main_backgrnd.Height - Resource.UIInventory_img_Deco_CoordiPreset_backgrnd.Height),
-                    Resource.UIInventory_img_Deco_CoordiPreset_backgrnd.Size);
+                    new Point(baseOffset.X + BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIEquip.img/Deco/main/backgrnd"), PluginBase.PluginManager.FindWz).Bitmap.Width + 1,
+                    baseOffset.Y + BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIEquip.img/Deco/main/backgrnd"), PluginBase.PluginManager.FindWz).Bitmap.Height - BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIEquip.img/Deco/CoordiPreset/backgrnd"), PluginBase.PluginManager.FindWz).Bitmap.Height),
+                    BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIEquip.img/Deco/CoordiPreset/backgrnd"), PluginBase.PluginManager.FindWz).Bitmap.Size);
             }
         }
 
         private void initCtrl()
         {
             this.btnDeco = new ACtrlButton();
-            this.btnDeco.Normal = new BitmapOrigin(Resource.UIInventory_img_Equip_EquipTab_buttonDecoUI_normal_0);
-            this.btnDeco.Pressed = new BitmapOrigin(Resource.UIInventory_img_Equip_EquipTab_buttonDecoUI_pressed_0);
-            this.btnDeco.MouseOver = new BitmapOrigin(Resource.UIInventory_img_Equip_EquipTab_buttonDecoUI_mouseOver_0);
-            this.btnDeco.Disabled = new BitmapOrigin(Resource.UIInventory_img_Equip_EquipTab_buttonDecoUI_disabled_0);
+            this.btnDeco.Normal = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIEquip.img/Equip/EquipTab/button:DecoUI/normal/0"), PluginBase.PluginManager.FindWz);
+            this.btnDeco.Pressed = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIEquip.img/Equip/EquipTab/button:DecoUI/pressed/0"), PluginBase.PluginManager.FindWz);
+            this.btnDeco.MouseOver = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIEquip.img/Equip/EquipTab/button:DecoUI/mouseOver/0"), PluginBase.PluginManager.FindWz);
+            this.btnDeco.Disabled = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIEquip.img/Equip/EquipTab/button:DecoUI/disabled/0"), PluginBase.PluginManager.FindWz);
             this.btnDeco.Location = new Point(251, 72);
             this.btnDeco.Size = new Size(89, 22);
             this.btnDeco.Visible = true;
@@ -247,10 +216,10 @@ namespace WzComparerR2.CharaSimControl
             this.btnDeco.MouseClick += new System.Windows.Forms.MouseEventHandler(btnDeco_MouseClick);
 
             this.btnEquip = new ACtrlButton();
-            this.btnEquip.Normal = new BitmapOrigin(Resource.UIInventory_img_Deco_CoordiTab_buttonEquipUI_normal_0);
-            this.btnEquip.Pressed = new BitmapOrigin(Resource.UIInventory_img_Deco_CoordiTab_buttonEquipUI_pressed_0);
-            this.btnEquip.MouseOver = new BitmapOrigin(Resource.UIInventory_img_Deco_CoordiTab_buttonEquipUI_mouseOver_0);
-            this.btnEquip.Disabled = new BitmapOrigin(Resource.UIInventory_img_Deco_CoordiTab_buttonEquipUI_disabled_0);
+            this.btnEquip.Normal = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIEquip.img/Deco/CoordiTab/button:EquipUI/normal/0"), PluginBase.PluginManager.FindWz);
+            this.btnEquip.Pressed = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIEquip.img/Deco/CoordiTab/button:EquipUI/pressed/0"), PluginBase.PluginManager.FindWz);
+            this.btnEquip.MouseOver = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIEquip.img/Deco/CoordiTab/button:EquipUI/mouseOver/0"), PluginBase.PluginManager.FindWz);
+            this.btnEquip.Disabled = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIEquip.img/Deco/CoordiTab/button:EquipUI/disabled/0"), PluginBase.PluginManager.FindWz);
             this.btnEquip.Location = new Point(251, 72);
             this.btnEquip.Size = new Size(89, 22);
             this.btnEquip.Visible = false;
@@ -259,17 +228,21 @@ namespace WzComparerR2.CharaSimControl
 
             this.btnEquipTab = new ACtrlButton();
             this.btnEquipTab.Location = new Point(11, 31);
-            this.btnEquipTab.Size = new Size(171, 22);
             this.btnEquipTab.Visible = true;
             this.btnEquipTab.ButtonStateChanged += new EventHandler(aCtrl_RefreshCall);
             this.btnEquipTab.MouseClick += new System.Windows.Forms.MouseEventHandler(btnEquipTab_MouseClick);
 
             this.btnPetTab = new ACtrlButton();
-            this.btnPetTab.Location = new Point(184, 31);
-            this.btnPetTab.Size = new Size(171, 22);
             this.btnPetTab.Visible = true;
             this.btnPetTab.ButtonStateChanged += new EventHandler(aCtrl_RefreshCall);
             this.btnPetTab.MouseClick += new System.Windows.Forms.MouseEventHandler(btnPetTab_MouseClick);
+
+            this.btnEnhanceWeapon = new ACtrlButton();
+            this.btnEnhanceWeapon.Location = new Point(244, 31);
+            this.btnEnhanceWeapon.Size = new Size(113, 22);
+            this.btnEnhanceWeapon.Visible = true;
+            this.btnEnhanceWeapon.ButtonStateChanged += new EventHandler(aCtrl_RefreshCall);
+            this.btnEnhanceWeapon.MouseClick += new System.Windows.Forms.MouseEventHandler(btnEnhanceWeapon_MouseClick);
 
             this.btnDressUpTab = new ACtrlButton();
             this.btnDressUpTab.Location = new Point(12, 31);
@@ -291,26 +264,86 @@ namespace WzComparerR2.CharaSimControl
 
             this.btnHairTab = new ACtrlButton();
             this.btnHairTab.Location = new Point(10, 31);
-            this.btnHairTab.Size = new Size(199, 23);
             this.btnHairTab.ButtonStateChanged += new EventHandler(aCtrl_RefreshCall);
             this.btnHairTab.MouseClick += new System.Windows.Forms.MouseEventHandler(btnHairTab_MouseClick);
 
             this.btnFaceTab = new ACtrlButton();
-            this.btnFaceTab.Location = new Point(211, 31);
-            this.btnFaceTab.Size = new Size(199, 23);
             this.btnFaceTab.ButtonStateChanged += new EventHandler(aCtrl_RefreshCall);
             this.btnFaceTab.MouseClick += new System.Windows.Forms.MouseEventHandler(btnFaceTab_MouseClick);
 
+            this.btnSkinTab = new ACtrlButton();
+            this.btnSkinTab.Location = new Point(278, 31);
+            this.btnSkinTab.Size = new Size(132, 23);
+            this.btnSkinTab.ButtonStateChanged += new EventHandler(aCtrl_RefreshCall);
+            this.btnSkinTab.MouseClick += new System.Windows.Forms.MouseEventHandler(btnSkinTab_MouseClick);
+
+            this.btnArc = new ACtrlButton();
+            this.btnArc.Location = new Point(388, 71);
+            this.btnArc.Size = new Size(92, 20);
+            this.btnArc.ButtonStateChanged += new EventHandler(aCtrl_RefreshCall);
+            this.btnArc.MouseClick += new System.Windows.Forms.MouseEventHandler(btnArc_MouseClick);
+
+            this.btnAut = new ACtrlButton();
+            this.btnAut.Location = new Point(480, 71);
+            this.btnAut.Size = new Size(92, 20);
+            this.btnAut.ButtonStateChanged += new EventHandler(aCtrl_RefreshCall);
+            this.btnAut.MouseClick += new System.Windows.Forms.MouseEventHandler(btnAut_MouseClick);
+
+            this.btnCube = new ACtrlButton();
+            this.btnCube.Normal = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIEquip.img/Equip/ZeroTab/button:Cube/normal/0"), PluginBase.PluginManager.FindWz);
+            this.btnCube.Pressed = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIEquip.img/Equip/ZeroTab/button:Cube/pressed/0"), PluginBase.PluginManager.FindWz);
+            this.btnCube.MouseOver = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIEquip.img/Equip/ZeroTab/button:Cube/mouseOver/0"), PluginBase.PluginManager.FindWz);
+            this.btnCube.Disabled = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIEquip.img/Equip/ZeroTab/button:Cube/disbaled/0"), PluginBase.PluginManager.FindWz);
+            this.btnCube.Size = new Size(84, 24);
+            this.btnCube.Location = new Point(84, 383);
+            this.btnCube.ButtonStateChanged += new EventHandler(aCtrl_RefreshCall);
+
+            this.btnexOption = new ACtrlButton();
+            this.btnexOption.Normal = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIEquip.img/Equip/ZeroTab/button:exOption/normal/0"), PluginBase.PluginManager.FindWz);
+            this.btnexOption.Pressed = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIEquip.img/Equip/ZeroTab/button:exOption/pressed/0"), PluginBase.PluginManager.FindWz);
+            this.btnexOption.MouseOver = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIEquip.img/Equip/ZeroTab/button:exOption/mouseOver/0"), PluginBase.PluginManager.FindWz);
+            this.btnexOption.Disabled = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIEquip.img/Equip/ZeroTab/button:exOption/disabled/0"), PluginBase.PluginManager.FindWz);
+            this.btnexOption.Size = new Size(84, 24);
+            this.btnexOption.Location = new Point(0, 383);
+            this.btnexOption.ButtonStateChanged += new EventHandler(aCtrl_RefreshCall);
+
+            this.btnInheritance = new ACtrlButton();
+            this.btnInheritance.Normal = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIEquip.img/Equip/ZeroTab/button:Inheritance/normal/0"), PluginBase.PluginManager.FindWz);
+            this.btnInheritance.Pressed = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIEquip.img/Equip/ZeroTab/button:Inheritance/pressed/0"), PluginBase.PluginManager.FindWz);
+            this.btnInheritance.MouseOver = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIEquip.img/Equip/ZeroTab/button:Inheritance/mouseOver/0"), PluginBase.PluginManager.FindWz);
+            this.btnInheritance.Disabled = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIEquip.img/Equip/ZeroTab/button:Inheritance/disabled/0"), PluginBase.PluginManager.FindWz);
+            this.btnInheritance.Size = new Size(83, 24);
+            this.btnInheritance.Location = new Point(127, 383);
+            this.btnInheritance.ButtonStateChanged += new EventHandler(aCtrl_RefreshCall);
+
+            this.btnNPC = new ACtrlButton();
+            this.btnNPC.Normal = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIEquip.img/Equip/ZeroTab/button:npc/normal/0"), PluginBase.PluginManager.FindWz);
+            this.btnNPC.Pressed = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIEquip.img/Equip/ZeroTab/button:npc/pressed/0"), PluginBase.PluginManager.FindWz);
+            this.btnNPC.MouseOver = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIEquip.img/Equip/ZeroTab/button:npc/mouseOver/0"), PluginBase.PluginManager.FindWz);
+            this.btnNPC.Disabled = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIEquip.img/Equip/ZeroTab/button:npc/disabled/0"), PluginBase.PluginManager.FindWz);
+            this.btnNPC.Size = new Size(112, 24);
+            this.btnNPC.Location = new Point(243, 383);
+            this.btnNPC.ButtonStateChanged += new EventHandler(aCtrl_RefreshCall);
+
+            this.btnPotential = new ACtrlButton();
+            this.btnPotential.Normal = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIEquip.img/Equip/ZeroTab/button:potential/normal/0"), PluginBase.PluginManager.FindWz);
+            this.btnPotential.Pressed = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIEquip.img/Equip/ZeroTab/button:potential/pressed/0"), PluginBase.PluginManager.FindWz);
+            this.btnPotential.MouseOver = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIEquip.img/Equip/ZeroTab/button:potential/mouseOver/0"), PluginBase.PluginManager.FindWz);
+            this.btnPotential.Disabled = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIEquip.img/Equip/ZeroTab/button:potential/disabled/0"), PluginBase.PluginManager.FindWz);
+            this.btnPotential.Size = new Size(111, 24);
+            this.btnPotential.Location = new Point(12, 383);
+            this.btnPotential.ButtonStateChanged += new EventHandler(aCtrl_RefreshCall);
+
             this.btnTitle = new ACtrlButton();
-            this.btnTitle.Normal = new BitmapOrigin(Resource.UIInventory_img_Equip_EquipTab_buttontitleSkin_normal_0);
-            this.btnTitle.Pressed = new BitmapOrigin(Resource.UIInventory_img_Equip_EquipTab_buttontitleSkin_pressed_0);
-            this.btnTitle.MouseOver = new BitmapOrigin(Resource.UIInventory_img_Equip_EquipTab_buttontitleSkin_mouseOver_0);
-            this.btnTitle.Disabled = new BitmapOrigin(Resource.UIInventory_img_Equip_EquipTab_buttontitleSkin_disabled_0);
-            this.btnTitle.Location = new Point(11, 443);
-            this.btnTitle.Size = new Size(84, 23);
+            this.btnTitle.Normal = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIEquip.img/Equip/EquipTab/button:titleSkin/normal/0"), PluginBase.PluginManager.FindWz);
+            this.btnTitle.Pressed = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIEquip.img/Equip/EquipTab/button:titleSkin/pressed/0"), PluginBase.PluginManager.FindWz);
+            this.btnTitle.MouseOver = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIEquip.img/Equip/EquipTab/button:titleSkin/mouseOver/0"), PluginBase.PluginManager.FindWz);
+            this.btnTitle.Disabled = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIEquip.img/Equip/EquipTab/button:titleSkin/disabled/0"), PluginBase.PluginManager.FindWz);
+            this.btnTitle.Size = new Size(83, 24);
             this.btnTitle.Visible = true;
             this.btnTitle.ButtonStateChanged += new EventHandler(aCtrl_RefreshCall);
             this.btnTitle.MouseClick += new System.Windows.Forms.MouseEventHandler(btnTitle_MouseClick);
+
 
             this.btnTotem = new ACtrlButton();
             this.btnTotem.Normal = new BitmapOrigin(Resource.UIInventory_img_Equip_EquipTab_buttontotem_normal_0);
@@ -324,26 +357,14 @@ namespace WzComparerR2.CharaSimControl
             this.btnTotem.MouseClick += new System.Windows.Forms.MouseEventHandler(btnTotem_MouseClick);
 
             this.btnSymbol = new ACtrlButton();
-            this.btnSymbol.Normal = new BitmapOrigin(Resource.UIInventory_img_Equip_EquipTab_buttonsymbol_normal_0);
-            this.btnSymbol.Pressed = new BitmapOrigin(Resource.UIInventory_img_Equip_EquipTab_buttonsymbol_pressed_0);
-            this.btnSymbol.MouseOver = new BitmapOrigin(Resource.UIInventory_img_Equip_EquipTab_buttonsymbol_mouseOver_0);
-            this.btnSymbol.Disabled = new BitmapOrigin(Resource.UIInventory_img_Equip_EquipTab_buttonsymbol_disabled_0);
-            this.btnSymbol.Location = new Point(272, 443);
+            this.btnSymbol.Normal = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIEquip.img/Equip/EquipTab/button:symbol/normal/0"), PluginBase.PluginManager.FindWz);
+            this.btnSymbol.Pressed = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIEquip.img/Equip/EquipTab/button:symbol/pressed/0"), PluginBase.PluginManager.FindWz);
+            this.btnSymbol.MouseOver = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIEquip.img/Equip/EquipTab/button:symbol/mouseOver/0"), PluginBase.PluginManager.FindWz);
+            this.btnSymbol.Disabled = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIEquip.img/Equip/EquipTab/button:symbol/disabled/0"), PluginBase.PluginManager.FindWz);
             this.btnSymbol.Size = new Size(84, 23);
             this.btnSymbol.Visible = true;
             this.btnSymbol.ButtonStateChanged += new EventHandler(aCtrl_RefreshCall);
-            this.btnSymbol.MouseClick += new System.Windows.Forms.MouseEventHandler(btnSymbol_MouseClick); ;
-
-            this.btnPet = new ACtrlButton();
-            this.btnPet.Normal = new BitmapOrigin(Resource.Equip_character_BtPet_normal_0);
-            this.btnPet.Pressed = new BitmapOrigin(Resource.Equip_character_BtPet_pressed_0);
-            this.btnPet.MouseOver = new BitmapOrigin(Resource.Equip_character_BtPet_mouseOver_0);
-            this.btnPet.Disabled = new BitmapOrigin(Resource.Equip_character_BtPet_disabled_0);
-            this.btnPet.Location = new Point(142, 266);
-            this.btnPet.Size = new Size(32, 12);
-            this.btnPet.Visible = false;
-            this.btnPet.ButtonStateChanged += new EventHandler(aCtrl_RefreshCall);
-            this.btnPet.MouseClick += new System.Windows.Forms.MouseEventHandler(btnPet_MouseClick);
+            this.btnSymbol.MouseClick += new System.Windows.Forms.MouseEventHandler(btnSymbol_MouseClick);
 
             this.btnEffectSetting = new ACtrlButton();
             this.btnEffectSetting.Normal = new BitmapOrigin(Resource.UIEquip_img_Equip_EquipTab_buttonEffectSetting_normal_0);
@@ -352,16 +373,14 @@ namespace WzComparerR2.CharaSimControl
             this.btnEffectSetting.Disabled = new BitmapOrigin(Resource.UIEquip_img_Equip_EquipTab_buttonEffectSetting_disabled_0);
             this.btnEffectSetting.Location = new Point(248, 376);
             this.btnEffectSetting.Size = new Size(92, 25);
-            this.btnEffectSetting.Visible = true;
             this.btnEffectSetting.ButtonStateChanged += new EventHandler(aCtrl_RefreshCall);
-            //this.btnEffectSetting.MouseClick += new System.Windows.Forms.MouseEventHandler(btnEffectSetting_MouseClick);
+            this.btnEffectSetting.MouseClick += new System.Windows.Forms.MouseEventHandler(btnEffectSetting_MouseClick);
 
             this.btnPresetApply = new ACtrlButton();
             this.btnPresetApply.Normal = new BitmapOrigin(Resource.UIInventory_img_Equip_EquipTab_buttonpresetApplication_normal_0);
             this.btnPresetApply.Pressed = new BitmapOrigin(Resource.UIInventory_img_Equip_EquipTab_buttonpresetApplication_pressed_0);
             this.btnPresetApply.MouseOver = new BitmapOrigin(Resource.UIInventory_img_Equip_EquipTab_buttonpresetApplication_mouseOver_0);
             this.btnPresetApply.Disabled = new BitmapOrigin(Resource.UIInventory_img_Equip_EquipTab_buttonpresetApplication_disabled_0);
-            this.btnPresetApply.Location = new Point(282, 404);
             this.btnPresetApply.Size = new Size(58, 25);
             this.btnPresetApply.Visible = false;
             this.btnPresetApply.ButtonStateChanged += new EventHandler(aCtrl_RefreshCall);
@@ -371,7 +390,6 @@ namespace WzComparerR2.CharaSimControl
             this.btnPreset1.Normal = new BitmapOrigin(Resource.UIInventory_img_Equip_EquipTab_buttonpreset1_normal_0);
             this.btnPreset1.Pressed = new BitmapOrigin(Resource.UIInventory_img_Equip_EquipTab_buttonpreset1_pressed_0);
             this.btnPreset1.MouseOver = new BitmapOrigin(Resource.UIInventory_img_Equip_EquipTab_buttonpreset1_mouseOver_0);
-            this.btnPreset1.Location = new Point(184, 407);
             this.btnPreset1.Size = new Size(18, 18);
             this.btnPreset1.ButtonStateChanged += new EventHandler(aCtrl_RefreshCall);
             this.btnPreset1.MouseClick += new System.Windows.Forms.MouseEventHandler(btnPreset1_MouseClick);
@@ -380,7 +398,6 @@ namespace WzComparerR2.CharaSimControl
             this.btnPreset2.Normal = new BitmapOrigin(Resource.UIInventory_img_Equip_EquipTab_buttonpreset2_normal_0);
             this.btnPreset2.Pressed = new BitmapOrigin(Resource.UIInventory_img_Equip_EquipTab_buttonpreset2_pressed_0);
             this.btnPreset2.MouseOver = new BitmapOrigin(Resource.UIInventory_img_Equip_EquipTab_buttonpreset2_mouseOver_0);
-            this.btnPreset2.Location = new Point(214, 407);
             this.btnPreset2.Size = new Size(18, 18);
             this.btnPreset2.ButtonStateChanged += new EventHandler(aCtrl_RefreshCall);
             this.btnPreset2.MouseClick += new System.Windows.Forms.MouseEventHandler(btnPreset2_MouseClick);
@@ -389,49 +406,55 @@ namespace WzComparerR2.CharaSimControl
             this.btnPreset3.Normal = new BitmapOrigin(Resource.UIInventory_img_Equip_EquipTab_buttonpreset3_normal_0);
             this.btnPreset3.Pressed = new BitmapOrigin(Resource.UIInventory_img_Equip_EquipTab_buttonpreset3_pressed_0);
             this.btnPreset3.MouseOver = new BitmapOrigin(Resource.UIInventory_img_Equip_EquipTab_buttonpreset3_mouseOver_0);
-            this.btnPreset3.Location = new Point(244, 407);
             this.btnPreset3.Size = new Size(18, 18);
             this.btnPreset3.ButtonStateChanged += new EventHandler(aCtrl_RefreshCall);
             this.btnPreset3.MouseClick += new System.Windows.Forms.MouseEventHandler(btnPreset3_MouseClick);
 
-            this.btnDragon = new ACtrlButton();
-            this.btnDragon.Normal = new BitmapOrigin(Resource.Equip_character_BtDragon_normal_0);
-            this.btnDragon.Pressed = new BitmapOrigin(Resource.Equip_character_BtDragon_pressed_0);
-            this.btnDragon.MouseOver = new BitmapOrigin(Resource.Equip_character_BtDragon_mouseOver_0);
-            this.btnDragon.Disabled = new BitmapOrigin(Resource.Equip_character_BtDragon_disabled_0);
-            this.btnDragon.Location = new Point(10, 266);
-            this.btnDragon.Size = new Size(43, 12);
-            this.btnDragon.Visible = false;
-            this.btnDragon.ButtonStateChanged += new EventHandler(aCtrl_RefreshCall);
-            this.btnDragon.MouseClick += new MouseEventHandler(btnDragon_MouseClick);
+            this.btnDragonOpen = new ACtrlButton();
+            this.btnDragonOpen.Normal = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIEquip.img/Equip/EquipTab/button:dragonEquipOpen/normal/0"), PluginBase.PluginManager.FindWz);
+            this.btnDragonOpen.Pressed = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIEquip.img/Equip/EquipTab/button:dragonEquipOpen/pressed/0"), PluginBase.PluginManager.FindWz);
+            this.btnDragonOpen.MouseOver = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIEquip.img/Equip/EquipTab/button:dragonEquipOpen/mouseOver/0"), PluginBase.PluginManager.FindWz);
+            this.btnDragonOpen.Disabled = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIEquip.img/Equip/EquipTab/button:dragonEquipOpen/disabled/0"), PluginBase.PluginManager.FindWz);
+            this.btnDragonOpen.Location = new Point(26, 376);
+            this.btnDragonOpen.Size = new Size(92, 25);
+            this.btnDragonOpen.ButtonStateChanged += new EventHandler(aCtrl_RefreshCall);
+            this.btnDragonOpen.MouseClick += new MouseEventHandler(btnDragonOpen_MouseClick);
 
-            this.btnMechanic = new ACtrlButton();
-            this.btnMechanic.Normal = new BitmapOrigin(Resource.Equip_character_BtMechanic_normal_0);
-            this.btnMechanic.Pressed = new BitmapOrigin(Resource.Equip_character_BtMechanic_pressed_0);
-            this.btnMechanic.MouseOver = new BitmapOrigin(Resource.Equip_character_BtMechanic_mouseOver_0);
-            this.btnMechanic.Disabled = new BitmapOrigin(Resource.Equip_character_BtMechanic_disabled_0);
-            this.btnMechanic.Location = new Point(10, 266);
-            this.btnMechanic.Size = new Size(43, 12);
-            this.btnMechanic.Visible = false;
-            this.btnMechanic.ButtonStateChanged += new EventHandler(aCtrl_RefreshCall);
-            this.btnMechanic.MouseClick += new MouseEventHandler(btnMechanic_MouseClick);
+            this.btnDragonClose = new ACtrlButton();
+            this.btnDragonClose.Normal = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIEquip.img/Equip/EquipTab/button:dragonEquipClose/normal/0"), PluginBase.PluginManager.FindWz);
+            this.btnDragonClose.Pressed = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIEquip.img/Equip/EquipTab/button:dragonEquipClose/pressed/0"), PluginBase.PluginManager.FindWz);
+            this.btnDragonClose.MouseOver = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIEquip.img/Equip/EquipTab/button:dragonEquipClose/mouseOver/0"), PluginBase.PluginManager.FindWz);
+            this.btnDragonClose.Disabled = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIEquip.img/Equip/EquipTab/button:dragonEquipClose/disabled/0"), PluginBase.PluginManager.FindWz);
+            this.btnDragonClose.Location = new Point(26, 376);
+            this.btnDragonClose.Size = new Size(92, 25);
+            this.btnDragonClose.ButtonStateChanged += new EventHandler(aCtrl_RefreshCall);
+            this.btnDragonClose.MouseClick += new MouseEventHandler(btnDragonClose_MouseClick);
 
-            this.btnAndroid = new ACtrlButton();
-            this.btnAndroid.Normal = new BitmapOrigin(Resource.Equip_character_BtAndroid_normal_0);
-            this.btnAndroid.Pressed = new BitmapOrigin(Resource.Equip_character_BtAndroid_pressed_0);
-            this.btnAndroid.MouseOver = new BitmapOrigin(Resource.Equip_character_BtAndroid_mouseOver_0);
-            this.btnAndroid.Disabled = new BitmapOrigin(Resource.Equip_character_BtAndroid_disabled_0);
-            this.btnAndroid.Location = new Point(65, 266);
-            this.btnAndroid.Size = new Size(25, 12);
-            this.btnAndroid.Visible = false;
-            this.btnAndroid.ButtonStateChanged += new EventHandler(aCtrl_RefreshCall);
-            this.btnAndroid.MouseClick += new MouseEventHandler(btnAndroid_MouseClick);
+            this.btnMechanicOpen = new ACtrlButton();
+            this.btnMechanicOpen.Normal = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIEquip.img/Equip/EquipTab/button:mechanicEquipOpen/normal/0"), PluginBase.PluginManager.FindWz);
+            this.btnMechanicOpen.Pressed = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIEquip.img/Equip/EquipTab/button:mechanicEquipOpen/pressed/0"), PluginBase.PluginManager.FindWz);
+            this.btnMechanicOpen.MouseOver = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIEquip.img/Equip/EquipTab/button:mechanicEquipOpen/mouseOver/0"), PluginBase.PluginManager.FindWz);
+            this.btnMechanicOpen.Disabled = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIEquip.img/Equip/EquipTab/button:mechanicEquipOpen/disabled/0"), PluginBase.PluginManager.FindWz);
+            this.btnMechanicOpen.Location = new Point(26, 376);
+            this.btnMechanicOpen.Size = new Size(92, 25);
+            this.btnMechanicOpen.ButtonStateChanged += new EventHandler(aCtrl_RefreshCall);
+            this.btnMechanicOpen.MouseClick += new MouseEventHandler(btnMechanicOpen_MouseClick);
+
+            this.btnMechanicClose = new ACtrlButton();
+            this.btnMechanicClose.Normal = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIEquip.img/Equip/EquipTab/button:mechanicEquipClose/normal/0"), PluginBase.PluginManager.FindWz);
+            this.btnMechanicClose.Pressed = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIEquip.img/Equip/EquipTab/button:mechanicEquipClose/pressed/0"), PluginBase.PluginManager.FindWz);
+            this.btnMechanicClose.MouseOver = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIEquip.img/Equip/EquipTab/button:mechanicEquipClose/mouseOver/0"), PluginBase.PluginManager.FindWz);
+            this.btnMechanicClose.Disabled = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIEquip.img/Equip/EquipTab/button:mechanicEquipClose/disabled/0"), PluginBase.PluginManager.FindWz);
+            this.btnMechanicClose.Location = new Point(26, 376);
+            this.btnMechanicClose.Size = new Size(92, 25);
+            this.btnMechanicClose.ButtonStateChanged += new EventHandler(aCtrl_RefreshCall);
+            this.btnMechanicClose.MouseClick += new MouseEventHandler(btnMechanicClose_MouseClick);
 
             this.btnBeautyRoom = new ACtrlButton();
-            this.btnBeautyRoom.Normal = new BitmapOrigin(Resource.UIInventory_img_Deco_CoordiTab_BeautyRoom_normal_0);
-            this.btnBeautyRoom.Pressed = new BitmapOrigin(Resource.UIInventory_img_Deco_CoordiTab_BeautyRoom_pressed_0);
-            this.btnBeautyRoom.MouseOver = new BitmapOrigin(Resource.UIInventory_img_Deco_CoordiTab_BeautyRoom_mouseOver_0);
-            this.btnBeautyRoom.Disabled = new BitmapOrigin(Resource.UIInventory_img_Deco_CoordiTab_BeautyRoom_disabled_0);
+            this.btnBeautyRoom.Normal = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIEquip.img/Deco/CoordiTab/button:BeautyRoom/normal/0"), PluginBase.PluginManager.FindWz);
+            this.btnBeautyRoom.Pressed = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIEquip.img/Deco/CoordiTab/button:BeautyRoom/pressed/0"), PluginBase.PluginManager.FindWz);
+            this.btnBeautyRoom.MouseOver = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIEquip.img/Deco/CoordiTab/button:BeautyRoom/mouseOver/0"), PluginBase.PluginManager.FindWz);
+            this.btnBeautyRoom.Disabled = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIEquip.img/Deco/CoordiTab/button:BeautyRoom/disabled/0"), PluginBase.PluginManager.FindWz);
             this.btnBeautyRoom.Location = new Point(11, 414);
             this.btnBeautyRoom.Size = new Size(101, 23);
             this.btnBeautyRoom.Visible = false;
@@ -439,10 +462,10 @@ namespace WzComparerR2.CharaSimControl
             this.btnBeautyRoom.MouseClick += new MouseEventHandler(btnBeautyRoom_MouseClick);
 
             this.btnCoordiPreset = new ACtrlButton();
-            this.btnCoordiPreset.Normal = new BitmapOrigin(Resource.UIInventory_img_Deco_CoordiTab_buttonCoordiPreset_normal_0);
-            this.btnCoordiPreset.Pressed = new BitmapOrigin(Resource.UIInventory_img_Deco_CoordiTab_buttonCoordiPreset_pressed_0);
-            this.btnCoordiPreset.MouseOver = new BitmapOrigin(Resource.UIInventory_img_Deco_CoordiTab_buttonCoordiPreset_mouseOver_0);
-            this.btnCoordiPreset.Disabled = new BitmapOrigin(Resource.UIInventory_img_Deco_CoordiTab_buttonCoordiPreset_disabled_0);
+            this.btnCoordiPreset.Normal = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIEquip.img/Deco/CoordiTab/button:CoordiPreset/normal/0"), PluginBase.PluginManager.FindWz);
+            this.btnCoordiPreset.Pressed = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIEquip.img/Deco/CoordiTab/button:CoordiPreset/pressed/0"), PluginBase.PluginManager.FindWz);
+            this.btnCoordiPreset.MouseOver = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIEquip.img/Deco/CoordiTab/button:CoordiPreset/mouseOver/0"), PluginBase.PluginManager.FindWz);
+            this.btnCoordiPreset.Disabled = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIEquip.img/Deco/CoordiTab/button:CoordiPreset/disabled/0"), PluginBase.PluginManager.FindWz);
             this.btnCoordiPreset.Location = new Point(255, 414);
             this.btnCoordiPreset.Size = new Size(101, 23);
             this.btnCoordiPreset.Visible = false;
@@ -480,11 +503,40 @@ namespace WzComparerR2.CharaSimControl
             this.btnClose.MouseClick += new MouseEventHandler(btnClose_MouseClick);
         }
 
+        private void LoadButton(ACtrlButton aCtrlButton, string path, int offset_x = 0, int offset_y = 0)
+        {
+            foreach (Wz_Node node in PluginBase.PluginManager.FindWz(path).Nodes)
+            {
+                string _outlink = PluginBase.PluginManager.FindWz($"path/{node.Text}/0/_outlink").GetValue<string>();
+                Wz_Node imgnode = PluginBase.PluginManager.FindWz(_outlink);
+                BitmapOrigin image = BitmapOrigin.CreateFromNode(node, PluginBase.PluginManager.FindWz);
+                switch (node.Text)
+                {
+                    case "normal":
+                        aCtrlButton.Normal = image;
+                        Wz_Vector vector = imgnode.GetValueEx<Wz_Vector>(null);
+                        aCtrlButton.Location = new Point((int)vector.X * (-1) + offset_x, (int)vector.Y * (-1) + offset_y);
+                        aCtrlButton.Size = image.Bitmap.Size;
+                        break;
+                    case "pressed":
+                        aCtrlButton.Pressed = image;
+                        break;
+                    case "mouseOver":
+                        aCtrlButton.MouseOver = image;
+                        break;
+                    case "disabled":
+                        aCtrlButton.Disabled = image;
+                        break;
+                }
+            }
+            aCtrlButton.ButtonStateChanged += new EventHandler(aCtrl_RefreshCall);
+        }
+
         public override void Refresh()
         {
             this.preRender();
             this.SetBitmap(this.Bitmap);
-            this.CaptionRectangle = new Rectangle(this.baseOffset, new Size(Resource.UIInventory_img_Equip_main_backgrnd.Width, 24));
+            this.CaptionRectangle = new Rectangle(this.baseOffset, new Size(BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIEquip.img/Equip/main/backgrnd"), PluginBase.PluginManager.FindWz).Bitmap.Width, 24));
             this.Location = newLocation;
             base.Refresh();
         }
@@ -502,29 +554,35 @@ namespace WzComparerR2.CharaSimControl
         {
             if (Bitmap != null)
                 Bitmap.Dispose();
-            control_event();
             //处理按钮可见
             //setControlState();
 
             //计算图像大小
+            Size size = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIEquip.img/Equip/main/backgrnd"), PluginBase.PluginManager.FindWz).Bitmap.Size;
+            CMSMode = size.Height > 444;
+            if (!CMSMode) KMSMode = get_KMSmode();
+            control_event();
             Point baseOffsetnew = calcRenderBaseOffset();
-            Size size = Resource.UIInventory_img_Equip_main_backgrnd.Size;
             size.Width += baseOffsetnew.X;
             if (this.equipVisible)
             {
-                if (this.TotemVisible)
-                    size.Height += Resource.UIInventory_img_Equip_EquipTab_totemEquip_canvastotem.Height + 1;
+                if (this.TotemVisible && !KMSMode)
+                    size.Height += BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIEquip.img/Equip/EquipTab/totemEquip/canvas:totem"), PluginBase.PluginManager.FindWz).Bitmap.Height + 1;
                 if (this.SymbolVisible)
                     size.Width += Resource.UIInventory_img_Equip_Symbol_backgrnd.Width + 1;
                 if (this.TitleMedalVisble)
-                    size.Width += Resource.UIWindow4_img_Equip_titleSkin_backgrnd.Width + 1;
+                    size.Width += BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIWindow4.img/Equip/titleSkin/backgrnd"), PluginBase.PluginManager.FindWz).Bitmap.Width + 2;
+                if (this.DragonVisible)
+                    size.Width += BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIEquip.img/Equip/EquipTab/dragonEquip/canvas:dragon"), PluginBase.PluginManager.FindWz).Bitmap.Width + 1;
+                if (this.MechanicVisible)
+                    size.Width += BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIEquip.img/Equip/EquipTab/mechanicEquip/canvas:mechanic"), PluginBase.PluginManager.FindWz).Bitmap.Width + 1;
             }
             if (decoVisible)
             {
                 if (this.BeautyRoomVisble)
-                    size.Width += Resource.UIInventory_img_Deco_BeautyRoom_backgrnd.Width + 1;
+                    size.Width += BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIEquip.img/Deco/BeautyRoom/backgrnd"), PluginBase.PluginManager.FindWz).Bitmap.Width + 1;
                 if (this.CoordiPresetVisble)
-                    size.Width += Resource.UIInventory_img_Deco_CoordiPreset_backgrnd.Width + 1;
+                    size.Width += BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIEquip.img/Deco/CoordiPreset/backgrnd"), PluginBase.PluginManager.FindWz).Bitmap.Width + 1;
             }
 
 
@@ -557,10 +615,9 @@ namespace WzComparerR2.CharaSimControl
                         renderCoordiPreset(g);
                 }
             }
-            if (this.TotemVisible) renderTotem(g);
+            if (this.TotemVisible && !KMSMode) renderTotem(g);
             if (this.DragonVisible) renderDragon(g);
-            else if (this.MechanicVisible) renderMechanic(g);
-            else if (this.AndroidVisible) renderAndroid(g);
+            if (this.MechanicVisible) renderMechanic(g);
 
             g.Dispose();
             this.Bitmap = bitmap;
@@ -569,54 +626,98 @@ namespace WzComparerR2.CharaSimControl
         private Point calcRenderBaseOffset()
         {
             if (this.TitleMedalVisble)
-                return new Point(Resource.UIWindow4_img_Equip_titleSkin_backgrnd.Width, 0);
+                return new Point(BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIWindow4.img/Equip/titleSkin/backgrnd"), PluginBase.PluginManager.FindWz).Bitmap.Width + 1, 0);
+            if (this.SymbolVisible)
+                return new Point(BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIEquip.img/Equip/Symbol/backgrnd"), PluginBase.PluginManager.FindWz).Bitmap.Width, 0);
             if (this.BeautyRoomVisble)
-                return new Point(Resource.UIInventory_img_Deco_BeautyRoom_backgrnd.Width, 0);
+                return new Point(BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIEquip.img/Deco/BeautyRoom/backgrnd"), PluginBase.PluginManager.FindWz).Bitmap.Width + 1, 0);
             if (this.DragonVisible)
-                return new Point(Resource.Equip_dragon_backgrnd.Width, 0);
+                return new Point(BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIEquip.img/Equip/EquipTab/dragonEquip/canvas:dragon"), PluginBase.PluginManager.FindWz).Bitmap.Width + 1, 0);
             else if (this.MechanicVisible)
-                return new Point(Resource.Equip_mechanic_backgrnd.Width, 0);
-            else if (this.AndroidVisible)
-                return new Point(Resource.Equip_Android_backgrnd.Width, 0);
-            else if (this.TotemVisible)
-                return new Point(Resource.Equip_totem_backgrnd.Width, 0);
+                return new Point(BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIEquip.img/Equip/EquipTab/mechanicEquip/canvas:mechanic"), PluginBase.PluginManager.FindWz).Bitmap.Width + 1, 0);
+            else if (this.TotemVisible && !KMSMode)
+                return new Point(BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIEquip.img/Equip/EquipTab/totemEquip/canvas:totem"), PluginBase.PluginManager.FindWz).Bitmap.Width, 0);
             else
                 return new Point(0, 0);
         }
 
-
-
         private void control_event()
         {
+            switch (this.jobID)
+            {
+                case 2200: this.evanMode = true; this.mechanicMode = false; this.zeroMode = false; break;
+                case 3500: this.evanMode = false; this.mechanicMode = true; this.zeroMode = false; break;
+                case 10100: this.evanMode = false; this.mechanicMode = false; this.zeroMode = true; break;
+                default: this.evanMode = false; this.mechanicMode = false; this.zeroMode = false; break;
+            }
             if (this.equipVisible)
             {
                 if (equipMode)
                 {
                     this.btnDeco.Visible = true;
                     this.btnEquip.Visible = false;
-                    this.btnTotem.Location = new Point(98, 443);
                     this.btnTotem.Visible = true;
                     this.btnTitle.Visible = true;
                     this.btnSymbol.Visible = true;
                     this.btnPreset1.Visible = true;
                     this.btnPreset2.Visible = true;
                     this.btnPreset3.Visible = true;
-                    this.btnEffectSetting.Visible = true;
+                    this.btnPreset1.Location = CMSMode ? new Point(184, 407) : new Point(184, 379);
+                    this.btnPreset2.Location = CMSMode ? new Point(214, 407) : new Point(214, 379);
+                    this.btnPreset3.Location = CMSMode ? new Point(244, 407) : new Point(244, 379);
+                    this.btnTotem.Location = CMSMode ? new Point(98, 443) : new Point(98, 414);
+                    this.btnTitle.Location = CMSMode ? new Point(14, 443) : new Point(11, 414);
+                    this.btnSymbol.Location = CMSMode ? new Point(272, 443) : new Point(272, 414);
+                    this.btnPresetApply.Location = CMSMode ? new Point(282, 404) : new Point(282, 376);
+                    this.btnEffectSetting.Visible = CMSMode;
                     if (this.currentPreset == this.checkPreset)
                         this.btnPresetApply.Visible = false;
                     else
                         this.btnPresetApply.Visible = true;
-                    if (this.jobID == 2200 || this.jobID == 3500)
+                    if (evanMode || mechanicMode)
                         this.showSpec = true;
-                    if (this.jobID == 2200)
-                        this.DragonVisible = true;
-                    else if (this.jobID == 3500)
-                        this.MechanicVisible = true;
-                    else
+                    if (evanMode && !CMSMode)
                     {
-                        this.DragonVisible = false;
-                        this.MechanicVisible = false;
+                        if (!DragonVisible)
+                        {
+                            this.btnDragonOpen.Visible = true;
+                            this.btnDragonClose.Visible = false;
+                        }
+                        else
+                        {
+                            this.btnDragonOpen.Visible = false;
+                            this.btnDragonClose.Visible = true;
+                        }
+                        this.btnMechanicOpen.Visible = false;
+                        this.btnMechanicClose.Visible = false;
                     }
+                    else if (mechanicMode && !CMSMode && !MechanicVisible)
+                    {
+                        if (!MechanicVisible)
+                        {
+                            this.btnMechanicOpen.Visible = true;
+                            this.btnMechanicClose.Visible = false;
+                        }
+                        else
+                        {
+                            this.btnMechanicOpen.Visible = false;
+                            this.btnMechanicClose.Visible = true;
+                        }
+                        this.btnDragonOpen.Visible = false;
+                        this.btnDragonClose.Visible = false;
+                    }
+                    else if (CMSMode)
+                    {
+                        this.btnDragonOpen.Visible = false;
+                        this.btnDragonClose.Visible = false;
+                        this.btnMechanicOpen.Visible = false;
+                        this.btnMechanicClose.Visible = false;
+                    }
+                    this.btnCube.Visible = false;
+                    this.btnexOption.Visible = false;
+                    this.btnInheritance.Visible = false;
+                    this.btnNPC.Visible = false;
+                    this.btnPotential.Visible = false;
                 }
                 else if (petMode)
                 {
@@ -630,9 +731,54 @@ namespace WzComparerR2.CharaSimControl
                     this.btnPreset3.Visible = false;
                     this.btnPresetApply.Visible = false;
                     this.btnEffectSetting.Visible = false;
+                    this.btnDragonOpen.Visible = false;
+                    this.btnDragonClose.Visible = false;
+                    this.btnMechanicOpen.Visible = false;
+                    this.btnMechanicClose.Visible = false;
+                    this.btnCube.Visible = false;
+                    this.btnexOption.Visible = false;
+                    this.btnInheritance.Visible = false;
+                    this.btnNPC.Visible = false;
+                    this.btnPotential.Visible = false;
+                }
+                else if (enchanceMode)
+                {
+                    this.btnCube.Visible = true;
+                    this.btnexOption.Visible = true;
+                    this.btnInheritance.Visible = true;
+                    this.btnPotential.Visible = true;
+                    this.btnNPC.Visible = true;
+                    this.btnDeco.Visible = false;
+                    this.btnEquip.Visible = false;
+                    this.btnTitle.Visible = false;
+                    this.btnTotem.Visible = false;
+                    this.btnSymbol.Visible = false;
+                    this.btnPreset1.Visible = false;
+                    this.btnPreset2.Visible = false;
+                    this.btnPreset3.Visible = false;
+                    this.btnPresetApply.Visible = false;
+                    this.btnEffectSetting.Visible = false;
+                    this.btnDragonOpen.Visible = false;
+                    this.btnDragonClose.Visible = false;
+                    this.btnMechanicOpen.Visible = false;
+                    this.btnMechanicClose.Visible = false;
                 }
                 this.btnEquipTab.Visible = true;
                 this.btnPetTab.Visible = true;
+                if (!zeroMode)
+                {
+                    this.btnEquipTab.Size = new Size(171, 22);
+                    this.btnPetTab.Location = new Point(184, 31);
+                    this.btnPetTab.Size = new Size(171, 22);
+                    this.btnEnhanceWeapon.Visible = false;
+                }
+                else
+                {
+                    this.btnEquipTab.Size = new Size(113, 22);
+                    this.btnPetTab.Location = new Point(127, 31);
+                    this.btnPetTab.Size = new Size(114, 22);
+                    this.btnEnhanceWeapon.Visible = true;
+                }
                 this.btnDressUpTab.Visible = false;
                 this.btnAndroidTab.Visible = false;
                 this.btnDamageSkinTab.Visible = false;
@@ -642,6 +788,7 @@ namespace WzComparerR2.CharaSimControl
                 this.btnFaceTab.Visible = false;
                 this.btnHairTab.Visible = false;
                 this.btnHelp.Visible = false;
+
             }
             else if (this.decoVisible)
             {
@@ -652,8 +799,6 @@ namespace WzComparerR2.CharaSimControl
                     this.btnBeautyRoom.Visible = true;
                     this.btnCoordiPreset.Visible = true;
                     this.btnAndroidShop.Visible = false;
-                    this.btnTotem.Location = new Point(143, 414);
-                    this.btnTotem.Visible = true;
                     this.btnHelp.Visible = false;
                 }
                 else if (this.androidMode)
@@ -663,7 +808,6 @@ namespace WzComparerR2.CharaSimControl
                     this.btnBeautyRoom.Visible = false;
                     this.btnCoordiPreset.Visible = false;
                     this.btnAndroidShop.Visible = true;
-                    this.btnTotem.Visible = false;
                     this.btnHelp.Visible = false;
                 }
                 else if (this.damageSkinMode)
@@ -673,13 +817,26 @@ namespace WzComparerR2.CharaSimControl
                     this.btnBeautyRoom.Visible = false;
                     this.btnCoordiPreset.Visible = false;
                     this.btnAndroidShop.Visible = false;
-                    this.btnTotem.Visible = false;
                     this.btnHelp.Visible = true;
                 }
                 if (this.BeautyRoomVisble)
                 {
                     this.btnFaceTab.Visible = true;
                     this.btnHairTab.Visible = true;
+                    if (CMSMode)
+                    {
+                        this.btnHairTab.Size = new Size(199, 23);
+                        this.btnFaceTab.Location = new Point(211, 31);
+                        this.btnFaceTab.Size = new Size(199, 23);
+                        this.btnSkinTab.Visible = false;
+                    }
+                    else
+                    {
+                        this.btnHairTab.Size = new Size(132, 23);
+                        this.btnFaceTab.Location = new Point(144, 31);
+                        this.btnFaceTab.Size = new Size(132, 23);
+                        this.btnSkinTab.Visible = true;
+                    }
                 }
                 this.btnDressUpTab.Visible = true;
                 this.btnAndroidTab.Visible = true;
@@ -690,88 +847,104 @@ namespace WzComparerR2.CharaSimControl
                 this.btnPreset2.Visible = false;
                 this.btnPreset3.Visible = false;
                 this.btnPresetApply.Visible = false;
+                this.btnTotem.Visible = false;
                 this.btnEffectSetting.Visible = false;
                 this.TitleMedalVisble = false;
                 this.SymbolVisible = false;
+                this.btnDragonOpen.Visible = false;
+                this.btnDragonClose.Visible = false;
+                this.btnMechanicOpen.Visible = false;
+                this.btnMechanicClose.Visible = false;
+                this.btnCube.Visible = false;
+                this.btnexOption.Visible = false;
+                this.btnInheritance.Visible = false;
+                this.btnNPC.Visible = false;
+                this.btnPotential.Visible = false;
             }
-        }
-
-        private void setControlState()
-        {
-            if (this.character == null)
+            if (KMSMode)
             {
-                this.btnDragon.Visible = false;
-                this.btnMechanic.Visible = false;
-                this.DragonVisible = false;
-                this.MechanicVisible = false;
-            }
-            else
-            {
-                if (this.character.Status.Job / 100 == 22) //龙神
-                {
-                    this.btnDragon.Visible = true;
-                }
-                else
-                {
-                    this.btnDragon.Visible = false;
-                    this.DragonVisible = false;
-                }
-
-                if (this.character.Status.Job / 100 == 35) //机械
-                {
-                    this.btnMechanic.Visible = true;
-                }
-                else
-                {
-                    this.btnMechanic.Visible = false;
-                    this.MechanicVisible = false;
-                }
+                this.btnTotem.Visible = false;
+                this.btnSymbol.Location = new Point(255, 414);
             }
         }
 
         private void renderEquip(Graphics g)
         {
             g.TranslateTransform(baseOffset.X, baseOffset.Y);
-            g.DrawImage(Resource.UIInventory_img_Equip_main_backgrnd, 0, 0);
+            render_bitmap(g, "UI/_Canvas/UIEquip.img/Equip/main/backgrnd", 0, 0);
             if (equipMode) //装备模式
             {
-                g.DrawImage(Resource.UIInventory_img_Equip_main_tabdetailTab_selected_0, 11, 31);
-                g.DrawImage(Resource.UIInventory_img_Equip_main_tabdetailTab_normal_1, 184, 31);
-                if (!showSpec)
-                    g.DrawImage(Resource.UIInventory_img_Equip_EquipTab_canvasequip, 12, 61);
+                if (!zeroMode)
+                {
+                    render_bitmap(g, "UI/_Canvas/UIEquip.img/Equip/main/tab:detailTab/selected/0", 11, 31);
+                    render_bitmap(g, "UI/_Canvas/UIEquip.img/Equip/main/tab:detailTab/normal/1", 184, 31);
+                }
                 else
-                    g.DrawImage(Resource.UIInventory_img_Equip_EquipTab_canvasequip2, 12, 61);
+                {
+                    render_bitmap(g, "UI/_Canvas/UIEquip.img/Equip/main/tab:detailTab2/selected/0", 11, 31);
+                    render_bitmap(g, "UI/_Canvas/UIEquip.img/Equip/main/tab:detailTab2/normal/1", 127, 31);
+                    render_bitmap(g, "UI/_Canvas/UIEquip.img/Equip/main/tab:detailTab2/normal/2", 244, 31);
+
+                }
+                if (!showSpec)
+                    render_bitmap(g, "UI/_Canvas/UIEquip.img/Equip/EquipTab/canvas:equip", 12, 61);
+                else if (KMSMode && zeroMode)
+                    render_bitmap(g, "UI/_Canvas/UIEquip.img/Equip/EquipTab/canvas:equip3", 12, 61);
+                else
+                {
+                    string _outlink = PluginBase.PluginManager.FindWz("UI/UIEquip.img/Equip/EquipTab/canvas:equip2/_outlink").GetValue<string>(null);
+                    render_bitmap(g, _outlink, 12, 61);
+                }
 
                 if (this.checkPreset == this.currentPreset)
-                    g.DrawImage(Resource.UIInventory_img_Equip_EquipTab_buttonpresetApplication_disabled_0, 282, 404);
+                    render_bitmap(g, "UI/_Canvas/UIEquip.img/Equip/EquipTab/button:presetApplication/disabled/0", 282, CMSMode ? 404 : 376);
                 switch (checkPreset)
                 {
-                    case 1: g.DrawImage(Resource.UIInventory_img_Equip_EquipTab_presetSelected_0, 182, 407 - 15); break;
-                    case 2: g.DrawImage(Resource.UIInventory_img_Equip_EquipTab_presetSelected_0, 212, 407 - 15); break;
-                    case 3: g.DrawImage(Resource.UIInventory_img_Equip_EquipTab_presetSelected_0, 242, 407 - 15); break;
+                    case 1: g.DrawImage(Resource.UIInventory_img_Equip_EquipTab_presetSelected_0, 182, CMSMode ? 392 : 364); break;
+                    case 2: g.DrawImage(Resource.UIInventory_img_Equip_EquipTab_presetSelected_0, 212, CMSMode ? 392 : 364); break;
+                    case 3: g.DrawImage(Resource.UIInventory_img_Equip_EquipTab_presetSelected_0, 242, CMSMode ? 392 : 364); break;
                 }
-                if (this.character != null) //绘制装备
-                {
-                    for (int i = 0; i < 30; i++)
-                    {
-                        Gear gear = this.character.Equip.GearSlots[i];
-                        if (gear != null)
-                        {
-                            int dx = 10 + i % 5 * 33, dy = 27 + i / 5 * 33;
-                            drawGearIcon(gear, g, dx, dy);
-                        }
-                    }
-                }
+                render_slot(g, "UI/UIEquip.img/Equip/EquipTab/SlotName");
+                //if (this.character != null) //绘制装备
+                //{
+                //    for (int i = 0; i < 30; i++)
+                //    {
+                //        Gear gear = this.character.Equip.GearSlots[i];
+                //        if (gear != null)
+                //        {
+                //            int dx = 10 + i % 5 * 33, dy = 27 + i / 5 * 33;
+                //            drawGearIcon(gear, g, dx, dy);
+                //        }
+                //    }
+                //}
             }
             else if (petMode) //宠物模式
             {
-                g.DrawImage(Resource.UIInventory_img_Equip_main_tabdetailTab_normal_0, 12, 31);
-                g.DrawImage(Resource.UIInventory_img_Equip_main_tabdetailTab_selected_1, 184, 31);
-                g.DrawImage(Resource.UIInventory_img_Equip_PetTab_canvaspet, 12, 61);
+                if (!zeroMode)
+                {
+                    render_bitmap(g, "UI/_Canvas/UIEquip.img/Equip/main/tab:detailTab/normal/0", 11, 31);
+                    render_bitmap(g, "UI/_Canvas/UIEquip.img/Equip/main/tab:detailTab/selected/1", 184, 31);
+                }
+                else
+                {
+                    render_bitmap(g, "UI/_Canvas/UIEquip.img/Equip/main/tab:detailTab2/normal/0", 11, 31);
+                    render_bitmap(g, "UI/_Canvas/UIEquip.img/Equip/main/tab:detailTab2/selected/1", 127, 31);
+                    render_bitmap(g, "UI/_Canvas/UIEquip.img/Equip/main/tab:detailTab2/normal/2", 244, 31);
+                }
+                render_bitmap(g, "UI/_Canvas/UIEquip.img/Equip/PetTab/canvas:pet", 12, 61);
+                render_slot(g, "UI/UIEquip.img/Equip/PetTab/SlotName");
             }
-            //g.DrawImage(Resource.Equip_character_backgrnd3, 10, 27);
-            //g.DrawImage(Resource.Equip_character_cashPendant, 76, 93);
-            //g.DrawImage(Resource.Equip_character_charmPocket, 10, 93);
+            else if(enchanceMode && zeroMode)//神之子武器强化模式
+            {
+                render_bitmap(g, "UI/_Canvas/UIEquip.img/Equip/ZeroTab/canvas:Zero", 12, 61);
+                render_bitmap(g, "UI/_Canvas/UIEquip.img/Equip/main/tab:detailTab2/normal/0", 11, 31);
+                render_bitmap(g, "UI/_Canvas/UIEquip.img/Equip/main/tab:detailTab2/normal/1", 127, 31);
+                render_bitmap(g, "UI/_Canvas/UIEquip.img/Equip/main/tab:detailTab2/selected/2", 244, 31);
+                render_bitmap(g, "UI/_Canvas/UIEquip.img/Equip/ZeroTab/Npc_R/normal/0", 283, 89, true);
+                render_bitmap(g, "UI/_Canvas/UIEquip.img/Equip/ZeroTab/Npc_L/normal/0", 12, 87, true);
+                render_bitmap(g, "UI/_Canvas/UIEquip.img/Equip/ZeroTab/button:ok/disabled/0", 144, 163);
+                render_bitmap(g, "UI/_Canvas/UIEquip.img/Equip/ZeroTab/button:cancel/disabled/0", 144, 187);
+            }
             if (this.character != null
                 && (this.character.Status.Job / 100 == 23 || this.character.Status.Job == 2002))
             {
@@ -789,29 +962,33 @@ namespace WzComparerR2.CharaSimControl
         private void renderDeco(Graphics g)
         {
             g.TranslateTransform(baseOffset.X, baseOffset.Y);
-            g.DrawImage(Resource.UIInventory_img_Deco_main_backgrnd, 0, 0);
+            render_bitmap(g, "UI/_Canvas/UIEquip.img/Deco/main/backgrnd", 0, 0);
             if (this.dressupMode)
             {
-                g.DrawImage(Resource.UIInventory_img_Deco_main_tabdetailTab_selected_0, 11, 31);
-                g.DrawImage(Resource.UIInventory_img_Deco_main_tabdetailTab_normal_1, 127, 31);
-                g.DrawImage(Resource.UIInventory_img_Deco_main_tabdetailTab_normal_2, 244, 31);
-                g.DrawImage(Resource.UIInventory_img_Deco_CoordiTab_canvascoordi, 12, 61);
+                render_bitmap(g, "UI/_Canvas/UIEquip.img/Deco/main/tab:detailTab/selected/0", 11, 31);
+                render_bitmap(g, "UI/_Canvas/UIEquip.img/Deco/main/tab:detailTab/normal/1", 127, 31);
+                render_bitmap(g, "UI/_Canvas/UIEquip.img/Deco/main/tab:detailTab/normal/2", 244, 31);
+                if (!zeroMode)
+                    render_bitmap(g, "UI/_Canvas/UIEquip.img/Deco/CoordiTab/canvas:coordi", 12, 61);
+                else
+                    render_bitmap(g, "UI/_Canvas/UIEquip.img/Deco/CoordiTab/canvas:zero", 12, 61);
+                render_slot(g, "UI/UIEquip.img/Deco/CoordiTab/SlotName");
             }
             else if (androidMode)
             {
-                g.DrawImage(Resource.UIInventory_img_Deco_main_tabdetailTab_normal_0, 11, 31);
-                g.DrawImage(Resource.UIInventory_img_Deco_main_tabdetailTab_selected_1, 127, 31);
-                g.DrawImage(Resource.UIInventory_img_Deco_main_tabdetailTab_normal_2, 244, 31);
-                g.DrawImage(Resource.UIInventory_img_Deco_AndroidTab_canvasand, 12, 61);
+                render_bitmap(g, "UI/_Canvas/UIEquip.img/Deco/main/tab:detailTab/normal/0", 11, 31);
+                render_bitmap(g, "UI/_Canvas/UIEquip.img/Deco/main/tab:detailTab/selected/1", 127, 31);
+                render_bitmap(g, "UI/_Canvas/UIEquip.img/Deco/main/tab:detailTab/normal/2", 244, 31);
+                render_bitmap(g, "UI/_Canvas/UIEquip.img/Deco/AndroidTab/canvas:and", 12, 61);
+                render_slot(g, "UI/UIEquip.img/Deco/AndroidTab/SlotName");
             }
             else if (damageSkinMode)
             {
-                g.DrawImage(Resource.UIInventory_img_Deco_main_tabdetailTab_normal_0, 11, 31);
-                g.DrawImage(Resource.UIInventory_img_Deco_main_tabdetailTab_normal_1, 127, 31);
-                g.DrawImage(Resource.UIInventory_img_Deco_main_tabdetailTab_selected_2, 244, 31);
-                g.DrawImage(Resource.UIInventory_img_Deco_DamageSkinTab_canvasand, 12, 61);
+                render_bitmap(g, "UI/_Canvas/UIEquip.img/Deco/main/tab:detailTab/normal/0", 11, 31);
+                render_bitmap(g, "UI/_Canvas/UIEquip.img/Deco/main/tab:detailTab/normal/1", 127, 31);
+                render_bitmap(g, "UI/_Canvas/UIEquip.img/Deco/main/tab:detailTab/selected/2", 244, 31);
+                render_bitmap(g, "UI/_Canvas/UIEquip.img/Deco/DamageSkinTab/canvas:and", 12, 61);
             }
-
             foreach (AControl aCtrl in this.aControls)
             {
                 aCtrl.Draw(g);
@@ -825,22 +1002,47 @@ namespace WzComparerR2.CharaSimControl
         {
             Rectangle rect = this.BeautyRoomRect;
             g.TranslateTransform(rect.X, rect.Y);
-            g.DrawImage(Resource.UIInventory_img_Deco_BeautyRoom_backgrnd, 0, 0);
+            render_bitmap(g, "UI/_Canvas/UIEquip.img/Deco/BeautyRoom/backgrnd", 0, 0);
             if (this.HairMode)
             {
-                g.DrawImage(Resource.UIInventory_img_Deco_BeautyRoom_BeautyRoom_tabTab_selected_0, 10, 31);
-                g.DrawImage(Resource.UIInventory_img_Deco_BeautyRoom_BeautyRoom_tabTab_normal_1, 211, 31);
+                if (CMSMode)
+                {
+                    render_bitmap(g, "UI/_Canvas/UIEquip.img/Deco/BeautyRoom/BeautyRoom/tab:Tab/selected/0", 10, 31);
+                    render_bitmap(g, "UI/_Canvas/UIEquip.img/Deco/BeautyRoom/BeautyRoom/tab:Tab/normal/1", 211, 31);
+                }
+                else
+                {
+                    render_bitmap(g, "UI/_Canvas/UIEquip.img/Deco/BeautyRoom/BeautyRoom/tab:Tab/selected/0", 10, 31);
+                    render_bitmap(g, "UI/_Canvas/UIEquip.img/Deco/BeautyRoom/BeautyRoom/tab:Tab/normal/1", 144, 31);
+                    render_bitmap(g, "UI/_Canvas/UIEquip.img/Deco/BeautyRoom/BeautyRoom/tab:Tab/normal/2", 278, 31);
+                }
             }
             else if (this.FaceMode)
             {
-                g.DrawImage(Resource.UIInventory_img_Deco_BeautyRoom_BeautyRoom_tabTab_normal_0, 10, 31);
-                g.DrawImage(Resource.UIInventory_img_Deco_BeautyRoom_BeautyRoom_tabTab_selected_1, 211, 31);
+                if (CMSMode)
+                {
+                    render_bitmap(g, "UI/_Canvas/UIEquip.img/Deco/BeautyRoom/BeautyRoom/tab:Tab/normal/0", 10, 31);
+                    render_bitmap(g, "UI/_Canvas/UIEquip.img/Deco/BeautyRoom/BeautyRoom/tab:Tab/selected/1", 211, 31);
+                }
+                else
+                {
+                    render_bitmap(g, "UI/_Canvas/UIEquip.img/Deco/BeautyRoom/BeautyRoom/tab:Tab/normal/0", 10, 31);
+                    render_bitmap(g, "UI/_Canvas/UIEquip.img/Deco/BeautyRoom/BeautyRoom/tab:Tab/selected/1", 144, 31);
+                    render_bitmap(g, "UI/_Canvas/UIEquip.img/Deco/BeautyRoom/BeautyRoom/tab:Tab/normal/2", 278, 31);
+                }
+            }
+            else if (this.SkinMode && !CMSMode)
+            {
+                render_bitmap(g, "UI/_Canvas/UIEquip.img/Deco/BeautyRoom/BeautyRoom/tab:Tab/normal/0", 10, 31);
+                render_bitmap(g, "UI/_Canvas/UIEquip.img/Deco/BeautyRoom/BeautyRoom/tab:Tab/normal/1", 144, 31);
+                render_bitmap(g, "UI/_Canvas/UIEquip.img/Deco/BeautyRoom/BeautyRoom/tab:Tab/selected/2", 278, 31);
             }
 
-            for (int i = 0; i< 6; i++)
+            for (int i = 0; i < 6; i++)
             {
                 g.DrawImage(Resource.UIInventory_img_Deco_BeautyRoom_BeautyRoom_Slot_layerunavailableSlot, 10 + 134 * (i % 3), 61 + 178 * (i / 3));
             }
+
             foreach (AControl aCtrl in this.BeautyControls)
             {
                 aCtrl.Draw(g);
@@ -852,7 +1054,8 @@ namespace WzComparerR2.CharaSimControl
         {
             Rectangle rect = this.CooridiPresetRect;
             g.TranslateTransform(rect.X, rect.Y);
-            g.DrawImage(Resource.UIInventory_img_Deco_CoordiPreset_backgrnd, 0, 0);
+            render_bitmap(g, "UI/_Canvas/UIEquip.img/Deco/CoordiPreset/backgrnd", 0, 0);
+            render_slot(g, "UI/UIEquip.img/Deco/CoordiPreset/SlotName");
             g.ResetTransform();
         }
 
@@ -860,22 +1063,21 @@ namespace WzComparerR2.CharaSimControl
         {
             Rectangle rect = this.DragonRect;
             g.TranslateTransform(rect.X, rect.Y);
-            g.DrawImage(Resource.Equip_dragon_backgrnd, 0, 0);
-            g.DrawImage(Resource.Equip_dragon_backgrnd2, 6, 22);
-            g.DrawImage(Resource.Equip_dragon_backgrnd3, 10, 29);
+            render_bitmap(g, "UI/_Canvas/UIEquip.img/Equip/EquipTab/dragonEquip/canvas:dragon", 0, 0);
+            render_slot(g, "UI/UIEquip.img/Equip/EquipTab/dragonEquip/SlotName");
 
-            if (this.character != null)
-            {
-                for (int i = 35; i < 39; i++)
-                {
-                    Gear gear = this.character.Equip.GearSlots[i];
-                    if (gear != null)
-                    {
-                        int dx = 10 + (i - 35) * 33, dy = 22 + (((i - 1) % 2) + 1) * 33;
-                        drawGearIcon(gear, g, dx, dy);
-                    }
-                }
-            }
+            //if (this.character != null)
+            //{
+            //    for (int i = 35; i < 39; i++)
+            //    {
+            //        Gear gear = this.character.Equip.GearSlots[i];
+            //        if (gear != null)
+            //        {
+            //            int dx = 10 + (i - 35) * 33, dy = 22 + (((i - 1) % 2) + 1) * 33;
+            //            drawGearIcon(gear, g, dx, dy);
+            //        }
+            //    }
+            //}
             g.ResetTransform();
         }
 
@@ -883,43 +1085,32 @@ namespace WzComparerR2.CharaSimControl
         {
             Rectangle rect = this.MechanicRect;
             g.TranslateTransform(rect.X, rect.Y);
-            g.DrawImage(Resource.Equip_mechanic_backgrnd, 0, 0);
-            g.DrawImage(Resource.Equip_mechanic_backgrnd2, 6, 22);
-            g.DrawImage(Resource.Equip_mechanic_backgrnd3, 12, 35);
+            render_bitmap(g, "UI/_Canvas/UIEquip.img/Equip/EquipTab/mechanicEquip/canvas:mechanic", 0, 0);
+            render_slot(g, "UI/UIEquip.img/Equip/EquipTab/mechanicEquip/SlotName");
 
-            if (this.character != null)
-            {
-                int dx, dy;
-                for (int i = 39; i < 44; i++)
-                {
-                    Gear gear = this.character.Equip.GearSlots[i];
-                    if (gear != null)
-                    {
-                        switch(i)
-                        {
-                            case 39: dx = 1; dy = 1; break;
-                            case 40: dx = 1; dy = 2; break;
-                            case 41: dx = 2; dy = 2; break;
-                            case 42: dx = 0; dy = 3; break;
-                            case 43: dx = 1; dy = 3; break;
-                            default: continue;
-                        }
-                        dx = 10 + dx * 33;
-                        dy = 22 + dy * 33;
-                        drawGearIcon(gear, g, dx, dy);
-                    }
-                }
-            }
-            g.ResetTransform();
-        }
-
-        private void renderAndroid(Graphics g)
-        {
-            Rectangle rect = this.AndroidRect;
-            g.TranslateTransform(rect.X, rect.Y);
-            g.DrawImage(Resource.Equip_Android_backgrnd, 0, 0);
-            g.DrawImage(Resource.Equip_Android_backgrnd2, 6, 24);
-            g.DrawImage(Resource.Equip_Android_backgrnd3, 12, 28);
+            //if (this.character != null)
+            //{
+            //    int dx, dy;
+            //    for (int i = 39; i < 44; i++)
+            //    {
+            //        Gear gear = this.character.Equip.GearSlots[i];
+            //        if (gear != null)
+            //        {
+            //            switch(i)
+            //            {
+            //                case 39: dx = 1; dy = 1; break;
+            //                case 40: dx = 1; dy = 2; break;
+            //                case 41: dx = 2; dy = 2; break;
+            //                case 42: dx = 0; dy = 3; break;
+            //                case 43: dx = 1; dy = 3; break;
+            //                default: continue;
+            //            }
+            //            dx = 10 + dx * 33;
+            //            dy = 22 + dy * 33;
+            //            drawGearIcon(gear, g, dx, dy);
+            //        }
+            //    }
+            //}
             g.ResetTransform();
         }
 
@@ -927,7 +1118,8 @@ namespace WzComparerR2.CharaSimControl
         {
             Rectangle rect = this.TotemRect;
             g.TranslateTransform(rect.X, rect.Y);
-            g.DrawImage(Resource.UIInventory_img_Equip_EquipTab_totemEquip_canvastotem, 0, 0);
+            render_bitmap(g, "UI/_Canvas/UIEquip.img/Equip/EquipTab/totemEquip/canvas:totem", 0, 0);
+            render_slot(g, "UI/UIEquip.img/Equip/EquipTab/totemEquip/SlotName");
             g.ResetTransform();
         }
 
@@ -935,18 +1127,33 @@ namespace WzComparerR2.CharaSimControl
         {
             Rectangle rect = this.SymbolRect;
             g.TranslateTransform(rect.X, rect.Y);
-            g.DrawImage(Resource.UIInventory_img_Equip_Symbol_backgrnd, 0, 0);
-            if (ArcMode)
+            render_bitmap(g, "UI/_Canvas/UIEquip.img/Equip/Symbol/backgrnd", 0, 0);
+            if (ArcAut == 1)
             {
-                g.DrawImage(Resource.UIInventory_img_Equip_Symbol_tabcategoryTab_selected_0, 22, 18);
-                g.DrawImage(Resource.UIInventory_img_Equip_Symbol_tabcategoryTab_normal_1, 114, 18);
-                g.DrawImage(Resource.UIInventory_img_Equip_Symbol_ArcEquip_backgrnd, 22, 45);
+                render_bitmap(g, "UI/_Canvas/UICharacterInfo.img/remote/detailEquip/tab:symbolTab/selected/0", 22, 18);
+                render_bitmap(g, "UI/_Canvas/UICharacterInfo.img/remote/detailEquip/tab:symbolTab/normal/1", 114, 18);
+                render_bitmap(g, "UI/_Canvas/UICharacterInfo.img/remote/detailEquip/ArcEquip/backgrnd", 22, 45);
+                foreach (Wz_Node Node in PluginBase.PluginManager.FindWz("UI/UIEquip.img/Equip/Symbol/ArcEquip/slotPos").Nodes)
+                {
+                    Wz_Vector Vector = Node.GetValueEx<Wz_Vector>(null);
+                    render_bitmap(g, "UI/_Canvas/UICharacterInfo.img/remote/detailEquip/ArcEquip/slotVector1/canvas:slot", Vector.X + 22, Vector.Y + 46);
+                }
             }
-            else if (AutMode)
+            else if (ArcAut == 2)
             {
-                g.DrawImage(Resource.UIInventory_img_Equip_Symbol_tabcategoryTab_normal_0, 22, 18);
-                g.DrawImage(Resource.UIInventory_img_Equip_Symbol_tabcategoryTab_selected_1, 114, 18);
-                g.DrawImage(Resource.UIInventory_img_Equip_Symbol_ArcEquip_backgrnd, 22, 45);
+                render_bitmap(g, "UI/_Canvas/UICharacterInfo.img/remote/detailEquip/tab:symbolTab/normal/0", 22, 18);
+                render_bitmap(g, "UI/_Canvas/UICharacterInfo.img/remote/detailEquip/tab:symbolTab/selected/1", 114, 18);
+                render_bitmap(g, "UI/_Canvas/UICharacterInfo.img/remote/detailEquip/AutEquip/backgrnd", 22, 45);
+                foreach (Wz_Node Node in PluginBase.PluginManager.FindWz("UI/UIEquip.img/Equip/Symbol/AutEquip/slotPos").Nodes)
+                {
+                    Wz_Vector Vector = Node.GetValueEx<Wz_Vector>(null);
+                    render_bitmap(g, "UI/_Canvas/UICharacterInfo.img/remote/detailEquip/AutEquip/slotVector1/canvas:slot", Vector.X + 22, Vector.Y + 46);
+                }
+            }
+
+            foreach (AControl aCtrl in this.SymbolControls)
+            {
+                aCtrl.Draw(g);
             }
             g.ResetTransform();
         }
@@ -955,25 +1162,58 @@ namespace WzComparerR2.CharaSimControl
         {
             Rectangle rect = this.TitleRect;
             g.TranslateTransform(rect.X, rect.Y);
-            g.DrawImage(Resource.UIWindow4_img_Equip_titleSkin_backgrnd, 0, 0);
+            g.DrawImage(BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIWindow4.img/Equip/titleSkin/backgrnd"), PluginBase.PluginManager.FindWz).Bitmap, 1, 0);
             g.ResetTransform();
         }
 
-        private void drawGearIcon(Gear gear, Graphics g, int x, int y)
+        private void render_bitmap(Graphics g, string nodepath, int x, int y, bool reverse = false)
         {
-            if (gear == null || g == null)
-                return;
-            if (gear.State == GearState.disable)
-                g.DrawImage(Resource.Equip_character_disabled, x, y);
-            Pen pen = GearGraphics.GetGearItemBorderPen(gear.Grade);
-            if (pen != null)
+            Wz_Node Node = PluginBase.PluginManager.FindWz(nodepath);
+            Bitmap image = BitmapOrigin.CreateFromNode(Node, PluginBase.PluginManager.FindWz).Bitmap;
+            if (reverse)
             {
-                Point[] path = GearGraphics.GetIconBorderPath(x, y);
-                g.DrawLines(pen, path);
+                image.RotateFlip(RotateFlipType.RotateNoneFlipX);
             }
-            g.DrawImage(gear.Icon.Bitmap,
-                x - gear.Icon.Origin.X,
-                y + 32 - gear.Icon.Origin.Y);
+            g.DrawImage(image, x, y);
+        }
+
+        private void render_slot(Graphics g, string nodepath)
+        {
+            foreach (Wz_Node Wz_Node in PluginBase.PluginManager.FindWz(nodepath).Nodes)
+            {
+                string _outlink = Wz_Node.FindNodeByPath("_outlink").GetValue<string>(null);
+                Wz_Node imgnode = PluginBase.PluginManager.FindWz(_outlink);
+                Bitmap slotimg = BitmapOrigin.CreateFromNode(imgnode, PluginBase.PluginManager.FindWz).Bitmap;
+                Wz_Vector Vector = Wz_Node.FindNodeByPath("origin").GetValueEx<Wz_Vector>(null);
+                g.DrawImage(slotimg, (int)Vector.X * (-1), (int)Vector.Y * (-1));
+            }
+        }
+
+        //private void drawGearIcon(Gear gear, Graphics g, int x, int y)
+        //{
+        //    if (gear == null || g == null)
+        //        return;
+        //    if (gear.State == GearState.disable)
+        //        g.DrawImage(Resource.Equip_character_disabled, x, y);
+        //    Pen pen = GearGraphics.GetGearItemBorderPen(gear.Grade);
+        //    if (pen != null)
+        //    {
+        //        Point[] path = GearGraphics.GetIconBorderPath(x, y);
+        //        g.DrawLines(pen, path);
+        //    }
+        //    g.DrawImage(gear.Icon.Bitmap,
+        //        x - gear.Icon.Origin.X,
+        //        y + 32 - gear.Icon.Origin.Y);
+        //}
+
+        private bool get_KMSmode()
+        {
+            foreach (Wz_Node node in PluginBase.PluginManager.FindWz("UI/UIEquip.img/Equip/EquipTab").Nodes)
+            {
+                if (node.Text == "totemEquip")
+                    return false;
+            }
+            return true;
         }
 
         private IEnumerable<AControl> aControls
@@ -982,18 +1222,34 @@ namespace WzComparerR2.CharaSimControl
             {
                 yield return btnDeco;
                 yield return btnEquip;
+                if (zeroMode)
+                {
+                    yield return btnEnhanceWeapon;
+                    yield return btnCube;
+                    yield return btnexOption;
+                    yield return btnInheritance;
+                    yield return btnNPC;
+                    yield return btnPotential;
+                }
                 yield return btnPreset1;
                 yield return btnPreset2;
                 yield return btnPreset3;
                 yield return btnPresetApply;
-                yield return btnEffectSetting;
-                yield return btnDragon;
-                yield return btnMechanic;
+                if (!CMSMode && evanMode)
+                {
+                    if (!DragonVisible) yield return btnDragonOpen;
+                    if (DragonVisible) yield return btnDragonClose;
+                }
+                else if (!CMSMode && mechanicMode)
+                {
+                    if (!MechanicVisible) yield return btnMechanicOpen;
+                    if (MechanicVisible) yield return btnMechanicClose;
+                }
+                else if (CMSMode)
+                    yield return btnEffectSetting;
                 yield return btnTitle;
                 yield return btnTotem;
                 yield return btnSymbol;
-                yield return btnPet;
-                yield return btnAndroid;
                 yield return btnEquipTab;
                 yield return btnPetTab;
                 yield return btnDressUpTab;
@@ -1013,6 +1269,17 @@ namespace WzComparerR2.CharaSimControl
             {
                 yield return btnHairTab;
                 yield return btnFaceTab;
+                if (!CMSMode)
+                    yield return btnSkinTab;
+            }
+        }
+
+        private IEnumerable<AControl> SymbolControls
+        {
+            get
+            {
+                yield return btnArc;
+                yield return btnAut;
             }
         }
 
@@ -1037,6 +1304,7 @@ namespace WzComparerR2.CharaSimControl
             this.equipVisible = true;
             this.equipMode = true;
             this.petMode = false;
+            this.enchanceMode = false;
             this.waitForRefresh = true;
         }
 
@@ -1078,8 +1346,7 @@ namespace WzComparerR2.CharaSimControl
         private void btnSymbol_MouseClick(object sender, MouseEventArgs e)
         {
             this.SymbolVisible = !this.SymbolVisible;
-            this.ArcMode = true;
-            this.AutMode = false;
+            this.ArcAut = 1;
             this.GrandAutMode = false;
             this.waitForRefresh = true;
         }
@@ -1090,27 +1357,52 @@ namespace WzComparerR2.CharaSimControl
             this.waitForRefresh = true;
         }
 
-        private void btnPet_MouseClick(object sender, MouseEventArgs e)
+        private void btnEffectSetting_MouseClick(Object sender, MouseEventArgs e)
         {
-            this.PetVisible = !this.PetVisible;
+            if (this.jobID == 2200)
+            {
+                this.DragonVisible = !this.DragonVisible;
+            }
+            else if (this.jobID == 3500)
+            {
+                this.MechanicVisible = !this.MechanicVisible;
+            }
             this.waitForRefresh = true;
         }
 
-        private void btnDragon_MouseClick(object sender, MouseEventArgs e)
+        private void btnDragonOpen_MouseClick(object sender, MouseEventArgs e)
         {
-            this.DragonVisible = !this.DragonVisible;
+            this.DragonVisible = true;
             this.waitForRefresh = true;
         }
 
-        private void btnMechanic_MouseClick(object sender, MouseEventArgs e)
+        private void btnDragonClose_MouseClick(object sender, MouseEventArgs e)
         {
-            this.MechanicVisible = !this.MechanicVisible;
+            this.DragonVisible = false;
             this.waitForRefresh = true;
         }
 
-        private void btnAndroid_MouseClick(object sender, MouseEventArgs e)
+        private void btnMechanicOpen_MouseClick(object sender, MouseEventArgs e)
         {
-            this.AndroidVisible = !this.AndroidVisible;
+            this.MechanicVisible = true;
+            this.waitForRefresh = true;
+        }
+
+        private void btnMechanicClose_MouseClick(object sender, MouseEventArgs e)
+        {
+            this.MechanicVisible = false;
+            this.waitForRefresh = true;
+        }
+
+        private void btnArc_MouseClick(object sender, MouseEventArgs e)
+        {
+            this.ArcAut = 1;
+            this.waitForRefresh = true;
+        }
+
+        private void btnAut_MouseClick(object sender, MouseEventArgs e)
+        {
+            this.ArcAut = 2;
             this.waitForRefresh = true;
         }
 
@@ -1126,6 +1418,7 @@ namespace WzComparerR2.CharaSimControl
         {
             this.HairMode = true;
             this.FaceMode = false;
+            this.SkinMode = false;
             this.waitForRefresh = true;
         }
 
@@ -1133,6 +1426,15 @@ namespace WzComparerR2.CharaSimControl
         {
             this.HairMode = false;
             this.FaceMode = true;
+            this.SkinMode = false;
+            this.waitForRefresh = true;
+        }
+
+        private void btnSkinTab_MouseClick(object sender, MouseEventArgs e)
+        {
+            this.HairMode = false;
+            this.FaceMode = false;
+            this.SkinMode = true;
             this.waitForRefresh = true;
         }
 
@@ -1146,6 +1448,7 @@ namespace WzComparerR2.CharaSimControl
         {
             this.equipMode = true;
             this.petMode = false;
+            this.enchanceMode = false;
             this.waitForRefresh = true;
         }
 
@@ -1153,8 +1456,18 @@ namespace WzComparerR2.CharaSimControl
         {
             this.equipMode = false;
             this.petMode = true;
+            this.enchanceMode = false;
             this.waitForRefresh = true;
         }
+
+        private void btnEnhanceWeapon_MouseClick(object sender, MouseEventArgs e)
+        {
+            this.equipMode = false;
+            this.petMode = false;
+            this.enchanceMode = true;
+            this.waitForRefresh = true;
+        }
+
         private void btnDressUpTab_MouseClick(object sender, MouseEventArgs e)
         {
             this.btnEquip.Visible = true;
@@ -1194,6 +1507,18 @@ namespace WzComparerR2.CharaSimControl
                 ctrl.OnMouseMove(childArgs);
             }
 
+            MouseEventArgs BeautyChildArgs = new MouseEventArgs(e.Button, e.Clicks, e.X - BeautyRoomRect.X, e.Y - BeautyRoomRect.Y, e.Delta);
+
+            foreach (AControl ctrl in this.BeautyControls)
+            {
+                ctrl.OnMouseMove(BeautyChildArgs);
+            }
+
+            foreach (AControl ctrl in this.SymbolControls)
+            {
+                ctrl.OnMouseMove(childArgs);
+            }
+
             if (this.waitForRefresh)
             {
                 this.Refresh();
@@ -1208,6 +1533,18 @@ namespace WzComparerR2.CharaSimControl
             MouseEventArgs childArgs = new MouseEventArgs(e.Button, e.Clicks, e.X - baseOffset.X, e.Y - baseOffset.Y, e.Delta);
 
             foreach (AControl ctrl in this.aControls)
+            {
+                ctrl.OnMouseDown(childArgs);
+            }
+
+            MouseEventArgs BeautyChildArgs = new MouseEventArgs(e.Button, e.Clicks, e.X - BeautyRoomRect.X, e.Y - BeautyRoomRect.Y, e.Delta);
+
+            foreach (AControl ctrl in this.BeautyControls)
+            {
+                ctrl.OnMouseDown(BeautyChildArgs);
+            }
+
+            foreach (AControl ctrl in this.SymbolControls)
             {
                 ctrl.OnMouseDown(childArgs);
             }
@@ -1230,6 +1567,18 @@ namespace WzComparerR2.CharaSimControl
                 ctrl.OnMouseUp(childArgs);
             }
 
+            MouseEventArgs BeautyChildArgs = new MouseEventArgs(e.Button, e.Clicks, e.X - BeautyRoomRect.X, e.Y - BeautyRoomRect.Y, e.Delta);
+
+            foreach (AControl ctrl in this.BeautyControls)
+            {
+                ctrl.OnMouseUp(BeautyChildArgs);
+            }
+
+            foreach (AControl ctrl in this.SymbolControls)
+            {
+                ctrl.OnMouseUp(childArgs);
+            }
+
             if (this.waitForRefresh)
             {
                 this.Refresh();
@@ -1244,6 +1593,18 @@ namespace WzComparerR2.CharaSimControl
             MouseEventArgs childArgs = new MouseEventArgs(e.Button, e.Clicks, e.X - baseOffset.X, e.Y - baseOffset.Y, e.Delta);
 
             foreach (AControl ctrl in this.aControls)
+            {
+                ctrl.OnMouseClick(childArgs);
+            }
+
+            MouseEventArgs BeautyChildArgs = new MouseEventArgs(e.Button, e.Clicks, e.X - BeautyRoomRect.X, e.Y - BeautyRoomRect.Y, e.Delta);
+
+            foreach (AControl ctrl in this.BeautyControls)
+            {
+                ctrl.OnMouseClick(BeautyChildArgs);
+            }
+
+            foreach (AControl ctrl in this.SymbolControls)
             {
                 ctrl.OnMouseClick(childArgs);
             }

@@ -30,16 +30,10 @@ namespace WzComparerR2.Comparer
         private Wz_Node wzOld { get; set; }
         private Wz_File stringWzNew { get; set; }
         private Wz_File itemWzNew { get; set; }
-        private Wz_File mobWzNew { get; set; }
-        private Wz_File npcWzNew { get; set; }
-        private Wz_File eqpWzNew { get; set; }
         private Wz_File etcWzNew { get; set; }
         private Wz_File questWzNew { get; set; }
         private Wz_File stringWzOld { get; set; }
         private Wz_File itemWzOld { get; set; }
-        private Wz_File mobWzOld { get; set; }
-        private Wz_File npcWzOld { get; set; }
-        private Wz_File eqpWzOld { get; set; }
         private Wz_File etcWzOld { get; set; }
         private Wz_File questWzOld { get; set; }
         private Wz_Node[] WzNewOld { get; set; } = new Wz_Node[2];
@@ -48,6 +42,8 @@ namespace WzComparerR2.Comparer
         private Wz_File[] ItemWzNewOld { get; set; } = new Wz_File[2];
         private Wz_File[] EtcWzNewOld { get; set; } = new Wz_File[2];
         private Wz_File[] QuestWzNewOld { get; set; } = new Wz_File[2];
+        private HashSet<string> OutputSkillTooltipIDs { get; set; } = new HashSet<string>();
+        private HashSet<string> PerJobSkillTooltipInfo { get; set; } = new HashSet<string>();
         private List<string> skillTooltipInfo = new List<string>();
         private List<string> itemTooltipInfo = new List<string>();
         private List<string> eqpTooltipInfo = new List<string>();
@@ -58,6 +54,7 @@ namespace WzComparerR2.Comparer
         private List<string> questTooltipInfo = new List<string>();
         private List<string> achievementTooltipInfo = new List<string>();
         private Dictionary<string, Dictionary<string, List<string>>> diffHtml = new Dictionary<string, Dictionary<string, List<string>>>();
+        private Dictionary<string, List<string>> diffPerJobSkillTags { get; set; } = new Dictionary<string, List<string>>();
         private Dictionary<string, List<string>> diffSkillTags = new Dictionary<string, List<string>>();
         private Dictionary<string, List<string>> diffItemTags = new Dictionary<string, List<string>>();
         private Dictionary<string, List<string>> diffEqpTags = new Dictionary<string, List<string>>();
@@ -71,6 +68,7 @@ namespace WzComparerR2.Comparer
         private Dictionary<int, List<int>> FifthJobSkillToJobID = new Dictionary<int, List<int>>();
         public Dictionary<string, string> FailToExportNodes = new Dictionary<string, string>();
         public Dictionary<string, string> FailToExportTooltips { get; private set; } = new Dictionary<string, string>();
+        private Dictionary<string, HashSet<int>> ChangedActions { get; set; } = new Dictionary<string, HashSet<int>>();
         private SortedSet<int> OutputMapTooltipIDs { get; set; } = new SortedSet<int>();
 
         public WzFileComparer Comparer { get; protected set; }
@@ -100,6 +98,10 @@ namespace WzComparerR2.Comparer
         public bool EnableAssembleTooltip { get; set; }
         public bool AllowFamiliarOutOfBounds { get; set; }
         public bool UseCTFamiliarUI { get; set; }
+        public bool EnableWorldArchive { get; set; }
+        public bool EnableMonsterBook { get; set; }
+        public bool ShowNpcQuotes { get; set; }
+        public bool LocatePetEquip { get; set; }
         public int QuestState { get; set; }
 
         public string StateInfo
@@ -165,7 +167,9 @@ namespace WzComparerR2.Comparer
                     StateInfo = "正在初始化5转技能应用职业代码...";
                     for (int i = 0; i < 2; i++)
                     {
-                        Wz_Node vCoreData = PluginManager.FindWz("Etc\\VcoreNew.img\\vSkill\\CoreData", WzFileNewOld[i]) ?? PluginManager.FindWz("Etc\\VCore.img\\CoreData", WzFileNewOld[i]); if (vCoreData == null) break;
+                        Wz_Node vCoreData = PluginManager.FindWz("Etc\\VcoreNew.img\\vSkill\\CoreData", WzFileNewOld[i]);
+                        if (vCoreData == null || vCoreData.FullPath == "Base.wz") vCoreData = PluginManager.FindWz("Etc\\VCore.img\\CoreData", WzFileNewOld[i]);
+                        if (vCoreData == null || vCoreData.FullPath == "Base.wz") break;
 
                         foreach (Wz_Node data in vCoreData.Nodes)
                         {
@@ -293,6 +297,20 @@ namespace WzComparerR2.Comparer
                             }
                         }
                     }
+                }
+                if (saveItemTooltip || saveEqpTooltip) // Check commodity differences
+                {
+                    StateInfo = "正在整理现金道具";
+                    CharaSimLoader.ClearAll();
+                    CharaSimLoader.LoadSetItemsIfEmpty(fileNew);
+                    CharaSimLoader.LoadAstraSubWeaponsIfEmpty(fileNew);
+                    CharaSimLoader.LoadExclusiveEquipsIfEmpty(fileNew);
+                    CharaSimLoader.LoadMsnMintableItemListIfEmpty(fileNew);
+                    if (this.LocatePetEquip) CharaSimLoader.LoadPetEquipInfoIfEmpty(fileNew);
+                    CharaSimLoader.LoadCommodities(fileOld, slotIdx: 1);
+                    CharaSimLoader.LoadCommodities(fileNew, slotIdx: 0);
+                    CompareCommodities();
+                    StateInfo = "现金道具整理完毕";
                 }
 
                 this.wzNew = fileNew.Node;
@@ -802,6 +820,14 @@ namespace WzComparerR2.Comparer
                 }
                 saveTooltip(skillTooltipPath);
             }
+            if (saveSkillTooltip && type.ToString() == "String" && PerJobSkillTooltipInfo != null)
+            {
+                if (!Directory.Exists(skillTooltipPath))
+                {
+                    Directory.CreateDirectory(skillTooltipPath);
+                }
+                savePerJobSkillTooltip(skillTooltipPath);
+            }
             if (saveItemTooltip && type.ToString() == "String" && itemTooltipInfo != null)
             {
                 if (!Directory.Exists(itemTooltipPath))
@@ -929,44 +955,88 @@ namespace WzComparerR2.Comparer
             }
         }
 
+        // 变更技能Tooltip处理
+        private void UpdateActionChanges()
+        {
+            if (ChangedActions.Count <= 0) return;
+
+            StateInfo = $"正在整理{ChangedActions.Count}个延迟变更点...";
+            StateDetail = "正在以Tooltip图像处理技能变更点...";
+
+            for (int i = 0; i < 2; i++) // 0: New, 1: Old
+            {
+                var skill_wz = PluginManager.FindWz(Wz_Type.Skill, WzFileNewOld[i]);
+                foreach (var skill_img in skill_wz?.Nodes ?? new Wz_Node.WzNodeCollection(null))
+                {
+                    if (!Regex.Match(skill_img.Text, @"^\d+[.]img$").Success) continue;
+
+                    var skill_node = skill_img.FindNodeByPath("skill", true);
+                    foreach (var skill in skill_node?.Nodes ?? new Wz_Node.WzNodeCollection(null))
+                    {
+                        if (!int.TryParse(skill.Text, out int skill_id)) continue;
+
+                        var action_node = skill.FindNodeByPath("action");
+                        foreach (var action in action_node?.Nodes ?? new Wz_Node.WzNodeCollection(null))
+                        {
+                            var action_str = action.GetValueEx<string>(null);
+                            if (string.IsNullOrEmpty(action_str)) continue;
+                            if (ChangedActions.ContainsKey(action_str))
+                            {
+                                ChangedActions[action_str].Add(skill_id);
+                            }
+                        }
+                    }
+                }
+            }
+            foreach (var kv in ChangedActions)
+            {
+                var action = kv.Key;
+                var ids = kv.Value;
+                foreach (var id in ids)
+                {
+                    if (!OutputSkillTooltipIDs.Contains(id.ToString()))
+                    {
+                        OutputSkillTooltipIDs.Add(id.ToString());
+                        diffSkillTags[id.ToString()] = new List<string>();
+                    }
+
+                    if (!diffSkillTags[id.ToString()].Contains(action))
+                    {
+                        diffSkillTags[id.ToString()].Add(action);
+                    }
+                }
+            }
+            ChangedActions.Clear();
+        }
+
         // 变更技能Tooltip输出
         private void saveTooltip(string skillTooltipPath)
         {
-            StringLinker slNew = new StringLinker();
-            StringLinker slOld = new StringLinker();
-            SkillTooltipRender2 skillRenderNew = new SkillTooltipRender2();
-            SkillTooltipRender2 skillRenderOld = new SkillTooltipRender2();
+            UpdateActionChanges();
+            SkillTooltipRender2[] skillRenderNewOld = new SkillTooltipRender2[2];
             int count = 0;
             int allCount = skillTooltipInfo.Count;
             var skillTypeFont = new Font("宋体", 11f, GraphicsUnit.Pixel);
 
-            this.stringWzNew = wzNew?.FindNodeByPath("String").GetNodeWzFile();
-            this.itemWzNew = wzNew?.FindNodeByPath("Item").GetNodeWzFile();
-            this.etcWzNew = wzNew?.FindNodeByPath("Etc").GetNodeWzFile();
-            this.questWzNew = wzNew?.FindNodeByPath("Quest").GetNodeWzFile();
-            this.stringWzOld = wzOld?.FindNodeByPath("String").GetNodeWzFile();
-            this.itemWzOld = wzOld?.FindNodeByPath("Item").GetNodeWzFile();
-            this.etcWzOld = wzOld?.FindNodeByPath("Etc").GetNodeWzFile();
-            this.questWzOld = wzOld?.FindNodeByPath("Quest").GetNodeWzFile();
+            for (int i = 0; i < 2; i++) // 0: New, 1: Old
+            {
+                this.StringWzNewOld[i] = WzNewOld[i]?.FindNodeByPath("String").GetNodeWzFile();
+                this.ItemWzNewOld[i] = WzNewOld[i]?.FindNodeByPath("Item").GetNodeWzFile();
+                this.EtcWzNewOld[i] = WzNewOld[i]?.FindNodeByPath("Etc").GetNodeWzFile();
+                this.QuestWzNewOld[i] = WzNewOld[i]?.FindNodeByPath("Quest").GetNodeWzFile();
 
-            slNew.Load(stringWzNew, itemWzNew, etcWzNew, questWzNew);
-            slOld.Load(stringWzOld, itemWzOld, etcWzOld, questWzOld);
-            skillRenderNew.StringLinker = slNew;
-            skillRenderOld.StringLinker = slOld;
-            skillRenderNew.ShowObjectID = true;
-            skillRenderOld.ShowObjectID = true;
-            skillRenderNew.ShowDelay = true;
-            skillRenderOld.ShowDelay = true;
-            skillRenderNew.wzNode = wzNew;
-            skillRenderOld.wzNode = wzOld;
-            skillRenderNew.DiffSkillTags = this.diffSkillTags;
-            skillRenderOld.DiffSkillTags = this.diffSkillTags;
-            skillRenderNew.IgnoreEvalError = true;
-            skillRenderOld.IgnoreEvalError = true;
-            skillRenderNew.Enable22AniStyle = CharaSimConfig.Default.Enable22AniStyle;
-            skillRenderOld.Enable22AniStyle = CharaSimConfig.Default.Enable22AniStyle;
-            skillRenderNew.ShowParameters = CharaSimConfig.Default.Skill.ShowParameters;
-            skillRenderOld.ShowParameters = CharaSimConfig.Default.Skill.ShowParameters;
+                skillRenderNewOld[i] = new SkillTooltipRender2();
+                skillRenderNewOld[i].StringLinker = new StringLinker();
+                skillRenderNewOld[i].StringLinker.Load(StringWzNewOld[i], ItemWzNewOld[i], EtcWzNewOld[i], QuestWzNewOld[i]);
+                skillRenderNewOld[i].ShowObjectID = this.ShowObjectID;
+                skillRenderNewOld[i].ShowDelay = true;
+                skillRenderNewOld[i].wzNode = WzNewOld[i];
+                skillRenderNewOld[i].DiffSkillTags = this.diffSkillTags;
+                skillRenderNewOld[i].IgnoreEvalError = true;
+                skillRenderNewOld[i].Enable22AniStyle = this.Enable22AniStyle;
+                skillRenderNewOld[i].ShowParameters = CharaSimConfig.Default.Skill.ShowParameters;
+            }
+
             diffHtml["Skill"] = new Dictionary<string, List<string>>() { { "变更", new List<string>() }, { "新增", new List<string>() }, { "删除", new List<string>() } };
             foreach (var skillID in skillTooltipInfo)
             {
@@ -976,60 +1046,88 @@ namespace WzComparerR2.Comparer
                     StateInfo = string.Format("{0}/{1} 技能: {2}", count, allCount, skillID);
                     StateDetail = "正在以Tooltip图像处理技能变更点...";
 
-                    Bitmap skillImageNew = null;
-                    Bitmap skillImageOld = null;
-                    string skillType = "删除";
+                    bool[] isSkillNull = new bool[2] { false, false };
+
+                    if (SkipKMSContent && isKMSSkillID(Int32.Parse(skillID))) continue;
+
+                    string skillType = "";
                     string skillNodePath = int.Parse(skillID) / 10000000 == 8 ? String.Format(@"\{0:D}.img\skill\{1:D}", int.Parse(skillID) / 100, skillID) : String.Format(@"\{0:D}.img\skill\{1:D}", int.Parse(skillID) / 10000, skillID);
                     if (int.Parse(skillID) / 10000 == 0) skillNodePath = String.Format(@"\000.img\skill\{0:D7}", skillID);
-                    int heightNew = 0, heightOld = 0;
-                    int width = 0;
+                    int nullSkillIdx = 0;
 
-                    // 变更后Tooltip图像生成
-                    Skill skillNew = Skill.CreateFromNode(PluginManager.FindWz("Skill" + skillNodePath, wzNew.GetNodeWzFile()), PluginManager.FindWz, PluginManager.FindWz, wzNew?.GetNodeWzFile());
-                    if (skillNew != null)
+                    // 绘制变更前技能Tooltip
+                    for (int i = 0; i < 2; i++) // 0: New, 1: Old
                     {
-                        skillNew.Level = skillNew.MaxLevel;
-                        skillRenderNew.Skill = skillNew;
-                        skillImageNew = skillRenderNew.Render();
-                        width += skillImageNew.Width;
-                        heightNew = skillImageNew.Height;
-                    }
-                    // 变更前Tooltip图像生成
-                    Skill skillOld = Skill.CreateFromNode(PluginManager.FindWz("Skill" + skillNodePath, wzOld.GetNodeWzFile()), PluginManager.FindWz, PluginManager.FindWz, wzOld?.GetNodeWzFile());
-                    if (skillOld != null)
-                    {
-                        skillOld.Level = skillOld.MaxLevel;
-                        skillRenderOld.Skill = skillOld;
-                        skillImageOld = skillRenderOld.Render();
-                        width += skillImageOld.Width;
-                        heightOld = skillImageOld.Height;
-                    }
-                    if (width == 0) continue;
-                    // Tooltip图像合成
-                    Bitmap resultImage = new Bitmap(width, Math.Max(heightNew, heightOld));
-                    Graphics g = Graphics.FromImage(resultImage);
+                        Skill skill = Skill.CreateFromNode(PluginManager.FindWz("Skill" + skillNodePath, WzFileNewOld[i]), PluginManager.FindWz, PluginManager.FindWz, WzFileNewOld[i]) ??
+                            (Skill.CreateFromNode(PluginManager.FindWz("Skill001" + skillNodePath, WzFileNewOld[i]), PluginManager.FindWz, PluginManager.FindWz, WzFileNewOld[i]) ??
+                            (Skill.CreateFromNode(PluginManager.FindWz("Skill002" + skillNodePath, WzFileNewOld[i]), PluginManager.FindWz, PluginManager.FindWz, WzFileNewOld[i]) ??
+                            Skill.CreateFromNode(PluginManager.FindWz("Skill003" + skillNodePath, WzFileNewOld[i]), PluginManager.FindWz, PluginManager.FindWz, WzFileNewOld[i])));
 
-                    if (skillImageOld != null)
-                    {
-                        if (skillImageNew != null)
+                        if (skill != null)
                         {
-                            g.DrawImage(skillImageNew, skillImageOld.Width, 0);
-                            skillImageNew.Dispose();
-                            skillType = "变更";
+                            skill.Level = skill.MaxLevel;
+                            skillRenderNewOld[i].Skill = skill;
                         }
-                        g.DrawImage(skillImageOld, 0, 0);
-                        skillImageOld.Dispose();
-                    }
-                    else
-                    {
-                        g.DrawImage(skillImageNew, 0, 0);
-                        skillImageNew.Dispose();
-                        skillType = "新增";
+                        else
+                        {
+                            isSkillNull[i] = true;
+                            nullSkillIdx = i + 1;
+                        }
                     }
 
-                    var skillTypeTextInfo = g.MeasureString(skillType, GearGraphics.ItemDetailFont2);
-                    int picH = 13;
-                    GearGraphics.DrawPlainText(g, skillType, skillTypeFont, Color.FromArgb(255, 255, 255), 2, (int)Math.Ceiling(skillTypeTextInfo.Width) + 2, ref picH, 10);
+                    // 合成Tooltip图片
+                    Bitmap resultImage = null;
+                    Graphics g = null;
+
+                    switch (nullSkillIdx)
+                    {
+                        case 0: // change
+                            skillType = "变更";
+
+                            Bitmap ImageNew = skillRenderNewOld[0].Render(true);
+                            Bitmap ImageOld = skillRenderNewOld[1].Render(true);
+                            if (ShowChangeType)
+                            {
+                                int picHchange = ShowObjectID ? 13 : 1;
+                                Graphics[] gNewOld = new Graphics[] { Graphics.FromImage(ImageNew), Graphics.FromImage(ImageOld) };
+                                GearGraphics.DrawPlainText(gNewOld[1], "变更前", skillTypeFont, Color.FromArgb(255, 255, 255), 2, 64, ref picHchange, 10);
+                                picHchange = ShowObjectID ? 13 : 1;
+                                GearGraphics.DrawPlainText(gNewOld[0], "变更后", skillTypeFont, Color.FromArgb(255, 255, 255), 2, 64, ref picHchange, 10);
+                            }
+
+                            resultImage = new Bitmap(ImageNew.Width + ImageOld.Width, Math.Max(ImageNew.Height, ImageOld.Height));
+                            g = Graphics.FromImage(resultImage);
+
+                            g.DrawImage(ImageOld, 0, 0);
+                            g.DrawImage(ImageNew, ImageOld.Width, 0);
+                            break;
+
+                        case 1: // delete
+                            skillType = "删除";
+                            if (isSkillNull[1]) continue;
+                            resultImage = skillRenderNewOld[1].Render();
+                            g = Graphics.FromImage(resultImage);
+                            break;
+
+                        case 2: // add
+                            skillType = "新增";
+                            if (isSkillNull[0]) continue;
+                            resultImage = skillRenderNewOld[0].Render();
+                            g = Graphics.FromImage(resultImage);
+                            break;
+
+                        default:
+                            break;
+                    }
+
+                    if (resultImage == null || g == null)
+                    {
+                        continue;
+                    }
+
+                    var skillTypeTextInfo = g.MeasureString(skillType, GearGraphics.ItemDetailFont);
+                    int picH = ShowObjectID ? 13 : 1;
+                    if (ShowChangeType && nullSkillIdx != 0) GearGraphics.DrawPlainText(g, skillType, skillTypeFont, Color.FromArgb(255, 255, 255), 2, (int)Math.Ceiling(skillTypeTextInfo.Width) + 2, ref picH, 10);
 
                     string imageName = Path.Combine(skillTooltipPath, "Skill_" + skillID + '[' + (ItemStringHelper.GetJobName(int.Parse(skillID) / 10000) ?? "其它") + "]_" + skillType + ".png");
                     diffHtml["Skill"][skillType].Add("Skill_" + skillID + '[' + (ItemStringHelper.GetJobName(int.Parse(skillID) / 10000) ?? "其它") + "]_" + skillType + ".png");
@@ -1047,6 +1145,162 @@ namespace WzComparerR2.Comparer
             }
             skillTooltipInfo.Clear();
             diffSkillTags.Clear();
+        }
+
+        private void savePerJobSkillTooltip(string skillTooltipPath)
+        {
+            UpdateActionChanges();
+            SkillTooltipRender2[] skillRenderNewOld = new SkillTooltipRender2[2];
+            int count = 0;
+            int allCount = skillTooltipInfo.Count;
+            var skillTypeFont = new Font("宋体", 11f, GraphicsUnit.Pixel);
+
+            for (int i = 0; i < 2; i++) // 0: New, 1: Old
+            {
+                this.StringWzNewOld[i] = WzNewOld[i]?.FindNodeByPath("String").GetNodeWzFile();
+                this.ItemWzNewOld[i] = WzNewOld[i]?.FindNodeByPath("Item").GetNodeWzFile();
+                this.EtcWzNewOld[i] = WzNewOld[i]?.FindNodeByPath("Etc").GetNodeWzFile();
+                this.QuestWzNewOld[i] = WzNewOld[i]?.FindNodeByPath("Quest").GetNodeWzFile();
+
+                skillRenderNewOld[i] = new SkillTooltipRender2();
+                skillRenderNewOld[i].StringLinker = new StringLinker();
+                skillRenderNewOld[i].StringLinker.Load(StringWzNewOld[i], ItemWzNewOld[i], EtcWzNewOld[i], QuestWzNewOld[i]);
+                skillRenderNewOld[i].ShowObjectID = this.ShowObjectID;
+                skillRenderNewOld[i].ShowDelay = true;
+                skillRenderNewOld[i].wzNode = WzNewOld[i];
+                skillRenderNewOld[i].DiffSkillTags = this.diffPerJobSkillTags;
+                skillRenderNewOld[i].IgnoreEvalError = true;
+                skillRenderNewOld[i].Enable22AniStyle = this.Enable22AniStyle;
+                skillRenderNewOld[i].ShowParameters = CharaSimConfig.Default.Skill.ShowParameters;
+            }
+            diffHtml["Skill"] = new Dictionary<string, List<string>>() { { "变更", new List<string>() }, { "新增", new List<string>() }, { "删除", new List<string>() } };
+            foreach (var skillID in PerJobSkillTooltipInfo)
+            {
+                try
+                {
+                    StateInfo = string.Format("{0}/{1} 技能: {2}", ++count, allCount, skillID);
+                    StateDetail = "正在以Tooltip图像处理分职业技能变更点...";
+
+                    bool[] isSkillNull = new bool[2] { false, false };
+
+                    if (SkipKMSContent && isKMSSkillID(Int32.Parse(skillID))) continue;
+
+                    string skillType = "";
+                    string skillNodePath = int.Parse(skillID) / 10000000 == 8 ? String.Format(@"\{0:D}.img\skill\{1:D}", int.Parse(skillID) / 100, skillID) : String.Format(@"\{0:D}.img\skill\{1:D}", int.Parse(skillID) / 10000, skillID);
+                    if (int.Parse(skillID) / 10000 == 0) skillNodePath = String.Format(@"\000.img\skill\{0:D7}", skillID);
+                    int nullSkillIdx = 0;
+
+                    int maxSkillIndex = 0;
+                    bool isSixthJobSkill = int.Parse(skillID) / 100000000 == 5;
+
+                    // 变更前后Tooltip图像生成
+                    for (int i = 0; i < 2; i++) // 0: New, 1: Old
+                    {
+                        Skill skill = Skill.CreateFromNode(PluginManager.FindWz("Skill" + skillNodePath, WzFileNewOld[i]), PluginManager.FindWz, PluginManager.FindWz, WzFileNewOld[i]) ??
+                            (Skill.CreateFromNode(PluginManager.FindWz("Skill001" + skillNodePath, WzFileNewOld[i]), PluginManager.FindWz, PluginManager.FindWz, WzFileNewOld[i]) ??
+                            (Skill.CreateFromNode(PluginManager.FindWz("Skill002" + skillNodePath, WzFileNewOld[i]), PluginManager.FindWz, PluginManager.FindWz, WzFileNewOld[i]) ??
+                            Skill.CreateFromNode(PluginManager.FindWz("Skill003" + skillNodePath, WzFileNewOld[i]), PluginManager.FindWz, PluginManager.FindWz, WzFileNewOld[i])));
+
+                        if (skill != null)
+                        {
+                            skill.Level = skill.MaxLevel;
+                            skillRenderNewOld[i].Skill = skill;
+                            maxSkillIndex = skill.PerJobAttackInfo.Count;
+                        }
+                        else
+                        {
+                            isSkillNull[i] = true;
+                            nullSkillIdx = i + 1;
+                        }
+                    }
+
+                    for (int jobIndex = 0; jobIndex < maxSkillIndex; jobIndex++)
+                    {
+                        // 绘制Tooltip图像
+                        Bitmap resultImage = null;
+                        Graphics g = null;
+
+                        int targetJobId = 0;
+
+                        switch (nullSkillIdx)
+                        {
+                            case 0: // change
+                                skillType = "变更";
+                                skillRenderNewOld[0].Skill.PerJobIndex = jobIndex;
+                                skillRenderNewOld[1].Skill.PerJobIndex = jobIndex;
+                                targetJobId = skillRenderNewOld[0].Skill.PerJobAttackInfo.Keys.ToList()[jobIndex];
+                                Bitmap ImageNew = skillRenderNewOld[0].Render(true);
+                                Bitmap ImageOld = skillRenderNewOld[1].Render(true);
+                                if (ShowChangeType)
+                                {
+                                    int picHchange = ShowObjectID ? 13 : 1;
+                                    Graphics[] gNewOld = new Graphics[] { Graphics.FromImage(ImageNew), Graphics.FromImage(ImageOld) };
+                                    GearGraphics.DrawPlainText(gNewOld[1], "变更前", skillTypeFont, Color.FromArgb(255, 255, 255), 2, 64, ref picHchange, 10);
+                                    picHchange = ShowObjectID ? 13 : 1;
+                                    GearGraphics.DrawPlainText(gNewOld[0], "变更后", skillTypeFont, Color.FromArgb(255, 255, 255), 2, 64, ref picHchange, 10);
+                                }
+
+                                resultImage = new Bitmap(ImageNew.Width + ImageOld.Width, Math.Max(ImageNew.Height, ImageOld.Height));
+                                g = Graphics.FromImage(resultImage);
+
+                                g.DrawImage(ImageOld, 0, 0);
+                                g.DrawImage(ImageNew, ImageOld.Width, 0);
+                                break;
+
+                            case 1: // delete
+                                skillType = "删除";
+                                if (isSkillNull[1]) continue;
+                                skillRenderNewOld[1].Skill.PerJobIndex = jobIndex;
+                                targetJobId = skillRenderNewOld[1].Skill.PerJobAttackInfo.Keys.ToList()[jobIndex];
+                                resultImage = skillRenderNewOld[1].Render();
+                                g = Graphics.FromImage(resultImage);
+                                break;
+
+                            case 2: // add
+                                skillType = "新增";
+                                if (isSkillNull[0]) continue;
+                                skillRenderNewOld[0].Skill.PerJobIndex = jobIndex;
+                                targetJobId = skillRenderNewOld[0].Skill.PerJobAttackInfo.Keys.ToList()[jobIndex];
+                                resultImage = skillRenderNewOld[0].Render();
+                                g = Graphics.FromImage(resultImage);
+                                break;
+
+                            default:
+                                break;
+                        }
+
+                        if (resultImage == null || g == null)
+                        {
+                            continue;
+                        }
+
+                        var skillTypeTextInfo = g.MeasureString(skillType, GearGraphics.ItemDetailFont);
+                        int picH = ShowObjectID ? 13 : 1;
+                        if (ShowChangeType && nullSkillIdx != 0) GearGraphics.DrawPlainText(g, skillType, skillTypeFont, Color.FromArgb(255, 255, 255), 2, (int)Math.Ceiling(skillTypeTextInfo.Width) + 2, ref picH, 10);
+
+                        string categoryPath = (ItemStringHelper.GetJobName(isSixthJobSkill ? targetJobId + 2 : targetJobId) ?? "其他");
+                        if (!Directory.Exists(Path.Combine(skillTooltipPath, categoryPath)))
+                        {
+                            Directory.CreateDirectory(Path.Combine(skillTooltipPath, categoryPath));
+                        }
+
+                        string imageName = Path.Combine(skillTooltipPath, categoryPath, "Skill_" + skillID + '[' + (ItemStringHelper.GetJobName(int.Parse(skillID) / 10000) ?? "其它") + "]_" + skillType + ".png");
+                        diffHtml["Skill"][skillType].Add("Skill_" + skillID + '[' + (ItemStringHelper.GetJobName(int.Parse(skillID) / 10000) ?? "其它") + "]_" + skillType + ".png");
+                        if (!File.Exists(imageName))
+                        {
+                            resultImage.Save(imageName, System.Drawing.Imaging.ImageFormat.Png);
+                        }
+                        resultImage.Dispose();
+                        g.Dispose();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    FailToExportTooltips.Add("Skill Tooltip: " + skillID, ex.Message);
+                }
+            }
+            PerJobSkillTooltipInfo.Clear();
+            diffPerJobSkillTags.Clear();
         }
 
         // 变更道具Tooltip输出
@@ -1079,6 +1333,8 @@ namespace WzComparerR2.Comparer
             itemRenderOld.ShowLinkedTamingMob = this.ShowLinkedTamingMob;
             itemRenderNew.CompareMode = true;
             itemRenderOld.CompareMode = true;
+            itemRenderNew.ShowApplicablePetEquip = this.LocatePetEquip;
+            itemRenderOld.ShowApplicablePetEquip = this.LocatePetEquip;
             itemRenderNew.Enable22AniStyle = CharaSimConfig.Default.Enable22AniStyle;
             itemRenderOld.Enable22AniStyle = CharaSimConfig.Default.Enable22AniStyle;
             diffHtml["Item"] = new Dictionary<string, List<string>> { { "变更", new List<string>() }, { "新增", new List<string>() }, { "删除", new List<string>() } };
@@ -1208,6 +1464,7 @@ namespace WzComparerR2.Comparer
                 itemRenderNewOld[i].ShowLinkedTamingMob = this.ShowLinkedTamingMob;
                 itemRenderNewOld[i].AllowFamiliarOutOfBounds = this.AllowFamiliarOutOfBounds;
                 itemRenderNewOld[i].UseCTFamiliarRender = this.UseCTFamiliarUI;
+                itemRenderNewOld[i].ShowApplicablePetEquip = this.LocatePetEquip;
                 itemRenderNewOld[i].CompareMode = true;
             }
             diffHtml["Item"] = new Dictionary<string, List<string>> { { "变更", new List<string>() }, { "新增", new List<string>() }, { "删除", new List<string>() } };
@@ -1297,7 +1554,7 @@ namespace WzComparerR2.Comparer
                         }
                     }
 
-                    // ツールチップ画像を合わせる
+                    // 合成Tooltip图像
                     Bitmap resultImage = null;
                     Graphics g = null;
 
@@ -1401,6 +1658,8 @@ namespace WzComparerR2.Comparer
             eqpRenderOld.StringLinker = slOld;
             eqpRenderNew.ShowObjectID = true;
             eqpRenderOld.ShowObjectID = true;
+            eqpRenderNew.ShowApplicablePet = this.LocatePetEquip;
+            eqpRenderOld.ShowApplicablePet = this.LocatePetEquip;
             diffHtml["Eqp"] = new Dictionary<string, List<string>> { { "变更", new List<string>() }, { "新增", new List<string>() }, { "删除", new List<string>() } };
 
             foreach (var eqpID in eqpTooltipInfo)
@@ -1458,7 +1717,7 @@ namespace WzComparerR2.Comparer
                     {
                         eqpNodePath = String.Format(@"Character\Totem\{0:D}.img", eqpID);
                     }
-                    else if (Regex.IsMatch(eqpID, "^012[1-9]|^013|^014|^015|^0160|^0169|^0170")) // 判断开头是否是012~015、0160或0169-0179
+                    else if (Regex.IsMatch(eqpID, "^012[1-9]|^013|^014|^015|^0160|^0169|^0170|^0172")) // 判断开头是否是012~015、0160或0169-0179
                     {
                         eqpNodePath = String.Format(@"Character\Weapon\{0:D}.img", eqpID);
                     }
@@ -1700,6 +1959,10 @@ namespace WzComparerR2.Comparer
             npcRenderOld.StringLinker = slOld;
             npcRenderNew.ShowAllIllustAtOnce = true;
             npcRenderOld.ShowAllIllustAtOnce = true;
+            npcRenderNew.EnableWorldArchive = true;
+            npcRenderOld.EnableWorldArchive = true;
+            npcRenderNew.ShowNpcQuotes = true;
+            npcRenderOld.ShowNpcQuotes = true;
             npcRenderNew.ShowObjectID = true;
             npcRenderOld.ShowObjectID = true;
             diffHtml["Npc"] = new Dictionary<string, List<string>> { { "变更", new List<string>() }, { "新增", new List<string>() }, { "删除", new List<string>() } };
@@ -2328,23 +2591,65 @@ namespace WzComparerR2.Comparer
             diffAchvTags.Clear();
         }
 
-        // 从Skill不同节点获取SkillID
-        private void getIDFromSkill(Wz_Node node)
+        //获取动作变更点
+        private void GetActionChanges(Wz_Node node, bool change)
         {
-            var tag = node.Text;
-            Match match = Regex.Match(node.FullPathToFile, @"^Skill\d*\\\d+.img\\skill\\(\d+)\\(common|masterLevel|combatOrders|action|isPetAutoBuff|BGM).*");
+            if (node == null) return;
+
+            Match match = Regex.Match(node.FullPathToFile, @"^Character\\00002000.img\\([^\\]+)\\\d+\\delay");
+            if (match.Success)
+            {
+                string action = match.Groups[1].ToString();
+
+                if (!string.IsNullOrEmpty(action))
+                {
+                    if (!ChangedActions.ContainsKey(action))
+                    {
+                        ChangedActions[action] = new HashSet<int>();
+                    }
+                }
+            }
+        }
+
+        // 从Skill不同节点获取SkillID
+        private void getIDFromSkill(Wz_Node node, bool change)
+        {
+            if (node == null) return;
+            Match match = Regex.Match(node.FullPathToFile, @"^String\\Skill.img\\(\d+).*");
+            string tag = null;
+            if (!match.Success)
+            {
+                tag = node.Text;
+                match = Regex.Match(node.FullPathToFile, @"^Skill\d*\\\d+.img\\skill\\(\d+)\\(common|masterLevel|combatOrders|action|isPetAutoBuff|isSequenceOn|BGM).*"); // 변경점 중 스킬 툴팁 출력할 것들
+                if (change && !match.Success)
+                {
+                    match = Regex.Match(node.FullPathToFile, @"^Skill\\_Canvas\\\d+.img\\skill\\(\d+)\\(icon)$"); // 스킬 아이콘 변경 체크
+                }
+            }
+
             if (match.Success)
             {
                 string skillID = match.Groups[1].ToString();
-                if (!skillTooltipInfo.Contains(skillID) && skillID != null)
+                if (skillID != null)
                 {
-                    skillTooltipInfo.Add(skillID);
-                    diffSkillTags[skillID] = new List<string>();
-                    diffSkillTags[skillID].Add(tag);
-                }
-                else if (skillTooltipInfo.Contains(skillID) && skillID != null)
-                {
-                    if (!diffSkillTags[skillID].Contains(tag))
+                    if (node.FindNodeByPath("common\\attackInfo") != null)
+                    {
+                        if (!PerJobSkillTooltipInfo.Contains(skillID))
+                        {
+                            PerJobSkillTooltipInfo.Add(skillID);
+                            diffPerJobSkillTags[skillID] = new List<string>();
+                        }
+                    }
+                    else
+                    {
+                        if (!skillTooltipInfo.Contains(skillID))
+                        {
+                            skillTooltipInfo.Add(skillID);
+                            diffSkillTags[skillID] = new List<string>();
+                        }
+                    }
+
+                    if (tag != null && !diffSkillTags[skillID].Contains(tag))
                     {
                         diffSkillTags[skillID].Add(tag);
                     }
@@ -2514,20 +2819,6 @@ namespace WzComparerR2.Comparer
             }
         }
 
-        // 从String不同节点获取SkillID
-        private void getIDFromString(Wz_Node node)
-        {
-            Match match = Regex.Match(node.FullPathToFile, @"^String\\Skill.img\\(\d+).*");
-            if (match.Success)
-            {
-                string skillID = match.Groups[1].ToString();
-                if (!skillTooltipInfo.Contains(skillID) && skillID != null)
-                {
-                    skillTooltipInfo.Add(skillID);
-                }
-            }
-        }
-
         // 从String不同节点获取ItemID
         private void getIDFromString2(Wz_Node node)
         {
@@ -2683,6 +2974,64 @@ namespace WzComparerR2.Comparer
             }
         }
 
+        // 确认现金道具价格变更
+        private void CompareCommodities()
+        {
+            var commodities_new = CharaSimLoader.LoadedCommodityPricesByItemId[0];
+            var commodities_old = CharaSimLoader.LoadedCommodityPricesByItemId[1];
+
+            var key_new = commodities_new.Keys;
+            var key_old = commodities_old.Keys;
+
+            var added = key_new.Except(key_old).ToList();
+            var removed = key_old.Except(key_new).ToList();
+            List<int> ids = new List<int>();
+            ids.AddRange(added);
+            ids.AddRange(removed);
+
+            var common = key_new.Intersect(key_old);
+            foreach (var id in common)
+            {
+                if (commodities_new.TryGetValue(id, out var commodity_new) && commodities_old.TryGetValue(id, out var commodity_old) && CommodityPriceChanged(commodity_new, commodity_old))
+                {
+                    ids.Add(id);
+                }
+            }
+
+            foreach (var id in ids)
+            {
+                if (id >= 2000000 && saveItemTooltip) // item
+                {
+                    if (!itemTooltipInfo.Contains(id.ToString()))
+                    {
+                        itemTooltipInfo.Add(id.ToString());
+                    }
+                }
+                else if (saveEqpTooltip) // eqp
+                {
+                    if (!eqpTooltipInfo.Contains(id.ToString()))
+                    {
+                        eqpTooltipInfo.Add(id.ToString());
+                    }
+                }
+            }
+        }
+
+        private bool CommodityPriceChanged(IReadOnlyList<CommodityPriceInfo> commodity_new, IReadOnlyList<CommodityPriceInfo> commodity_old)
+        {
+            if (commodity_new.Count != commodity_old.Count)
+                return true;
+
+            for (int i = 0; i < commodity_new.Count; i++) // Sorted in CharaSimLoader
+            {
+                if (commodity_new[i] != commodity_old[i])
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
         private void CompareImg(Wz_Image imgNew, Wz_Image imgOld, string imgName, string anchorName, string menuAnchorName, string outputDir, StreamWriter sw)
         {
             StateDetail = "img构成分析中";
@@ -2720,26 +3069,17 @@ namespace WzComparerR2.Comparer
                 count[idx]++;
 
                 // 变更的技能Tooltip处理
-                if (saveSkillTooltip && outputDir.Contains("Skill"))
+                if (saveSkillTooltip)
                 {
-                    if (diff.NodeNew != null)
+                    if (imgName.StartsWith("Skill") || imgName.StartsWith("String"))
                     {
-                        getIDFromSkill(diff.NodeNew);
+                        getIDFromSkill(diff.NodeNew, idx == 0 ? true : false);
+                        getIDFromSkill(diff.NodeOld, idx == 0 ? true : false);
                     }
-                    if (diff.NodeOld != null)
+                    if (imgName.StartsWith("Character\\00002000.img"))
                     {
-                        getIDFromSkill(diff.NodeOld);
-                    }
-                }
-                if (saveSkillTooltip && outputDir.Contains("String"))
-                {
-                    if (diff.NodeNew != null)
-                    {
-                        getIDFromString(diff.NodeNew);
-                    }
-                    if (diff.NodeOld != null)
-                    {
-                        getIDFromString(diff.NodeOld);
+                        GetActionChanges(diff.NodeNew, idx == 0 ? true : false);
+                        GetActionChanges(diff.NodeOld, idx == 0 ? true : false);
                     }
                 }
                 // 变更的道具Tooltip处理
@@ -2949,9 +3289,16 @@ namespace WzComparerR2.Comparer
                     sw.Write("<td>{0}</td>", OutputNodeValue(fullPath, node, 0, outputDir) ?? " ");
                     sw.WriteLine("</tr>");
 
-                    if (saveSkillTooltip && outputDir.Contains("Skill")) // 变更技能Tooltip处理
+                    if (saveSkillTooltip) // 变更技能Tooltip处理
                     {
-                        getIDFromSkill(node);
+                        if (imgName.StartsWith("Skill") || imgName.StartsWith("String"))
+                        {
+                            getIDFromSkill(node, idx == 0 ? true : false);
+                        }
+                        if (imgName.StartsWith("Character\\00002000.img"))
+                        {
+                            GetActionChanges(node, idx == 0 ? true : false);
+                        }
                     }
                     if (saveItemTooltip && outputDir.Contains("Item")) // 变更道具Tooltip处理
                     {

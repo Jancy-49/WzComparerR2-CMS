@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Text;
+using System.Text.RegularExpressions;
 using WzComparerR2.WzLib;
 
 namespace WzComparerR2.CharaSim
@@ -17,9 +18,19 @@ namespace WzComparerR2.CharaSim
             this.RelationSkill = null;
             this.ReqSkill = new Dictionary<int, int>();
             this.Action = new List<string>();
+            this.IsRoguelikeSkill = false;
+            this.IsRedmoon = false;
+            this.IsGuildCastleResearch = false;
+            this.GuildCastleResearchType = 0;
+            this.GuildCastleResearchRequirements = new Dictionary<int, int>();
+            this.GuildCastleResearchReqCondition = "";
+            this.VariableProps = new List<string>();
+            this.PerJobAttackInfo = new Dictionary<int, Dictionary<string, string>>();
+            this.perJobIndex = 0;
         }
 
         private int level;
+        private int perJobIndex;
         internal List<Dictionary<string, string>> levelCommon;
         internal Dictionary<string, string> common;
 
@@ -41,6 +52,7 @@ namespace WzComparerR2.CharaSim
         public BitmapOrigin IconDisabled { get; set; }
 
         public HyperSkillType Hyper { get; set; }
+        public int HyperSkill { get; set; }
         public bool HyperStat { get; set; }
         public bool applyHyper { get; set; }
 
@@ -56,6 +68,16 @@ namespace WzComparerR2.CharaSim
             }
         }
 
+        public int PerJobIndex
+        {
+            get { return perJobIndex; }
+            set
+            {
+                perJobIndex = Math.Max(0, Math.Min(value, this.PerJobAttackInfo.Count - 1));
+            }
+        }
+
+        public Dictionary<int, Dictionary<string, string>> PerJobAttackInfo { get; set; }
         public int ReqLevel { get; set; }
         public int ReqAmount { get; set; }
         public bool PreBBSkill { get; set; }
@@ -148,8 +170,19 @@ namespace WzComparerR2.CharaSim
         public bool collabo { get; set; }
         public bool bgmLoop { get; set; }
         public bool notAbleWhenFlying { get; set; }
+        public bool IsRoguelikeSkill { get; set; }
+        public bool IsRedmoon { get; set; }
+        public bool IsGuildCastleResearch { get; set; }
+        public int GuildCastleResearchType { get; set; }
+        public Dictionary<int, int> GuildCastleResearchRequirements { get; set; }
+        public string GuildCastleResearchReqCondition { get; set; }
+        public List<string> VariableProps { get; set; }
         public int reqGuildLv { get; set; }
         public int fixSkillAlpha { get; set; }
+        public int tabIndex { get; set; }
+        public int categoryIndex { get; set; }
+        public bool Hasreq { get; set; }
+        public bool HasreqLevel { get; set; }
         public Point LT { get; set; }
         public Point RB { get; set; }
         public int MaxLevel
@@ -169,8 +202,14 @@ namespace WzComparerR2.CharaSim
         {
             Skill skill = new Skill();
             int skillID;
-            if (!Int32.TryParse(node.Text, out skillID))
-                return null;
+            if (!Int32.TryParse(node?.Text, out skillID))
+            {
+                Match m = Regex.Match(node.FullPathToFile, @"^Skill\\Roguelike\\.+\\(\d+)\.img$");
+                if (!(m.Success && Int32.TryParse(m.Result("$1"), out skillID)))
+                    return null;
+                skill.IsRoguelikeSkill = true;
+                if (node.FullPathToFile.Contains("Redmoon")) skill.IsRedmoon = true;
+            }
             skill.SkillID = skillID;
 
             foreach (Wz_Node childNode in node.Nodes)
@@ -187,22 +226,95 @@ namespace WzComparerR2.CharaSim
                         skill.IconDisabled = BitmapOrigin.CreateFromNode(childNode, findNode, wzf);
                         break;
                     case "common":
-                        foreach (Wz_Node commonNode in childNode.Nodes)
+                        if (skill.IsRoguelikeSkill)
                         {
-                            if (commonNode.Value != null && !(commonNode.Value is Wz_Vector))
+                            skill.common.Add("maxLevel", "1");
+                            foreach (Wz_Node commonNode in childNode.Nodes)
                             {
-                                skill.common[commonNode.Text] = commonNode.Value.ToString();
-                            }
-                            else if (commonNode.Value != null && commonNode.Value is Wz_Vector)
-                            {
-                                Wz_Vector cNode = commonNode.Value as Wz_Vector;
-                                if (commonNode.Text == "lt")
+                                switch (commonNode.Text)
                                 {
-                                    skill.LT = new Point(cNode.X, cNode.Y);
+                                    case "icon":
+                                        skill.Icon = BitmapOrigin.CreateFromNode(commonNode, findNode, wzf);
+                                        break;
+                                    case "iconMouseOver":
+                                        skill.IconMouseOver = BitmapOrigin.CreateFromNode(commonNode, findNode, wzf);
+                                        break;
+                                    case "iconDisabled":
+                                        skill.IconDisabled = BitmapOrigin.CreateFromNode(commonNode, findNode, wzf);
+                                        break;
+                                    case "Combo":
+                                    case "Tags":
+                                        break;
+                                    default:
+                                        if (commonNode.Value != null && !(commonNode.Value is Wz_Vector))
+                                        {
+                                            skill.common[commonNode.Text] = commonNode.Value.ToString();
+                                        }
+                                        else if (commonNode.Value != null && commonNode.Value is Wz_Vector)
+                                        {
+                                            Wz_Vector cNode = commonNode.Value as Wz_Vector;
+                                            if (commonNode.Text == "lt")
+                                            {
+                                                skill.LT = new Point(cNode.X, cNode.Y);
+                                            }
+                                            else if (commonNode.Text == "rb")
+                                            {
+                                                skill.RB = new Point(cNode.X, cNode.Y);
+                                            }
+                                        }
+                                        break;
                                 }
-                                else if (commonNode.Text == "rb")
+                            }
+                        }
+                        else
+                        {
+                            foreach (Wz_Node commonNode in childNode.Nodes)
+                            {
+                                if (commonNode.Value != null && !(commonNode.Value is Wz_Vector))
                                 {
-                                    skill.RB = new Point(cNode.X, cNode.Y);
+                                    skill.common[commonNode.Text] = commonNode.Value.ToString();
+                                }
+                                else if (commonNode.Value != null && commonNode.Value is Wz_Vector)
+                                {
+                                    Wz_Vector cNode = commonNode.Value as Wz_Vector;
+                                    if (commonNode.Text == "lt")
+                                    {
+                                        skill.LT = new Point(cNode.X, cNode.Y);
+                                    }
+                                    else if (commonNode.Text == "rb")
+                                    {
+                                        skill.RB = new Point(cNode.X, cNode.Y);
+                                    }
+                                }
+                                else if (commonNode.Text == "attackInfo")
+                                {
+                                    if (commonNode.Nodes.Count > 0)
+                                    {
+                                        foreach (Wz_Node jobNode in commonNode.Nodes)
+                                        {
+                                            int jobID;
+                                            if (Int32.TryParse(jobNode.Text, out jobID))
+                                            {
+                                                Dictionary<string, string> attackInfo = new Dictionary<string, string>();
+                                                foreach (Wz_Node infoNode in jobNode.Nodes)
+                                                {
+                                                    attackInfo[infoNode.Text] = infoNode.Value.ToString();
+                                                }
+                                                skill.PerJobAttackInfo[jobID] = attackInfo;
+                                            }
+                                        }
+                                    }
+                                }
+                                else if (commonNode.Nodes.Count > 0)
+                                {
+                                    skill.VariableProps.Add(commonNode.Text);
+                                    foreach (var levelNode in commonNode.Nodes)
+                                    {
+                                        if (levelNode.Value != null && !(levelNode.Value is Wz_Vector))
+                                        {
+                                            skill.common[$"{commonNode.Text}_{levelNode.Text}"] = levelNode.Value.ToString();
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -237,6 +349,7 @@ namespace WzComparerR2.CharaSim
                         break;
                     case "hyper":
                         skill.Hyper = (HyperSkillType)childNode.GetValue<int>();
+                        skill.HyperSkill = childNode.GetValue<int>();
                         break;
                     case "hyperStat":
                         skill.HyperStat = childNode.GetValue<int>() != 0;
@@ -367,6 +480,7 @@ namespace WzComparerR2.CharaSim
                         break;
                     case "reqLev":
                         skill.ReqLevel = childNode.GetValue<int>();
+                        skill.HasreqLevel = true;
                         break;
                     case "fixSkillAlpha":
                         skill.fixSkillAlpha = childNode.GetValue<int>();
@@ -391,6 +505,7 @@ namespace WzComparerR2.CharaSim
                                 }
                             }
                         }
+                        skill.Hasreq = true;
                         break;
                     case "action":
                         for (int i = 0; ; i++)
@@ -539,6 +654,12 @@ namespace WzComparerR2.CharaSim
                         break;
                     case "notAbleWhenFlying":
                         skill.notAbleWhenFlying = childNode.GetValue<int>() != 0;
+                        break;
+                    case "tabIndex":
+                        skill.tabIndex = childNode.GetValue<int>();
+                        break;
+                    case "categoryIndex":
+                        skill.categoryIndex = childNode.GetValue<int>();
                         break;
                 }
             }

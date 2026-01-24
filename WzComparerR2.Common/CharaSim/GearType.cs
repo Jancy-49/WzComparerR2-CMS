@@ -514,6 +514,10 @@ namespace WzComparerR2.CharaSim
         /// </summary>
         ancientBow = 159,
         /// <summary>
+        /// 阿斯特拉 172
+        /// </summary>
+        astra = 172,
+        /// <summary>
         /// 拼图 168
         /// </summary>
         bit = 168,

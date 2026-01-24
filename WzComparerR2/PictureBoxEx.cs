@@ -1026,7 +1026,7 @@ namespace WzComparerR2
 
             if (this.ShowInfo && this.XnaFont != null)
             {
-                UpdateInfoText();
+                //UpdateInfoText();
                 sprite.Begin();
                 sprite.DrawStringEx(this.XnaFont, this.sbInfo, Vector2.Zero, Color.Black);
                 sprite.End();
