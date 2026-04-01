@@ -89,8 +89,12 @@ namespace WzComparerR2.CharaSim
             }
         }
 
-        public static Item CreateFromNode(Wz_Node node, GlobalFindNodeFunction findNode)
+        public static Item CreateFromNode(Wz_Node node, GlobalFindNodeFunction findNode, Wz_File wzf = null)
         {
+            if (node == null)
+            {
+                return null;
+            }
             Item item = new Item();
             int value;
             if (node == null
@@ -120,21 +124,21 @@ namespace WzComparerR2.CharaSim
                         case "icon":
                             if (subNode.Value is Wz_Uol || subNode.Value is Wz_Png)
                             {
-                                item.Icon = BitmapOrigin.CreateFromNode(subNode, findNode);
+                                item.Icon = BitmapOrigin.CreateFromNode(subNode, findNode, wzf);
                             }
                             break;
 
                         case "iconRaw":
                             if (subNode.Value is Wz_Uol || subNode.Value is Wz_Png)
                             {
-                                item.IconRaw = BitmapOrigin.CreateFromNode(subNode, findNode);
+                                item.IconRaw = BitmapOrigin.CreateFromNode(subNode, findNode, wzf);
                             }
                             break;
 
                         case "sample":
                             if (subNode.Value is Wz_Uol || subNode.Value is Wz_Png)
                             {
-                                item.Sample = BitmapOrigin.CreateFromNode(subNode, findNode);
+                                item.Sample = BitmapOrigin.CreateFromNode(subNode, findNode, wzf);
                             }
                             break;
 

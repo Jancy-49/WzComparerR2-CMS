@@ -536,11 +536,11 @@ namespace WzComparerR2.CharaSimControl
                 DateTime time = DateTime.Now.AddDays(7d);
                 if (!item.Cash)
                 {
-                    expireTime = time.ToString("yyyy年 M月 d日 HH时 mm分前可使用");
+                    expireTime = time.ToString("到yyyy年 M月 d日 HH时 mm分可使用");
                 }
                 else
                 {
-                    expireTime = time.ToString("yyyy年 M月 d日 HH时前可使用");
+                    expireTime = time.ToString("到yyyy年 M月 d日 HH时可使用");
                 }
             }
             else if (item.ConsumableFrom != null || item.EndUseDate != null)
@@ -552,7 +552,7 @@ namespace WzComparerR2.CharaSimControl
                 }
                 if (item.EndUseDate != null)
                 {
-                    expireTime += string.Format("\n{0}年 {1}月 {2}日 {3:D2}时 {4:D2}分前可使用", Convert.ToInt32(item.EndUseDate.Substring(0, 4)), Convert.ToInt32(item.EndUseDate.Substring(4, 2)), Convert.ToInt32(item.EndUseDate.Substring(6, 2)), Convert.ToInt32(item.EndUseDate.Substring(8, 2)), Convert.ToInt32(item.EndUseDate.Substring(10, 2)));
+                    expireTime += string.Format("\n到{0}年 {1}月 {2}日 {3:D2}时 {4:D2}分可使用", Convert.ToInt32(item.EndUseDate.Substring(0, 4)), Convert.ToInt32(item.EndUseDate.Substring(4, 2)), Convert.ToInt32(item.EndUseDate.Substring(6, 2)), Convert.ToInt32(item.EndUseDate.Substring(8, 2)), Convert.ToInt32(item.EndUseDate.Substring(10, 2)));
                 }
             }
             else if ((item.Props.TryGetValue(ItemPropType.permanent, out value) && value != 0) || (item.IsPet && item.Props.TryGetValue(ItemPropType.life, out value) && value == 0))
@@ -711,7 +711,7 @@ namespace WzComparerR2.CharaSimControl
                             GearGraphics.DrawString(g, desc, Translator.IsKoreanStringPresent(desc) ? GearGraphics.KMSItemDetailFont : GearGraphics.ItemDetailFont, item22ColorTable, descLeft, descRight, ref picH, LineHeight);
                             break;
                         case 2:
-                            GearGraphics.DrawString(g, desc, Translator.IsKoreanStringPresent(desc) ? GearGraphics.KMSItemDetailFont : GearGraphics.ItemDetailFont, item22ColorTable, descLeft, descRight, ref picH, LineHeight); 
+                            GearGraphics.DrawString(g, desc, Translator.IsKoreanStringPresent(desc) ? GearGraphics.KMSItemDetailFont : GearGraphics.ItemDetailFont, item22ColorTable, descLeft, descRight, ref picH, LineHeight);
                             picH += 16;
                             GearGraphics.DrawString(g, translatedDesc, Translator.IsKoreanStringPresent(translatedDesc) ? GearGraphics.KMSItemDetailFont : GearGraphics.ItemDetailFont, item22ColorTable, descLeft, descRight, ref picH, LineHeight);
                             break;
@@ -719,13 +719,13 @@ namespace WzComparerR2.CharaSimControl
                             GearGraphics.DrawString(g, translatedDesc, Translator.IsKoreanStringPresent(translatedDesc) ? GearGraphics.KMSItemDetailFont : GearGraphics.ItemDetailFont, item22ColorTable, descLeft, descRight, ref picH, LineHeight);
                             break;
                     }
-                    
+
                 }
                 else
                 {
                     GearGraphics.DrawString(g, desc, Translator.IsKoreanStringPresent(desc) ? GearGraphics.KMSItemDetailFont : GearGraphics.ItemDetailFont, item22ColorTable, descLeft, descRight, ref picH, LineHeight);
                 }
-                
+
                 picH += 3;
             }
 
@@ -1179,7 +1179,7 @@ namespace WzComparerR2.CharaSimControl
                         }
                     }
                 }
-                tags.Add($"#c持有{count}项功能：{string.Join("、", petSkillNames)}#");
+                tags.Add($"#c拥有{count}个技能：{string.Join("、", petSkillNames)}#");
 
                 if (item.Props.TryGetValue(ItemPropType.noScroll, out value) && value > 0)
                 {
@@ -1242,7 +1242,7 @@ namespace WzComparerR2.CharaSimControl
                     }
                     else if (!(item.ItemID / 10000 == 501 || item.ItemID / 10000 == 502 || item.ItemID / 10000 == 516))
                     {
-                        tags.Add("#$r用冒险券购买时在使用前可与他人交换1次#");
+                        tags.Add("#$r用冒险券购买后，使用前可与他人交换1次#");
                     }
                 }
             }

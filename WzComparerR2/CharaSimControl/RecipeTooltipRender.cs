@@ -115,7 +115,7 @@ namespace WzComparerR2.CharaSimControl
                 picH += 16;
             }
 
-            picH += 4;
+            picH += 5;
             fmt.Dispose();
             g.Dispose();
             return tooltip;

@@ -146,7 +146,7 @@ namespace WzComparerR2.CharaSimControl
         private Bitmap GeneratePreAssembleFamiliarCard()
         {
             // Get Mob image and name
-            Mob mob = Mob.CreateFromNode(PluginManager.FindWz($@"Mob\{familiar.MobID.ToString().PadLeft(7, '0')}.img", this.SourceWzFile), PluginManager.FindWz);
+            Mob mob = Mob.CreateFromNode(PluginManager.FindWz($@"Mob\{familiar.MobID.ToString().PadLeft(7, '0')}.img", this.SourceWzFile), PluginManager.FindWz, PluginManager.FindWz);
 
             Point alignOrigin = new Point(190, 222);
             Point mobOrigin = new Point(0, 0);

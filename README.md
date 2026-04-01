@@ -1,12 +1,17 @@
-# WzComparerR2-CMS
-- 这是一个专为CMS设计的冒险岛提取工具。
-- 与其他客户端合作，例如 KMS、GMS、CMS。
+*<s>使用前先大喊 niconiconi! poi! duang!以减少bug发生率</s>*  
 
-# 帕普拉图斯主页
-- 融合[帕普拉图斯主页](https://jancy-49.github.io/Papulatus-Daily/index.html)，实现资讯版块跟进功能。
+[![Build Status](https://dev.azure.com/kagamiastudio/WzComparerR2/_apis/build/status/Kagamia.WzComparerR2?branchName=master)](https://dev.azure.com/kagamiastudio/WzComparerR2/_build/latest?definitionId=4&branchName=master)
 
-# Tooltip
-- EasyCompare可输出Skilltooltip、Itemtooltip、Eqptooltip、MapTooltip、Mobtooltip、Npctooltip、QuestTooltip和AchvTooltip
+# Maintenance Status
+
+⚠️ The WzComparerR2 project is now in deep maintenance status. This means that only critical bugs or wz file format breaking changes are being considered for inclusion by owner. Expect slow replies to issues.
+
+# WzComparerR2
+这是一个用C# latest/.Net4.62+.Net8组装的冒险岛提取器...  
+包含了一些奇怪的机能比如stringWZ搜索 客户端对比 装备模拟 地图模拟等等..  
+
+tips: WcR2将尽力维持每周更新，Releases里**不会**提供最稳定版下载，最新版会通过azure-pipeline自动发布。  
+links: [\[更新日志\]](https://github.com/Kagamia/WzComparerR2/tree/master/UpdateLogs)  [\[版本计划\]](https://github.com/Kagamia/WzComparerR2/wiki/Roadmap)  [\[最新版下载\]](https://github.com/Kagamia/WzComparerR2/releases/tag/ci-build)
 
 # Modules
 - **WzComparerR2** 主程序
@@ -14,53 +19,34 @@
 - **WzComparerR2.PluginBase** 插件管理器
 - **WzComparerR2.WzLib** wz文件读取相关
 - **CharaSimResource** 用于装备模拟的资源文件
-- **WzComparerR2.Updater** 程序更新器(未完成)
 - **WzComparerR2.LuaConsole** (可选插件)Lua控制台
 - **WzComparerR2.MapRender** (可选插件)地图仿真器
 - **WzComparerR2.Avatar** (可选插件)纸娃娃
-- **WzComparerR2.MonsterCard** (可选插件)怪物卡(已废弃)
+- **WzComparerR2.Network** (可选插件)在线聊天室
 
-# Usage
-- **2.x**: Win7+/.net4.8+/dx11.0
+# Prerequisite
+- **2.x**: Win7sp1+/.net4.6.2+/dx11.0
+- **1.x**: WinXp+/.net2.0+/dx9.0
 
-# NX OpenAPI
-- [了解如何获取API密钥。](https://openapi.nexon.com/guide/prepare-in-advance/)
-- 无法使用其他国家或地区的NexonID。只能使用韩国NexonID。
-- [了解有关OpenAPI功能的更多信息。](https://openapi.nexon.com/game/maplestory/)
-
-### ItemID to NX OpenAPI ItemIcon Filename
-|   |1st |2nd |3rd |4th |5th |6th |7th |
-|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
-|0  |    |P   |C   |L   |H   |O   |B   |
-|1  |E   |O   |D   |A   |G   |P   |A   |
-|2  |H   |N   |A   |J   |F   |M   |D   |
-|3  |G   |M   |B   |I   |E   |N   |C   |
-|4  |B   |L   |G   |P   |D   |K   |F   |
-|5  |A   |K   |H   |O   |C   |L   |E   |
-|6  |    |J   |E   |N   |B   |I   |H   |
-|7  |    |I   |F   |M   |A   |J   |G   |
-|8  |    |H   |K   |D   |P   |G   |J   |
-|9  |    |G   |I   |C   |O   |H   |I   |
-
-例如，以下ItemIcon URL 表示道具ID 1802767。非KMS道具不可用。
+# Installation
+```sh
+git clone --recurse-submodules -j8 git://github.com/Kagamia/WzComparerR2.git
 ```
-https://open.api.nexon.com/static/maplestory/ItemIcon/KEHCJAIG.png
-```
-
+Clone repository with submodules.
 
 # Compile
-- vs2022 or higher/.net 6 SDK
+- vs2022 or higher/.net 8 SDK
 
-# Credits
+# Credits and Acknowledgement
 - **Fiel** ([Southperry](http://www.southperry.net))  wz文件读取代码改造自WzExtract 以及WzPatcher
 - **Index** ([Exrpg](http://bbs.exrpg.com/space-uid-137285.html)) MapRender的原始代码 以及libgif
-- **[DotNetBar](http://www.devcomponents.com/)**
-- **[IMEHelper](https://github.com/JLChnToZ/IMEHelper)**
-- **[Spine-Runtime](https://github.com/EsotericSoftware/spine-runtimes)**
-- **[EmptyKeysUI](https://github.com/EmptyKeys)**
-- **[libvpx](https://www.webmproject.org/code/) & [libyuv](https://chromium.googlesource.com/libyuv/libyuv/)** for video decoding
-- **[@KENNYSOFT](https://github.com/KENNYSOFT)** and his WcR2-KMS version.
-- **[@Kagamia](https://github.com/Kagamia)** and her WcR2-CMS version.
-- **[@Spadow](https://github.com/Sunaries)** for providing his WcR2-GMS version.
-- **[@PirateIzzy](https://github.comPirateIzzy)** for providing the basis of this fork.
-- **[@seotbeo](https://github.com/seotbeo)** for providing Skill comparison feature.
+- **Deneo** For .ms file format and video format
+- [DotNetBar](http://www.devcomponents.com/)
+- [SharpDX](https://github.com/sharpdx/SharpDX) & [Monogame](https://github.com/MonoGame/MonoGame)
+- [BassLibrary](http://www.un4seen.com/)
+- [IMEHelper](https://github.com/JLChnToZ/IMEHelper)
+- [Spine-Runtime](https://github.com/EsotericSoftware/spine-runtimes)
+- [EmptyKeysUI](https://github.com/EmptyKeys)
+- [libvpx](https://www.webmproject.org/code/) & [libyuv](https://chromium.googlesource.com/libyuv/libyuv/) for video decoding
+- [VC-LTL5](https://github.com/Chuyu-Team/VC-LTL5) for native library build
+- All testers from CMST tester group.

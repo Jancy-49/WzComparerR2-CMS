@@ -9,7 +9,7 @@ namespace WzComparerR2
     {
         public static decimal Parse(string mathExpression, params decimal[] args)
         {
-            var tokens = Lexer(ExcessiveBracketFilter(mathExpression));
+            var tokens = Lexer(mathExpression);
             var inst = Suffix(tokens);
 
             var paramList = new Dictionary<string, object>();
@@ -30,29 +30,7 @@ namespace WzComparerR2
 
             return Execute(inst, new EvalContext(paramList));
         }
-        public static string ExcessiveBracketFilter(string expression)
-        {
-            int leftBracketQuantity = System.Text.RegularExpressions.Regex.Matches(expression, "[(]").Count;
-            int rightBracketQuantity = System.Text.RegularExpressions.Regex.Matches(expression, "[)]").Count;
-            int bracketQuantityDelta = rightBracketQuantity - leftBracketQuantity;
-            if (bracketQuantityDelta > 0)
-            {
-                while (bracketQuantityDelta > 0)
-                {
-                    expression = expression.Remove(expression.LastIndexOf(")"));
-                    bracketQuantityDelta--;
-                }
-            }
-            else if (bracketQuantityDelta < 0)
-            {
-                while (bracketQuantityDelta < 0)
-                {
-                    expression += ")";
-                    bracketQuantityDelta++;
-                }
-            }
-            return expression;
-        }
+
         private static List<Token> Lexer(string expr)
         {
             var tokens = new List<Token>();
@@ -142,21 +120,26 @@ namespace WzComparerR2
 
                     case TokenType.BracketEnd: //括号结束 弹出到上一个括号
                         {
-                            Token t;
-                            int count = 0;
-                            while ((t = stack.Pop()) != null)
+                            bool foundBracketEnd = false;
+                            while (stack.Count > 0)
                             {
+                                Token t = stack.Pop();
                                 if (t.Type != TokenType.BracketStart)
                                 {
                                     value.Add(t);
-                                    count++;
                                 }
                                 else
                                 {
                                     if (t.Tag == Tag.Call)
                                         value.Add(new Token(TokenType.CallEnd, ""));
+                                    foundBracketEnd = true;
                                     break;
                                 }
+                            }
+                            // ignore redundant bracketEnd at the end of expression, workaround for skill 80003671,80003672,80003677
+                            if (!foundBracketEnd && i != tokens.Count - 1)
+                            {
+                                throw new ArgumentException("Brackets are not paired.");
                             }
                         }
                         break;

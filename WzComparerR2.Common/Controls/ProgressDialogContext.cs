@@ -46,11 +46,13 @@ namespace WzComparerR2.Controls
             get { return this.dialog.Message; }
             set { this.dialog.Message = value; }
         }
+
         public string FullMessage
         {
             get { return this.dialog.FullMessage; }
             set { this.dialog.FullMessage = value; }
         }
+
         public int Progress
         {
             get { return this.dialog.Progress; }

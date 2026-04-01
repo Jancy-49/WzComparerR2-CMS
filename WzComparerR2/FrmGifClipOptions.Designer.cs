@@ -72,7 +72,6 @@ namespace WzComparerR2
             this.txtHeightNew = new DevComponents.Editors.IntegerInput();
             this.txtScaleNew = new DevComponents.Editors.IntegerInput();
             this.tableLayoutPanel2 = new System.Windows.Forms.TableLayoutPanel();
-            this.chk768Preset = new System.Windows.Forms.CheckBox();
             this.tableLayoutPanel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.txtStartTime)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.txtStopTime)).BeginInit();
@@ -101,15 +100,15 @@ namespace WzComparerR2
             this.buttonOK.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.buttonOK.ColorTable = DevComponents.DotNetBar.eButtonColor.OrangeWithBackground;
             this.buttonOK.DialogResult = System.Windows.Forms.DialogResult.OK;
-            this.buttonOK.Location = new System.Drawing.Point(30, 3);
+            this.buttonOK.Location = new System.Drawing.Point(58, 3);
             this.buttonOK.Margin = new System.Windows.Forms.Padding(30, 3, 3, 3);
             this.buttonOK.Name = "buttonOK";
-            this.buttonOK.Size = new System.Drawing.Size(65, 23);
+            this.buttonOK.Size = new System.Drawing.Size(75, 23);
             this.buttonOK.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
             this.buttonOK.Symbol = "";
             this.buttonOK.SymbolSize = 1F;
             this.buttonOK.TabIndex = 0;
-            this.buttonOK.Text = "OK";
+            this.buttonOK.Text = "确定";
             // 
             // buttonCancel
             // 
@@ -117,10 +116,10 @@ namespace WzComparerR2
             this.buttonCancel.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.buttonCancel.ColorTable = DevComponents.DotNetBar.eButtonColor.OrangeWithBackground;
             this.buttonCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.buttonCancel.Location = new System.Drawing.Point(101, 3);
+            this.buttonCancel.Location = new System.Drawing.Point(195, 3);
             this.buttonCancel.Margin = new System.Windows.Forms.Padding(3, 3, 30, 3);
             this.buttonCancel.Name = "buttonCancel";
-            this.buttonCancel.Size = new System.Drawing.Size(65, 23);
+            this.buttonCancel.Size = new System.Drawing.Size(75, 23);
             this.buttonCancel.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
             this.buttonCancel.TabIndex = 1;
             this.buttonCancel.Text = "取消";
@@ -205,7 +204,7 @@ namespace WzComparerR2
             this.labelX13.Name = "labelX13";
             this.labelX13.Size = new System.Drawing.Size(94, 20);
             this.labelX13.TabIndex = 38;
-            this.labelX13.Text = "高度 (px)";
+            this.labelX13.Text = "高度(px)";
             // 
             // line2
             // 
@@ -259,7 +258,7 @@ namespace WzComparerR2
             this.labelX3.Name = "labelX3";
             this.labelX3.Size = new System.Drawing.Size(94, 20);
             this.labelX3.TabIndex = 8;
-            this.labelX3.Text = "开始时间 (ms)";
+            this.labelX3.Text = "开始时间(ms)";
             // 
             // labelX4
             // 
@@ -274,7 +273,7 @@ namespace WzComparerR2
             this.labelX4.Name = "labelX4";
             this.labelX4.Size = new System.Drawing.Size(94, 20);
             this.labelX4.TabIndex = 9;
-            this.labelX4.Text = "结束时间 (ms)";
+            this.labelX4.Text = "结束时间(ms)";
             // 
             // labelX2
             // 
@@ -319,7 +318,7 @@ namespace WzComparerR2
             this.labelX6.Name = "labelX6";
             this.labelX6.Size = new System.Drawing.Size(94, 20);
             this.labelX6.TabIndex = 25;
-            this.labelX6.Text = "左侧坐标 (px)";
+            this.labelX6.Text = "左侧装备(px)";
             // 
             // labelX7
             // 
@@ -334,7 +333,7 @@ namespace WzComparerR2
             this.labelX7.Name = "labelX7";
             this.labelX7.Size = new System.Drawing.Size(94, 20);
             this.labelX7.TabIndex = 26;
-            this.labelX7.Text = "上侧坐标 (px)";
+            this.labelX7.Text = "上方坐标(px)";
             // 
             // labelX8
             // 
@@ -349,7 +348,7 @@ namespace WzComparerR2
             this.labelX8.Name = "labelX8";
             this.labelX8.Size = new System.Drawing.Size(94, 20);
             this.labelX8.TabIndex = 27;
-            this.labelX8.Text = "右侧坐标 (px)";
+            this.labelX8.Text = "右侧坐标(px)";
             // 
             // labelX9
             // 
@@ -364,7 +363,7 @@ namespace WzComparerR2
             this.labelX9.Name = "labelX9";
             this.labelX9.Size = new System.Drawing.Size(94, 20);
             this.labelX9.TabIndex = 28;
-            this.labelX9.Text = "下侧坐标 (px)";
+            this.labelX9.Text = "下方坐标(px)";
             // 
             // labelX10
             // 
@@ -421,7 +420,7 @@ namespace WzComparerR2
             this.labelX12.Name = "labelX12";
             this.labelX12.Size = new System.Drawing.Size(94, 20);
             this.labelX12.TabIndex = 37;
-            this.labelX12.Text = "宽度 (px)";
+            this.labelX12.Text = "宽(px)";
             // 
             // labelX14
             // 
@@ -436,7 +435,7 @@ namespace WzComparerR2
             this.labelX14.Name = "labelX14";
             this.labelX14.Size = new System.Drawing.Size(94, 20);
             this.labelX14.TabIndex = 38;
-            this.labelX14.Text = "比例 (%)";
+            this.labelX14.Text = "倍率(%)";
             // 
             // txtStartTime
             // 
@@ -453,7 +452,7 @@ namespace WzComparerR2
             this.txtStartTime.IsInputReadOnly = true;
             this.txtStartTime.Location = new System.Drawing.Point(183, 3);
             this.txtStartTime.Name = "txtStartTime";
-            this.txtStartTime.Size = new System.Drawing.Size(68, 19);
+            this.txtStartTime.Size = new System.Drawing.Size(68, 21);
             this.txtStartTime.TabIndex = 0;
             this.txtStartTime.TabStop = false;
             this.txtStartTime.ValueObjectChanged += new System.EventHandler(this.txtTime_ValueObjectChanged);
@@ -473,7 +472,7 @@ namespace WzComparerR2
             this.txtStopTime.IsInputReadOnly = true;
             this.txtStopTime.Location = new System.Drawing.Point(183, 29);
             this.txtStopTime.Name = "txtStopTime";
-            this.txtStopTime.Size = new System.Drawing.Size(68, 19);
+            this.txtStopTime.Size = new System.Drawing.Size(68, 21);
             this.txtStopTime.TabIndex = 2;
             this.txtStopTime.TabStop = false;
             this.txtStopTime.ValueObjectChanged += new System.EventHandler(this.txtTime_ValueObjectChanged);
@@ -508,7 +507,7 @@ namespace WzComparerR2
             this.txtClipLeft.IsInputReadOnly = true;
             this.txtClipLeft.Location = new System.Drawing.Point(183, 87);
             this.txtClipLeft.Name = "txtClipLeft";
-            this.txtClipLeft.Size = new System.Drawing.Size(68, 19);
+            this.txtClipLeft.Size = new System.Drawing.Size(68, 21);
             this.txtClipLeft.TabIndex = 6;
             this.txtClipLeft.TabStop = false;
             this.txtClipLeft.ValueObjectChanged += new System.EventHandler(this.txtBound_ValueObjectChanged);
@@ -528,7 +527,7 @@ namespace WzComparerR2
             this.txtClipTop.IsInputReadOnly = true;
             this.txtClipTop.Location = new System.Drawing.Point(183, 113);
             this.txtClipTop.Name = "txtClipTop";
-            this.txtClipTop.Size = new System.Drawing.Size(68, 19);
+            this.txtClipTop.Size = new System.Drawing.Size(68, 21);
             this.txtClipTop.TabIndex = 8;
             this.txtClipTop.TabStop = false;
             this.txtClipTop.ValueObjectChanged += new System.EventHandler(this.txtBound_ValueObjectChanged);
@@ -548,7 +547,7 @@ namespace WzComparerR2
             this.txtClipRight.IsInputReadOnly = true;
             this.txtClipRight.Location = new System.Drawing.Point(183, 139);
             this.txtClipRight.Name = "txtClipRight";
-            this.txtClipRight.Size = new System.Drawing.Size(68, 19);
+            this.txtClipRight.Size = new System.Drawing.Size(68, 21);
             this.txtClipRight.TabIndex = 10;
             this.txtClipRight.TabStop = false;
             this.txtClipRight.ValueObjectChanged += new System.EventHandler(this.txtBound_ValueObjectChanged);
@@ -568,7 +567,7 @@ namespace WzComparerR2
             this.txtClipBottom.IsInputReadOnly = true;
             this.txtClipBottom.Location = new System.Drawing.Point(183, 165);
             this.txtClipBottom.Name = "txtClipBottom";
-            this.txtClipBottom.Size = new System.Drawing.Size(68, 19);
+            this.txtClipBottom.Size = new System.Drawing.Size(68, 21);
             this.txtClipBottom.TabIndex = 12;
             this.txtClipBottom.TabStop = false;
             this.txtClipBottom.ValueObjectChanged += new System.EventHandler(this.txtBound_ValueObjectChanged);
@@ -603,7 +602,7 @@ namespace WzComparerR2
             this.txtWidth.IsInputReadOnly = true;
             this.txtWidth.Location = new System.Drawing.Point(183, 223);
             this.txtWidth.Name = "txtWidth";
-            this.txtWidth.Size = new System.Drawing.Size(68, 19);
+            this.txtWidth.Size = new System.Drawing.Size(68, 21);
             this.txtWidth.TabIndex = 17;
             this.txtWidth.TabStop = false;
             this.txtWidth.ValueObjectChanged += new System.EventHandler(this.txtSize_ValueObjectChanged);
@@ -623,7 +622,7 @@ namespace WzComparerR2
             this.txtHeight.IsInputReadOnly = true;
             this.txtHeight.Location = new System.Drawing.Point(183, 249);
             this.txtHeight.Name = "txtHeight";
-            this.txtHeight.Size = new System.Drawing.Size(68, 19);
+            this.txtHeight.Size = new System.Drawing.Size(68, 21);
             this.txtHeight.TabIndex = 19;
             this.txtHeight.TabStop = false;
             this.txtHeight.ValueObjectChanged += new System.EventHandler(this.txtSize_ValueObjectChanged);
@@ -643,7 +642,7 @@ namespace WzComparerR2
             this.txtScale.IsInputReadOnly = true;
             this.txtScale.Location = new System.Drawing.Point(183, 275);
             this.txtScale.Name = "txtScale";
-            this.txtScale.Size = new System.Drawing.Size(68, 19);
+            this.txtScale.Size = new System.Drawing.Size(68, 21);
             this.txtScale.TabIndex = 21;
             this.txtScale.TabStop = false;
             // 
@@ -663,7 +662,7 @@ namespace WzComparerR2
             this.txtStartTimeNew.MinValue = 0;
             this.txtStartTimeNew.Name = "txtStartTimeNew";
             this.txtStartTimeNew.ShowUpDown = true;
-            this.txtStartTimeNew.Size = new System.Drawing.Size(68, 19);
+            this.txtStartTimeNew.Size = new System.Drawing.Size(68, 21);
             this.txtStartTimeNew.TabIndex = 1;
             this.txtStartTimeNew.ValueObjectChanged += new System.EventHandler(this.txtTimeNew_ValueObjectChanged);
             // 
@@ -683,7 +682,7 @@ namespace WzComparerR2
             this.txtStopTimeNew.MinValue = 0;
             this.txtStopTimeNew.Name = "txtStopTimeNew";
             this.txtStopTimeNew.ShowUpDown = true;
-            this.txtStopTimeNew.Size = new System.Drawing.Size(68, 19);
+            this.txtStopTimeNew.Size = new System.Drawing.Size(68, 21);
             this.txtStopTimeNew.TabIndex = 3;
             this.txtStopTimeNew.ValueObjectChanged += new System.EventHandler(this.txtTimeNew_ValueObjectChanged);
             // 
@@ -718,7 +717,7 @@ namespace WzComparerR2
             this.txtClipLeftNew.MinValue = -16384;
             this.txtClipLeftNew.Name = "txtClipLeftNew";
             this.txtClipLeftNew.ShowUpDown = true;
-            this.txtClipLeftNew.Size = new System.Drawing.Size(68, 19);
+            this.txtClipLeftNew.Size = new System.Drawing.Size(68, 21);
             this.txtClipLeftNew.TabIndex = 7;
             this.txtClipLeftNew.ValueObjectChanged += new System.EventHandler(this.txtBoundNew_ValueObjectChanged);
             // 
@@ -738,7 +737,7 @@ namespace WzComparerR2
             this.txtClipTopNew.MinValue = -16384;
             this.txtClipTopNew.Name = "txtClipTopNew";
             this.txtClipTopNew.ShowUpDown = true;
-            this.txtClipTopNew.Size = new System.Drawing.Size(68, 19);
+            this.txtClipTopNew.Size = new System.Drawing.Size(68, 21);
             this.txtClipTopNew.TabIndex = 9;
             this.txtClipTopNew.ValueObjectChanged += new System.EventHandler(this.txtBoundNew_ValueObjectChanged);
             // 
@@ -758,7 +757,7 @@ namespace WzComparerR2
             this.txtClipRightNew.MinValue = -16384;
             this.txtClipRightNew.Name = "txtClipRightNew";
             this.txtClipRightNew.ShowUpDown = true;
-            this.txtClipRightNew.Size = new System.Drawing.Size(68, 19);
+            this.txtClipRightNew.Size = new System.Drawing.Size(68, 21);
             this.txtClipRightNew.TabIndex = 11;
             this.txtClipRightNew.ValueObjectChanged += new System.EventHandler(this.txtBoundNew_ValueObjectChanged);
             // 
@@ -778,7 +777,7 @@ namespace WzComparerR2
             this.txtClipBottomNew.MinValue = -16384;
             this.txtClipBottomNew.Name = "txtClipBottomNew";
             this.txtClipBottomNew.ShowUpDown = true;
-            this.txtClipBottomNew.Size = new System.Drawing.Size(68, 19);
+            this.txtClipBottomNew.Size = new System.Drawing.Size(68, 21);
             this.txtClipBottomNew.TabIndex = 13;
             this.txtClipBottomNew.ValueObjectChanged += new System.EventHandler(this.txtBoundNew_ValueObjectChanged);
             // 
@@ -813,7 +812,7 @@ namespace WzComparerR2
             this.txtWidthNew.MinValue = -16384;
             this.txtWidthNew.Name = "txtWidthNew";
             this.txtWidthNew.ShowUpDown = true;
-            this.txtWidthNew.Size = new System.Drawing.Size(68, 19);
+            this.txtWidthNew.Size = new System.Drawing.Size(68, 21);
             this.txtWidthNew.TabIndex = 18;
             this.txtWidthNew.ValueObjectChanged += new System.EventHandler(this.txtSizeNew_ValueObjectChanged);
             // 
@@ -833,7 +832,7 @@ namespace WzComparerR2
             this.txtHeightNew.MinValue = -16384;
             this.txtHeightNew.Name = "txtHeightNew";
             this.txtHeightNew.ShowUpDown = true;
-            this.txtHeightNew.Size = new System.Drawing.Size(68, 19);
+            this.txtHeightNew.Size = new System.Drawing.Size(68, 21);
             this.txtHeightNew.TabIndex = 20;
             this.txtHeightNew.ValueObjectChanged += new System.EventHandler(this.txtSizeNew_ValueObjectChanged);
             // 
@@ -853,39 +852,25 @@ namespace WzComparerR2
             this.txtScaleNew.MinValue = 0;
             this.txtScaleNew.Name = "txtScaleNew";
             this.txtScaleNew.ShowUpDown = true;
-            this.txtScaleNew.Size = new System.Drawing.Size(68, 19);
+            this.txtScaleNew.Size = new System.Drawing.Size(68, 21);
             this.txtScaleNew.TabIndex = 22;
             this.txtScaleNew.ValueObjectChanged += new System.EventHandler(this.txtScaleNew_ValueObjectChanged);
             // 
             // tableLayoutPanel2
             // 
-            this.tableLayoutPanel2.ColumnCount = 3;
-            this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 30F));
-            this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 30F));
-            this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 40F));
+            this.tableLayoutPanel2.ColumnCount = 2;
+            this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
             this.tableLayoutPanel2.Controls.Add(this.buttonCancel, 1, 0);
             this.tableLayoutPanel2.Controls.Add(this.buttonOK, 0, 0);
-            this.tableLayoutPanel2.Controls.Add(this.chk768Preset, 2, 0);
             this.tableLayoutPanel2.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.tableLayoutPanel2.Location = new System.Drawing.Point(8, 313);
             this.tableLayoutPanel2.Name = "tableLayoutPanel2";
             this.tableLayoutPanel2.RowCount = 1;
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 30F));
             this.tableLayoutPanel2.Size = new System.Drawing.Size(328, 30);
             this.tableLayoutPanel2.TabIndex = 3;
-            // 
-            // chk768Preset
-            // 
-            this.chk768Preset.Anchor = System.Windows.Forms.AnchorStyles.Left;
-            this.chk768Preset.AutoSize = true;
-            this.chk768Preset.Font = new System.Drawing.Font("宋体", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
-            this.chk768Preset.Location = new System.Drawing.Point(199, 7);
-            this.chk768Preset.Name = "chk768Preset";
-            this.chk768Preset.Size = new System.Drawing.Size(120, 16);
-            this.chk768Preset.TabIndex = 2;
-            this.chk768Preset.Text = "1366x768分辨率";
-            this.chk768Preset.UseVisualStyleBackColor = true;
-            this.chk768Preset.CheckedChanged += new System.EventHandler(this.chk768Preset_CheckedChanged);
             // 
             // FrmGifClipOptions
             // 
@@ -896,7 +881,6 @@ namespace WzComparerR2
             this.Controls.Add(this.tableLayoutPanel1);
             this.Controls.Add(this.tableLayoutPanel2);
             this.DoubleBuffered = true;
-            this.Font = new System.Drawing.Font("宋体", 9F);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.MaximizeBox = false;
             this.MinimizeBox = false;
@@ -924,7 +908,6 @@ namespace WzComparerR2
             ((System.ComponentModel.ISupportInitialize)(this.txtHeightNew)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.txtScaleNew)).EndInit();
             this.tableLayoutPanel2.ResumeLayout(false);
-            this.tableLayoutPanel2.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -974,6 +957,5 @@ namespace WzComparerR2
         private DevComponents.Editors.IntegerInput txtWidthNew;
         private DevComponents.Editors.IntegerInput txtHeightNew;
         private DevComponents.Editors.IntegerInput txtScaleNew;
-        private System.Windows.Forms.CheckBox chk768Preset;
     }
 }

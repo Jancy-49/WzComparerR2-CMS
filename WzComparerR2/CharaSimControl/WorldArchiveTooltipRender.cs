@@ -53,7 +53,7 @@ namespace WzComparerR2.CharaSimControl
                 }
                 waMobBmp = resizedBmp;
             }
-            Bitmap waNpcBmp = GetSpecialNpcBitmap(NpcID);
+            //Bitmap waNpcBmp = GetSpecialNpcBitmap(NpcID);
 
             int height = 30;
             Bitmap bmp1 = new Bitmap(1, 1);
@@ -159,16 +159,16 @@ namespace WzComparerR2.CharaSimControl
                     }
                 }
             }
-            if (waNpcBmp != null)
-            {
-                Bitmap bmp3 = new Bitmap(bmp2.Width + waNpcBmp.Width, Math.Max(bmp2.Width, waNpcBmp.Height));
-                using (Graphics g = Graphics.FromImage(bmp3))
-                {
-                    g.DrawImage(bmp2, 0, 0, new Rectangle(0, 0, bmp2.Width, bmp2.Height), GraphicsUnit.Pixel);
-                    g.DrawImage(waNpcBmp, bmp2.Width, 0, new Rectangle(0, 0, waNpcBmp.Width, waNpcBmp.Height), GraphicsUnit.Pixel);
-                }
-                return bmp3;
-            }
+            //if (waNpcBmp != null)
+            //{
+            //    Bitmap bmp3 = new Bitmap(bmp2.Width + waNpcBmp.Width, Math.Max(bmp2.Width, waNpcBmp.Height));
+            //    using (Graphics g = Graphics.FromImage(bmp3))
+            //    {
+            //        g.DrawImage(bmp2, 0, 0, new Rectangle(0, 0, bmp2.Width, bmp2.Height), GraphicsUnit.Pixel);
+            //        g.DrawImage(waNpcBmp, bmp2.Width, 0, new Rectangle(0, 0, waNpcBmp.Width, waNpcBmp.Height), GraphicsUnit.Pixel);
+            //    }
+            //    return bmp3;
+            //}
             return bmp2;
         }
 
@@ -194,24 +194,24 @@ namespace WzComparerR2.CharaSimControl
             return mobBitmap.Bitmap;
         }
 
-        private Bitmap GetSpecialNpcBitmap(int npcID)
-        {
-            BitmapOrigin npcBitmap = BitmapOrigin.CreateFromNode(PluginManager.FindWz(@$"UI\UIworldArchive.img\illust\npc\{npcID}"), PluginManager.FindWz, this.SourceWzFile);
-            if (npcBitmap.Bitmap == null) return null;
-            else
-            {
-                Bitmap npcBmp = npcBitmap.Bitmap;
-                Bitmap specialNpcTooltip = new Bitmap(npcBmp.Width + 20, npcBmp.Height + Resource.WorldArchive.Height + 32);
-                using (Graphics g = Graphics.FromImage(specialNpcTooltip))
-                {
-                    GearGraphics.DrawNewTooltipBack(g, 0, 0, specialNpcTooltip.Width, specialNpcTooltip.Height);
-                    int picH = 12;
-                    g.DrawImage(Resource.WorldArchive, 14, picH, new Rectangle(0, 0, Resource.WorldArchive.Width, Resource.WorldArchive.Height), GraphicsUnit.Pixel);
-                    picH += 10 + Resource.WorldArchive.Height;
-                    g.DrawImage(npcBmp, 10, picH, new Rectangle(0, 0, npcBmp.Width, npcBmp.Height), GraphicsUnit.Pixel);
-                }
-                return specialNpcTooltip;
-            }
-        }
+        //private Bitmap GetSpecialNpcBitmap(int npcID)
+        //{
+        //    BitmapOrigin npcBitmap = BitmapOrigin.CreateFromNode(PluginManager.FindWz(@$"UI\UIworldArchive.img\illust\npc\{npcID}"), PluginManager.FindWz, this.SourceWzFile);
+        //    if (npcBitmap.Bitmap == null) return null;
+        //    else
+        //    {
+        //        Bitmap npcBmp = npcBitmap.Bitmap;
+        //        Bitmap specialNpcTooltip = new Bitmap(npcBmp.Width + 20, npcBmp.Height + Resource.WorldArchive.Height + 32);
+        //        using (Graphics g = Graphics.FromImage(specialNpcTooltip))
+        //        {
+        //            GearGraphics.DrawNewTooltipBack(g, 0, 0, specialNpcTooltip.Width, specialNpcTooltip.Height);
+        //            int picH = 12;
+        //            g.DrawImage(Resource.WorldArchive, 14, picH, new Rectangle(0, 0, Resource.WorldArchive.Width, Resource.WorldArchive.Height), GraphicsUnit.Pixel);
+        //            picH += 10 + Resource.WorldArchive.Height;
+        //            g.DrawImage(npcBmp, 10, picH, new Rectangle(0, 0, npcBmp.Width, npcBmp.Height), GraphicsUnit.Pixel);
+        //        }
+        //        return specialNpcTooltip;
+        //    }
+        //}
     }
 }

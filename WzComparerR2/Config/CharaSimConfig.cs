@@ -102,24 +102,24 @@ namespace WzComparerR2.Config
             set { this["CopyParsedSkillString"] = value; }
         }
 
-        [ConfigurationProperty("Enable22AniStyle")]
+        [ConfigurationProperty("enable22AniStyle")]
         public ConfigItem<bool> Enable22AniStyle
         {
-            get { return (ConfigItem<bool>)this["Enable22AniStyle"]; }
-            set { this["Enable22AniStyle"] = value; }
+            get { return (ConfigItem<bool>)this["enable22AniStyle"]; }
+            set { this["enable22AniStyle"] = value; }
         }
 
-        [ConfigurationProperty("ShowParameters")]
+        [ConfigurationProperty("showParameters")]
         public ConfigItem<bool> ShowParameters
         {
-            get { return (ConfigItem<bool>)this["ShowParameters"]; }
-            set { this["ShowParameters"] = value; }
+            get { return (ConfigItem<bool>)this["showParameters"]; }
+            set { this["showParameters"] = value; }
         }
 
-        [ConfigurationProperty("Quest")]
+        [ConfigurationProperty("quest")]
         public CharaSimQuestConfig Quest
         {
-            get { return (CharaSimQuestConfig)this["Quest"]; }
+            get { return (CharaSimQuestConfig)this["quest"]; }
         }
     }
 }

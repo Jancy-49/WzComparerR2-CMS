@@ -72,7 +72,7 @@ namespace WzComparerR2.Common
                     continue;
                 }
 
-                PrepareFrame(canvas, frame, rect, backgrnd, minAlpha);
+                PrepareFrame(canvas, frame, rect, backgrnd, minAlpha, enc is BuildInApngEncoder);
                 enc.AppendFrame(canvas, frame.Delay);
             }
 
@@ -107,13 +107,12 @@ namespace WzComparerR2.Common
                     continue;
                 }
 
-                PrepareFrame(canvas, frame, rect, backgrnd, minAlpha);
+                PrepareFrame(canvas, frame, rect, backgrnd, minAlpha, enc is BuildInApngEncoder);
                 enc.AppendFrame(canvas, frame.Delay);
             }
 
             enc.Dispose();
         }
-
 
         public Rectangle GetRect()
         {
@@ -153,7 +152,7 @@ namespace WzComparerR2.Common
         /// <summary>
         /// 预处理帧坐标，生成新的图片。
         /// </summary>
-        private static void PrepareFrame(Bitmap canvas, IGifFrame frame, Rectangle canvasRect, Color backgrnd, int minAlpha)
+        private static void PrepareFrame(Bitmap canvas, IGifFrame frame, Rectangle canvasRect, Color backgrnd, int minAlpha, bool supportAlphaChannel = false)
         {
             Graphics g = Graphics.FromImage(canvas);
 
@@ -169,35 +168,38 @@ namespace WzComparerR2.Common
                 frameRect.Offset(-canvasRect.X, -canvasRect.Y);
                 frame.Draw(g, canvasRect);
 
-                BitmapData data = canvas.LockBits(new Rectangle(Point.Empty, canvas.Size), ImageLockMode.ReadWrite, PixelFormat.Format32bppArgb);
-                unsafe
+                if (!supportAlphaChannel)
                 {
-                    byte* buffer = (byte*)data.Scan0.ToPointer();
-
-                    for (int y = frameRect.Top; y < frameRect.Bottom; y++)
+                    BitmapData data = canvas.LockBits(new Rectangle(Point.Empty, canvas.Size), ImageLockMode.ReadWrite, PixelFormat.Format32bppArgb);
+                    unsafe
                     {
-                        for (int x = frameRect.Left; x < frameRect.Right; x++)
-                        {
-                            int i = 4 * x + y * data.Stride;
+                        byte* buffer = (byte*)data.Scan0.ToPointer();
 
-                            byte a = buffer[i + 3];
-                            if (a <= minAlpha)
+                        for (int y = frameRect.Top; y < frameRect.Bottom; y++)
+                        {
+                            for (int x = frameRect.Left; x < frameRect.Right; x++)
                             {
-                                buffer[i] = buffer[i + 1] = buffer[i + 2] = buffer[i + 3] = 0;
-                            }
-                            else if (a < 0xff)
-                            {
-                                float al = a / 255f;
-                                float be = (1 - al);
-                                buffer[i] = (byte)(buffer[i] * al + backgrnd.B * be);
-                                buffer[i + 1] = (byte)(buffer[i + 1] * al + backgrnd.G * be);
-                                buffer[i + 2] = (byte)(buffer[i + 2] * al + backgrnd.R * be);
-                                buffer[i + 3] = 0xff;
+                                int i = 4 * x + y * data.Stride;
+
+                                byte a = buffer[i + 3];
+                                if (a <= minAlpha)
+                                {
+                                    buffer[i] = buffer[i + 1] = buffer[i + 2] = buffer[i + 3] = 0;
+                                }
+                                else if (a < 0xff)
+                                {
+                                    float al = a / 255f;
+                                    float be = (1 - al);
+                                    buffer[i] = (byte)(buffer[i] * al + backgrnd.B * be);
+                                    buffer[i + 1] = (byte)(buffer[i + 1] * al + backgrnd.G * be);
+                                    buffer[i + 2] = (byte)(buffer[i + 2] * al + backgrnd.R * be);
+                                    buffer[i + 3] = 0xff;
+                                }
                             }
                         }
                     }
+                    canvas.UnlockBits(data);
                 }
-                canvas.UnlockBits(data);
             }
         }
 

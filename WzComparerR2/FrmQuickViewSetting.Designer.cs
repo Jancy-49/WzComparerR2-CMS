@@ -122,6 +122,8 @@
             this.chkShowQuestObjectID = new DevComponents.DotNetBar.Controls.CheckBoxX();
             this.chkQAS = new DevComponents.DotNetBar.Controls.CheckBoxX();
             this.chkUseAssembleUI = new DevComponents.DotNetBar.Controls.CheckBoxX();
+            this.chkShowItemPurchasePrice = new DevComponents.DotNetBar.Controls.CheckBoxX();
+            this.chkShowGearPurchasePrice = new DevComponents.DotNetBar.Controls.CheckBoxX();
             ((System.ComponentModel.ISupportInitialize)(this.superTabControl1)).BeginInit();
             this.superTabControl1.SuspendLayout();
             this.superTabControlPanel1.SuspendLayout();
@@ -453,6 +455,7 @@
             // 
             // superTabControlPanel2
             // 
+            this.superTabControlPanel2.Controls.Add(this.chkShowGearPurchasePrice);
             this.superTabControlPanel2.Controls.Add(this.checkBoxX18);
             this.superTabControlPanel2.Controls.Add(this.checkBoxX17);
             this.superTabControlPanel2.Controls.Add(this.checkBoxX11);
@@ -466,6 +469,21 @@
             this.superTabControlPanel2.TabIndex = 0;
             this.superTabControlPanel2.TabItem = this.superTabItem2;
             this.superTabControlPanel2.Visible = false;
+            // 
+            // chkShowGearPurchasePrice
+            // 
+            this.chkShowGearPurchasePrice.AutoSize = true;
+            this.chkShowGearPurchasePrice.BackColor = System.Drawing.Color.Transparent;
+            // 
+            // 
+            // 
+            this.chkShowGearPurchasePrice.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
+            this.chkShowGearPurchasePrice.Location = new System.Drawing.Point(13, 155);
+            this.chkShowGearPurchasePrice.Name = "chkShowGearPurchasePrice";
+            this.chkShowGearPurchasePrice.Size = new System.Drawing.Size(120, 16);
+            this.chkShowGearPurchasePrice.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
+            this.chkShowGearPurchasePrice.TabIndex = 5;
+            this.chkShowGearPurchasePrice.Text = "显示购买价格";
             // 
             // checkBoxX17
             // 
@@ -493,7 +511,7 @@
             this.checkBoxX11.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
             this.checkBoxX11.Location = new System.Drawing.Point(13, 84);
             this.checkBoxX11.Name = "checkBoxX11";
-            this.checkBoxX11.Size = new System.Drawing.Size(133, 16);
+            this.checkBoxX11.Size = new System.Drawing.Size(120, 16);
             this.checkBoxX11.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
             this.checkBoxX11.TabIndex = 4;
             this.checkBoxX11.Text = "显示勋章样式";
@@ -552,6 +570,7 @@
             // 
             // superTabControlPanel3
             // 
+            this.superTabControlPanel3.Controls.Add(this.chkShowItemPurchasePrice);
             this.superTabControlPanel3.Controls.Add(this.chkUseAssembleUI);
             this.superTabControlPanel3.Controls.Add(this.checkBoxX23);
             this.superTabControlPanel3.Controls.Add(this.checkBoxX12);
@@ -569,6 +588,21 @@
             this.superTabControlPanel3.TabIndex = 0;
             this.superTabControlPanel3.TabItem = this.superTabItem3;
             this.superTabControlPanel3.Visible = false;
+            // 
+            // chkShowItemPurchasePrice
+            // 
+            this.chkShowItemPurchasePrice.AutoSize = true;
+            this.chkShowItemPurchasePrice.BackColor = System.Drawing.Color.Transparent;
+            // 
+            // 
+            // 
+            this.chkShowItemPurchasePrice.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
+            this.chkShowItemPurchasePrice.Location = new System.Drawing.Point(13, 203);
+            this.chkShowItemPurchasePrice.Name = "chkShowItemPurchasePrice";
+            this.chkShowItemPurchasePrice.Size = new System.Drawing.Size(120, 16);
+            this.chkShowItemPurchasePrice.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
+            this.chkShowItemPurchasePrice.TabIndex = 5;
+            this.chkShowItemPurchasePrice.Text = "显示购买价格";
             // 
             // chkUseAssembleUI
             // 
@@ -1527,5 +1561,7 @@
         private DevComponents.DotNetBar.Controls.CheckBoxX chkShowQuestObjectID;
         private DevComponents.DotNetBar.Controls.CheckBoxX chkQAS;
         private DevComponents.DotNetBar.Controls.CheckBoxX chkUseAssembleUI;
+        private DevComponents.DotNetBar.Controls.CheckBoxX chkShowItemPurchasePrice;
+        private DevComponents.DotNetBar.Controls.CheckBoxX chkShowGearPurchasePrice;
     }
 }

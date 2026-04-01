@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
-using System.Text;
-using System.Threading.Tasks;
 using WzComparerR2.WzLib.Cryptography;
 using WzComparerR2.WzLib.Utilities;
 
@@ -17,10 +14,14 @@ namespace WzComparerR2.WzLib
         {
             this.MsEntry = msEntry;
             this.Offset = msEntry.StartPos;
-            this.IsChecksumChecked = true;
         }
 
         public Ms_Entry MsEntry { get; private set; }
+
+        public override int CalcCheckSum(Stream stream)
+        {
+            return this.MsEntry.CalculatedCheckSum;
+        }
 
         public override Stream OpenRead()
         {
@@ -63,6 +64,7 @@ namespace WzComparerR2.WzLib
             {
                 cs.ReadExactly(span);
             }
+
             var ms = new MemoryStream(buffer);
             return ms;
         }

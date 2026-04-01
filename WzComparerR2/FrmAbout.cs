@@ -8,6 +8,7 @@ using System.Windows.Forms;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using DevComponents.AdvTree;
 
 namespace WzComparerR2
@@ -19,10 +20,10 @@ namespace WzComparerR2
             InitializeComponent();
 #if NET6_0_OR_GREATER
             // https://learn.microsoft.com/en-us/dotnet/core/compatibility/fx-core#controldefaultfont-changed-to-segoe-ui-9pt
-            this.Font = new Font(new FontFamily("宋体"), 9f);
+            this.Font = new Font("宋体", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
 #endif
 
-            this.lblClrVer.Text = string.Format("{0} ({1})", Environment.Version, Environment.Is64BitProcess ? "x64" : "x86");
+            this.lblClrVer.Text = string.Format("{0} ({1})", Environment.Version, RuntimeInformation.ProcessArchitecture);
             this.lblAsmVer.Text = GetAsmVersion().ToString();
             this.lblFileVer.Text = GetFileVersion().ToString();
             this.lblCopyright.Text = GetAsmCopyright().ToString();
@@ -49,10 +50,10 @@ namespace WzComparerR2
         {
             this.advTree1.Nodes.Clear();
 
-            this.advTree1.Nodes.Add(new Node("CMS <font color=\"#808080\">v5.9.0</font>"));
-            this.advTree1.Nodes.Add(new Node("[CMS] 中文版<font color=\"#808080\">Jancy</font>"));
+            this.advTree1.Nodes.Add(new Node("CMS <font color=\"#808080\">v5.9.2</font>"));
+
             foreach (var contribution in new[]
-{
+            {
                 Tuple.Create("[CMS] 新增技能窗预览功能", "Jancy"),
                 Tuple.Create("[CMS] 新增小游戏功能", "Jancy"),
                 Tuple.Create("[CMS] 新增联盟预览功能", "Jancy"),
@@ -93,7 +94,7 @@ namespace WzComparerR2
                 foreach (var plugin in PluginBase.PluginManager.LoadedPlugins)
                 {
                     string nodeTxt = string.Format("{0} <font color=\"#808080\">{1} ({2})</font>",
-                        plugin.Instance.Name,
+                        plugin.Instance.Name, 
                         plugin.Instance.Version,
                         plugin.Instance.FileVersion);
                     Node node = new Node(nodeTxt);
@@ -104,6 +105,12 @@ namespace WzComparerR2
             {
                 string nodeTxt = "<font color=\"#808080\">连接的插件不存在</font>";
                 Node node = new Node(nodeTxt);
+                this.advTree1.Nodes.Add(node);
+            }
+
+            {
+                var NANUMGOTHIC_SOURCEINFO = "\r\n该程序部分应用了NAVER提供的字体。\r\n";
+                Node node = new Node(NANUMGOTHIC_SOURCEINFO);
                 this.advTree1.Nodes.Add(node);
             }
         }

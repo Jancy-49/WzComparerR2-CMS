@@ -14,7 +14,6 @@ namespace WzComparerR2.Common
 
             if (!string.IsNullOrEmpty(path = node.Nodes["source"].GetValueEx<string>(null)))
             {
-                // return findNode?.Invoke(path);
                 if (wzf == null) return findNode?.Invoke(path);
                 else // Skill 비교 툴팁 출력용 / code from FindNodeByPath
                 {
@@ -40,7 +39,6 @@ namespace WzComparerR2.Common
             }
             else if (!string.IsNullOrEmpty(path = node.Nodes["_outlink"].GetValueEx<string>(null)))
             {
-                // return findNode?.Invoke(path);
                 if (wzf == null) return findNode?.Invoke(path);
                 else // Skill 비교 툴팁 출력용 / code from FindNodeByPath
                 {

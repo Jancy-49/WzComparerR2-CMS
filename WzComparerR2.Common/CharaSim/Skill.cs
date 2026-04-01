@@ -1,9 +1,14 @@
-﻿using System;
+﻿using DevComponents.DotNetBar;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Windows.Forms;
 using WzComparerR2.WzLib;
+using DrawingPoint = System.Drawing.Point;
+using DrawingRectangle = System.Drawing.Rectangle;
+using DrawingSize = System.Drawing.Size;
 
 namespace WzComparerR2.CharaSim
 {
@@ -183,8 +188,8 @@ namespace WzComparerR2.CharaSim
         public int categoryIndex { get; set; }
         public bool Hasreq { get; set; }
         public bool HasreqLevel { get; set; }
-        public Point LT { get; set; }
-        public Point RB { get; set; }
+        public DrawingPoint LT { get; set; }
+        public DrawingPoint RB { get; set; }
         public int MaxLevel
         {
             get
@@ -200,15 +205,44 @@ namespace WzComparerR2.CharaSim
 
         public static Skill CreateFromNode(Wz_Node node, GlobalFindNodeFunction findNode, GlobalFindNodeFunction2 findNode2, Wz_File wzf = null)
         {
+            if (node == null)
+            {
+                return null;
+            }
             Skill skill = new Skill();
             int skillID;
             if (!Int32.TryParse(node?.Text, out skillID))
             {
-                Match m = Regex.Match(node.FullPathToFile, @"^Skill\\Roguelike\\.+\\(\d+)\.img$");
-                if (!(m.Success && Int32.TryParse(m.Result("$1"), out skillID)))
+                if (node.FullPathToFile.StartsWith("Skill\\Roguelike"))
+                {
+                    Match m = Regex.Match(node.FullPathToFile, @"^Skill\\Roguelike\\.+\\(\d+)\.img$");
+                    if (!(m.Success && Int32.TryParse(m.Result("$1"), out skillID)))
+                    {
+                        return null;
+                    }
+                    else
+                    {
+                        skill.IsRoguelikeSkill = true;
+                        if (node.FullPathToFile.Contains("Redmoon")) skill.IsRedmoon = true;
+                    }
+                }
+            }
+            else if (node.FullPathToFile.StartsWith("Etc\\GuildCastle.img"))
+            {
+                Match m = Regex.Match(node.FullPathToFile, @"^Etc\\GuildCastle.img\\ResearchList\\(Guild|Personal)\\(\d+)$");
+                if (!m.Success)
+                {
                     return null;
-                skill.IsRoguelikeSkill = true;
-                if (node.FullPathToFile.Contains("Redmoon")) skill.IsRedmoon = true;
+                }
+                else
+                {
+                    skill.IsGuildCastleResearch = true;
+                    switch (m.Result("$1"))
+                    {
+                        case "Guild": skill.GuildCastleResearchType = 0; break;
+                        case "Personal": skill.GuildCastleResearchType = 1; break;
+                    }
+                }
             }
             skill.SkillID = skillID;
 
@@ -255,11 +289,11 @@ namespace WzComparerR2.CharaSim
                                             Wz_Vector cNode = commonNode.Value as Wz_Vector;
                                             if (commonNode.Text == "lt")
                                             {
-                                                skill.LT = new Point(cNode.X, cNode.Y);
+                                                skill.LT = new DrawingPoint(cNode.X, cNode.Y);
                                             }
                                             else if (commonNode.Text == "rb")
                                             {
-                                                skill.RB = new Point(cNode.X, cNode.Y);
+                                                skill.RB = new DrawingPoint(cNode.X, cNode.Y);
                                             }
                                         }
                                         break;
@@ -279,11 +313,11 @@ namespace WzComparerR2.CharaSim
                                     Wz_Vector cNode = commonNode.Value as Wz_Vector;
                                     if (commonNode.Text == "lt")
                                     {
-                                        skill.LT = new Point(cNode.X, cNode.Y);
+                                        skill.LT = new DrawingPoint(cNode.X, cNode.Y);
                                     }
                                     else if (commonNode.Text == "rb")
                                     {
-                                        skill.RB = new Point(cNode.X, cNode.Y);
+                                        skill.RB = new DrawingPoint(cNode.X, cNode.Y);
                                     }
                                 }
                                 else if (commonNode.Text == "attackInfo")
@@ -680,15 +714,15 @@ namespace WzComparerR2.CharaSim
                     BitmapOrigin force = BitmapOrigin.CreateFromNode(forceNode, findNode, wzf);
                     using (Graphics graphics = Graphics.FromImage(skill.Icon.Bitmap))
                     {
-                        graphics.DrawImage(force.Bitmap, new Point(0, 0));
+                        graphics.DrawImage(force.Bitmap, new DrawingPoint(0, 0));
                     }
                     using (Graphics graphics = Graphics.FromImage(skill.IconMouseOver.Bitmap))
                     {
-                        graphics.DrawImage(force.Bitmap, new Point(0, 0));
+                        graphics.DrawImage(force.Bitmap, new DrawingPoint(0, 0));
                     }
                     using (Graphics graphics = Graphics.FromImage(skill.IconDisabled.Bitmap))
                     {
-                        graphics.DrawImage(force.Bitmap, new Point(0, 0));
+                        graphics.DrawImage(force.Bitmap, new DrawingPoint(0, 0));
                     }
                 }
             }

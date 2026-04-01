@@ -12,7 +12,7 @@ namespace WzComparerR2.Rendering
     public class AnimationGraphics
     {
         public AnimationGraphics(GraphicsDevice graphicsDevice)
-            : this(graphicsDevice, new SpriteBatch(graphicsDevice))
+            : this (graphicsDevice, new SpriteBatch(graphicsDevice))
         {
         }
 
@@ -103,11 +103,7 @@ namespace WzComparerR2.Rendering
             {
                 this.sprite.Dispose();
             }
-            // 检查spineRenderer是否实现了IDisposable接口
-            if (this.spineRenderer is IDisposable disposableRenderer)
-            {
-                disposableRenderer.Dispose();
-            }
+            this.spineRenderer.Dispose();
         }
     }
 }

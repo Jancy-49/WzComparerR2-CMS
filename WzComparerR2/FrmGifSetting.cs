@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
-using System.IO;
 using System.Text;
 using System.Linq;
 using System.Windows.Forms;
@@ -11,20 +10,17 @@ using System.Reflection;
 using DevComponents.DotNetBar;
 using WzComparerR2.Config;
 using MathHelper = Microsoft.Xna.Framework.MathHelper;
-using Newtonsoft.Json.Linq;
-using System.Diagnostics;
 
 namespace WzComparerR2
 {
     public partial class FrmGifSetting : DevComponents.DotNetBar.Office2007Form
     {
-
         public FrmGifSetting()
         {
             InitializeComponent();
 #if NET6_0_OR_GREATER
             // https://learn.microsoft.com/en-us/dotnet/core/compatibility/fx-core#controldefaultfont-changed-to-segoe-ui-9pt
-            this.Font = new Font(new FontFamily("宋体"), 9f);
+            this.Font = new Font("宋体", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
 #endif
             initSelection();
         }
@@ -133,54 +129,38 @@ namespace WzComparerR2
             get { return checkBoxX3.Checked; }
             set { checkBoxX3.Checked = value; }
         }
+
         public string FFmpegBinPath
         {
             get { return textBoxX1.Text; }
             set { textBoxX1.Text = value; }
         }
+
         public string FFmpegArgument
         {
             get { return textBoxX2.Text; }
             set { textBoxX2.Text = value; }
         }
+
         public string FFmpegDefaultExtension
         {
             get { return textBoxX3.Text; }
             set { textBoxX3.Text = value; }
         }
+
         public string FFmpegBinPathHint
         {
             set { textBoxX1.WatermarkText = value; }
         }
+
         public string FFmpegArgumentHint
         {
             set { textBoxX2.WatermarkText = value; }
         }
+
         public string FFmpegDefaultExtensionHint
         {
             set { textBoxX3.WatermarkText = value; }
-        }
-
-        private void isFFmpegExist(object sender, EventArgs e)
-        {
-            if (string.IsNullOrEmpty(this.FFmpegBinPath) || !File.Exists(this.FFmpegBinPath))
-            {
-                MessageBoxEx.Show(this, "未找到FFmpeg可执行文件。\n点击“确定”下载并指定路径。", "注意", MessageBoxButtons.OK);
-#if NET6_0_OR_GREATER
-                Process.Start(new ProcessStartInfo
-                {
-                    UseShellExecute = true,
-                    FileName = "https://www.gyan.dev/ffmpeg/builds/",
-                });
-#else
-                Process.Start("https://www.gyan.dev/ffmpeg/builds/");
-#endif
-                buttonX3_Click(sender, e);
-                if (string.IsNullOrEmpty(this.FFmpegBinPath) || !File.Exists(this.FFmpegBinPath))
-                {
-                    MessageBoxEx.Show(this, "未指定FFmpeg可执行文件。该预设将不生效。", "注意", MessageBoxButtons.OK);
-                }
-            }
         }
 
         public void Load(ImageHandlerConfig config)
@@ -198,6 +178,7 @@ namespace WzComparerR2
             this.MosaicBlockSize = config.MosaicInfo.BlockSize;
 
             this.PaletteOptimized = config.PaletteOptimized;
+
             this.FFmpegBinPath = config.FFmpegBinPath;
             this.FFmpegArgument = config.FFmpegArgument;
             this.FFmpegDefaultExtension = config.FFmpegOutputFileExtension;
@@ -218,43 +199,10 @@ namespace WzComparerR2
             config.MosaicInfo.BlockSize = this.MosaicBlockSize;
 
             config.PaletteOptimized = this.PaletteOptimized;
+
             config.FFmpegBinPath = this.FFmpegBinPath;
             config.FFmpegArgument = this.FFmpegArgument;
             config.FFmpegOutputFileExtension = this.FFmpegDefaultExtension;
-        }
-        private void buttonX3_Click(object sender, EventArgs e)
-        {
-            OpenFileDialog dlg = new();
-            dlg.Title = "查找ffmpeg程序";
-            dlg.Filter = "ffmpeg.exe|*.exe|*.*|*.*";
-            dlg.FileName = this.FFmpegBinPath;
-            if (dlg.ShowDialog(this) == DialogResult.OK)
-            {
-                this.FFmpegBinPath = dlg.FileName;
-            }
-        }
-        private void btnDiscordPreset_Click(object sender, System.EventArgs e)
-        {
-            string discordConfigPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "discord", "settings.json");
-            if (File.Exists(discordConfigPath))
-            {
-                // TO DO: Add support for Nitro exclusive background colors.
-                try
-                {
-                    JObject discordConfig = JObject.Parse(File.ReadAllText(discordConfigPath));
-                    string bgColor = discordConfig.SelectToken("BACKGROUND_COLOR").ToString().Replace("#", "FF");
-                    BackgroundColor = Color.FromArgb(Convert.ToInt32(bgColor, 16));
-                }
-                catch
-                {
-                    BackgroundColor = Color.FromArgb(-13750732);
-                }
-            }
-            else
-            {
-                BackgroundColor = Color.FromArgb(-13750732);
-            }
-            BackgroundType = ImageBackgroundType.Color;
         }
 
         private void btnNonTransparentMP4Preset_Click(object sender, EventArgs e)
@@ -264,7 +212,6 @@ namespace WzComparerR2
             BackgroundColor = Color.White;
             FFmpegArgument = string.Empty;
             FFmpegDefaultExtension = string.Empty;
-            isFFmpegExist(sender, e);
         }
 
         private void btnGreenBackdropMP4Preset_Click(object sender, EventArgs e)
@@ -274,7 +221,6 @@ namespace WzComparerR2
             BackgroundColor = Color.FromArgb(0, 255, 0);
             FFmpegArgument = string.Empty;
             FFmpegDefaultExtension = string.Empty;
-            isFFmpegExist(sender, e);
         }
 
         private void btnBlueBackdropMP4Preset_Click(object sender, EventArgs e)
@@ -284,7 +230,6 @@ namespace WzComparerR2
             BackgroundColor = Color.Blue;
             FFmpegArgument = string.Empty;
             FFmpegDefaultExtension = string.Empty;
-            isFFmpegExist(sender, e);
         }
 
         private void btnTransparentMOVPreset_Click(object sender, EventArgs e)
@@ -295,7 +240,6 @@ namespace WzComparerR2
             BackgroundColor = Color.White;
             FFmpegArgument = @$"-y -f rawvideo -pixel_format bgra -s %w*%h -r 1000/%t -i ""%i"" -vf ""crop=trunc(iw/2)*2:trunc(ih/2)*2"" -vcodec qtrle -pix_fmt argb ""%o""";
             FFmpegDefaultExtension = ".mov";
-            isFFmpegExist(sender, e);
         }
 
         private void btnTransparentWebMPreset_Click(object sender, EventArgs e)
@@ -306,12 +250,11 @@ namespace WzComparerR2
             BackgroundColor = Color.White;
             FFmpegArgument = @$"-y -f rawvideo -pixel_format bgra -s %w*%h -r 1000/%t -i ""%i"" -vf ""crop=trunc(iw/2)*2:trunc(ih/2)*2"" -vcodec libvpx-vp9 -pix_fmt yuva420p ""%o""";
             FFmpegDefaultExtension = ".webm";
-            isFFmpegExist(sender, e);
         }
 
         private void btnDefaultPreset_Click(object sender, EventArgs e)
         {
-            GifEncoder = 0;
+            GifEncoder = 1;
             BackgroundType = ImageBackgroundType.Transparent;
             MinMixedAlpha = 0;
             BackgroundColor = Color.White;
@@ -335,5 +278,16 @@ namespace WzComparerR2
             panelExMosaic.Enabled = rdoMosaic.Checked;
         }
 
+        private void buttonX3_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog dlg = new();
+            dlg.Title = "选择FFmpeg.exe文件路径...";
+            dlg.Filter = "ffmpeg.exe|*.exe|*.*|*.*";
+            dlg.FileName = this.FFmpegBinPath;
+            if (dlg.ShowDialog(this) == DialogResult.OK)
+            {
+                this.FFmpegBinPath = dlg.FileName;
+            }
+        }
     }
 }

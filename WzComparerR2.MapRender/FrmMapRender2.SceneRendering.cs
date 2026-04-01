@@ -12,7 +12,8 @@ using WzComparerR2.Animation;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using WzComparerR2.Controls;
-using WzComparerR2.CharaSim;
+using WzComparerR2.MapRender.Effects;
+using WzComparerR2.PluginBase;
 
 namespace WzComparerR2.MapRender
 {
@@ -54,6 +55,7 @@ namespace WzComparerR2.MapRender
                     else if (item is ObjItem)
                     {
                         var _item = (ObjItem)item;
+                        ApplyMapEvents(_item.Events, _item.View.Animator, _item.SpineAni);
                         (_item.View.Animator as WzComparerR2.Controls.AnimationItem)?.Update(elapsed);
                         _item.View.Time += (int)elapsed.TotalMilliseconds;
                     }
@@ -71,9 +73,20 @@ namespace WzComparerR2.MapRender
                         {
                             if (smAni.GetCurrent() == null) //当前无动作
                             {
-                                smAni.SetAnimation(smAni.Data.States[0]); //动作0
+                                if (life.Type == LifeItem.LifeType.Mob)
+                                {
+                                    if (life.Controller.PlayRegenMotion)
+                                        smAni.SetAnimation("regen");
+                                    else
+                                        smAni.SetAnimation("stand");
+                                }
+                                else
+                                {
+                                    smAni.SetAnimation(smAni.Data.States[0]); //动作0
+                                }
                             }
                             smAni.Update(elapsed);
+                            life.Controller.Update(elapsed);
                         }
 
                         life.View.Time += (int)elapsed.TotalMilliseconds;
@@ -148,11 +161,67 @@ namespace WzComparerR2.MapRender
                     UpdateAllItems(node.Nodes[i], elapsed);
                 }
             }
+            this.mapData.ExecuteQueue();
+        }
+
+        private void ApplyMapEvents(IEnumerable<ItemEvent> itemEvents, object animator, string defaultAniName)
+        {
+            if (itemEvents.Count() == 0 || animator is not ISpineAnimator)
+            {
+                return;
+            }
+            var cursorPos = renderEnv.Camera.CameraToWorld(renderEnv.Input.MousePosition);
+            var eventList = itemEvents.Select(ie =>
+            {
+                return new
+                {
+                    SlotName = ie.SlotName,
+                    Animation = ie.Animation,
+                    MapEvent = this.mapData.Events.FirstOrDefault(me => me.Index == ie.ActionKey),
+                    Rect = (animator as ISpineAnimator).GetBounds(ie.SlotName),
+                };
+            }).Where(data => data.MapEvent != null || !string.IsNullOrEmpty(data.Animation));
+
+            foreach (var data in eventList)
+            {
+                var sensorRect = data.Rect;
+                if (sensorRect.Contains(cursorPos))
+                {
+                    if (!string.IsNullOrEmpty(data.Animation))
+                    {
+                        var tmpMapEvent = new MapEvent(null, "SetAnimationOnceAndReturn", defaultAniName, data.Animation, null);
+                        InvokeMapEvent(animator as ISpineAnimator, tmpMapEvent);
+                    }
+                    else InvokeMapEvent(animator as ISpineAnimator, data.MapEvent);
+                }
+            }
+        }
+
+        private void InvokeMapEvent(ISpineAnimator spine, MapEvent mapEvent)
+        {
+            if (spine != null && mapEvent != null)
+            {
+                switch (mapEvent.Type)
+                {
+                    case MapEventType.SetAnimationOnceAndReturn:
+                        if (spine.NextAnimationName.Count > 0)
+                        {
+                            return;
+                        }
+                        else
+                        {
+                            spine.SelectedAnimationName = mapEvent.ChangedAnimation;
+                            spine.NextAnimationName.Enqueue(mapEvent.DefaultAnimation);
+                        }
+                        break;
+                }
+            }
         }
 
         private void UpdateTooltip()
         {
             var mouse = renderEnv.Input.MousePosition;
+            mouse = renderEnv.Camera.DivideByScale(mouse);
 
             var mouseElem = EmptyKeys.UserInterface.Input.InputManager.Current.MouseDevice.MouseOverElement;
             object target = null;
@@ -160,7 +229,7 @@ namespace WzComparerR2.MapRender
             {
                 var mouseTarget = this.allItems.Reverse<ItemRect>().FirstOrDefault(item =>
                 {
-                    return item.rect.Contains(mouse) && (item.item is LifeItem || item.item is PortalItem || item.item is IlluminantClusterItem || item.item is ReactorItem);
+                    return item.rect.Contains(mouse) && (item.item is LifeItem || item.item is PortalItem || item.item is IlluminantClusterItem || item.item is ReactorItem || (item.item is ObjItem && (item.item as ObjItem).Obstacle));
                 });
                 target = mouseTarget.item;
             }
@@ -216,17 +285,35 @@ namespace WzComparerR2.MapRender
             var mousePos = this.renderEnv.Camera.CameraToWorld(mouse);
             sb.AppendFormat("{0},{1}", mousePos.X, mousePos.Y);
 
-            //Power Requirement
-            if (this.mapData?.Barrier > 0 || this.mapData?.BarrierArc > 0 || this.mapData?.BarrierAut > 0)
-            {
-                sb.Append(" ReqPwr:").Append(this.mapData?.Barrier > 0 ? "★" + this.mapData?.Barrier.ToString() : "").Append(this.mapData?.BarrierArc > 0 ? "●" + this.mapData?.BarrierArc.ToString() : "").Append(this.mapData?.BarrierAut > 0 ? "⬢ " + this.mapData?.BarrierAut.ToString() : "");
-            }
+            sb.AppendFormat(" Scale: x{0:f2}", this.renderEnv.Camera.Scale);
+
+            sb.AppendFormat(" Time: [{0:f3}]", cm.GameTime.TotalGameTime.TotalMilliseconds / 1000);
             this.ui.TopBar.Text = sb.ToString();
         }
 
-        private void OnSceneItemClick(SceneItem item)
+        private void UpdateMinimapIcons()
         {
-            if (item is PortalItem)
+            this.ui.Minimap.Icons.RemoveAll(icon => icon.Tag == "mob");
+            foreach (var mob in this.mapData.Scene.Mobs)
+            {
+                var mobNode = PluginManager.FindWz(string.Format("Mob/{0:D7}.img/info", mob.ID));
+                if ((mobNode?.Nodes["minimap"].GetValueEx(0) ?? 0) != 0)
+                {
+                    var x = mob.X + mob.Controller.RelPos.X;
+                    var y = mob.Y + mob.Controller.RelPos.Y;
+                    this.ui.Minimap.Icons.Add(new UIMinimap2.MapIcon()
+                    {
+                        IconType = UIMinimap2.IconType.Another,
+                        WorldPosition = new EmptyKeys.UserInterface.PointF(x, y),
+                        Tag = "mob"
+                    });
+                }
+            }
+        }
+
+        private void OnSceneItemClick(SceneItem item, EmptyKeys.UserInterface.Input.MouseButton targetButton)
+        {
+            if (item is PortalItem && targetButton == EmptyKeys.UserInterface.Input.MouseButton.Left)
             {
                 var portal = (PortalItem)item;
                 if (portal.ToMap != 999999999)
@@ -239,21 +326,62 @@ namespace WzComparerR2.MapRender
                 }
                 else if (portal.GraphTargetMap.Count > 1)
                 {
-                    this.ui.Teleport.Sl = this.StringLinker;
-                    this.ui.Teleport.CmbMaps.ItemsSource = portal.GraphTargetMap.ToList();
-                    this.ui.Teleport.CmbMaps.SelectedIndex = 0;
-                    this.ui.Teleport.Toggle();
+                    this.ui.Teleport.LoadContents(this.StringLinker, portal.GraphTargetMap);
+                    this.ui.Teleport.Show();
+                }
+                else if (portal.IsSpring && (portal.ToName == null || portal.ToName == ""))
+                {
+                    this.cm.StartCoroutine(OnCameraMoving(new Point(portal.X + portal.HorizontalImpact / 5, portal.Y - portal.VerticalImpact / 5), 500)); // spring
+                }
+                else if (portal.ToName != null && portal.ToName != "")
+                {
+                    BlinkPortal(portal.ToName); // blink
                 }
             }
-            else if (item is IlluminantClusterItem)
+            else if (item is IlluminantClusterItem && targetButton == EmptyKeys.UserInterface.Input.MouseButton.Left)
             {
                 var illuminantCluster = (IlluminantClusterItem)item;
                 this.cm.StartCoroutine(OnCameraMoving(new Point(illuminantCluster.End.X, illuminantCluster.End.Y), 500));
             }
-            else if (item is ReactorItem)
+            else if (item is ReactorItem && targetButton == EmptyKeys.UserInterface.Input.MouseButton.Left)
             {
                 var reactor = (ReactorItem)item;
                 reactor.View.NextStage = reactor.View.Stage + 1;
+
+                PlaySoundEff($@"Sound\Reactor.img\{reactor.ID}\{reactor.View.Stage}");
+            }
+            else if (item is LifeItem)
+            {
+                var life = (LifeItem)item;
+                if (life.Type == LifeItem.LifeType.Mob)
+                {
+                    var ani = life.View.Animator as StateMachineAnimator;
+                    var soundEffPath = $@"Sound\Mob.img\{life.ID:D7}\";
+
+                    if (life.Controller.CanHit && targetButton == EmptyKeys.UserInterface.Input.MouseButton.Left)
+                    {
+                        life.Controller.DoDamage();
+                        if (life.Controller.DecideDie())
+                        {
+                            life.Controller.SetDied();
+                            soundEffPath += "Die";
+                        }
+                        else
+                        {
+                            life.Controller.SetHit();
+                            soundEffPath += "Damage";
+                        }
+
+                        PlaySoundEff(soundEffPath);
+                    }
+                    else if (life.Controller.CanAttack && targetButton == EmptyKeys.UserInterface.Input.MouseButton.Middle)
+                    {
+                        soundEffPath += life.Controller.DecideAttack().Replace("attack", "Attack").Replace("skill", "Skill");
+                        life.Controller.SetAttack();
+
+                        PlaySoundEff(soundEffPath);
+                    }
+                }
             }
         }
 
@@ -278,8 +406,9 @@ namespace WzComparerR2.MapRender
 
             allItems.Clear();
             var camera = this.renderEnv.Camera;
+            var cameraScale = this.renderEnv.Camera.Scale;
             var origin = camera.Origin;
-            this.batcher.Begin(origin, (float)(gameTime.TotalGameTime.TotalSeconds % 1000));
+            this.batcher.Begin(origin, (float)(gameTime.TotalGameTime.TotalSeconds % 1000), cameraScale);
             Rectangle[] rects = null;
             //绘制场景
             foreach (var kv in GetDrawableItems(this.mapData.Scene))
@@ -301,8 +430,8 @@ namespace WzComparerR2.MapRender
                     {
                         for (int i = 0; i < rectCount; i++)
                         {
-                            rects[i].X -= (int)origin.X;
-                            rects[i].Y -= (int)origin.Y;
+                            rects[i].X -= (int)(origin.X / cameraScale);
+                            rects[i].Y -= (int)(origin.Y / cameraScale);
                             allItems.Add(new ItemRect() { item = kv.Key, rect = rects[i] });
                         }
                     }
@@ -327,11 +456,12 @@ namespace WzComparerR2.MapRender
         {
             var pos = renderEnv.Camera.CameraToWorld(renderEnv.Input.MousePosition);
             var origin = renderEnv.Camera.Origin.ToPoint();
+            var scale = renderEnv.Camera.Scale;
             foreach (var item in mapData.Tooltips)
             {
                 if (item.CharRect.Contains(pos) || item.Rect.Contains(pos))
                 {
-                    var center = new Vector2(item.Rect.Center.X - origin.X, item.Rect.Center.Y - origin.Y);
+                    var center = new Vector2((int)(item.Rect.Center.X * scale - origin.X), (int)(item.Rect.Center.Y * scale - origin.Y));
                     tooltip.Draw(gameTime, renderEnv, item, center);
                 }
             }
@@ -351,6 +481,18 @@ namespace WzComparerR2.MapRender
                     {
                         lines.Add(new Point(fh.X1, fh.Y1));
                         lines.Add(new Point(fh.X2, fh.Y2));
+                        if (showFootholdBoundary)
+                        {
+                            lines.Add(new Point(fh.X1, fh.Y1));
+                            lines.Add(new Point(fh.X1, fh.Y1 + 10));
+                            lines.Add(new Point(fh.X1, fh.Y1 + 10));
+                            lines.Add(new Point(fh.X1 - 5, fh.Y1 + 5));
+
+                            lines.Add(new Point(fh.X2, fh.Y2));
+                            lines.Add(new Point(fh.X2, fh.Y2 - 10));
+                            lines.Add(new Point(fh.X2, fh.Y2 - 10));
+                            lines.Add(new Point(fh.X2 + 5, fh.Y2 - 5));
+                        }
                     }
                 }
 
@@ -439,6 +581,167 @@ namespace WzComparerR2.MapRender
                     this.batcher.MeshPush(meshItem);
                 }
             }
+
+            if (patchVisibility.PortalVisible && patchVisibility.PortalInEditMode)
+            {
+                if (patchVisibility.SpringPortalPathVisible)
+                {
+                    var lines = new List<Point>();
+                    var portalList = this.mapData.Scene.Fly.Portal.Slots.OfType<PortalItem>().Where(p => p.IsSpring);
+                    var arrowScaler = 15;
+                    var barScaler = 0;
+                    foreach (var item in portalList)
+                    {
+                        double invLen = item.InverseImpactLength;
+                        double sin = item.VerticalImpact * item.InverseImpactLength;
+                        double cos = item.HorizontalImpact * item.InverseImpactLength;
+                        Point arrow1 = new Point((int)((cos + sin) * -arrowScaler), (int)((cos - sin) * -arrowScaler));
+                        Point arrow2 = new Point((int)((sin - cos) * arrowScaler), (int)((cos + sin) * arrowScaler));
+
+                        foreach (var d in new[] { -3, 0, 3 })
+                        {
+                            var d2 = Math.Abs(d) * barScaler + 1;
+                            Point start = new Point(item.X + d * 15, item.Y);
+                            Point end = new Point((int)(item.X + item.HorizontalImpact / (d2 * 5) + d * 15), (int)(item.Y - item.VerticalImpact / (d2 * 5)));
+
+                            lines.Add(start);
+                            lines.Add(end);
+                            lines.Add(end);
+                            lines.Add(new Point((int)(end.X + arrow1.X / d2), (int)(end.Y + arrow1.Y / d2)));
+                            lines.Add(end);
+                            lines.Add(new Point((int)(end.X + arrow2.X / d2), (int)(end.Y + arrow2.Y / d2)));
+                        }
+                    }
+
+                    if (lines.Count > 0)
+                    {
+                        var meshItem = this.batcher.MeshPop();
+                        meshItem.RenderObject = new LineListMesh(lines.ToArray(), color, 1);
+                        this.batcher.Draw(meshItem);
+                        this.batcher.MeshPush(meshItem);
+                    }
+                }
+                if (patchVisibility.PortalRangeVisible)
+                {
+                    var rectList = new List<Rectangle>();
+                    var portalList = this.mapData.Scene.Fly.Portal.Slots.OfType<PortalItem>().Where(p => p.HRange > 0 && p.VRange > 0);
+                    foreach (var portal in portalList)
+                    {
+                        var x = portal.X;
+                        var y = portal.Y;
+                        var w = portal.HRange;
+                        var h = portal.VRange;
+
+                        Rectangle rect = new Rectangle(x - w / 2, y - h / 2, w, h);
+                        rectList.Add(rect);
+                    }
+
+                    foreach (var rect in rectList)
+                    {
+                        var meshItem = this.batcher.MeshPop();
+                        meshItem.RenderObject = new RectMesh(rect, color, 1, alpha: 0.3);
+                        this.batcher.Draw(meshItem);
+                        this.batcher.MeshPush(meshItem);
+                    }
+                }
+            }
+
+            if (patchVisibility.ObstacleAreaVisible)
+            {
+                var rectList = new List<Rectangle>();
+                var objList = this?.mapData.Scene.Layers.Nodes.SelectMany(l => ((LayerNode)l).Obj.Slots.OfType<ObjItem>()).Where(o => o.Obstacle);
+                foreach (var obj in objList)
+                {
+                    var lt = (obj.View.Animator as FrameAnimator).CurrentFrame.LT;
+                    var rb = (obj.View.Animator as FrameAnimator).CurrentFrame.RB;
+
+                    if (lt != Point.Zero || rb != Point.Zero)
+                    {
+                        var x = obj.X;
+                        var y = obj.Y;
+                        Vector2 move = Vector2.Zero;
+                        Rectangle rect = new Rectangle(x + lt.X, y + lt.Y, rb.X - lt.X, rb.Y - lt.Y);
+
+                        if (obj.MoveW != 0 || obj.MoveH != 0)
+                        {
+                            move = GetMovingObjPos(obj);
+                        }
+                        if (obj.View.Flip)
+                        {
+                            rect.X = 2 * x - rect.X - rect.Width;
+                        }
+                        rect.Offset(move);
+
+                        rectList.Add(rect);
+                    }
+                }
+
+                foreach (var rect in rectList)
+                {
+                    var meshItem = this.batcher.MeshPop();
+                    meshItem.RenderObject = new RectMesh(rect, color, 1);
+                    this.batcher.Draw(meshItem);
+                    this.batcher.MeshPush(meshItem);
+                }
+            }
+
+            if (patchVisibility.MobHitboxVisible)
+            {
+                var rectList = new List<Rectangle>();
+                var mobList = this?.mapData.Scene.Mobs;
+                foreach (var mob in mobList)
+                {
+                    var lt = (mob.View.Animator as StateMachineAnimator).CurrentLT;
+                    var rb = (mob.View.Animator as StateMachineAnimator).CurrentRB;
+
+                    if (lt != Point.Zero || rb != Point.Zero)
+                    {
+                        var x = (int)mob.Controller.IntCurPos.X;
+                        var y = (int)mob.Controller.IntCurPos.Y;
+                        Rectangle rect = new Rectangle(x + lt.X, y + lt.Y, rb.X - lt.X, rb.Y - lt.Y);
+
+                        if (mob.Flip)
+                        {
+                            rect.X = 2 * x - rect.X - rect.Width;
+                        }
+
+                        rectList.Add(rect);
+                    }
+                }
+
+                foreach (var rect in rectList)
+                {
+                    var meshItem = this.batcher.MeshPop();
+                    meshItem.RenderObject = new RectMesh(rect, color, 1);
+                    this.batcher.Draw(meshItem);
+                    this.batcher.MeshPush(meshItem);
+                }
+            }
+        }
+
+        private void DrawCaptureRect(GameTime gameTime)
+        {
+            if (patchVisibility.CaptureRectVisible)
+            {
+                var camera = this.renderEnv.Camera;
+                var cameraScale = this.renderEnv.Camera.Scale;
+                var origin = camera.Origin;
+                this.batcher.Begin(origin, (float)(gameTime.TotalGameTime.TotalSeconds % 1000), cameraScale);
+
+                Rectangle rect = this.renderEnv.Camera.WorldRect;
+                if (!this.CaptureRect.IsEmpty)
+                {
+                    rect = this.CaptureRect;
+                }
+                if (!rect.IsEmpty)
+                {
+                    var meshItem = this.batcher.MeshPop();
+                    meshItem.RenderObject = new RectMesh(rect, new Color(204, 204, 204), 5);
+                    this.batcher.Draw(meshItem);
+                    this.batcher.MeshPush(meshItem);
+                }
+                this.batcher.End();
+            }
         }
 
         private void DrawName(SceneItem item)
@@ -463,7 +766,7 @@ namespace WzComparerR2.MapRender
 
                             //绘制怪物名称
                             mesh = batcher.MeshPop();
-                            mesh.Position = new Vector2(life.X, life.Cy + 4);
+                            mesh.Position = new Vector2(life.X, life.Cy + 4) + life.Controller.IntRelPos;
                             mesh.RenderObject = new TextMesh()
                             {
                                 Align = Alignment.Center,
@@ -519,11 +822,8 @@ namespace WzComparerR2.MapRender
                     case LifeItem.LifeType.Npc:
                         if (this.patchVisibility.NpcNameVisible)
                         {
-                            var npcNode = PluginBase.PluginManager.FindWz(string.Format("Npc/{0:D7}.img/info", life.ID));
-                            if ((npcNode?.Nodes["hideName"].GetValueEx(0) ?? 0) != 0)
-                            {
-                                break;
-                            }
+                            if (life.HideName) break;
+
                             string name, desc;
                             if (this.StringLinker?.StringNpc.TryGetValue(life.ID, out sr) ?? false)
                             {
@@ -556,6 +856,7 @@ namespace WzComparerR2.MapRender
                             {
                                 mesh = batcher.MeshPop();
                                 mesh.Position = new Vector2(life.X, life.Cy + 21);
+                                // temporarily ignore font name and size here.
                                 mesh.RenderObject = new TextMesh()
                                 {
                                     Align = Alignment.Center,
@@ -578,9 +879,10 @@ namespace WzComparerR2.MapRender
         {
             var mapLight = this.mapData.Light;
             var origin = this.renderEnv.Camera.Origin.ToPoint();
+            var scale = this.renderEnv.Camera.Scale;
             this.GraphicsDevice.Clear(mapLight.BackColor);
 
-            this.lightRenderer.Begin(Matrix.CreateTranslation(new Vector3(-origin.X, -origin.Y, 0)));
+            this.lightRenderer.Begin(Matrix.CreateScale(scale, scale, 1) * Matrix.CreateTranslation(new Vector3(-origin.X, -origin.Y, 0)));
             // render spot light
             foreach (var light2D in mapLight.Lights)
             {
@@ -594,7 +896,7 @@ namespace WzComparerR2.MapRender
                     if (item is ObjItem obj && obj.Light && obj.View.Animator is FrameAnimator frameAni)
                     {
                         var frame = frameAni.CurrentFrame;
-                        this.lightRenderer.DrawTextureLight(frame.Texture, new Vector2(obj.X, obj.Y), frame.AtlasRect, frame.Origin.ToVector2(), obj.Flip, new Color(Color.White, frame.A0));
+                        this.lightRenderer.DrawTextureLight(frame.Texture, new Vector2(obj.X, obj.Y), frame.AtlasRect, frame.Origin.ToVector2(), obj.View.Flip, new Color(Color.White, frame.A0));
                     }
                 }
             }
@@ -694,6 +996,14 @@ namespace WzComparerR2.MapRender
                             }
                         }
                     }
+                    else if (item is LifeItem life && life.Type == LifeItem.LifeType.Mob)
+                    {
+                        var meshLifeEffect = GetMesh(item, effectAni: true);
+                        if (meshLifeEffect != null)
+                        {
+                            kvList.Add(new KeyValuePair<SceneItem, MeshItem>(item, meshLifeEffect));
+                        }
+                    }
                 }
                 kvList.Sort((kv1, kv2) => kv1.Value.CompareTo(kv2.Value));
                 foreach (var kv in kvList)
@@ -705,76 +1015,80 @@ namespace WzComparerR2.MapRender
             kvList.Clear();
         }
 
-        private MeshItem GetMesh(SceneItem item)
+        private MeshItem GetMesh(SceneItem item, bool effectAni = false)
         {
             if (item.Tags != null && item.Tags.Any(tag => !patchVisibility.IsTagVisible(tag)))
             {
                 return null;
             }
 
-            if (item is BackItem)
+            switch (item)
             {
-                var back = (BackItem)item;
-                if (back.Quest.Exists(quest => !patchVisibility.IsVisible(quest.Item1, quest.Item2)))
-                {
-                    return null;
-                }
-                if (back.IsFront ? patchVisibility.FrontVisible : patchVisibility.BackVisible)
-                {
-                    return GetMeshBack(back);
-                }
-            }
-            else if (item is ObjItem obj)
-            {
-                if (patchVisibility.ObjVisible && !obj.Light)
-                {
-                    if (((ObjItem)item).Quest.Exists(quest => !patchVisibility.IsVisible(quest.Item1, quest.Item2)))
+                case BackItem back:
+                    if (back.Quest.Exists(quest => !patchVisibility.IsQuestVisible(quest.ID, quest.State)))
                     {
                         return null;
                     }
-                    return GetMeshObj(obj);
-                }
-            }
-            else if (item is TileItem)
-            {
-                if (patchVisibility.TileVisible)
-                {
-                    return GetMeshTile((TileItem)item);
-                }
-            }
-            else if (item is LifeItem)
-            {
-                var life = (LifeItem)item;
-                if ((life.Type == LifeItem.LifeType.Mob && patchVisibility.MobVisible)
-                    || (life.Type == LifeItem.LifeType.Npc && patchVisibility.NpcVisible))
-                {
-                    return GetMeshLife(life);
-                }
-            }
-            else if (item is PortalItem)
-            {
-                if (patchVisibility.PortalVisible)
-                {
-                    return GetMeshPortal((PortalItem)item);
-                }
-            }
-            else if (item is ReactorItem)
-            {
-                if (patchVisibility.ReactorVisible)
-                {
-                    return GetMeshReactor((ReactorItem)item);
-                }
-            }
-            else if (item is ParticleItem)
-            {
-                if (((ParticleItem)item).Quest.Exists(quest => !patchVisibility.IsVisible(quest.Item1, quest.Item2)))
-                {
-                    return null;
-                }
-                if (patchVisibility.EffectVisible)
-                {
-                    return GetMeshParticle((ParticleItem)item);
-                }
+                    if (back.IsFront ? patchVisibility.FrontVisible : patchVisibility.BackVisible)
+                    {
+                        return GetMeshBack(back);
+                    }
+                    break;
+
+                case ObjItem obj:
+                    if (patchVisibility.ObjVisible && !obj.Light)
+                    {
+                        if (obj.Quest.Exists(quest => !patchVisibility.IsQuestVisible(quest.ID, quest.State)))
+                        {
+                            return null;
+                        }
+                        if (obj.Questex.Exists(questex => !patchVisibility.IsQuestVisible(questex.ID, questex.Key, questex.State)))
+                        {
+                            return null;
+                        }
+                        return GetMeshObj(obj);
+                    }
+                    break;
+
+                case TileItem tile:
+                    if (patchVisibility.TileVisible)
+                    {
+                        return GetMeshTile(tile);
+                    }
+                    break;
+
+                case LifeItem life:
+                    if ((life.Type == LifeItem.LifeType.Mob && patchVisibility.MobVisible)
+                        || (life.Type == LifeItem.LifeType.Npc && patchVisibility.NpcVisible))
+                    {
+                        return GetMeshLife(life, effectAni: effectAni);
+                    }
+                    break;
+
+                case PortalItem portal:
+                    if (patchVisibility.PortalVisible)
+                    {
+                        return GetMeshPortal(portal);
+                    }
+                    break;
+
+                case ReactorItem reactor:
+                    if (patchVisibility.ReactorVisible)
+                    {
+                        return GetMeshReactor(reactor);
+                    }
+                    break;
+
+                case ParticleItem particle:
+                    if (particle.Quest.Exists(quest => !patchVisibility.IsQuestVisible(quest.ID, quest.State)))
+                    {
+                        return null;
+                    }
+                    if (patchVisibility.EffectVisible)
+                    {
+                        return GetMeshParticle((ParticleItem)item);
+                    }
+                    break;
             }
             return null;
         }
@@ -788,23 +1102,28 @@ namespace WzComparerR2.MapRender
             }
 
             //计算坐标
-            Point renderSize;
-            if (back.View.Animator is FrameAnimator frameAni)
+            int cx = back.Cx;
+            int cy = back.Cy;
+            if ((back.TileMode & TileMode.BothTile) != 0 && (cx == 0 || cy == 0))
             {
-                renderSize = frameAni.CurrentFrame.Rectangle.Size;
-            }
-            else if (back.View.Animator is AnimationItem aniItem)
-            {
-                var rect = aniItem.Measure();
-                renderSize = rect.Size;
-            }
-            else
-            {
-                renderSize = Point.Zero;
-            }
+                Point renderSize = Point.Zero;
+                switch (back.View.Animator)
+                {
+                    case FrameAnimator frameAni:
+                        renderSize = frameAni.Data.GetBound().Size;
+                        break;
+                    case AnimationItem aniItem:
+                        // For spine animation, we don't know how to calculate the correct cx and cy
+                        renderSize = aniItem.Measure().Size;
+                        break;
+                    case MsCustomSprite msCustomSprite:
+                        renderSize = msCustomSprite.Size.ToPoint();
+                        break;
+                }
 
-            int cx = (back.Cx == 0 ? renderSize.X : back.Cx);
-            int cy = (back.Cy == 0 ? renderSize.Y : back.Cy);
+                if (cx == 0) cx = renderSize.X;
+                if (cy == 0) cy = renderSize.Y;
+            }
 
             Vector2 tileOff = new Vector2(cx, cy);
             Vector2 position = new Vector2(back.X, back.Y);
@@ -841,7 +1160,8 @@ namespace WzComparerR2.MapRender
             Rectangle? tileRect = null;
             if (back.TileMode != TileMode.None)
             {
-                var cameraRect = renderEnv.Camera.ClipRect;
+                //var cameraRect = renderEnv.Camera.ClipRect;
+                var cameraRect = renderEnv.Camera.ScaledClipRect;
 
                 int l, t, r, b;
                 if ((back.TileMode & TileMode.Horizontal) != 0 && cx > 0)
@@ -888,7 +1208,7 @@ namespace WzComparerR2.MapRender
 
         private MeshItem GetMeshObj(ObjItem obj)
         {
-            var renderObj = GetRenderObject(obj.View.Animator, flip: obj.Flip);
+            var renderObj = GetRenderObject(obj.View.Animator, flip: obj.View.Flip);
             if (renderObj == null)
             {
                 return null;
@@ -896,9 +1216,15 @@ namespace WzComparerR2.MapRender
             var mesh = batcher.MeshPop();
             mesh.RenderObject = renderObj;
             mesh.Position = new Vector2(obj.X, obj.Y);
-            mesh.FlipX = obj.Flip;
             mesh.Z0 = obj.Z;
             mesh.Z1 = obj.Index;
+
+            if (obj.MoveW != 0 || obj.MoveH != 0)
+            {
+                mesh.Position += GetMovingObjPos(obj);
+            }
+            mesh.FlipX = obj.View.Flip;
+
             return mesh;
         }
 
@@ -917,17 +1243,17 @@ namespace WzComparerR2.MapRender
             return mesh;
         }
 
-        private MeshItem GetMeshLife(LifeItem life)
+        private MeshItem GetMeshLife(LifeItem life, bool effectAni = false)
         {
-            var renderObj = GetRenderObject(life.View.Animator);
+            var renderObj = GetRenderObject(life.View.Animator, effectAni: effectAni);
             if (renderObj == null)
             {
                 return null;
             }
             var mesh = batcher.MeshPop();
             mesh.RenderObject = renderObj;
-            mesh.Position = new Vector2(life.X, life.Cy);
-            mesh.FlipX = life.Flip;
+            mesh.Position = life.Controller.IntCurPos;
+            mesh.FlipX = life.Controller.MovementEnabled ? life.Controller.FlipX : life.Flip;
             mesh.Z0 = ((renderObj as Frame)?.Z ?? 0);
             mesh.Z1 = life.Index;
             return mesh;
@@ -1008,7 +1334,7 @@ namespace WzComparerR2.MapRender
             return mesh;
         }
 
-        private object GetRenderObject(object animator, bool flip = false, int alpha = 255)
+        private object GetRenderObject(object animator, bool flip = false, int alpha = 255, bool effectAni = false)
         {
             if (animator is FrameAnimator frameAni)
             {
@@ -1048,10 +1374,109 @@ namespace WzComparerR2.MapRender
             }
             else if (animator is StateMachineAnimator smAni)
             {
-                return smAni.Data.GetMesh();
+                return effectAni ? smAni.EffectData?.GetMesh() : smAni.Data.GetMesh();
+            }
+            else if (animator is MsCustomSprite msCustomSprite)
+            {
+                this.UpdateShaderConstant(msCustomSprite.Material);
+                return msCustomSprite;
             }
 
             return null;
+        }
+
+        private Vector2 GetMovingObjPos(ObjItem obj)
+        {
+            double movingX = 0;
+            double movingY = 0;
+            double time = obj.View.Time;
+            switch (obj.MoveType)
+            {
+                case 1:
+                case 2: // line
+                    time *= Math.PI * 2 / obj.MoveP;
+                    movingX = obj.MoveW * Math.Cos(time);
+                    movingY = obj.MoveH * Math.Cos(time);
+                    break;
+                case 3: // circle
+                    time *= Math.PI * 2 / obj.MoveP;
+                    movingX = obj.MoveW * Math.Cos(time);
+                    movingY = obj.MoveH * Math.Sin(time);
+                    break;
+
+                case 6:
+                case 7:
+                case 8:
+                    int sign = -1;
+                    double freq = (double)(obj.MoveP + obj.MoveDelay) * 2;
+                    time = time % freq;
+                    if (time >= freq / 2)
+                    {
+                        time -= freq / 2;
+                        if (obj.MoveType == 8)
+                            obj.View.Flip = !obj.Flip;
+
+                        if (obj.MoveType != 6)
+                            sign = +1;
+                    }
+                    else
+                    {
+                        if (obj.MoveType == 8)
+                            obj.View.Flip = obj.Flip;
+                    }
+
+                    movingX = (Math.Min(1, Math.Max(-1, (time - obj.MoveDelay) * -2 / obj.MoveP + 1)) * sign + 1) / 2 * obj.MoveW;
+                    movingY = (Math.Min(1, Math.Max(-1, (time - obj.MoveDelay) * -2 / obj.MoveP + 1)) * sign + 1) / 2 * obj.MoveH;
+
+                    break;
+
+                default:
+                    break;
+            }
+            return new Vector2((float)movingX, (float)movingY);
+        }
+
+        private void UpdateShaderConstant(ShaderMaterial shaderMaterial)
+        {
+            // we don't know the exact value that being used in the original client
+            switch (shaderMaterial)
+            {
+                case LightPixelShaderMaterial light:
+                    light.PlayerPos = renderEnv.Camera.CameraToWorld(renderEnv.Input.MousePosition).ToVector2();
+                    light.LightInnerRadius = 50f;
+                    light.LightOuterRadius = 200f;
+                    light.PlayerLightColor = Color.White.ToVector4();
+                    light.TopColor = Color.White.ToVector4();
+                    light.BottomColor = new Color(0.2f, 0.2f, 0.2f, 1f).ToVector4();
+                    light.MinY = 4500;
+                    light.MaxY = 19500;
+                    break;
+
+                case WaterFrontPixelShaderMaterial waterFront:
+                    waterFront.PlayerPos = renderEnv.Camera.CameraToWorld(renderEnv.Input.MousePosition).ToVector2();
+                    waterFront.Factor1 = 1f;
+                    waterFront.MinY = 4500;
+                    waterFront.MaxY = 19500;
+                    waterFront.DistNoiseCenterPos = waterFront.PlayerPos;
+                    waterFront.Factor2 = 1f;
+                    break;
+            }
+        }
+
+        private void PlaySoundEff(string path)
+        {
+            Music soundEff = LoadSoundEff(path);
+            if (soundEff != null)
+            {
+                soundEff.Volume = bgm?.Volume ?? 1;
+                soundEff.Play();
+                soundEff.soundEffDispose();
+            }
+        }
+
+        private void LoadMobResource(LifeItem mob)
+        {
+            this.mapData.LoadResource(resLoader, mob);
         }
     }
 }

@@ -66,7 +66,6 @@ namespace WzComparerR2
             try
             {
                 var req = WebRequest.Create(url) as HttpWebRequest;
-                req.UserAgent = "WzComparerR2-JMS/1.0";
                 req.Timeout = 15000;
                 using (var resp = req.GetResponse() as HttpWebResponse)
                 {

@@ -149,6 +149,16 @@ namespace WzComparerR2.Config
         }
 
         /// <summary>
+        /// Preferred Client Region Configuration
+        /// </summary>
+        [ConfigurationProperty("PreferredClientRegion")]
+        public ConfigItem<int> PreferredClientRegion
+        {
+            get { return (ConfigItem<int>)this["PreferredClientRegion"]; }
+            set { this["PreferredClientRegion"] = value; }
+        }
+
+        /// <summary>
         /// Preferred Translate Engine Configuration
         /// </summary>
         [ConfigurationProperty("PreferredTranslateEngine")]
@@ -268,6 +278,34 @@ namespace WzComparerR2.Config
             set { this["autoDetectUpdate"] = value; }
         }
 
+        [ConfigurationProperty("bucket")]
+        public ConfigItem<string> Bucket
+        {
+            get { return (ConfigItem<string>)this["bucket"]; }
+            set { this["bucket"] = value; }
+        }
+
+        [ConfigurationProperty("region")]
+        public ConfigItem<string> Region
+        {
+            get { return (ConfigItem<string>)this["region"]; }
+            set { this["region"] = value; }
+        }
+
+        [ConfigurationProperty("secretid")]
+        public ConfigItem<string> SecretID
+        {
+            get { return (ConfigItem<string>)this["secretid"]; }
+            set { this["secretid"] = value; }
+        }
+
+        [ConfigurationProperty("secretkey")]
+        public ConfigItem<string> SecretKey
+        {
+            get { return (ConfigItem<string>)this["secretkey"]; }
+            set { this["secretkey"] = value; }
+        }
+
         /// <summary>
         /// 获取或设置一个值，指示是否不再提示游戏更新器通知。
         /// </summary>
@@ -302,6 +340,13 @@ namespace WzComparerR2.Config
         public PatcherSettingCollection PatcherSettings
         {
             get { return (PatcherSettingCollection)this["patcherSettings"]; }
+        }
+
+        [ConfigurationProperty("nexonOpenAPIKey")]
+        public ConfigItem<string> NexonOpenAPIKey
+        {
+            get { return (ConfigItem<string>)this["nexonOpenAPIKey"]; }
+            set { this["nexonOpenAPIKey"] = value; }
         }
     }
 }

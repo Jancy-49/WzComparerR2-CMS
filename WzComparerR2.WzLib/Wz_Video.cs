@@ -29,7 +29,7 @@ namespace WzComparerR2.WzLib
                 string signature = new string(br.ReadChars(4));
                 if (signature != "MCV0")
                 {
-                    throw new Exception("文件签名不匹配。");
+                    throw new Exception("File signature does not match.");
                 }
                 s.Position += 2;
                 int headerLen = br.ReadUInt16();
@@ -123,7 +123,7 @@ namespace WzComparerR2.WzLib
         {
             if (buffer.Length - offset < this.Length)
             {
-                throw new ArgumentException("缓冲区大小不足");
+                throw new ArgumentException("Insufficient buffer size");
             }
             lock (this.WzFile.ReadLock)
             {
@@ -137,7 +137,7 @@ namespace WzComparerR2.WzLib
         {
             if (span.Length < this.Length)
             {
-                throw new ArgumentException("缓冲区大小不足");
+                throw new ArgumentException("Insufficient buffer size");
             }
             lock (this.WzFile.ReadLock)
             {

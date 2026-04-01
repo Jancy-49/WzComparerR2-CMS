@@ -94,6 +94,7 @@ namespace WzComparerR2.Avatar
                         gif.Frames.Add(f);
                     }
                 }
+                
 
                 var gifFile = gif.EncodeGif(Color.Transparent);
                 string fileName = "D:\\ms\\new_" + action.Replace('\\', '.');
@@ -292,7 +293,7 @@ namespace WzComparerR2.Avatar
 
             foreach (var part in new [] {"prepare", "keydown", "keydownend"})
             {
-                var effects = new List<Tuple<Gif, int>>();
+                var effects = new List<Tuple<Gif,int>>();
 
                 for (int i = -1; ; i++)
                 {
@@ -321,8 +322,8 @@ namespace WzComparerR2.Avatar
                         for(int i = 0, i0 = part == "keydown" ? keydownCount : 1; i < i0; i++)
                         {
                             effGif.Item1.Frames.ForEach(af => layer.AddFrame((GifFrame)af));
-                            layers.Add(new Tuple<GifLayer, int>(layer, effGif.Item2));
-                            fDelay += effGif.Item1.Frames.Select(f => f.Delay).Sum();
+                            layers.Add(new Tuple<GifLayer, int>(layer,effGif.Item2));
+                            fDelay+= effGif.Item1.Frames.Select(f => f.Delay).Sum();
                         }
 
                         effDelay = Math.Max(fDelay, effDelay);
@@ -385,7 +386,7 @@ namespace WzComparerR2.Avatar
 
                 for (int i = 1; ; i++)
                 {
-                    Wz_Node effNode = ChairNode.FindNodeByPath("effect" + ( i > 1 ? i.ToString() : ""));
+                    Wz_Node effNode = ChairNode.FindNodeByPath("effect"+( i > 1 ? i.ToString() : ""));
                     if (effNode == null)
                         break;
                     var gif = Gif.CreateFromNode(effNode, PluginManager.FindWz);

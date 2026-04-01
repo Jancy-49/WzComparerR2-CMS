@@ -40,7 +40,7 @@ namespace WzComparerR2.CharaSim
             this.status.AbnormalDmgR = 11.00;
             this.status.BuffDurationIncR.BaseVal = 65;
             this.status.TamingMobDurationIncR.BaseVal = 20;
-            
+
             this.status.MesoGainR.BaseVal = 10;
             this.status.DropGainR.BaseVal = 100;
             this.status.ExpGainR = 120.00;

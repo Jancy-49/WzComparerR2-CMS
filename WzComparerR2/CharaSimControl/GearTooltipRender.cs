@@ -93,7 +93,7 @@ namespace WzComparerR2.CharaSimControl
                 width += 252;
             }
 
-               // GearGraphics.DrawGearDetailNumber(g, 2, 2, gear.ItemID.ToString("d8"), true);
+            // GearGraphics.DrawGearDetailNumber(g, 2, 2, gear.ItemID.ToString("d8"), true);
 
             g.Dispose();
 
@@ -350,8 +350,8 @@ namespace WzComparerR2.CharaSimControl
                 picHeight += 14;
                 hasPart2 = true;
             }
-               
-            
+
+
             //分割线2号
             if (hasPart2)
             {
@@ -371,7 +371,8 @@ namespace WzComparerR2.CharaSimControl
                     optionCount++;
                 }
             }
-            if (optionCount>0){
+            if (optionCount > 0)
+            {
                 picHeight += 4 * optionCount;
             }
             else if (gear.CanPotential)
@@ -395,8 +396,8 @@ namespace WzComparerR2.CharaSimControl
                 //分割线3号
                 picHeight -= 3;
                 g.DrawLine(Pens.White, 6, picHeight, 245, picHeight);
-                g.DrawImage(GetAdditionalOptionIcon(gear.AdditionGrade), 8, picHeight+1);
-                g.DrawString("Bonus Potential", GearGraphics.EquipDetailFont, GearGraphics.SetItemNameBrush, 26, picHeight+2);
+                g.DrawImage(GetAdditionalOptionIcon(gear.AdditionGrade), 8, picHeight + 1);
+                g.DrawString("Bonus Potential", GearGraphics.EquipDetailFont, GearGraphics.SetItemNameBrush, 26, picHeight + 2);
                 picHeight += 24;
 
                 foreach (Potential potential in gear.AdditionalOptions)
@@ -524,7 +525,7 @@ namespace WzComparerR2.CharaSimControl
                 g.DrawString(setItem.SetItemName, GearGraphics.EquipDetailFont, GearGraphics.SetItemNameBrush, 126, 10, format);
                 picHeight += 25;
 
-                format.Alignment=StringAlignment.Far;
+                format.Alignment = StringAlignment.Far;
 
                 foreach (var setItemPart in setItem.ItemIDs.Parts)
                 {

@@ -28,17 +28,6 @@
         /// </summary>
         private void InitializeComponent()
         {
-            DevComponents.DotNetBar.SuperTooltipInfo superTooltipInfo2 = new DevComponents.DotNetBar.SuperTooltipInfo();
-            DevComponents.DotNetBar.SuperTooltipInfo superTooltipInfo3 = new DevComponents.DotNetBar.SuperTooltipInfo();
-            DevComponents.DotNetBar.SuperTooltipInfo superTooltipInfo4 = new DevComponents.DotNetBar.SuperTooltipInfo();
-            DevComponents.DotNetBar.SuperTooltipInfo superTooltipInfo5 = new DevComponents.DotNetBar.SuperTooltipInfo();
-            DevComponents.DotNetBar.SuperTooltipInfo superTooltipInfo6 = new DevComponents.DotNetBar.SuperTooltipInfo();
-            DevComponents.DotNetBar.SuperTooltipInfo superTooltipInfo7 = new DevComponents.DotNetBar.SuperTooltipInfo();
-            DevComponents.DotNetBar.SuperTooltipInfo superTooltipInfo8 = new DevComponents.DotNetBar.SuperTooltipInfo();
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FrmPatcher));
-            DevComponents.DotNetBar.SuperTooltipInfo superTooltipInfo9 = new DevComponents.DotNetBar.SuperTooltipInfo();
-            DevComponents.DotNetBar.SuperTooltipInfo superTooltipInfo10 = new DevComponents.DotNetBar.SuperTooltipInfo();
-            DevComponents.DotNetBar.SuperTooltipInfo superTooltipInfo1 = new DevComponents.DotNetBar.SuperTooltipInfo();
             this.comboBoxEx1 = new DevComponents.DotNetBar.Controls.ComboBoxEx();
             this.integerInput1 = new DevComponents.Editors.IntegerInput();
             this.txtUrl = new DevComponents.DotNetBar.Controls.TextBoxX();
@@ -55,12 +44,6 @@
             this.flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
             this.buttonXCheck = new DevComponents.DotNetBar.ButtonX();
             this.expandablePanel2 = new DevComponents.DotNetBar.ExpandablePanel();
-            this.chkResolvePngLink = new DevComponents.DotNetBar.Controls.CheckBoxX();
-            this.chkSaveSkillTooltip = new DevComponents.DotNetBar.Controls.CheckBoxX();
-            this.chkSaveItemTooltip = new DevComponents.DotNetBar.Controls.CheckBoxX();
-            this.chkSaveEqpTooltip = new DevComponents.DotNetBar.Controls.CheckBoxX();
-            this.chkSaveMobTooltip = new DevComponents.DotNetBar.Controls.CheckBoxX();
-            this.chkSaveNpcTooltip = new DevComponents.DotNetBar.Controls.CheckBoxX();
             this.chkEnableDarkMode = new DevComponents.DotNetBar.Controls.CheckBoxX();
             this.chkOutputRemovedImg = new DevComponents.DotNetBar.Controls.CheckBoxX();
             this.chkOutputAddedImg = new DevComponents.DotNetBar.Controls.CheckBoxX();
@@ -98,6 +81,7 @@
             this.labelX5 = new DevComponents.DotNetBar.LabelX();
             this.labelX3 = new DevComponents.DotNetBar.LabelX();
             this.superTooltip1 = new DevComponents.DotNetBar.SuperTooltip();
+            this.chkResolvePngLink = new DevComponents.DotNetBar.Controls.CheckBoxX();
             ((System.ComponentModel.ISupportInitialize)(this.integerInput1)).BeginInit();
             this.expandablePanel1.SuspendLayout();
             this.flowLayoutPanel1.SuspendLayout();
@@ -113,21 +97,16 @@
             this.expandablePanel3.SuspendLayout();
             this.SuspendLayout();
             // 
-            // superTooltip1
-            // 
-            this.superTooltip1.DefaultTooltipSettings = superTooltipInfo1;
-            // 
             // comboBoxEx1
             // 
             this.comboBoxEx1.DisplayMember = "Text";
             this.comboBoxEx1.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed;
             this.comboBoxEx1.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.comboBoxEx1.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.comboBoxEx1.FormattingEnabled = true;
-            this.comboBoxEx1.ItemHeight = 13;
+            this.comboBoxEx1.ItemHeight = 15;
             this.comboBoxEx1.Location = new System.Drawing.Point(12, 35);
             this.comboBoxEx1.Name = "comboBoxEx1";
-            this.comboBoxEx1.Size = new System.Drawing.Size(86, 19);
+            this.comboBoxEx1.Size = new System.Drawing.Size(86, 21);
             this.comboBoxEx1.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
             this.comboBoxEx1.TabIndex = 0;
             this.comboBoxEx1.SelectedIndexChanged += new System.EventHandler(this.comboBoxEx1_SelectedIndexChanged);
@@ -147,7 +126,7 @@
             this.integerInput1.MinValue = 0;
             this.integerInput1.Name = "integerInput1";
             this.integerInput1.ShowUpDown = true;
-            this.integerInput1.Size = new System.Drawing.Size(60, 19);
+            this.integerInput1.Size = new System.Drawing.Size(60, 21);
             this.integerInput1.TabIndex = 1;
             this.integerInput1.ValueChanged += new System.EventHandler(this.integerInput_ValueChanged);
             // 
@@ -176,7 +155,7 @@
             this.buttonXPatch.Size = new System.Drawing.Size(40, 25);
             this.buttonXPatch.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
             this.buttonXPatch.TabIndex = 8;
-            this.buttonXPatch.Text = "Patch";
+            this.buttonXPatch.Text = "更新";
             this.buttonXPatch.Click += new System.EventHandler(this.buttonXPatch_Click);
             // 
             // chkDeadPatch
@@ -189,16 +168,12 @@
             this.chkDeadPatch.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
             this.chkDeadPatch.Location = new System.Drawing.Point(81, 87);
             this.chkDeadPatch.Name = "chkDeadPatch";
-            this.chkDeadPatch.Size = new System.Drawing.Size(88, 18);
+            this.chkDeadPatch.Size = new System.Drawing.Size(82, 16);
             this.chkDeadPatch.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
-            superTooltipInfo2.BodyText = "开启此项后，每更新完一个子文件，将立即覆盖原文件并删除临时文件。这样做会减少临时文件空间的需要，但伴随一定风险。";
-            superTooltipInfo2.Color = DevComponents.DotNetBar.eTooltipColor.System;
-            superTooltipInfo2.CustomSize = new System.Drawing.Size(180, 130);
-            superTooltipInfo2.FooterVisible = false;
-            superTooltipInfo2.HeaderText = "Dead Patch";
-            this.superTooltip1.SetSuperTooltip(this.chkDeadPatch, superTooltipInfo2);
+            this.superTooltip1.SetSuperTooltip(this.chkDeadPatch, new DevComponents.DotNetBar.SuperTooltipInfo("覆盖更新", "", "每个文件打补丁后立即覆盖原始文件。临时文件可能会减少所需空间，但中途中断可能会有危险。\r\n\r\n对于KMST1125类型的补丁，" +
+            "激活更新摘要才能运行。", null, null, DevComponents.DotNetBar.eTooltipColor.System, true, false, new System.Drawing.Size(180, 180)));
             this.chkDeadPatch.TabIndex = 7;
-            this.chkDeadPatch.Text = "Dead Patch";
+            this.chkDeadPatch.Text = "覆盖更新";
             // 
             // chkPrePatch
             // 
@@ -210,16 +185,11 @@
             this.chkPrePatch.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
             this.chkPrePatch.Location = new System.Drawing.Point(6, 87);
             this.chkPrePatch.Name = "chkPrePatch";
-            this.chkPrePatch.Size = new System.Drawing.Size(88, 18);
+            this.chkPrePatch.Size = new System.Drawing.Size(76, 16);
             this.chkPrePatch.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
-            superTooltipInfo3.BodyText = "开启此项则会在补丁更新前进行预加载。预加载后可以自由选择要更新的子文件，或调整子文件更新顺序。调整完毕后再次单击Patch按钮开始更新。";
-            superTooltipInfo3.Color = DevComponents.DotNetBar.eTooltipColor.Default;
-            superTooltipInfo3.CustomSize = new System.Drawing.Size(180, 140);
-            superTooltipInfo3.FooterVisible = false;
-            superTooltipInfo3.HeaderText = "PrePatch";
-            this.superTooltip1.SetSuperTooltip(this.chkPrePatch, superTooltipInfo3);
+            this.superTooltip1.SetSuperTooltip(this.chkPrePatch, new DevComponents.DotNetBar.SuperTooltipInfo("更新摘要", "", "在应用实际更新之前，您必须检查需要更新的文件，并且只能对自由选择的文件进行更新。", null, null, DevComponents.DotNetBar.eTooltipColor.Default, true, false, new System.Drawing.Size(180, 140)));
             this.chkPrePatch.TabIndex = 6;
-            this.chkPrePatch.Text = "PrePatch";
+            this.chkPrePatch.Text = "更新摘要";
             // 
             // buttonXOpen2
             // 
@@ -243,9 +213,9 @@
             // 
             this.txtMSFolder.Border.Class = "TextBoxBorder";
             this.txtMSFolder.Border.CornerType = DevComponents.DotNetBar.eCornerType.Square;
-            this.txtMSFolder.Location = new System.Drawing.Point(92, 59);
+            this.txtMSFolder.Location = new System.Drawing.Point(68, 59);
             this.txtMSFolder.Name = "txtMSFolder";
-            this.txtMSFolder.Size = new System.Drawing.Size(235, 21);
+            this.txtMSFolder.Size = new System.Drawing.Size(259, 21);
             this.txtMSFolder.TabIndex = 3;
             // 
             // labelX2
@@ -258,9 +228,9 @@
             this.labelX2.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
             this.labelX2.Location = new System.Drawing.Point(7, 61);
             this.labelX2.Name = "labelX2";
-            this.labelX2.Size = new System.Drawing.Size(105, 18);
+            this.labelX2.Size = new System.Drawing.Size(62, 16);
             this.labelX2.TabIndex = 5;
-            this.labelX2.Text = "MS Folder";
+            this.labelX2.Text = "游戏目录";
             // 
             // buttonXOpen1
             // 
@@ -284,9 +254,9 @@
             // 
             this.txtPatchFile.Border.Class = "TextBoxBorder";
             this.txtPatchFile.Border.CornerType = DevComponents.DotNetBar.eCornerType.Square;
-            this.txtPatchFile.Location = new System.Drawing.Point(92, 34);
+            this.txtPatchFile.Location = new System.Drawing.Point(68, 34);
             this.txtPatchFile.Name = "txtPatchFile";
-            this.txtPatchFile.Size = new System.Drawing.Size(235, 21);
+            this.txtPatchFile.Size = new System.Drawing.Size(259, 21);
             this.txtPatchFile.TabIndex = 0;
             // 
             // labelX1
@@ -299,18 +269,18 @@
             this.labelX1.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
             this.labelX1.Location = new System.Drawing.Point(7, 36);
             this.labelX1.Name = "labelX1";
-            this.labelX1.Size = new System.Drawing.Size(93, 18);
+            this.labelX1.Size = new System.Drawing.Size(62, 16);
             this.labelX1.TabIndex = 2;
-            this.labelX1.Text = "PatchFile";
+            this.labelX1.Text = "补丁文件";
             // 
             // expandablePanel1
             // 
             this.expandablePanel1.CanvasColor = System.Drawing.SystemColors.Control;
             this.expandablePanel1.ColorSchemeStyle = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
             this.expandablePanel1.Controls.Add(this.flowLayoutPanel1);
+            this.expandablePanel1.Controls.Add(this.buttonXCheck);
             this.expandablePanel1.Controls.Add(this.comboBoxEx1);
             this.expandablePanel1.Controls.Add(this.txtUrl);
-            this.expandablePanel1.Controls.Add(this.buttonXCheck);
             this.expandablePanel1.DisabledBackColor = System.Drawing.Color.Empty;
             this.expandablePanel1.Dock = System.Windows.Forms.DockStyle.Top;
             this.expandablePanel1.ExpandOnTitleClick = true;
@@ -332,7 +302,7 @@
             this.expandablePanel1.TitleStyle.BorderColor.ColorSchemePart = DevComponents.DotNetBar.eColorSchemePart.PanelBorder;
             this.expandablePanel1.TitleStyle.ForeColor.ColorSchemePart = DevComponents.DotNetBar.eColorSchemePart.PanelText;
             this.expandablePanel1.TitleStyle.GradientAngle = 90;
-            this.expandablePanel1.TitleText = "补丁文件下载地址";
+            this.expandablePanel1.TitleText = "补丁文件下载链接";
             // 
             // flowLayoutPanel1
             // 
@@ -353,7 +323,7 @@
             this.buttonXCheck.ColorTable = DevComponents.DotNetBar.eButtonColor.OrangeWithBackground;
             this.buttonXCheck.Location = new System.Drawing.Point(322, 61);
             this.buttonXCheck.Name = "buttonXCheck";
-            this.buttonXCheck.Size = new System.Drawing.Size(55, 23);
+            this.buttonXCheck.Size = new System.Drawing.Size(41, 23);
             this.buttonXCheck.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
             this.buttonXCheck.TabIndex = 4;
             this.buttonXCheck.Text = "确认";
@@ -364,11 +334,6 @@
             this.expandablePanel2.CanvasColor = System.Drawing.SystemColors.Control;
             this.expandablePanel2.ColorSchemeStyle = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
             this.expandablePanel2.Controls.Add(this.chkResolvePngLink);
-            this.expandablePanel2.Controls.Add(this.chkSaveSkillTooltip);
-            this.expandablePanel2.Controls.Add(this.chkSaveItemTooltip);
-            this.expandablePanel2.Controls.Add(this.chkSaveEqpTooltip);
-            this.expandablePanel2.Controls.Add(this.chkSaveNpcTooltip);
-            this.expandablePanel2.Controls.Add(this.chkSaveMobTooltip);
             this.expandablePanel2.Controls.Add(this.chkEnableDarkMode);
             this.expandablePanel2.Controls.Add(this.chkOutputRemovedImg);
             this.expandablePanel2.Controls.Add(this.chkOutputAddedImg);
@@ -390,7 +355,7 @@
             this.expandablePanel2.ExpandOnTitleClick = true;
             this.expandablePanel2.Location = new System.Drawing.Point(0, 87);
             this.expandablePanel2.Name = "expandablePanel2";
-            this.expandablePanel2.Size = new System.Drawing.Size(384, 180);
+            this.expandablePanel2.Size = new System.Drawing.Size(384, 157);
             this.expandablePanel2.Style.Alignment = System.Drawing.StringAlignment.Center;
             this.expandablePanel2.Style.BackColor1.ColorSchemePart = DevComponents.DotNetBar.eColorSchemePart.PanelBackground;
             this.expandablePanel2.Style.BackColor2.ColorSchemePart = DevComponents.DotNetBar.eColorSchemePart.PanelBackground2;
@@ -408,112 +373,6 @@
             this.expandablePanel2.TitleStyle.GradientAngle = 90;
             this.expandablePanel2.TitleText = "手动更新";
             // 
-            // chkResolvePngLink
-            // 
-            this.chkResolvePngLink.AutoSize = true;
-            this.chkResolvePngLink.BackColor = System.Drawing.Color.Transparent;
-            // 
-            // 
-            // 
-            this.chkResolvePngLink.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
-            this.chkResolvePngLink.Location = new System.Drawing.Point(280, 135);
-            this.chkResolvePngLink.Name = "chkResolvePngLink";
-            this.chkResolvePngLink.Size = new System.Drawing.Size(99, 18);
-            this.chkResolvePngLink.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
-            superTooltipInfo4.BodyText = "比较与链接的PNG相同的情况下不输出。";
-            superTooltipInfo4.Color = DevComponents.DotNetBar.eTooltipColor.System;
-            superTooltipInfo4.CustomSize = new System.Drawing.Size(180, 90);
-            superTooltipInfo4.FooterVisible = false;
-            superTooltipInfo4.HeaderText = "PNG链接解析";
-            this.superTooltip1.SetSuperTooltip(this.chkResolvePngLink, superTooltipInfo4);
-            this.chkResolvePngLink.TabIndex = 18;
-            this.chkResolvePngLink.Text = "PNG链接解析";
-            // 
-            // chkSaveSkillTooltip
-            // 
-            this.chkSaveSkillTooltip.AutoSize = true;
-            this.chkSaveSkillTooltip.BackColor = System.Drawing.Color.Transparent;
-            // 
-            // 
-            // 
-            this.chkSaveSkillTooltip.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
-            this.chkSaveSkillTooltip.Location = new System.Drawing.Point(184, 111);
-            this.chkSaveSkillTooltip.Name = "chkSaveSkillTooltip";
-            this.chkSaveSkillTooltip.Size = new System.Drawing.Size(80, 18);
-            this.chkSaveSkillTooltip.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
-            superTooltipInfo4.BodyText = "保存变更的技能提示框图像。";
-            superTooltipInfo4.Color = DevComponents.DotNetBar.eTooltipColor.System;
-            superTooltipInfo4.CustomSize = new System.Drawing.Size(180, 60);
-            superTooltipInfo4.FooterVisible = false;
-            superTooltipInfo4.HeaderText = "技能提示框";
-            this.superTooltip1.SetSuperTooltip(this.chkSaveSkillTooltip, superTooltipInfo4);
-            this.chkSaveSkillTooltip.TabIndex = 14;
-            this.chkSaveSkillTooltip.Text = "技能提示框";
-            // 
-            // chkSaveItemTooltip
-            // 
-            this.chkSaveItemTooltip.AutoSize = true;
-            this.chkSaveItemTooltip.BackColor = System.Drawing.Color.Transparent;
-            // 
-            // 
-            // 
-            this.chkSaveItemTooltip.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
-            this.chkSaveItemTooltip.Location = new System.Drawing.Point(280, 111);
-            this.chkSaveItemTooltip.Name = "chkSaveItemTooltip";
-            this.chkSaveItemTooltip.Size = new System.Drawing.Size(80, 18);
-            this.chkSaveItemTooltip.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
-            this.superTooltip1.SetSuperTooltip(this.chkSaveItemTooltip, superTooltipInfo4);
-            this.chkSaveItemTooltip.TabIndex = 14;
-            this.chkSaveItemTooltip.Text = "道具提示框";
-            // 
-            // chkSaveEqpTooltip
-            // 
-            this.chkSaveEqpTooltip.AutoSize = true;
-            this.chkSaveEqpTooltip.BackColor = System.Drawing.Color.Transparent;
-            // 
-            // 
-            // 
-            this.chkSaveEqpTooltip.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
-            this.chkSaveEqpTooltip.Location = new System.Drawing.Point(6, 135);
-            this.chkSaveEqpTooltip.Name = "chkSaveEqpTooltip";
-            this.chkSaveEqpTooltip.Size = new System.Drawing.Size(80, 18);
-            this.chkSaveEqpTooltip.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
-            this.superTooltip1.SetSuperTooltip(this.chkSaveEqpTooltip, superTooltipInfo4);
-            this.chkSaveEqpTooltip.TabIndex = 14;
-            this.chkSaveEqpTooltip.Text = "装备提示框";
-            // 
-            // chkSaveMobTooltip
-            // 
-            this.chkSaveMobTooltip.AutoSize = true;
-            this.chkSaveMobTooltip.BackColor = System.Drawing.Color.Transparent;
-            // 
-            // 
-            // 
-            this.chkSaveMobTooltip.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
-            this.chkSaveMobTooltip.Location = new System.Drawing.Point(95, 135);
-            this.chkSaveMobTooltip.Name = "chkSaveMobTooltip";
-            this.chkSaveMobTooltip.Size = new System.Drawing.Size(80, 18);
-            this.chkSaveMobTooltip.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
-            this.superTooltip1.SetSuperTooltip(this.chkSaveMobTooltip, superTooltipInfo4);
-            this.chkSaveMobTooltip.TabIndex = 14;
-            this.chkSaveMobTooltip.Text = "怪物提示框";
-            // 
-            // chkSaveNpcTooltip
-            // 
-            this.chkSaveNpcTooltip.AutoSize = true;
-            this.chkSaveNpcTooltip.BackColor = System.Drawing.Color.Transparent;
-            // 
-            // 
-            // 
-            this.chkSaveNpcTooltip.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
-            this.chkSaveNpcTooltip.Location = new System.Drawing.Point(184, 135);
-            this.chkSaveNpcTooltip.Name = "chkSaveNpcTooltip";
-            this.chkSaveNpcTooltip.Size = new System.Drawing.Size(80, 18);
-            this.chkSaveMobTooltip.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
-            this.superTooltip1.SetSuperTooltip(this.chkSaveNpcTooltip, superTooltipInfo4);
-            this.chkSaveNpcTooltip.TabIndex = 14;
-            this.chkSaveNpcTooltip.Text = "NPC提示框";
-            // 
             // chkEnableDarkMode
             // 
             this.chkEnableDarkMode.AutoSize = true;
@@ -522,18 +381,13 @@
             // 
             // 
             this.chkEnableDarkMode.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
-            this.chkEnableDarkMode.Location = new System.Drawing.Point(184, 155);
+            this.chkEnableDarkMode.Location = new System.Drawing.Point(253, 135);
             this.chkEnableDarkMode.Name = "chkEnableDarkMode";
-            this.chkEnableDarkMode.Size = new System.Drawing.Size(76, 18);
+            this.chkEnableDarkMode.Size = new System.Drawing.Size(125, 16);
             this.chkEnableDarkMode.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
-            superTooltipInfo5.BodyText = "比较结果以暗黑模式HTML输出。";
-            superTooltipInfo5.Color = DevComponents.DotNetBar.eTooltipColor.System;
-            superTooltipInfo5.CustomSize = new System.Drawing.Size(180, 60);
-            superTooltipInfo5.FooterVisible = false;
-            superTooltipInfo5.HeaderText = "暗黑模式";
-            this.superTooltip1.SetSuperTooltip(this.chkEnableDarkMode, superTooltipInfo5);
+            this.superTooltip1.SetSuperTooltip(this.chkEnableDarkMode, new DevComponents.DotNetBar.SuperTooltipInfo("黑暗模式", "", "以黑暗模式输出对比结果。", null, null, DevComponents.DotNetBar.eTooltipColor.System, true, false, new System.Drawing.Size(180, 80)));
             this.chkEnableDarkMode.TabIndex = 14;
-            this.chkEnableDarkMode.Text = "暗黑模式";
+            this.chkEnableDarkMode.Text = "黑暗模式";
             // 
             // chkOutputRemovedImg
             // 
@@ -543,16 +397,11 @@
             // 
             // 
             this.chkOutputRemovedImg.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
-            this.chkOutputRemovedImg.Location = new System.Drawing.Point(95, 155);
+            this.chkOutputRemovedImg.Location = new System.Drawing.Point(125, 135);
             this.chkOutputRemovedImg.Name = "chkOutputRemovedImg";
-            this.chkOutputRemovedImg.Size = new System.Drawing.Size(94, 18);
+            this.chkOutputRemovedImg.Size = new System.Drawing.Size(125, 16);
             this.chkOutputRemovedImg.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
-            superTooltipInfo6.BodyText = "输出移除的img。";
-            superTooltipInfo6.Color = DevComponents.DotNetBar.eTooltipColor.System;
-            superTooltipInfo6.CustomSize = new System.Drawing.Size(180, 80);
-            superTooltipInfo6.FooterVisible = false;
-            superTooltipInfo6.HeaderText = "输出删除img";
-            this.superTooltip1.SetSuperTooltip(this.chkOutputRemovedImg, superTooltipInfo6);
+            this.superTooltip1.SetSuperTooltip(this.chkOutputRemovedImg, new DevComponents.DotNetBar.SuperTooltipInfo("输出删除img", "", "输出删除的img。", null, null, DevComponents.DotNetBar.eTooltipColor.System, true, false, new System.Drawing.Size(180, 80)));
             this.chkOutputRemovedImg.TabIndex = 14;
             this.chkOutputRemovedImg.Text = "输出删除img";
             // 
@@ -564,16 +413,11 @@
             // 
             // 
             this.chkOutputAddedImg.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
-            this.chkOutputAddedImg.Location = new System.Drawing.Point(6, 155);
+            this.chkOutputAddedImg.Location = new System.Drawing.Point(6, 135);
             this.chkOutputAddedImg.Name = "chkOutputAddedImg";
-            this.chkOutputAddedImg.Size = new System.Drawing.Size(101, 18);
+            this.chkOutputAddedImg.Size = new System.Drawing.Size(113, 16);
             this.chkOutputAddedImg.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
-            superTooltipInfo7.BodyText = "输出新增的img。";
-            superTooltipInfo7.Color = DevComponents.DotNetBar.eTooltipColor.System;
-            superTooltipInfo7.CustomSize = new System.Drawing.Size(180, 80);
-            superTooltipInfo7.FooterVisible = false;
-            superTooltipInfo7.HeaderText = "输出新增img";
-            this.superTooltip1.SetSuperTooltip(this.chkOutputAddedImg, superTooltipInfo7);
+            this.superTooltip1.SetSuperTooltip(this.chkOutputAddedImg, new DevComponents.DotNetBar.SuperTooltipInfo("输出新增img", "", "输出新增img。", null, null, DevComponents.DotNetBar.eTooltipColor.System, true, false, new System.Drawing.Size(180, 80)));
             this.chkOutputAddedImg.TabIndex = 13;
             this.chkOutputAddedImg.Text = "输出新增img";
             // 
@@ -582,18 +426,14 @@
             this.cmbComparePng.DisplayMember = "Text";
             this.cmbComparePng.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed;
             this.cmbComparePng.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cmbComparePng.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.cmbComparePng.FormattingEnabled = true;
-            this.cmbComparePng.ItemHeight = 13;
-            this.cmbComparePng.Location = new System.Drawing.Point(65, 108);
+            this.cmbComparePng.ItemHeight = 15;
+            this.cmbComparePng.Location = new System.Drawing.Point(79, 108);
             this.cmbComparePng.Name = "cmbComparePng";
-            this.cmbComparePng.Size = new System.Drawing.Size(115, 19);
+            this.cmbComparePng.Size = new System.Drawing.Size(120, 21);
             this.cmbComparePng.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
-            superTooltipInfo8.BodyText = "指定PNG比较方式.\r\nSizeOnly - 仅对比图片大小\r\nSizeAndDataLength - 同时对比图片大小和压缩流长度\r\nPixel - 像素级对比(可能略耗时)";
-            superTooltipInfo8.Color = DevComponents.DotNetBar.eTooltipColor.System;
-            superTooltipInfo8.CustomSize = new System.Drawing.Size(300, 130);
-            superTooltipInfo8.HeaderText = "PNG比较";
-            this.superTooltip1.SetSuperTooltip(this.cmbComparePng, superTooltipInfo8);
+            this.superTooltip1.SetSuperTooltip(this.cmbComparePng, new DevComponents.DotNetBar.SuperTooltipInfo("PNG对比", "", "指定PNG对比方式。\r\nSizeOnly - 仅对比图像大小\r\nSizeAndDataLength - 仅对比图像大小和文件容量" +
+            "\r\nPixel - 对比所有像素(可能耗时长。)", null, null, DevComponents.DotNetBar.eTooltipColor.System, true, true, new System.Drawing.Size(300, 130)));
             this.cmbComparePng.TabIndex = 12;
             // 
             // chkOutputPng
@@ -607,16 +447,11 @@
             this.chkOutputPng.Checked = true;
             this.chkOutputPng.CheckState = System.Windows.Forms.CheckState.Checked;
             this.chkOutputPng.CheckValue = "Y";
-            this.chkOutputPng.Location = new System.Drawing.Point(260, 155);
+            this.chkOutputPng.Location = new System.Drawing.Point(208, 111);
             this.chkOutputPng.Name = "chkOutputPng";
-            this.chkOutputPng.Size = new System.Drawing.Size(85, 16);
+            this.chkOutputPng.Size = new System.Drawing.Size(82, 16);
             this.chkOutputPng.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
-            superTooltipInfo9.BodyText = "输出PNG、音频文件。";
-            superTooltipInfo9.Color = DevComponents.DotNetBar.eTooltipColor.System;
-            superTooltipInfo9.CustomSize = new System.Drawing.Size(180, 60);
-            superTooltipInfo9.FooterVisible = false;
-            superTooltipInfo9.HeaderText = "输出PNG、音频文件";
-            this.superTooltip1.SetSuperTooltip(this.chkOutputPng, superTooltipInfo9);
+            this.superTooltip1.SetSuperTooltip(this.chkOutputPng, new DevComponents.DotNetBar.SuperTooltipInfo("输出PNG、音频文件", "", "输出PNG、音频文件。", null, null, DevComponents.DotNetBar.eTooltipColor.System, true, false, new System.Drawing.Size(180, 80)));
             this.chkOutputPng.TabIndex = 11;
             this.chkOutputPng.Text = "输出PNG、音频文件";
             // 
@@ -630,16 +465,11 @@
             this.chkCompare.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
             this.chkCompare.Location = new System.Drawing.Point(6, 111);
             this.chkCompare.Name = "chkCompare";
-            this.chkCompare.Size = new System.Drawing.Size(67, 16);
+            this.chkCompare.Size = new System.Drawing.Size(70, 16);
             this.chkCompare.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
-            superTooltipInfo10.BodyText = "更新同时比较两个版本。\r\n该功能不会对更新造成影响。";
-            superTooltipInfo10.Color = DevComponents.DotNetBar.eTooltipColor.System;
-            superTooltipInfo10.CustomSize = new System.Drawing.Size(238, 130);
-            superTooltipInfo10.FooterVisible = false;
-            superTooltipInfo10.HeaderText = "Wz比较";
-            this.superTooltip1.SetSuperTooltip(this.chkCompare, superTooltipInfo10);
+            this.superTooltip1.SetSuperTooltip(this.chkCompare, new DevComponents.DotNetBar.SuperTooltipInfo("Wz对比", "", "更新同时对比两个版本。\r\n该功能不对更新造成影响。", null, null, DevComponents.DotNetBar.eTooltipColor.System, true, false, new System.Drawing.Size(238, 130)));
             this.chkCompare.TabIndex = 10;
-            this.chkCompare.Text = "Wz比较";
+            this.chkCompare.Text = "Wz对比";
             // 
             // panelEx2
             // 
@@ -680,8 +510,8 @@
             this.superTabControl1.ControlBox.SubItems.AddRange(new DevComponents.DotNetBar.BaseItem[] {
             this.superTabControl1.ControlBox.MenuBox,
             this.superTabControl1.ControlBox.CloseBox});
-            this.superTabControl1.Controls.Add(this.superTabControlPanel2);
             this.superTabControl1.Controls.Add(this.superTabControlPanel1);
+            this.superTabControl1.Controls.Add(this.superTabControlPanel2);
             this.superTabControl1.Controls.Add(this.superTabControlPanel3);
             this.superTabControl1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.superTabControl1.Location = new System.Drawing.Point(0, 0);
@@ -708,7 +538,6 @@
             this.superTabControlPanel1.Size = new System.Drawing.Size(297, 180);
             this.superTabControlPanel1.TabIndex = 1;
             this.superTabControlPanel1.TabItem = this.superTabItem1;
-            this.superTabControlPanel1.Visible = false;
             // 
             // txtNotice
             // 
@@ -737,9 +566,9 @@
             // 
             this.superTabControlPanel2.Controls.Add(this.advTreePatchFiles);
             this.superTabControlPanel2.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.superTabControlPanel2.Location = new System.Drawing.Point(236, 0);
+            this.superTabControlPanel2.Location = new System.Drawing.Point(63, 0);
             this.superTabControlPanel2.Name = "superTabControlPanel2";
-            this.superTabControlPanel2.Size = new System.Drawing.Size(124, 180);
+            this.superTabControlPanel2.Size = new System.Drawing.Size(257, 180);
             this.superTabControlPanel2.TabIndex = 0;
             this.superTabControlPanel2.TabItem = this.superTabItem2;
             // 
@@ -763,7 +592,7 @@
             this.advTreePatchFiles.DoubleClickTogglesNode = false;
             this.advTreePatchFiles.DragDropNodeCopyEnabled = false;
             this.advTreePatchFiles.DropAsChildOffset = 65535;
-            this.advTreePatchFiles.Enabled = false;
+            this.advTreePatchFiles.Enabled = true;
             this.advTreePatchFiles.ExpandWidth = 0;
             this.advTreePatchFiles.GridRowLines = true;
             this.advTreePatchFiles.Location = new System.Drawing.Point(0, 0);
@@ -773,7 +602,7 @@
             this.advTreePatchFiles.NodesConnector = this.nodeConnector1;
             this.advTreePatchFiles.NodeStyle = this.elementStyle1;
             this.advTreePatchFiles.PathSeparator = ";";
-            this.advTreePatchFiles.Size = new System.Drawing.Size(124, 180);
+            this.advTreePatchFiles.Size = new System.Drawing.Size(257, 180);
             this.advTreePatchFiles.Styles.Add(this.elementStyle1);
             this.advTreePatchFiles.TabIndex = 0;
             this.advTreePatchFiles.Text = "advTree1";
@@ -788,14 +617,14 @@
             // 
             this.columnHeader2.Editable = false;
             this.columnHeader2.Name = "columnHeader2";
-            this.columnHeader2.Text = "补丁类型";
+            this.columnHeader2.Text = "补丁容量";
             this.columnHeader2.Width.Absolute = 70;
             // 
             // columnHeader3
             // 
             this.columnHeader3.Editable = false;
             this.columnHeader3.Name = "columnHeader3";
-            this.columnHeader3.Text = "文件长度";
+            this.columnHeader3.Text = "容量";
             this.columnHeader3.Width.Absolute = 70;
             // 
             // columnHeader4
@@ -814,7 +643,7 @@
             // columnHeader6
             // 
             this.columnHeader6.Name = "columnHeader6";
-            this.columnHeader6.Text = "移动";
+            this.columnHeader6.Text = "运行";
             this.columnHeader6.Width.Absolute = 150;
             // 
             // nodeConnector1
@@ -844,7 +673,6 @@
             this.superTabControlPanel3.Size = new System.Drawing.Size(257, 180);
             this.superTabControlPanel3.TabIndex = 0;
             this.superTabControlPanel3.TabItem = this.superTabItem3;
-            this.superTabControlPanel3.Visible = false;
             // 
             // txtPatchState
             // 
@@ -880,7 +708,7 @@
             this.superTabItem3.AttachedControl = this.superTabControlPanel3;
             this.superTabItem3.GlobalItem = false;
             this.superTabItem3.Name = "superTabItem3";
-            this.superTabItem3.Text = "通知";
+            this.superTabItem3.Text = "状态";
             // 
             // panelEx1
             // 
@@ -918,7 +746,7 @@
             this.expandablePanel3.DisabledBackColor = System.Drawing.Color.Empty;
             this.expandablePanel3.Dock = System.Windows.Forms.DockStyle.Top;
             this.expandablePanel3.ExpandOnTitleClick = true;
-            this.expandablePanel3.Location = new System.Drawing.Point(0, 260);
+            this.expandablePanel3.Location = new System.Drawing.Point(0, 244);
             this.expandablePanel3.Name = "expandablePanel3";
             this.expandablePanel3.Size = new System.Drawing.Size(384, 110);
             this.expandablePanel3.Style.Alignment = System.Drawing.StringAlignment.Center;
@@ -936,7 +764,7 @@
             this.expandablePanel3.TitleStyle.BorderColor.ColorSchemePart = DevComponents.DotNetBar.eColorSchemePart.PanelBorder;
             this.expandablePanel3.TitleStyle.ForeColor.ColorSchemePart = DevComponents.DotNetBar.eColorSchemePart.PanelText;
             this.expandablePanel3.TitleStyle.GradientAngle = 90;
-            this.expandablePanel3.TitleText = "补丁回退";
+            this.expandablePanel3.TitleText = "还原补丁";
             // 
             // buttonXCreate
             // 
@@ -948,7 +776,7 @@
             this.buttonXCreate.Size = new System.Drawing.Size(48, 21);
             this.buttonXCreate.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
             this.buttonXCreate.TabIndex = 12;
-            this.buttonXCreate.Text = "制作";
+            this.buttonXCreate.Text = "生成";
             this.buttonXCreate.Click += new System.EventHandler(this.buttonXCreate_Click);
             // 
             // txtPatchFile2
@@ -960,9 +788,9 @@
             // 
             this.txtPatchFile2.Border.Class = "TextBoxBorder";
             this.txtPatchFile2.Border.CornerType = DevComponents.DotNetBar.eCornerType.Square;
-            this.txtPatchFile2.Location = new System.Drawing.Point(92, 34);
+            this.txtPatchFile2.Location = new System.Drawing.Point(68, 34);
             this.txtPatchFile2.Name = "txtPatchFile2";
-            this.txtPatchFile2.Size = new System.Drawing.Size(235, 21);
+            this.txtPatchFile2.Size = new System.Drawing.Size(259, 21);
             this.txtPatchFile2.TabIndex = 6;
             // 
             // buttonXOpen4
@@ -1000,9 +828,9 @@
             // 
             this.txtMSFolder2.Border.Class = "TextBoxBorder";
             this.txtMSFolder2.Border.CornerType = DevComponents.DotNetBar.eCornerType.Square;
-            this.txtMSFolder2.Location = new System.Drawing.Point(92, 59);
+            this.txtMSFolder2.Location = new System.Drawing.Point(68, 59);
             this.txtMSFolder2.Name = "txtMSFolder2";
-            this.txtMSFolder2.Size = new System.Drawing.Size(235, 21);
+            this.txtMSFolder2.Size = new System.Drawing.Size(259, 21);
             this.txtMSFolder2.TabIndex = 9;
             // 
             // labelX4
@@ -1015,9 +843,9 @@
             this.labelX4.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
             this.labelX4.Location = new System.Drawing.Point(7, 61);
             this.labelX4.Name = "labelX4";
-            this.labelX4.Size = new System.Drawing.Size(105, 18);
+            this.labelX4.Size = new System.Drawing.Size(62, 16);
             this.labelX4.TabIndex = 11;
-            this.labelX4.Text = "MS Folder";
+            this.labelX4.Text = "游戏目录";
             // 
             // labelX5
             // 
@@ -1029,9 +857,9 @@
             this.labelX5.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
             this.labelX5.Location = new System.Drawing.Point(7, 36);
             this.labelX5.Name = "labelX5";
-            this.labelX5.Size = new System.Drawing.Size(93, 18);
+            this.labelX5.Size = new System.Drawing.Size(62, 16);
             this.labelX5.TabIndex = 8;
-            this.labelX5.Text = "PatchFile";
+            this.labelX5.Text = "补丁文件";
             // 
             // labelX3
             // 
@@ -1043,20 +871,35 @@
             this.labelX3.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
             this.labelX3.Location = new System.Drawing.Point(12, 86);
             this.labelX3.Name = "labelX3";
-            this.labelX3.Size = new System.Drawing.Size(340, 18);
+            this.labelX3.Size = new System.Drawing.Size(285, 18);
             this.labelX3.TabIndex = 1;
             this.labelX3.Text = "该功能不安全。请注意使用。";
             // 
             // superTooltip1
             // 
-            this.superTooltip1.DefaultTooltipSettings = superTooltipInfo1;
+            this.superTooltip1.DefaultTooltipSettings = new DevComponents.DotNetBar.SuperTooltipInfo("", "", "", null, null, DevComponents.DotNetBar.eTooltipColor.Gray);
+            // 
+            // chkResolvePngLink
+            // 
+            this.chkResolvePngLink.AutoSize = true;
+            this.chkResolvePngLink.BackColor = System.Drawing.Color.Transparent;
+            // 
+            // 
+            // 
+            this.chkResolvePngLink.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
+            this.chkResolvePngLink.Location = new System.Drawing.Point(290, 111);
+            this.chkResolvePngLink.Name = "chkResolvePngLink";
+            this.chkResolvePngLink.Size = new System.Drawing.Size(95, 16);
+            this.chkResolvePngLink.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
+            this.superTooltip1.SetSuperTooltip(this.chkResolvePngLink, new DevComponents.DotNetBar.SuperTooltipInfo("跟随PNG链接", "", "与链接PNG对比，相同情况下不输出。", null, null, DevComponents.DotNetBar.eTooltipColor.System, true, false, new System.Drawing.Size(180, 90)));
+            this.chkResolvePngLink.TabIndex = 18;
+            this.chkResolvePngLink.Text = "跟随PNG链接";
             // 
             // FrmPatcher
             // 
-            this.ClientSize = new System.Drawing.Size(384, 381);
+            this.ClientSize = new System.Drawing.Size(384, 361);
             this.Controls.Add(this.panelEx1);
             this.DoubleBuffered = true;
-            this.Font = new System.Drawing.Font("宋体", 9F);
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "FrmPatcher";
@@ -1136,11 +979,6 @@
         private DevComponents.DotNetBar.ButtonX buttonXCreate;
         private DevComponents.DotNetBar.Controls.CheckBoxX chkResolvePngLink;
         private DevComponents.DotNetBar.Controls.CheckBoxX chkEnableDarkMode;
-        private DevComponents.DotNetBar.Controls.CheckBoxX chkSaveSkillTooltip;
-        private DevComponents.DotNetBar.Controls.CheckBoxX chkSaveItemTooltip;
-        private DevComponents.DotNetBar.Controls.CheckBoxX chkSaveEqpTooltip;
-        private DevComponents.DotNetBar.Controls.CheckBoxX chkSaveMobTooltip;
-        private DevComponents.DotNetBar.Controls.CheckBoxX chkSaveNpcTooltip;
         private System.Windows.Forms.FlowLayoutPanel flowLayoutPanel1;
     }
 }

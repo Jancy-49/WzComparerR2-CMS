@@ -8,7 +8,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace WzComparerR2.Animation
 {
-    public class MultiFrameAnimationData
+    public class MultiFrameAnimationData 
     {
         public MultiFrameAnimationData()
         {
@@ -53,7 +53,7 @@ namespace WzComparerR2.Animation
                     }
                 }
 
-                int delay = frameNode.Nodes["delay"].GetValueEx<int>(100);
+                int delay = frameNode.Nodes["delay"].GetValueEx<int>(120);
                 int count = 0;
                 foreach (Wz_Node aniNode in frameNode.Nodes)
                 {

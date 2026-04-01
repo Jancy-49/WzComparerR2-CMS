@@ -37,7 +37,7 @@ namespace WzComparerR2.CharaSimControl
         public bool IgnoreEvalError { get; set; } = false;
         public bool IsWideMode { get; set; } = true;
         public bool Enable22AniStyle { get; set; }
-        public bool ShowParameters { get; set; } = false;
+        public bool ShowParameters { get; set; }
         public bool InputMode { get; set; } = false;
         public int selectJob;
         public Dictionary<string, List<string>> DiffSkillTags = new Dictionary<string, List<string>>();
@@ -107,7 +107,7 @@ namespace WzComparerR2.CharaSimControl
             }
 
             if (origindescBmp != null)
-            { 
+            {
                 totalSize.Width += origindescBmp.Width;
                 totalSize.Height = Math.Max(picHeight, origindescBmp.Height);
                 origindescOrigin.X = originBmp.Width;
@@ -146,7 +146,7 @@ namespace WzComparerR2.CharaSimControl
 
             if (origindescBmp != null)
             {
-                g.DrawImage(origindescBmp, origindescOrigin.X, origindescOrigin.Y, 
+                g.DrawImage(origindescBmp, origindescOrigin.X, origindescOrigin.Y,
                     new Rectangle(Point.Empty, origindescBmp.Size), GraphicsUnit.Pixel);
             }
 
@@ -172,13 +172,35 @@ namespace WzComparerR2.CharaSimControl
                 { "$g", GearGraphics.gearCyanColor },
             };
 
+            // Initialize skillCommon Dictionary
+            Dictionary<string, string> skillCommon = Skill.Common;
+            if (Skill.PerJobAttackInfo.Count > 0)
+            {
+                if (!InputMode)
+                {
+                    var perJobInfo = Skill.PerJobAttackInfo.Values.ToList()[Skill.PerJobIndex];
+                    foreach (var i in perJobInfo.Keys)
+                    {
+                        skillCommon[i] = perJobInfo[i];
+                    }
+                }
+                else
+                {
+                    int jobID = ItemStringHelper.Get4thjob(selectJob);
+                    var perJobInfo = Skill.PerJobAttackInfo[jobID];
+                    foreach (var i in perJobInfo.Keys)
+                    {
+                        skillCommon[i] = perJobInfo[i];
+                    }
+                }
+            }
+
             picH = 0;
             splitterH = new List<int>();
             string skillIDstr = Skill.SkillID.ToString().PadLeft(7, '0');
 
             //获取文字
-            StringResult sr;
-            if (StringLinker == null || !StringLinker.StringSkill.TryGetValue(Skill.SkillID, out sr))
+            if (StringLinker == null || !(StringLinker.StringSkill.TryGetValue(Skill.SkillID, out StringResult _sr) && _sr is StringResultSkill sr))
             {
                 sr = new StringResultSkill();
                 sr.Name = "(null)";
@@ -193,6 +215,28 @@ namespace WzComparerR2.CharaSimControl
                     sr2.Name = "(null)";
                 }
                 sr = sr2;
+            }
+            else if (Skill.IsGuildCastleResearch)
+            {
+                switch (Skill.GuildCastleResearchType)
+                {
+                    case 0:
+                        if (StringLinker == null || !(StringLinker.StringGuildCastleGuildResearch.TryGetValue(Skill.SkillID, out StringResult _sr2) && _sr2 is StringResultSkill sr2))
+                        {
+                            sr2 = new StringResultSkill();
+                            sr2.Name = "(null)";
+                        }
+                        sr = sr2;
+                        break;
+                    case 1:
+                        if (StringLinker == null || !(StringLinker.StringGuildCastlePersonalResearch.TryGetValue(Skill.SkillID, out _sr2) && _sr2 is StringResultSkill sr3))
+                        {
+                            sr3 = new StringResultSkill();
+                            sr3.Name = "(null)";
+                        }
+                        sr = sr3;
+                        break;
+                }
             }
 
             bool isTranslateRequired = Translator.IsTranslateEnabled;
@@ -281,28 +325,58 @@ namespace WzComparerR2.CharaSimControl
 
             if (sr.Desc != null)
             {
-                Dictionary<string, string> skillCommon = Skill.Common;
-                if (Skill.PerJobAttackInfo.Count > 0)
-                {
-                    if (!InputMode)
-                    {
-                        var perJobInfo = Skill.PerJobAttackInfo.Values.ToList()[Skill.PerJobIndex];
-                        foreach (var i in perJobInfo.Keys)
-                        {
-                            skillCommon[i] = perJobInfo[i];
-                        }
-                    }
-                    else
-                    {
-                        int jobID = ItemStringHelper.Get4thjob(selectJob);
-                        var perJobInfo = Skill.PerJobAttackInfo[jobID];
-                        foreach (var i in perJobInfo.Keys)
-                        {
-                            skillCommon[i] = perJobInfo[i];
-                        }
-                    }
-                }
                 string hdesc = SummaryParser.GetSkillSummary(sr.Desc, Skill.Level, skillCommon, SummaryParams.Default);
+                if (Skill.IsRoguelikeSkill)
+                {
+                    hdesc = hdesc.Replace("<style color=\"Orange\">", "#c").Replace("</>", "#");
+                }
+                if (Skill.IsGuildCastleResearch)
+                {
+                    StringBuilder gcrSb = new StringBuilder();
+                    gcrSb.AppendLine(hdesc);
+                    List<string> OrRequirements = new List<string>();
+                    if (Skill.GuildCastleResearchRequirements.Count > 0)
+                    {
+                        gcrSb.AppendLine();
+                        gcrSb.AppendLine(StringLinker.StringGuildCastleResearchTooltip["requirementTitle"].Desc);
+                        foreach (var i in Skill.GuildCastleResearchRequirements)
+                        {
+                            StringResultSkill subSr = new StringResultSkill();
+                            switch (Skill.GuildCastleResearchType)
+                            {
+                                case 0:
+                                    if (StringLinker == null || !(StringLinker.StringGuildCastleGuildResearch.TryGetValue(i.Key, out StringResult _sr2) && _sr2 is StringResultSkill sr2))
+                                    {
+                                        sr2 = new StringResultSkill();
+                                        sr2.Name = "(null)";
+                                    }
+                                    subSr = sr2;
+                                    break;
+                                case 1:
+                                    if (StringLinker == null || !(StringLinker.StringGuildCastlePersonalResearch.TryGetValue(i.Key, out _sr2) && _sr2 is StringResultSkill sr3))
+                                    {
+                                        sr3 = new StringResultSkill();
+                                        sr3.Name = "(null)";
+                                    }
+                                    subSr = sr3;
+                                    break;
+                            }
+                            if (Skill.GuildCastleResearchReqCondition != "OR")
+                            {
+                                gcrSb.AppendLine(StringLinker.StringGuildCastleResearchTooltip["requirementElem"].Desc.Replace("#requirementElem", subSr.Name).Replace("#level", i.Value.ToString()));
+                            }
+                            else
+                            {
+                                OrRequirements.Add(StringLinker.StringGuildCastleResearchTooltip["requirementElem"].Desc.Replace("#requirementElem", subSr.Name).Replace("#level", i.Value.ToString()));
+                            }
+                        }
+                        if (OrRequirements.Count > 0)
+                        {
+                            gcrSb.AppendLine(string.Join("\r\n或\r\n", OrRequirements));
+                        }
+                    }
+                    hdesc = gcrSb.ToString();
+                }
                 if (isTranslateRequired)
                 {
                     string mergedDescString = Translator.MergeString(hdesc, Translator.TranslateString(hdesc), 2);
@@ -400,14 +474,20 @@ namespace WzComparerR2.CharaSimControl
                 // 스킬 변경점에 초록색 칠하기
                 if (doHighlight)
                 {
-
                     if (Skill.SkillID / 100000 == 4000)
                     {
                         if (Skill.VSkillValue == 2) Skill.Level = 60;
                         if (Skill.VSkillValue == 1) Skill.Level = 30;
                     }
                 }
-                string hStr = SummaryParser.GetSkillSummary(Skill, Skill.Level, sr, SummaryParams.Default, skillSummaryOptions, doHighlight, skillIDstr, this.DiffSkillTags);
+                string hStr = SummaryParser.GetSkillSummary(Skill, Skill.Level, sr, SummaryParams.Default, skillSummaryOptions, doHighlight, skillIDstr, this.DiffSkillTags, skillCommon);
+
+                if (Skill.IsGuildCastleResearch && Skill.VariableProps.Contains("ResearchTimeCost"))
+                {
+                    string extraHstr = StringLinker.StringGuildCastleResearchTooltip["ResearchTimeCost"].Desc.Replace("#ResearchTimeCost", $"#ResearchTimeCost_{Skill.Level}");
+                    hStr += "\r\n";
+                    hStr += SummaryParser.GetSkillSummary(extraHstr, Skill.Level, Skill.Common, SummaryParams.Default, skillSummaryOptions);
+                }
 
                 GearGraphics.DrawString(g, "[现在等级 " + Skill.Level + "]", GearGraphics.ItemDetailFont, region.LevelDescLeft, region.TextRight, ref picH, 16);
                 if (Skill.SkillID / 10000 / 1000 == 10 && Skill.Level == 1 && Skill.ReqLevel > 0)
@@ -437,6 +517,12 @@ namespace WzComparerR2.CharaSimControl
                     ConvertPerM = this.DisplayPermyriadAsPercent,
                     IgnoreEvalError = this.IgnoreEvalError,
                 });
+                if (Skill.IsGuildCastleResearch && Skill.VariableProps.Contains("ResearchTimeCost"))
+                {
+                    string extraHstr = StringLinker.StringGuildCastleResearchTooltip["ResearchTimeCost"].Desc.Replace("#ResearchTimeCost", $"#ResearchTimeCost_{Skill.Level + 1}");
+                    hStr += "\r\n";
+                    hStr += SummaryParser.GetSkillSummary(extraHstr, Skill.Level + 1, Skill.Common, SummaryParams.Default, skillSummaryOptions);
+                }
                 GearGraphics.DrawString(g, "[下次等级 " + (Skill.Level + 1) + "]", GearGraphics.ItemDetailFont, region.LevelDescLeft, region.TextRight, ref picH, 16);
                 if (Skill.SkillID / 10000 / 1000 == 10 && (Skill.Level + 1) == 1 && Skill.ReqLevel > 0)
                 {
@@ -476,9 +562,9 @@ namespace WzComparerR2.CharaSimControl
                     g.DrawImage(icon.Bitmap, 13 - icon.Origin.X, picH + 32 - icon.Origin.Y);
                 }
                 string skillName;
-                if (this.StringLinker != null && this.StringLinker.StringSkill.TryGetValue(Skill.AddAttackToolTipDescSkill, out sr))
+                if ((this.StringLinker != null && this.StringLinker.StringSkill.TryGetValue(Skill.AddAttackToolTipDescSkill, out var _sr2)) && _sr2 is StringResultSkill sr2)
                 {
-                    skillName = sr.Name;
+                    skillName = sr2.Name;
                 }
                 else
                 {
@@ -509,9 +595,9 @@ namespace WzComparerR2.CharaSimControl
                     g.DrawImage(icon.Bitmap, 13 - icon.Origin.X, picH + 32 - icon.Origin.Y);
                 }
                 string skillName;
-                if (this.StringLinker != null && this.StringLinker.StringSkill.TryGetValue(Skill.AssistSkillLink, out sr))
+                if ((this.StringLinker != null && this.StringLinker.StringSkill.TryGetValue(Skill.AssistSkillLink, out _sr)) && _sr is StringResultSkill sr2)
                 {
-                    skillName = sr.Name;
+                    skillName = sr2.Name;
                 }
                 else
                 {
@@ -534,6 +620,14 @@ namespace WzComparerR2.CharaSimControl
                 if (Skill.IsRoguelikeSkill)
                 {
                     attr.Add("肉鸽技能: " + (Skill.IsRedmoon ? "血月森林" : "法老的宝物"));
+                }
+                if (Skill.IsGuildCastleResearch)
+                {
+                    switch (Skill.GuildCastleResearchType)
+                    {
+                        case 0: attr.Add("家族城堡研究: 共同研究"); break;
+                        case 1: attr.Add("家族城堡研究: 个人研究"); break;
+                    }
                 }
                 if (Skill.applyHyper)
                 {
@@ -690,7 +784,7 @@ namespace WzComparerR2.CharaSimControl
                 if (Skill.applySixthSkillIncBuffDuration)
                 {
                     attr.Add("应用6转技能增加增益时间");
-                } 
+                }
                 if (Skill.notResetDarkSight)
                 {
                     attr.Add("无法重置隐身术");
@@ -812,7 +906,7 @@ namespace WzComparerR2.CharaSimControl
                     skillDescEx.Add("#c[技能延时] " + action + ": " + CharaSimLoader.GetActionDelay(action, this.wzNode) + " ms#");
                 }
             }
-            
+
             if (Skill.alertTime > 0)
             {
                 skillDescEx.Add("#c[提示时间] " + Skill.alertTime + " ms#");
@@ -833,9 +927,9 @@ namespace WzComparerR2.CharaSimControl
                 foreach (var kv in Skill.ReqSkill)
                 {
                     string skillName;
-                    if (this.StringLinker != null && this.StringLinker.StringSkill.TryGetValue(kv.Key, out sr))
+                    if ((this.StringLinker != null && this.StringLinker.StringSkill.TryGetValue(kv.Key, out var _sr2)) && _sr2 is StringResultSkill sr2)
                     {
-                        skillName = sr.Name;
+                        skillName = sr2.Name;
                     }
                     else
                     {
@@ -849,7 +943,7 @@ namespace WzComparerR2.CharaSimControl
             {
                 if (!InputMode)
                 {
-                    int jobID = Skill.PerJobAttackInfo.Keys.ToList()[Skill.PerJobIndex];
+                    int jobID = Skill.PerJobAttackInfo.ElementAt(Skill.PerJobIndex).Key;
                     if (Skill.SkillID / 100000000 == 5) jobID += 2;
                     skillDescEx.Add($"#c[适用职业] {ItemStringHelper.GetJobName(jobID)}#");
                 }
@@ -882,17 +976,17 @@ namespace WzComparerR2.CharaSimControl
             {
                 skillDescEx.Add("#c[掉落] " + Skill.makeMesoByMobDead_reboot + "金币#");
             }
-            
+
             if (Skill.bossCoinWorthR > 0)
             {
                 skillDescEx.Add("#c[提高强力结晶售价] " + Skill.bossCoinWorthR + "%#");
             }
-            
+
             if (Skill.bossRewardDropR > 0)
             {
                 skillDescEx.Add("#c[提高奖励掉落率] " + Skill.bossRewardDropR + "%#");
             }
-            
+
             if (Skill.fixSkillAlpha > 0)
             {
                 skillDescEx.Add("#c[固定灰度] " + Skill.fixSkillAlpha + "#");
@@ -933,7 +1027,7 @@ namespace WzComparerR2.CharaSimControl
                     }
                     if (para.Count > 0)
                     {
-                        paramtext = string.Join(", ", para.ToArray());
+                        paramtext = "[Common] " + string.Join(", ", para.ToArray());
                         GearGraphics.DrawPlainText(g, paramtext, GearGraphics.ItemDetailFont, Color.FromArgb(175, 173, 255), region.LevelDescLeft, region.TextRight, ref picH, 16);
                     }
                 }

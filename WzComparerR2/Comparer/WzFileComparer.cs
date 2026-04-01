@@ -66,8 +66,8 @@ namespace WzComparerR2.Comparer
                 AppendContext(node);
 
             var cmp = Compare(
-                nodeNew == null ? null : new WzNodeAgent(nodeNew).Children,
-                nodeOld == null ? null : new WzVirtualNodeAgent(nodeOld).Children);
+               nodeNew == null ? null : new WzNodeAgent(nodeNew).Children,
+               nodeOld == null ? null : new WzVirtualNodeAgent(nodeOld).Children);
 
             foreach (var diff in cmp)
             {
@@ -233,7 +233,7 @@ namespace WzComparerR2.Comparer
                                 }
                                 else if (linkNew && linkOld) //两边都是link
                                 {
-                                    if (linkInfoNew.LinkType == linkInfoOld.LinkType
+                                    if (linkInfoNew.LinkType == linkInfoOld.LinkType 
                                         && linkInfoNew.LinkUrl == linkInfoOld.LinkUrl) //link没有变动
                                     {
                                         compared = true;
@@ -435,6 +435,7 @@ namespace WzComparerR2.Comparer
                             default:
                                 goto case WzPngComparison.SizeAndDataLength;
                         }
+                        break;
 
                     case Wz_Vector vector:
                         Wz_Vector vectorOld = (Wz_Vector)dataOld;
@@ -446,6 +447,7 @@ namespace WzComparerR2.Comparer
                     case Wz_Sound sound:
                         Wz_Sound soundOld = (Wz_Sound)dataOld;
                         return sound.Ms == soundOld.Ms && sound.DataLength == soundOld.DataLength;
+
                     case Wz_Convex convex:
                         Wz_Convex convexOld = (Wz_Convex)dataOld;
                         if (convex.Points.Length != convexOld.Points.Length)
@@ -456,7 +458,7 @@ namespace WzComparerR2.Comparer
                         {
                             var vectorNew = convex.Points[i];
                             vectorOld = convexOld.Points[i];
-                            if (vectorNew.X != vectorOld.X || vectorNew.Y != vectorOld.Y)
+                            if (vectorNew.X != vectorOld.X || vectorNew.Y != vectorOld.Y) 
                                 return false;
                         }
                         return true;
@@ -670,7 +672,7 @@ namespace WzComparerR2.Comparer
 
             public void DisposeAll()
             {
-                while (_list.Count > 0)
+                while(_list.Count > 0)
                 {
                     DisposeLast();
                 }

@@ -41,12 +41,13 @@ namespace WzComparerR2.Controls
         }
 
         public string FullMessage { get; set; }
+
         private void labelX1_MouseClick(object sender, MouseEventArgs e)
         {
             if (e.Button == MouseButtons.Right)
             {
                 Clipboard.SetText(this.FullMessage ?? this.Message);
-                ToastNotification.Show(this, "已复制到剪贴板", 1000, eToastPosition.TopCenter);
+                ToastNotification.Show(this, "复制到剪贴板。", 1000, eToastPosition.TopCenter);
             }
         }
     }

@@ -276,6 +276,12 @@ namespace WzComparerR2.CharaSim
             return gearTypeName != null && Regex.IsMatch(gearTypeName, @"^hair\d*$");
         }
 
+        public static bool IsCosmetic(GearType type)
+        {
+            return IsHair(type) || IsFace(type) || type == GearType.body || type == GearType.head;
+        }
+
+
         public static bool IsWeapon(GearType type)
         {
             return IsLeftWeapon(type)
@@ -609,7 +615,7 @@ namespace WzComparerR2.CharaSim
             }
             if (code / 10000 == 119)
             {
-                switch(code / 100)
+                switch (code / 100)
                 {
                     case 11902:
                         return (GearType)(code / 10);
@@ -857,8 +863,12 @@ namespace WzComparerR2.CharaSim
             return combinedProps;
         }
 
-        public static Gear CreateFromNode(Wz_Node node, GlobalFindNodeFunction findNode)
+        public static Gear CreateFromNode(Wz_Node node, GlobalFindNodeFunction findNode, Wz_File wzf = null)
         {
+            if (node == null)
+            {
+                return null;
+            }
             int gearID;
             Match m = Regex.Match(node.Text, @"^(\d{8})\.img$");
             if (!(m.Success && Int32.TryParse(m.Result("$1"), out gearID)))
@@ -879,28 +889,28 @@ namespace WzComparerR2.CharaSim
                         case "icon":
                             if (subNode.Value is Wz_Uol || subNode.Value is Wz_Png)
                             {
-                                gear.Icon = BitmapOrigin.CreateFromNode(subNode, findNode);
+                                gear.Icon = BitmapOrigin.CreateFromNode(subNode, findNode, wzf);
                             }
                             break;
 
                         case "iconRaw":
                             if (subNode.Value is Wz_Uol || subNode.Value is Wz_Png)
                             {
-                                gear.IconRaw = BitmapOrigin.CreateFromNode(subNode, findNode);
+                                gear.IconRaw = BitmapOrigin.CreateFromNode(subNode, findNode, wzf);
                             }
                             break;
 
                         case "sample":
                             if (subNode.Value is Wz_Uol || subNode.Value is Wz_Png)
                             {
-                                gear.Sample = BitmapOrigin.CreateFromNode(subNode, findNode);
+                                gear.Sample = BitmapOrigin.CreateFromNode(subNode, findNode, wzf);
                             }
                             break;
 
                         case "toolTipPreview":
                             if (subNode.Value is Wz_Uol || subNode.Value is Wz_Png)
                             {
-                                gear.ToolTIpPreview = BitmapOrigin.CreateFromNode(subNode, findNode);
+                                gear.ToolTIpPreview = BitmapOrigin.CreateFromNode(subNode, findNode, wzf);
                             }
                             break;
 
@@ -922,7 +932,7 @@ namespace WzComparerR2.CharaSim
                             break;
 
                         case "option": //附加潜能信息
-                            Wz_Node itemWz = findNode !=null? findNode("Item\\ItemOption.img"):null;
+                            Wz_Node itemWz = findNode != null ? findNode("Item\\ItemOption.img") : null;
                             if (itemWz == null)
                                 break;
                             int optIdx = 0;
@@ -1230,18 +1240,18 @@ namespace WzComparerR2.CharaSim
 
             if (Gear.IsFace(gear.type))
             {
-                gear.Icon = BitmapOrigin.CreateFromNode(findNode(@"Item\Install\0380.img\03801284\info\icon"), findNode);
-                gear.IconRaw = BitmapOrigin.CreateFromNode(findNode(@"Item\Install\0380.img\03801284\info\iconRaw"), findNode);
+                gear.Icon = BitmapOrigin.CreateFromNode(findNode(@"Item\Install\0380.img\03801284\info\icon"), findNode, wzf);
+                gear.IconRaw = BitmapOrigin.CreateFromNode(findNode(@"Item\Install\0380.img\03801284\info\iconRaw"), findNode, wzf);
             }
             if (Gear.IsHair(gear.type))
             {
-                gear.Icon = BitmapOrigin.CreateFromNode(findNode(@"Item\Install\0380.img\03801283\info\icon"), findNode);
-                gear.IconRaw = BitmapOrigin.CreateFromNode(findNode(@"Item\Install\0380.img\03801283\info\iconRaw"), findNode);
+                gear.Icon = BitmapOrigin.CreateFromNode(findNode(@"Item\Install\0380.img\03801283\info\icon"), findNode, wzf);
+                gear.IconRaw = BitmapOrigin.CreateFromNode(findNode(@"Item\Install\0380.img\03801283\info\iconRaw"), findNode, wzf);
             }
             if (gear.type == GearType.head)
             {
-                gear.Icon = BitmapOrigin.CreateFromNode(findNode(@"Item\Install\0380.img\03801577\info\icon"), findNode);
-                gear.IconRaw = BitmapOrigin.CreateFromNode(findNode(@"Item\Install\0380.img\03801577\info\iconRaw"), findNode);
+                gear.Icon = BitmapOrigin.CreateFromNode(findNode(@"Item\Install\0380.img\03801577\info\icon"), findNode, wzf);
+                gear.IconRaw = BitmapOrigin.CreateFromNode(findNode(@"Item\Install\0380.img\03801577\info\iconRaw"), findNode, wzf);
             }
 
             if (gear.Props.TryGetValue(GearPropType.incCHUC, out value))
@@ -1255,7 +1265,7 @@ namespace WzComparerR2.CharaSim
 
                 if (previewNode != null)
                 {
-                    gear.IllusionRingPreview = BitmapOrigin.CreateFromNode(previewNode, findNode);
+                    gear.IllusionRingPreview = BitmapOrigin.CreateFromNode(previewNode, findNode, wzf);
                 }
             }
 

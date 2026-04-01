@@ -18,7 +18,7 @@ namespace WzComparerR2.Common
             {
                 return SpineDetectionResult.Failed("WzNode or its parent cannot be null.");
             }
-
+           
             Wz_Node parentNode = wzNode.ParentNode;
             Wz_Node atlasNode = null;
             Wz_Node skelNode = null;
@@ -177,13 +177,13 @@ namespace WzComparerR2.Common
                 string version = Spine.SkeletonBinary.GetVersionString(stream);
                 return version;
             }
-            catch
+            catch 
             {
                 // ignore error;
                 return null;
             }
-            finally
-            {
+            finally 
+            { 
                 stream.Position = oldPos;
             }
         }

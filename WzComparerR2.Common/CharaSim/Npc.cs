@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using WzComparerR2.WzLib;
+using DrawingPoint = System.Drawing.Point;
 
 namespace WzComparerR2.CharaSim
 {
@@ -62,6 +63,10 @@ namespace WzComparerR2.CharaSim
 
         public static Npc CreateFromNode(Wz_Node node, GlobalFindNodeFunction findNode, GlobalFindNodeFunction2 findNode2, Wz_File wzf = null, GetSpineDefaultFunc getSpineDefaultFunc = null)
         {
+            if (node == null)
+            {
+                return null;
+            }
             int npcID;
             Match m = Regex.Match(node.Text, @"^(\d{7})\.img$");
             if (!(m.Success && Int32.TryParse(m.Result("$1"), out npcID)))
@@ -73,7 +78,7 @@ namespace WzComparerR2.CharaSim
             npcInfo.ID = npcID;
             Wz_Node infoNode = node.FindNodeByPath("info").ResolveUol();
 
-            Point baseOrigin = Point.Empty;
+            DrawingPoint baseOrigin = DrawingPoint.Empty;
 
             //加载基础属性
             if (infoNode != null)
@@ -130,7 +135,7 @@ namespace WzComparerR2.CharaSim
                                                 var faceBmpOrigin = BitmapOrigin.CreateFromNode(faceNode, findNode);
                                                 if (faceBmpOrigin.Bitmap != null && faceBmpOrigin.Bitmap.Size != new Size(1, 1))
                                                 {
-                                                    if (baseOrigin != Point.Empty && (npcInfo.Illustration2BaseBitmap.Width > faceBmpOrigin.Bitmap.Width && npcInfo.Illustration2BaseBitmap.Height > faceBmpOrigin.Bitmap.Height))
+                                                    if (baseOrigin != DrawingPoint.Empty && (npcInfo.Illustration2BaseBitmap.Width > faceBmpOrigin.Bitmap.Width && npcInfo.Illustration2BaseBitmap.Height > faceBmpOrigin.Bitmap.Height))
                                                     {
                                                         Bitmap combinedBmp = new Bitmap(npcInfo.Illustration2BaseBitmap.Width, npcInfo.Illustration2BaseBitmap.Height);
                                                         using (Graphics g = Graphics.FromImage(combinedBmp))

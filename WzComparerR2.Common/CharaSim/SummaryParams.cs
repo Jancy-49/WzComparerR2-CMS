@@ -1,5 +1,4 @@
-﻿using DevComponents.DotNetBar;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -11,10 +10,10 @@ namespace WzComparerR2.CharaSim
         private string n;
         private string cStart;
         private string cEnd;
-        private string eStart;
-        private string eEnd;
         private string gStart;
         private string gEnd;
+        private string xStart;
+        private string xEnd;
 
         /// <summary>
         /// 获取或设置回车符(\r)的替换字符串。
@@ -69,23 +68,25 @@ namespace WzComparerR2.CharaSim
             get { return gEnd; }
             set { gEnd = value; }
         }
+
         /// <summary>
-        /// 获取或设置自定义高亮起始符(#e)的替换字符串。
+        /// 获取或设置自定义高亮起始符(#x)的替换字符串。
         /// </summary>
-        public string EStart
+        public string XStart
         {
-            get { return eStart; }
-            set { eStart = value; }
+            get { return xStart; }
+            set { xStart = value; }
         }
 
         /// <summary>
         /// 获取或设置自定义高亮结束符(#)的替换字符串
         /// </summary>
-        public string EEnd
+        public string XEnd
         {
-            get { return eEnd; }
-            set { eEnd = value; }
+            get { return xEnd; }
+            set { xEnd = value; }
         }
+
         /// <summary>
         /// 获取默认的替换字符串组合。
         /// </summary>
@@ -99,10 +100,10 @@ namespace WzComparerR2.CharaSim
                     N = @"\n",
                     cStart = @"#c",
                     cEnd = @"#",
-                    eStart = @"#$e",
-                    eEnd = @"#",
                     gStart = @"#$g",
-                    gEnd = @"#"
+                    gEnd = @"#",
+                    xStart = @"#$x",
+                    xEnd = @"#",
                 };
             }
         }
@@ -117,10 +118,10 @@ namespace WzComparerR2.CharaSim
                     N = "\n",
                     cStart = @"#c",
                     cEnd = @"#",
-                    eStart = @"#$e",
-                    eEnd = @"#",
                     gStart = @"#$g",
                     gEnd = @"#",
+                    xStart = @"#$x",
+                    xEnd = @"#",
                 };
             }
         }
@@ -135,10 +136,10 @@ namespace WzComparerR2.CharaSim
                     N = "<br />",
                     cStart = @"<span style=""font-weight:bold; color:orange;"">",
                     cEnd = @"</span>",
-                    eStart = @"<span style=""font-weight:bold; color:#aaffff;"">",
-                    eEnd = @"</span>",
                     gStart = @"<span style=""font-weight:bold; color:#3f0;"">",
-                    gEnd = @"</span>"
+                    gEnd = @"</span>",
+                    xStart = @"<span style=""font-weight:bold; color:#ddfe01;"">",
+                    xEnd = @"</span>",
                 };
             }
         }

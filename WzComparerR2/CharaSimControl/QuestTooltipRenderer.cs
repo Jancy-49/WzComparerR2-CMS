@@ -150,7 +150,7 @@ namespace WzComparerR2.CharaSimControl
                 { "^b", GearGraphics.EquipMDMoris9FontBold },
             };
 
-            // 전경
+            // 前景
             using Bitmap fg = new Bitmap(width, DefaultPicHeight);
             using Graphics g = Graphics.FromImage(fg);
             g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
@@ -273,7 +273,7 @@ namespace WzComparerR2.CharaSimControl
                 picH += 11;
             }
 
-            // 보상
+            // 奖励
             if (state != 2)
             {
                 if (this.Quest.Reward.HasValues)
@@ -308,7 +308,7 @@ namespace WzComparerR2.CharaSimControl
             var bottomPoint = picH;
             picH += 49;
 
-            // 배경
+            // 背景
             Bitmap bg = new Bitmap(width + Margin_right, Math.Max(picH + Margin_top, (108 + Margin_top) - npcImage.Origin.Y + (npcImage.Bitmap?.Height ?? 0)));
             using Graphics g2 = Graphics.FromImage(bg);
             g2.DrawImage(res["top"].Image, 0, Margin_top);
@@ -316,20 +316,20 @@ namespace WzComparerR2.CharaSimControl
             g2.DrawImage(res["bottom"].Image, 0, bottomPoint + Margin_top);
 
 
-            // 중첩
+            // 重叠
             g2.DrawImage(fg, 0, 0 + Margin_top);
-            // npc 이미지
+            // npc图像
             if (npcImage.Bitmap != null)
             {
                 g2.DrawImage(npcImage.Bitmap, 263 - npcImage.Origin.X, (108 + Margin_top) - npcImage.Origin.Y);
             }
 
-            // ID 표시
+            // 显示ID
             if (this.ShowObjectID)
             {
                 GearGraphics.DrawGearDetailNumber(g2, 3, 3 + Margin_top, $"{this.Quest.ID.ToString()}-{this.Quest.State}", true);
             }
-            // 상태
+            // 状态
             var stateText = new string[] { "可开始", "进行中", "已完成" };
             TextRenderer.DrawText(g2, $"状态: {stateText[state]}" + (this.Quest.Blocked ? " / 任务不可开始" : ""), GearGraphics.ItemDetailFont, new Point(21, bg.Height - 26), ((SolidBrush)GearGraphics.QuestBrushEnd).Color, TextFormatFlags.NoPadding);
 
@@ -617,7 +617,7 @@ namespace WzComparerR2.CharaSimControl
                     case "c":
                     case "R":
                         return "0";
-                        //return "미완";
+                    //return "미완";
 
                     case "u":
                         return "未完成";

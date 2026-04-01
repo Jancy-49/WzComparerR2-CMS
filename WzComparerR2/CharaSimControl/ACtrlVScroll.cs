@@ -148,7 +148,7 @@ namespace WzComparerR2.CharaSimControl
             {
                 setAllState(ButtonState.Normal);
             }
-
+            
             base.OnMouseMove(e);
         }
 

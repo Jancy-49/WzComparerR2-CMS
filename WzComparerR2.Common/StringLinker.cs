@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using WzComparerR2.WzLib;
 
 namespace WzComparerR2.Common
@@ -15,6 +16,9 @@ namespace WzComparerR2.Common
             stringMob = new Dictionary<int, StringResult>();
             stringNpc = new Dictionary<int, StringResult>();
             stringFamiliarSkill = new Dictionary<int, StringResult>();
+            stringGuildCastleGuildResearch = new Dictionary<int, StringResult>();
+            stringGuildCastlePersonalResearch = new Dictionary<int, StringResult>();
+            stringGuildCastleResearchTooltip = new Dictionary<string, StringResult>();
             stringRoguelikeSkill = new Dictionary<int, StringResult>();
             stringSkill = new Dictionary<int, StringResult>();
             stringSkill2 = new Dictionary<string, StringResult>();
@@ -185,6 +189,103 @@ namespace WzComparerR2.Common
                                         stringFamiliarSkill[id] = strResult;
                                     }
                                 }
+                            }
+                        }
+                        break;
+                    case "GuildCastle.img":
+                        if (!image.TryExtract()) break;
+                        Wz_Node researchNode = image.Node.FindNodeByPath("Research");
+                        foreach (Wz_Node tree in researchNode.Nodes)
+                        {
+                            switch (tree.Text)
+                            {
+                                case "Guild":
+                                    foreach (Wz_Node guildNode in tree.Nodes)
+                                    {
+                                        Wz_Node test_tree = TryLocateUolNode(guildNode);
+                                        if (Int32.TryParse(guildNode.Text, out id) && guildNode.ResolveUol() is Wz_Node linkNode)
+                                        {
+                                            StringResultSkill strResult = new StringResultSkill();
+
+                                            strResult.Name = GetDefaultString(linkNode, "name") ?? strResult.Name ?? string.Empty;
+                                            strResult.Desc = GetDefaultString(linkNode, "desc") ?? strResult.Desc;
+                                            var h = GetDefaultString(linkNode, "h");
+                                            if (update && h != null)
+                                            {
+                                                strResult.SkillH.Clear();
+                                            }
+                                            strResult.SkillH.Add(h);
+
+                                            if (guildNode.FullPath == test_tree.FullPath)
+                                            {
+                                                if (guildNode.FullPath == test_tree.FullPath)
+                                                {
+                                                    strResult.FullPath = guildNode.FullPath;
+                                                }
+                                                else
+                                                {
+                                                    strResult.FullPath = guildNode.FullPath + " -> " + test_tree.FullPath;
+                                                }
+                                            }
+                                            else
+                                            {
+                                                strResult.FullPath = guildNode.FullPath + " -> " + test_tree.FullPath;
+                                            }
+                                            AddAllValue(strResult, linkNode);
+                                            stringGuildCastleGuildResearch[id] = strResult;
+                                        }
+                                    }
+                                    break;
+                                case "Personal":
+                                    foreach (Wz_Node personalNode in tree.Nodes)
+                                    {
+                                        Wz_Node test_tree = TryLocateUolNode(personalNode);
+                                        if (Int32.TryParse(personalNode.Text, out id) && personalNode.ResolveUol() is Wz_Node linkNode)
+                                        {
+                                            StringResultSkill strResult = new StringResultSkill();
+
+                                            strResult.Name = GetDefaultString(linkNode, "name") ?? strResult.Name ?? string.Empty;
+                                            strResult.Desc = GetDefaultString(linkNode, "desc") ?? strResult.Desc;
+                                            var h = GetDefaultString(linkNode, "h");
+                                            if (update && h != null)
+                                            {
+                                                strResult.SkillH.Clear();
+                                            }
+                                            strResult.SkillH.Add(h);
+
+                                            if (personalNode.FullPath == test_tree.FullPath)
+                                            {
+                                                if (personalNode.FullPath == test_tree.FullPath)
+                                                {
+                                                    strResult.FullPath = personalNode.FullPath;
+                                                }
+                                                else
+                                                {
+                                                    strResult.FullPath = personalNode.FullPath + " -> " + test_tree.FullPath;
+                                                }
+                                            }
+                                            else
+                                            {
+                                                strResult.FullPath = personalNode.FullPath + " -> " + test_tree.FullPath;
+                                            }
+                                            AddAllValue(strResult, linkNode);
+                                            stringGuildCastlePersonalResearch[id] = strResult;
+                                        }
+                                    }
+                                    break;
+                                case "Tooltip":
+                                    foreach (Wz_Node tooltipNode in tree.Nodes)
+                                    {
+                                        StringResult sr = new StringResult();
+                                        int counter = 0;
+                                        sr.Desc = Regex.Replace(tooltipNode.Value.ToString(), @"\{\}", m =>
+                                        {
+                                            counter++;
+                                            return counter == 2 ? "#level" : m.Value;
+                                        }).Replace("{}", $"#{tooltipNode.Text}");
+                                        stringGuildCastleResearchTooltip[tooltipNode.Text] = sr;
+                                    }
+                                    break;
                             }
                         }
                         break;
@@ -402,20 +503,7 @@ namespace WzComparerR2.Common
                             {
                                 continue;
                             }
-                            StringResult strResult = null;
-                            if (update)
-                            {
-                                try
-                                {
-                                    if (tree.Text.Length >= 7 && Int32.TryParse(tree.Text, out id))
-                                    {
-                                        strResult = stringSkill[id];
-                                    }
-                                    strResult = stringSkill2[tree.Text];
-                                }
-                                catch { }
-                            }
-                            if (strResult == null) strResult = new StringResultSkill();
+                            StringResultSkill strResult = new StringResultSkill();
 
                             strResult.Name = GetDefaultString(linkNode, "name") ?? strResult.Name ?? string.Empty;//?? GetDefaultString(tree, "bookName");
                             strResult.Desc = GetDefaultString(linkNode, "desc") ?? strResult.Desc;
@@ -444,25 +532,6 @@ namespace WzComparerR2.Common
                             }
                             else if (!update) strResult.SkillhcH.Add(h);
 
-                            // Precaution for GMS modifying it into Level 4 Link Skill
-                            for (int i = 3; i <= 99; i++)
-                            {
-                                string hi = GetDefaultString(linkNode, "h_" + i);
-                                if (string.IsNullOrEmpty(hi))
-                                    continue;
-                                else
-                                {
-                                    if (update && strResult.SkillExtraH.ContainsKey(i))
-                                    {
-                                        strResult.SkillExtraH[i] = hi;
-                                    }
-                                    else
-                                    {
-                                        strResult.SkillExtraH.Add(i, hi);
-                                    }
-                                }
-                            }
-
                             if (strResult.SkillH.Count > 0 && strResult.SkillH.Last() == null)
                             {
                                 strResult.SkillH.RemoveAt(strResult.SkillH.Count - 1);
@@ -480,6 +549,18 @@ namespace WzComparerR2.Common
                                     }
                                     strResult.SkillH.Add(hi);
                                 }
+                            }
+                            // KMST1196, add h_ prefix strings
+                            foreach (Wz_Node child in linkNode.Nodes)
+                            {
+                                if (child.Text.StartsWith("h_") && int.TryParse(child.Text.Substring(2), out int level) && level > 0 && child.Value != null)
+                                {
+                                    strResult.SkillExtraH.Add(new KeyValuePair<int, string>(level, child.GetValue<string>()));
+                                }
+                            }
+                            if (strResult.SkillExtraH.Count > 1)
+                            {
+                                strResult.SkillExtraH.Sort((left, right) => left.Key.CompareTo(right.Key));
                             }
                             strResult.SkillH.TrimExcess();
                             strResult.SkillpH.TrimExcess();
@@ -649,7 +730,7 @@ namespace WzComparerR2.Common
                 }
             }
 
-            var worldArchiveNode = etcNode.FindNodeByPath("worldArchive.img");
+            var worldArchiveNode = etcNode?.FindNodeByPath("worldArchive.img");
             if (worldArchiveNode != null)
             {
                 Wz_Image worldArchiveImg = worldArchiveNode.Value as Wz_Image;
@@ -673,9 +754,9 @@ namespace WzComparerR2.Common
                                             switch (subNode2.Text)
                                             {
                                                 case "mob":
-                                                    List<int> mobIDs = new List<int>();
                                                     foreach (Wz_Node mobNode in subNode2.Nodes)
                                                     {
+                                                        List<int> mobIDs = new List<int>();
                                                         foreach (Wz_Node idNode in mobNode.FindNodeByPath("id")?.Nodes ?? new Wz_Node.WzNodeCollection(null))
                                                         {
                                                             var mobID = idNode.GetValueEx<int>(0);
@@ -688,6 +769,10 @@ namespace WzComparerR2.Common
                                                         }
                                                         foreach (var mobID in mobIDs)
                                                         {
+                                                            if (!stringMob.ContainsKey(mobID))
+                                                            {
+                                                                continue;
+                                                            }
                                                             StringResult strResult = new StringResult();
                                                             strResult.Name = stringMob[mobID].Name;
                                                             strResult.Desc = desc;
@@ -696,9 +781,9 @@ namespace WzComparerR2.Common
                                                     }
                                                     break;
                                                 case "npc":
-                                                    List<int> npcIDs = new List<int>();
                                                     foreach (Wz_Node npcNode in subNode2.Nodes)
                                                     {
+                                                        List<int> npcIDs = new List<int>();
                                                         foreach (Wz_Node idNode in npcNode.FindNodeByPath("id")?.Nodes ?? new Wz_Node.WzNodeCollection(null))
                                                         {
                                                             var npcID = idNode.GetValueEx<int>(0);
@@ -711,6 +796,10 @@ namespace WzComparerR2.Common
                                                         }
                                                         foreach (var npcID in npcIDs)
                                                         {
+                                                            if (!stringNpc.ContainsKey(npcID))
+                                                            {
+                                                                continue;
+                                                            }
                                                             StringResult strResult = new StringResult();
                                                             strResult.Name = stringNpc[npcID].Name;
                                                             strResult.Desc = desc;
@@ -787,6 +876,8 @@ namespace WzComparerR2.Common
             stringMap.Clear();
             stringNpc.Clear();
             stringFamiliarSkill.Clear();
+            stringGuildCastleGuildResearch.Clear();
+            stringGuildCastlePersonalResearch.Clear();
             stringRoguelikeSkill.Clear();
             stringSkill.Clear();
             stringSkill2.Clear();
@@ -802,8 +893,20 @@ namespace WzComparerR2.Common
         {
             get
             {
-                return (stringEqp.Count + stringItem.Count + stringMap.Count +
-                    stringMob.Count + stringNpc.Count + stringFamiliarSkill.Count + stringSkill.Count + stringSetItem.Count + stringQuest.Count + stringAchievement.Count > 0);
+                return (
+                    stringEqp.Count +
+                    stringItem.Count +
+                    stringMap.Count +
+                    stringMob.Count +
+                    stringNpc.Count +
+                    stringFamiliarSkill.Count +
+                    stringGuildCastleGuildResearch.Count +
+                    stringGuildCastlePersonalResearch.Count +
+                    stringSkill.Count +
+                    stringRoguelikeSkill.Count +
+                    stringSetItem.Count +
+                    stringQuest.Count +
+                    stringAchievement.Count > 0);
             }
         }
 
@@ -813,6 +916,9 @@ namespace WzComparerR2.Common
         private Dictionary<int, StringResult> stringMob;
         private Dictionary<int, StringResult> stringNpc;
         private Dictionary<int, StringResult> stringFamiliarSkill;
+        private Dictionary<int, StringResult> stringGuildCastleGuildResearch;
+        private Dictionary<int, StringResult> stringGuildCastlePersonalResearch;
+        private Dictionary<string, StringResult> stringGuildCastleResearchTooltip;
         private Dictionary<int, StringResult> stringRoguelikeSkill;
         private Dictionary<int, StringResult> stringSkill;
         private Dictionary<string, StringResult> stringSkill2;
@@ -890,6 +996,21 @@ namespace WzComparerR2.Common
         public Dictionary<int, StringResult> StringFamiliarSkill
         {
             get { return stringFamiliarSkill; }
+        }
+
+        public Dictionary<int, StringResult> StringGuildCastleGuildResearch
+        {
+            get { return stringGuildCastleGuildResearch; }
+        }
+
+        public Dictionary<int, StringResult> StringGuildCastlePersonalResearch
+        {
+            get { return stringGuildCastlePersonalResearch; }
+        }
+
+        public Dictionary<string, StringResult> StringGuildCastleResearchTooltip
+        {
+            get { return stringGuildCastleResearchTooltip; }
         }
 
         public Dictionary<int, StringResult> StringRoguelikeSkill

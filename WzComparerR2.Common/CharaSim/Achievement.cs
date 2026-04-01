@@ -22,14 +22,8 @@ namespace WzComparerR2.CharaSim
         private string _subCategory { get; set; }
         public int ID { get; set; }
         public int Score { get; set; }
-        public string MainCategory
-        {
-            get { return GetMainCategoryStr(); }
-        }
-        public string SubCategory
-        {
-            get { return GetSubCategoryStr(); }
-        }
+        public string MainCategory { get { return GetMainCategoryStr(); } }
+        public string SubCategory { get { return GetSubCategoryStr(); } }
         public string Difficulty { get; set; }
         public string UiForm { get; set; }
         public string Block { get; set; }
@@ -40,32 +34,13 @@ namespace WzComparerR2.CharaSim
         public List<string> Missions { get; set; }
         public List<AchievementReward> Rewards { get; set; }
 
-        public bool ShowMissions
-        {
-            get
-            {
-                return (this.UiForm == "mission" || this.UiForm == "all")
-                    && this.Missions.Count > 0;
-            }
-        }
-        public bool HasRewards
-        {
-            get { return this.Rewards.Count > 0; }
-        }
-        public bool Hide
-        {
-            get { return this.Block == "hide"; }
-        }
+        public bool ShowMissions { get { return (this.UiForm == "mission" || this.UiForm == "all") && this.Missions.Count > 0; } }
+        public bool HasRewards { get { return this.Rewards.Count > 0; } }
+        public bool Hide { get { return this.Block == "hide"; } }
 
-        public static Achievement CreateFromNode(
-            Wz_Node node,
-            GlobalFindNodeFunction findNode,
-            GlobalFindNodeFunction2 findNode2,
-            Wz_File wzf = null
-        )
+        public static Achievement CreateFromNode(Wz_Node node, GlobalFindNodeFunction findNode, GlobalFindNodeFunction2 findNode2, Wz_File wzf = null)
         {
-            if (node == null)
-                return null;
+            if (node == null) return null;
 
             Match m = Regex.Match(node.Text, @"^(\d+)\.img$");
             if (!(m.Success && Int32.TryParse(m.Result("$1"), out int achievementID)))
@@ -83,28 +58,20 @@ namespace WzComparerR2.CharaSim
                     switch (propNode.Text)
                     {
                         case "score":
-                            achievement.Score = propNode.GetValueEx<int>(0);
-                            break;
+                            achievement.Score = propNode.GetValueEx<int>(0); break;
                         case "mainCategory":
-                            achievement._mainCategory = propNode.GetValueEx<string>(null);
-                            break;
+                            achievement._mainCategory = propNode.GetValueEx<string>(null); break;
                         case "subCategory":
-                            achievement._subCategory = propNode.GetValueEx<string>(null);
-                            break;
+                            achievement._subCategory = propNode.GetValueEx<string>(null); break;
                         case "difficulty":
-                            achievement.Difficulty = propNode.GetValueEx<string>("normal");
-                            break;
+                            achievement.Difficulty = propNode.GetValueEx<string>("normal"); break;
                         case "prior":
                             var prior = propNode.FindNodeByPath("achievement_id");
-                            if (prior != null)
-                                achievement.PriorIDs.Add(prior.GetValueEx<int>(-1));
+                            if (prior != null) achievement.PriorIDs.Add(prior.GetValueEx<int>(-1));
                             else
                             {
                                 var valueNode = propNode.FindNodeByPath("values");
-                                foreach (
-                                    var value in valueNode?.Nodes
-                                        ?? new Wz_Node.WzNodeCollection(null)
-                                )
+                                foreach (var value in valueNode?.Nodes ?? new Wz_Node.WzNodeCollection(null))
                                 {
                                     prior = value.FindNodeByPath("achievement_id");
                                     var priorID = prior.GetValueEx<int>(-1);
@@ -114,25 +81,15 @@ namespace WzComparerR2.CharaSim
                                     }
                                 }
                             }
-                            achievement.PriorCondition = propNode
-                                .FindNodeByPath("condition")
-                                .GetValueEx<string>(null);
+                            achievement.PriorCondition = propNode.FindNodeByPath("condition").GetValueEx<string>(null);
                             break;
                         case "uiType":
-                            achievement.UiForm = propNode
-                                .FindNodeByPath("uiForm")
-                                .GetValueEx<string>("basic");
-                            break;
+                            achievement.UiForm = propNode.FindNodeByPath("uiForm").GetValueEx<string>("basic"); break;
                         case "block":
-                            achievement.Block = propNode.GetValueEx<string>("none");
-                            break;
+                            achievement.Block = propNode.GetValueEx<string>("none"); break;
                         case "period":
-                            achievement.Start = propNode
-                                .FindNodeByPath("start")
-                                .GetValueEx<string>(null);
-                            achievement.End = propNode
-                                .FindNodeByPath("end")
-                                .GetValueEx<string>(null);
+                            achievement.Start = propNode.FindNodeByPath("start").GetValueEx<string>(null);
+                            achievement.End = propNode.FindNodeByPath("end").GetValueEx<string>(null);
                             break;
                     }
                 }
@@ -176,7 +133,7 @@ namespace WzComparerR2.CharaSim
                 case "general":
                     return "普通";
                 case "growth":
-                    return "养成";
+                    return "成长";
                 case "job":
                     return "职业";
                 case "item":
@@ -190,7 +147,7 @@ namespace WzComparerR2.CharaSim
                 case "event":
                     return "活动";
                 case "memory":
-                    return "回忆";
+                    return "记忆";
 
                 default:
                     return this._mainCategory;
@@ -222,7 +179,7 @@ namespace WzComparerR2.CharaSim
                     return "联盟";
 
                 case "story":
-                    return "剧情";
+                    return "故事";
                 case "jobChange":
                     return "转职";
                 case "skill":
@@ -237,19 +194,19 @@ namespace WzComparerR2.CharaSim
                 case "enchantment":
                     return "强化";
                 case "equip":
-                    return "穿戴";
+                    return "装备";
 
                 case "exploration":
                     return "探险";
                 case "quest":
                     return "任务";
                 case "cooperation":
-                    return "协作";
+                    return "合作";
                 case "special":
                     return "特殊";
 
                 case "field":
-                    return "区域";
+                    return "猎场";
                 case "boss":
                     return "首领怪";
                 case "loot":
@@ -258,16 +215,16 @@ namespace WzComparerR2.CharaSim
                 case "party":
                     return "组队";
                 case "guild":
-                    return "家族";
+                    return "公会";
                 case "trade":
                     return "交易";
                 case "etc":
-                    return "其他";
+                    return "其它";
 
                 case "progress":
                     return "正在进行的活动";
                 case "complete":
-                    return "上一个活动";
+                    return "过去活动";
 
                 default:
                     return this._subCategory;

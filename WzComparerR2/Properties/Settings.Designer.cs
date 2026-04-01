@@ -37,26 +37,34 @@ namespace WzComparerR2.Properties {
                 this["APIKey"] = value;
             }
         }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
         public string APIKey2
         {
             get
             {
-                return ((string)(this["APIKey"]));
+                return ((string)(this["APIKey2"]));
             }
             set
             {
-                this["APIKey"] = value;
+                this["APIKey2"] = value;
             }
         }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
         public string APIKey3
         {
             get
             {
-                return ((string)(this["APIKey"]));
+                return ((string)(this["APIKey3"]));
             }
             set
             {
-                this["APIKey"] = value;
+                this["APIKey3"] = value;
             }
         }
     }

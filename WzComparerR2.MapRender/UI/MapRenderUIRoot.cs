@@ -12,6 +12,7 @@ using EmptyKeys.UserInterface.Themes;
 using EmptyKeys.UserInterface.Data;
 using Res = CharaSimResource.Resource;
 using MRes = WzComparerR2.MapRender.Properties.Resources;
+using WzComparerR2.Config;
 
 namespace WzComparerR2.MapRender.UI
 {
@@ -36,6 +37,8 @@ namespace WzComparerR2.MapRender.UI
         public UITopBar TopBar { get; private set; }
         public UIChatBox ChatBox { get; private set; }
         public UITeleport Teleport { get; private set; }
+        public bool CtrlOn => this._ctrlPressed;
+        private bool _ctrlPressed;
 
         private void InitializeComponents()
         {
@@ -120,6 +123,7 @@ namespace WzComparerR2.MapRender.UI
             {
                 wnd.JumpToCurrentMap();
             }
+            wnd.EnableButtons();
         }
 
         private void Teleport_Visible(object sender, RoutedEventArgs e)
@@ -127,6 +131,7 @@ namespace WzComparerR2.MapRender.UI
             UITeleport wnd = sender as UITeleport;
             wnd.Left = (int)Math.Max(0, (this.Width - wnd.Width) / 2);
             wnd.Top = (int)Math.Max(0, (this.Height - wnd.Height) / 2);
+            wnd.EnableButtons();
         }
 
         public void LoadContent(object contentManager)
@@ -158,7 +163,7 @@ namespace WzComparerR2.MapRender.UI
             {
                 fontIndex = 0;
             }
-            
+
             resDict[MapRenderResourceKey.FontList] = fontList;
             resDict[MapRenderResourceKey.DefaultFontFamily] = new FontFamily(fontList[fontIndex]);
             resDict[MapRenderResourceKey.DefaultFontSize] = 12f;
@@ -174,7 +179,20 @@ namespace WzComparerR2.MapRender.UI
 
             var tooltipBrush = new NinePatchBrush()
             {
-                Resource = new EKNineFormResource()
+                Resource = CharaSimConfig.Default.Misc.Enable22AniStyle ?
+                new EKNineFormResource()
+                {
+                    NW = assetManager.LoadTexture(null, nameof(Res.UIToolTipNew_img_Item_Common_frame_flexible_nw)),
+                    N = assetManager.LoadTexture(null, nameof(Res.UIToolTipNew_img_Item_Common_frame_flexible_n)),
+                    NE = assetManager.LoadTexture(null, nameof(Res.UIToolTipNew_img_Item_Common_frame_flexible_ne)),
+                    W = assetManager.LoadTexture(null, nameof(Res.UIToolTipNew_img_Item_Common_frame_flexible_w)),
+                    C = assetManager.LoadTexture(null, nameof(Res.UIToolTipNew_img_Item_Common_frame_flexible_c)),
+                    E = assetManager.LoadTexture(null, nameof(Res.UIToolTipNew_img_Item_Common_frame_flexible_e)),
+                    SW = assetManager.LoadTexture(null, nameof(Res.UIToolTipNew_img_Item_Common_frame_flexible_sw)),
+                    S = assetManager.LoadTexture(null, nameof(Res.UIToolTipNew_img_Item_Common_frame_flexible_s)),
+                    SE = assetManager.LoadTexture(null, nameof(Res.UIToolTipNew_img_Item_Common_frame_flexible_se)),
+                } :
+                new EKNineFormResource()
                 {
                     NW = assetManager.LoadTexture(null, nameof(Res.UIToolTip_img_Item_Frame2_nw)),
                     N = assetManager.LoadTexture(null, nameof(Res.UIToolTip_img_Item_Frame2_n)),
@@ -247,6 +265,16 @@ namespace WzComparerR2.MapRender.UI
         protected virtual void OnInputUpdated(EventArgs e)
         {
             this.InputUpdated?.Invoke(this, e);
+        }
+
+        public void OnCtrlKeyDown()
+        {
+            this._ctrlPressed = true;
+        }
+
+        public void OnCtrlKeyUp()
+        {
+            this._ctrlPressed = false;
         }
     }
 }

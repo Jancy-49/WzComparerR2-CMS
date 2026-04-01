@@ -892,7 +892,7 @@ namespace WzComparerR2.CharaSimControl
                 GearGraphics.DrawString(g, "Tip. 宠物达到15级时可特定说话。", GearGraphics.ItemDetailFont, 100, right, ref picH, 16);
                 GearGraphics.DrawString(g, "#c例) /宠物 [说话]#", GearGraphics.ItemDetailFont, new Dictionary<string, Color>() { { "c", ((SolidBrush)GearGraphics.OrangeBrush4).Color } }, 100, right, ref picH, 16);
             }
-            
+
             string incline = null;
             ItemPropType[] inclineTypes = new ItemPropType[]{
                     ItemPropType.charismaEXP,
@@ -1517,7 +1517,7 @@ namespace WzComparerR2.CharaSimControl
             }
             return level;
         }
- 
+
         private bool TryGetNickResource(long nickTag, out Wz_Node resNode)
         {
             resNode = PluginBase.PluginManager.FindWz("UI/NameTag.img/nick/" + nickTag);

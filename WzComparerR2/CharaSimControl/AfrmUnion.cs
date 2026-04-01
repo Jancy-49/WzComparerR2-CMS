@@ -85,6 +85,10 @@ namespace WzComparerR2.CharaSimControl
         public UnionInnerStat[] union_inner_stat = Array.Empty<UnionInnerStat>();
         public UnionChampion[] union_champion = Array.Empty<UnionChampion>();
         public UnionBadgeInfo[] champion_badge_total_info = Array.Empty<UnionBadgeInfo>();
+        public UnionRaiderStat[] union_rader_stat = Array.Empty<UnionRaiderStat>(); 
+        public UnionOccupiedStat[] union_occupied_stat = Array.Empty<UnionOccupiedStat>();
+        public UnionArtifactEffect[] union_artifact_effect = Array.Empty<UnionArtifactEffect>();
+        public UnionArtifactCrystal[] union_artifact_crystal = Array.Empty<UnionArtifactCrystal>();
         public int union_preset = 1;
         private bool waitForRefresh;
 
@@ -127,11 +131,37 @@ namespace WzComparerR2.CharaSimControl
             public string champion_grade { get; set; }
         }
 
+        public class UnionRaiderStat
+        {
+
+        }
+
+        public class UnionOccupiedStat
+        {
+
+        }
+
         public class UnionBadgeInfo
         {
             public string stat { get; set; }
         }
 
+        public class UnionArtifactEffect
+        {
+            public string name { get; set; }
+            public int level { get; set; }
+        }
+
+        public class UnionArtifactCrystal
+        {
+            public string name { get; set; }
+            public string validity_flag { get; set; }
+            public int level { get; set; }
+            public string date_expire { get; set; }
+            public string crystal_option_name_1 { get; set; }
+            public string crystal_option_name_2 { get; set; }
+            public string crystal_option_name_3 { get; set; }
+        }
 
         private List<Point> areaPos = new List<Point>
         {
@@ -707,13 +737,62 @@ namespace WzComparerR2.CharaSimControl
             g.DrawImage(Resource.mapleUnion_buttonartifactSetting_checked_0, 0, 136);
             g.DrawImage(Resource.mapleUnion_button_championSetting_normal_0, 0, 260);
             g.DrawImage(Resource.mapleUnion_artifactSetting_backgrnd, 29, 0);
+            if (resultJson2 != null)
+            {
+                union_artifact_crystal = resultJson2["union_artifact_crystal"].ToObject<AfrmUnion.UnionArtifactCrystal[]>();
+                union_artifact_effect = resultJson2["union_artifact_effect"].ToObject<AfrmUnion.UnionArtifactEffect[]>();
+            }
             for (int i = 0; i <= 8; i++)
             {
-                g.DrawImage(Resource.mapleUnion_artifactSetting_canvasdisabledSlot, 49 + 188 * (i % 3), 20 + 218 * (i / 3));
-                string artifact_disabled = "artifact_artifacts_" + i.ToString() + "_gradeInfo_0_disabled";
-                System.Drawing.Bitmap image = Resource.ResourceManager.GetObject(artifact_disabled) as System.Drawing.Bitmap;
-                g.DrawImage(image, new Rectangle(49 + 188 * (i % 3) + 89 - image.Width / 2, 20 + 218 * (i / 3) + 105 - image.Height / 2, image.Width, image.Height));
-                g.DrawImage(Resource.mapleUnion_artifactSetting_canvasdisabled, 50 + 188 * (i % 3), 22 + 218 * (i / 3));
+                if (i >= union_artifact_crystal.Length)
+                {
+                    g.DrawImage(Resource.mapleUnion_artifactSetting_canvasdisabledSlot, 49 + 188 * (i % 3), 20 + 218 * (i / 3));
+                    string artifact_disabled = "artifact_artifacts_" + i.ToString() + "_gradeInfo_0_disabled";
+                    System.Drawing.Bitmap image = Resource.ResourceManager.GetObject(artifact_disabled) as System.Drawing.Bitmap;
+                    g.DrawImage(image, new Rectangle(49 + 188 * (i % 3) + 89 - image.Width / 2, 20 + 218 * (i / 3) + 105 - image.Height / 2, image.Width, image.Height));
+                    g.DrawImage(Resource.mapleUnion_artifactSetting_canvasdisabled, 50 + 188 * (i % 3), 22 + 218 * (i / 3));
+                }
+                else
+                {
+                    var crystal = union_artifact_crystal[i];
+                    var effect = union_artifact_effect[i];
+                    int artifact_level = crystal.level;
+                    int effect_level = effect.level;
+                    string effect_name = effect.name;
+                    g.DrawString("Lv. " + effect_level.ToString(), GearGraphics.EquipDetailFont, GearGraphics.WhiteBrush, 653, 524 + 16 * i);
+                    g.DrawString(effect_name, GearGraphics.EquipDetailFont, GearGraphics.GrayBrush, 695, 524 + 16 * i);
+                    if (artifact_level < 5)
+                    {
+                        g.DrawImage(Resource.artifact_slot_0_0, 49 + 188 * (i % 3), 20 + 218 * (i / 3));
+                        if (artifact_level == 1)
+                        {
+                            string artifact = "artifact_artifacts_"+ i.ToString() + "_gradeInfo_0_icon";
+                            System.Drawing.Bitmap image = Resource.ResourceManager.GetObject(artifact) as System.Drawing.Bitmap;
+                            g.DrawImage(image, new Rectangle(49 + 188 * (i % 3) + 89 - image.Width / 2, 20 + 218 * (i / 3) + 105 - image.Height / 2, image.Width, image.Height));
+                        }
+                        else if (artifact_level < 5)
+                        {
+                            string artifact = "artifact_artifacts_" + i.ToString() + "_gradeInfo_1_icon";
+                            System.Drawing.Bitmap image = Resource.ResourceManager.GetObject(artifact) as System.Drawing.Bitmap;
+                            g.DrawImage(image, new Rectangle(49 + 188 * (i % 3) + 89 - image.Width / 2, 20 + 218 * (i / 3) + 105 - image.Height / 2, image.Width, image.Height));
+                        }
+                    }
+                    else
+                    {
+                        g.DrawImage(Resource.artifact_slot_4_0, 49 + 188 * (i % 3), 20 + 218 * (i / 3));
+                        string artifact = "artifact_artifacts_" + i.ToString() + "_gradeInfo_4_icon";
+                        System.Drawing.Bitmap image = Resource.ResourceManager.GetObject(artifact) as System.Drawing.Bitmap;
+                        g.DrawImage(image, new Rectangle(49 + 188 * (i % 3) + 89 - image.Width / 2, 20 + 218 * (i / 3) + 105 - image.Height / 2, image.Width, image.Height));
+                    }
+                    switch (artifact_level)
+                    {
+                        case 1: g.DrawImage(Resource.mapleUnion_artifactSetting_artifactGrade_enabled_0, 49 + 188 * (i % 3) + 77, 218 * (i / 3) + 33); break;
+                        case 2: g.DrawImage(Resource.mapleUnion_artifactSetting_artifactGrade_enabled_1, 49 + 188 * (i % 3) + 68, 218 * (i / 3) + 33); break;
+                        case 3: g.DrawImage(Resource.mapleUnion_artifactSetting_artifactGrade_enabled_2, 49 + 188 * (i % 3) + 59, 218 * (i / 3) + 33); break;
+                        case 4: g.DrawImage(Resource.mapleUnion_artifactSetting_artifactGrade_enabled_3, 49 + 188 * (i % 3) + 49, 218 * (i / 3) + 33); break;
+                        case 5: g.DrawImage(Resource.mapleUnion_artifactSetting_artifactGrade_enabled_4, 49 + 188 * (i % 3) + 41, 218 * (i / 3) + 33); break;
+                    }
+                }
             }
             g.DrawImage(Resource.mapleUnion_artifactSetting_scrollslot_enabled_base, 608, 20);
             g.DrawString(artifact_ap, GearGraphics.ItemDetailFont, GearGraphics.WhiteBrush, 590f, 682f);

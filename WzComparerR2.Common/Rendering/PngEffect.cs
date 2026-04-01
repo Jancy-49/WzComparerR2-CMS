@@ -11,7 +11,7 @@ namespace WzComparerR2.Rendering
     public class PngEffect : Effect
     {
         public PngEffect(GraphicsDevice graphicDevice)
-            : base(graphicDevice, GetEffectCode())
+            :base(graphicDevice, GetEffectCode())
         {
             this.AlphaMixEnabled = false;
             this.MinMixedAlpha = 255;
@@ -60,7 +60,7 @@ namespace WzComparerR2.Rendering
         private static byte[] GetEffectCode()
         {
             var asm = Assembly.GetAssembly(typeof(PngEffect));
-
+            
             using (var input = asm.GetManifestResourceStream("WzComparerR2.Rendering.Effect.PngEffect.mgfxo"))
             {
                 byte[] code = new byte[input.Length];

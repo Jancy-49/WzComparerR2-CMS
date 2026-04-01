@@ -392,7 +392,7 @@ namespace WzComparerR2.CharaSimControl
                     len += seg;
                     fit = tst;
                 }
-            }   
+            }
 
             return fit;
         }
@@ -423,7 +423,7 @@ namespace WzComparerR2.CharaSimControl
                 if (this.SetItem.SetItemID < 0)
                 {
                     effTitle = $"[ 世界内重复佩戴效果({effect.Key} / {this.SetItem.CompleteCount}) ]";
-                    worldSetEff = true ;
+                    worldSetEff = true;
                 }
                 else if (specialPetSetEffectName && this.SetItem.SetItemName.EndsWith(" 套装"))
                 {
@@ -437,7 +437,7 @@ namespace WzComparerR2.CharaSimControl
                 {
                     TextRenderer.DrawText(g, effTitle, GearGraphics.EquipMDMoris9Font, new Point(14 - (worldSetEff ? 1 : 0), picHeight), color, TextFormatFlags.NoPadding);
                 }
-                else 
+                else
                 {
                     TextRenderer.DrawText(g, effTitle, GearGraphics.EquipDetailFont, new Point(14 - (worldSetEff ? 1 : 0), picHeight), color, TextFormatFlags.NoPadding);
                 }
@@ -497,7 +497,7 @@ namespace WzComparerR2.CharaSimControl
                     }
                     else
                     {
-                        var summary = ItemStringHelper.GetGearPropString(prop.Key, Convert.ToInt32(prop.Value)).Replace(":","");
+                        var summary = ItemStringHelper.GetGearPropString(prop.Key, Convert.ToInt32(prop.Value)).Replace(":", "");
                         GearGraphics.DrawPlainText(g, summary, Translator.IsKoreanStringPresent(summary) ? GearGraphics.EquipMDMoris9Font : GearGraphics.EquipDetailFont, color, 14 + dx, 290, ref picHeight, 15);
                     }
                 }

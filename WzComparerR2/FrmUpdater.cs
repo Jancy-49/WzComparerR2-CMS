@@ -17,6 +17,7 @@ using Newtonsoft.Json.Linq;
 using System.Net;
 using System.IO;
 using System.Security.Policy;
+using WzComparerR2.Config;
 
 namespace WzComparerR2
 {
@@ -27,29 +28,75 @@ namespace WzComparerR2
             InitializeComponent();
 #if NET6_0_OR_GREATER
             // https://learn.microsoft.com/en-us/dotnet/core/compatibility/fx-core#controldefaultfont-changed-to-segoe-ui-9pt
-            this.Font = new Font(new FontFamily("宋体"), 9f);
+            this.Font = new Font(new FontFamily("宋体"), 9f, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
 #endif
 
-            // this.lblClrVer.Text = string.Format("{0} ({1})", Environment.Version, Program.GetArchitecture());
+            //this.lblCurrentVer.Text = $"{versionNumbers()[2]}.{versionNumbers()[3]}";
             this.lblCurrentVer.Text = BuildInfo.BuildTime;
-            // this.lblLatestVer.Text = GetFileVersion().ToString();
-            var updateSession = new UpdaterSession();
-            // this.lblUpdateContent.Text = GetAsmCopyright().ToString();
-            Task.Run(() => this.ExecuteUpdateAsync(updateSession, updateSession.CancellationToken));
-            // GetPluginInfo();
+            Task.Run(() => this.ExecuteUpdateAsync());
         }
 
-        private UpdaterSession updateSession;
+        public bool EnableAutoUpdate
+        {
+            get { return chkEnableAutoUpdate.Checked; }
+            set { chkEnableAutoUpdate.Checked = value; }
+        }
+
         private string net462url;
         private string net60url;
         private string net80url;
         private string fileurl;
 
-        private string updaterURL = "https://github.com/HikariCalyx/WzComparerR2Updater/releases/download/v1.0.0.250318-1934/Updater.exe";
         private static string checkUpdateURL = "https://api.github.com/repos/Jancy-49/WzComparerR2-CMS/releases/latest";
 
-        public static async Task<bool> QueryUpdate()
+        private string GetFileVersion()
         {
+            return this.GetAsmAttr<AssemblyInformationalVersionAttribute>()?.InformationalVersion
+                ?? this.GetAsmAttr<AssemblyFileVersionAttribute>()?.Version;
+        }
+
+        private int[] versionNumbers()
+        {
+            string[] parts = GetFileVersion().ToString().Split('.');
+            int[] numbers = new int[4];
+            for (int i = 0; i < parts.Length; i++)
+            {
+                if (int.TryParse(parts[i], out int num))
+                {
+                    numbers[i] = num;
+                }
+                else
+                {
+                    numbers[i] = 0;
+                }
+            }
+            return numbers;
+        }
+
+        private static int[] getCiVersionNumbers(string version)
+        {
+            string[] parts = version.Split('-')[2].Split('.');
+            int[] numbers = new int[2];
+            for (int i = 0; i < parts.Length; i++)
+            {
+                if (int.TryParse(parts[i], out int num))
+                {
+                    numbers[i] = num;
+                }
+                else
+                {
+                    numbers[i] = 0;
+                }
+            }
+            return numbers;
+        }
+
+        public async Task<bool> QueryUpdate()
+        {
+#if DEBUG
+            // Disable update check in debug builds
+            return false;
+#endif
             var request = (HttpWebRequest)WebRequest.Create(checkUpdateURL);
             request.Accept = "application/json";
             request.UserAgent = "WzComparerR2/1.0";
@@ -62,16 +109,16 @@ namespace WzComparerR2
                     string responseString = reader.ReadToEnd();
                     JObject UpdateContent = JObject.Parse(responseString);
                     string BuildNumber = UpdateContent.SelectToken("tag_name").ToString();
-                    return Int64.Parse(BuildNumber) > Int64.Parse(BuildInfo.BuildTime);
+                    return Int64.Parse(BuildNumber.Substring(1, 8)) > Int64.Parse(BuildInfo.BuildTime.Substring(1, 8));
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return false;
             }
         }
 
-        private async Task ExecuteUpdateAsync(UpdaterSession session, CancellationToken cancellationToken)
+        private async Task ExecuteUpdateAsync()
         {
             var request = (HttpWebRequest)WebRequest.Create(checkUpdateURL);
             request.Accept = "application/json";
@@ -91,21 +138,21 @@ namespace WzComparerR2
                     downloadUrls[i] = assets[i]["browser_download_url"]?.ToString();
                 }
                 // This part is for builds that are separated into 3 packages
-                foreach (string url in downloadUrls)
+                /*foreach (string url in downloadUrls)
                 {
-                    if (url.Contains("net6.0")) net60url = url;
-                    else if (url.Contains("net8.0")) net80url = url;
+                    if (url.Contains("net6")) net60url = url;
+                    else if (url.Contains("net8")) net80url = url;
                     else net462url = url;
-                }
+                }*/
 
-                // fileurl = downloadUrls[0];
+                // This part is specificially for this fork
+                fileurl = downloadUrls[0];
 
                 this.lblLatestVer.Text = BuildNumber;
-                AppendText(ChangeTitle + "\r\n", Color.Red);
                 AppendText(Changelog, Color.Black);
                 this.richTextBoxEx1.SelectionStart = 0;
 
-                if (Int64.Parse(BuildNumber) > Int64.Parse(BuildInfo.BuildTime))
+                if (Int64.Parse(BuildNumber.Substring(1, 8)) > Int64.Parse(BuildInfo.BuildTime.Substring(1, 8)))
                 {
                     buttonX1.Enabled = true;
                     this.lblUpdateContent.Text = "可更新";
@@ -117,11 +164,12 @@ namespace WzComparerR2
             }
             catch (Exception ex)
             {
-                this.lblUpdateContent.Text = "更新检查失败";
+                this.lblUpdateContent.Text = "确认更新失败";
+                AppendText(ex.Message + "\r\n" + ex.StackTrace, Color.Red);
             }
         }
 
-        private async Task DownloadUpdateAsync(string url, UpdaterSession session, CancellationToken cancellationToken)
+        private async Task DownloadUpdateAsync(string url, int version)
         {
             string currentDirectory = AppDomain.CurrentDomain.BaseDirectory;
             string savePath = Path.Combine(currentDirectory, "update.zip");
@@ -143,29 +191,22 @@ namespace WzComparerR2
                         }
                     }
                 }
-                if (!File.Exists(Path.Combine(currentDirectory, "Updater.exe")))
-                {
-                    request = (HttpWebRequest)WebRequest.Create(updaterURL);
-                    request.Method = "GET";
-                    using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
-                    {
-                        if (response.StatusCode == HttpStatusCode.OK)
-                        {
-                            using (Stream responseStream = response.GetResponseStream())
-                            {
-                                using (FileStream fileStream = new FileStream(Path.Combine(currentDirectory, "Updater.exe"), FileMode.Create, FileAccess.Write))
-                                {
-                                    responseStream.CopyTo(fileStream);
-                                }
-                            }
-                        }
-                    }
-                }
-                RunProgram("Updater.exe", "\"" + savePath + "\"");
+
+                ExtractResource("WzComparerR2.WzComparerR2.Updater.exe", Path.Combine(currentDirectory, "WzComparerR2.Updater.exe"));
+#if NET6_0_OR_GREATER
+                ExtractResource("WzComparerR2.WzComparerR2.Updater.deps.json", Path.Combine(currentDirectory, "WzComparerR2.Updater.deps.json"));
+                ExtractResource("WzComparerR2.WzComparerR2.Updater.dll", Path.Combine(currentDirectory, "WzComparerR2.Updater.dll"));
+                ExtractResource("WzComparerR2.WzComparerR2.Updater.dll.config", Path.Combine(currentDirectory, "WzComparerR2.Updater.dll.config"));
+                ExtractResource("WzComparerR2.WzComparerR2.Updater.runtimeconfig.json", Path.Combine(currentDirectory, "WzComparerR2.Updater.runtimeconfig.json"));
+#else
+                ExtractResource("WzComparerR2.WzComparerR2.Updater.exe.config", Path.Combine(currentDirectory, "WzComparerR2.Updater.exe.config"));
+#endif
+                RunProgram("WzComparerR2.Updater.exe", "\"" + savePath + "\"", version);
             }
             catch (Exception ex)
             {
-                this.lblUpdateContent.Text = "无法下载更新";
+                this.lblUpdateContent.Text = "下载更新失败";
+                AppendText(ex.Message + "\r\n" + ex.StackTrace, Color.Red);
             }
             finally
             {
@@ -175,10 +216,10 @@ namespace WzComparerR2
 
         private void buttonX1_Click(object sender, EventArgs e)
         {
-            this.lblUpdateContent.Text = "正在下载更新...";
+            this.lblUpdateContent.Text = "更新下载中";
             buttonX1.Enabled = false;
+            /*
             string selectedURL = "";
-            updateSession = new UpdaterSession();
             switch (Environment.Version.Major)
             {
                 default:
@@ -192,20 +233,21 @@ namespace WzComparerR2
                     selectedURL = net80url;
                     break;
             }
-            Task.Run(() => this.DownloadUpdateAsync(selectedURL, updateSession, updateSession.CancellationToken));
+            */
+            Task.Run(() => this.DownloadUpdateAsync(fileurl, Environment.Version.Major));
         }
 
-        private void RunProgram(string url, string argument)
+        private void RunProgram(string url, string path, int dotNetVersion)
         {
 #if NET6_0_OR_GREATER
             Process.Start(new ProcessStartInfo
             {
                 UseShellExecute = true,
                 FileName = url,
-                Arguments = argument,
+                Arguments = String.Format("{0} {1}", path, dotNetVersion.ToString()),
             });
 #else
-            Process.Start(url, argument);
+            Process.Start(url, String.Format("{0} {1}", path, dotNetVersion.ToString()));
 #endif
         }
 
@@ -219,38 +261,40 @@ namespace WzComparerR2
             this.richTextBoxEx1.SelectionColor = this.richTextBoxEx1.ForeColor;
         }
 
-        class UpdaterSession
+        private T GetAsmAttr<T>()
         {
-            public UpdaterSession()
+            object[] attr = this.GetType().Assembly.GetCustomAttributes(typeof(T), true);
+            if (attr != null && attr.Length > 0)
             {
-                this.cancellationTokenSource = new CancellationTokenSource();
+                return (T)attr[0];
             }
-            public Task UpdateExecTask;
+            return default(T);
+        }
 
-            public CancellationToken CancellationToken => this.cancellationTokenSource.Token;
-            private CancellationTokenSource cancellationTokenSource;
-            private TaskCompletionSource<bool> tcsWaiting;
+        private void ExtractResource(string resourceName, string outputPath)
+        {
+            var assembly = Assembly.GetExecutingAssembly();
 
-            public void Cancel()
-            {
-                this.cancellationTokenSource.Cancel();
-            }
+            using Stream? resourceStream = assembly.GetManifestResourceStream(resourceName);
+            if (resourceStream == null)
+                throw new InvalidOperationException($"未找到资源: {resourceName}");
 
-            public async Task WaitForContinueAsync()
-            {
-                var tcs = new TaskCompletionSource<bool>();
-                this.tcsWaiting = tcs;
-                this.cancellationTokenSource.Token.Register(() => tcs.TrySetCanceled());
-                await tcs.Task;
-            }
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath)!);
 
-            public void Continue()
-            {
-                if (this.tcsWaiting != null)
-                {
-                    this.tcsWaiting.SetResult(true);
-                }
-            }
+            using FileStream fileStream = new FileStream(outputPath, FileMode.Create, FileAccess.Write);
+            resourceStream.CopyTo(fileStream);
+        }
+
+        private void chkEnableAutoUpdate_CheckedChanged(object sender, EventArgs e)
+        {
+            //var config = WcR2Config.Default;
+            //config.EnableAutoUpdate = chkEnableAutoUpdate.Checked;
+            //ConfigManager.Save();
+        }
+
+        public void Load(WcR2Config config)
+        {
+            //this.EnableAutoUpdate = config.EnableAutoUpdate;
         }
     }
 }

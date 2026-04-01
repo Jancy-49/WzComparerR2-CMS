@@ -13,6 +13,11 @@ namespace WzComparerR2.MapRender.Patches2
         public string PName { get; set; }
         public int X { get; set; }
         public int Y { get; set; }
+        public int HorizontalImpact { get; set; }
+        public int VerticalImpact { get; set; }
+        public double InverseImpactLength { get; set; }
+        public int HRange { get; set; }
+        public int VRange { get; set; }
         public int? ToMap { get; set; }
         public string ToName { get; set; }
         //Graph.img에 따른 이동경로 출력
@@ -21,6 +26,13 @@ namespace WzComparerR2.MapRender.Patches2
         public int Image { get; set; }
         public bool EnchantPortal { get; set; }
         public bool ShownAtMinimap { get; set; }
+        public bool IsSpring
+        {
+            get
+            {
+                return HorizontalImpact != 0 || VerticalImpact != 0;
+            }
+        }
 
         public ItemView View { get; set; }
         public ItemTooltip Tooltip { get; set; }
@@ -33,18 +45,26 @@ namespace WzComparerR2.MapRender.Patches2
                 Type = node.Nodes["pt"].GetValueEx(0),
                 X = node.Nodes["x"].GetValueEx(0),
                 Y = node.Nodes["y"].GetValueEx(0),
+                HorizontalImpact = node.Nodes["horizontalImpact"].GetValueEx(0),
+                VerticalImpact = node.Nodes["verticalImpact"].GetValueEx(0),
+                HRange = node.Nodes["hRange"].GetValueEx(0),
+                VRange = node.Nodes["vRange"].GetValueEx(0),
                 ToMap = node.Nodes["tm"].GetValueEx<int>(),
                 ToName = node.Nodes["tn"].GetValueEx<string>(null),
                 Script = node.Nodes["script"].GetValueEx<string>(null),
                 Image = node.Nodes["image"].GetValueEx<int>(0),
                 EnchantPortal = node.Nodes["enchantPortal"].GetValueEx<int>(0) != 0,
                 ShownAtMinimap = node.Nodes["shownAtMinimap"].GetValueEx<int>(0) != 0
-
             };
+            item.InverseImpactLength = item.IsSpring ? 1 / Math.Sqrt(item.HorizontalImpact * item.HorizontalImpact + item.VerticalImpact * item.VerticalImpact) : 0;
+            if (item.Type == 12)
+            {
+                item.VerticalImpact = 1000;
+            }
             return item;
         }
 
-        public static readonly string[] PortalTypes = new[] { "sp", "pi", "pv", "pc", "pg", "tp", "ps", "pgi", "psi", "pcs", "ph", "psh", "pcj", "pci", "pci2", "pcig", "pshg", "pcc", "pcir" };
+        public static readonly IReadOnlyList<string> PortalTypes = new[] { "sp", "pi", "pv", "pc", "pg", "tp", "ps", "pgi", "psi", "pcs", "ph", "psh", "pcj", "pci", "pci2", "pcig", "pshg", "pcc", "pcir" };
 
         public class ItemView
         {

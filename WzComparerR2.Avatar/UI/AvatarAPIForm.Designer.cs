@@ -48,7 +48,6 @@
             this.buttonX1.Size = new System.Drawing.Size(75, 23);
             this.buttonX1.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
             this.buttonX1.TabIndex = 4;
-            this.buttonX1.Enabled = false;
             this.buttonX1.Text = "确认";
             // 
             // buttonX2
@@ -81,8 +80,6 @@
             this.textBoxX1.Size = new System.Drawing.Size(180, 21);
             this.textBoxX1.TabIndex = 0;
             this.textBoxX1.KeyDown += new System.Windows.Forms.KeyEventHandler(this.textBoxX1_KeyDown);
-            this.textBoxX1.TextChanged += new System.EventHandler(this.textBoxX1_TextChanged);
-            this.textBoxX1.MaxLength = 12;
             // 
             // checkBoxX1
             // 
@@ -100,8 +97,7 @@
             this.checkBoxX1.Size = new System.Drawing.Size(51, 18);
             this.checkBoxX1.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
             this.checkBoxX1.TabIndex = 1;
-            this.checkBoxX1.Text = "外观";
-            this.checkBoxX1.Visible = false;
+            this.checkBoxX1.Text = "外形";
             // 
             // checkBoxX2
             // 
@@ -116,8 +112,7 @@
             this.checkBoxX2.Size = new System.Drawing.Size(51, 18);
             this.checkBoxX2.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
             this.checkBoxX2.TabIndex = 2;
-            this.checkBoxX2.Text = "装备界面";
-            this.checkBoxX2.Visible = false;
+            this.checkBoxX2.Text = "装备窗";
             // 
             // labelX1
             // 
@@ -130,9 +125,7 @@
             this.labelX1.Name = "labelX1";
             this.labelX1.Size = new System.Drawing.Size(56, 18);
             this.labelX1.TabIndex = 5;
-            this.labelX1.Text = "基准 :";
-            this.labelX1.Font = new System.Drawing.Font("MS PGothic", 9f);
-            this.labelX1.Visible = false;
+            this.labelX1.Text = "基准:";
             // 
             // cmbRegion
             // 
@@ -147,7 +140,6 @@
             this.cmbRegion.Name = "cmbRegion";
             this.cmbRegion.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
             this.cmbRegion.TabIndex = 3;
-            this.cmbRegion.WatermarkText = "角色区域";
             this.cmbRegion.SelectedIndexChanged += cmbRegion_SelectedIndexChanged;
             // 
             // AvatarAPIForm
@@ -166,7 +158,7 @@
             this.MinimizeBox = false;
             this.Name = "AvatarAPIForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
-            this.Text = "请输入角色名。";
+            this.Text = "请输入要导入的角色名。";
             this.ResumeLayout(false);
             this.PerformLayout();
 

@@ -19,11 +19,11 @@ namespace WzComparerR2
             InitializeComponent();
 #if NET6_0_OR_GREATER
             // https://learn.microsoft.com/en-us/dotnet/core/compatibility/fx-core#controldefaultfont-changed-to-segoe-ui-9pt
-            this.Font = new Font(new FontFamily("宋体"), 9f);
+            this.Font = new Font("宋体", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
 #endif
             if (multiFrameInfo != null)
             {
-                this.Text += " (多帧 : " + multiFrameInfo + ")";
+                this.Text += " (多帧: " + multiFrameInfo + ")";
             }
             this.Frames = frames;
             var endIdx = frames.Count - 1;
@@ -39,6 +39,7 @@ namespace WzComparerR2
             this.txtSpeedY.Value = 0;
             this.txtGoX.Value = 0;
             this.txtGoY.Value = 0;
+            this.txtAngle.Value = 0;
             this.chkFullMove.Checked = true;
             this.chkFlipX.Checked = false;
             this.chkFlipY.Checked = false;
@@ -50,7 +51,7 @@ namespace WzComparerR2
 
         }
 
-        private List<Frame> Frames { get; set; }
+        private List<Frame> Frames {  get; set; }
 
         private int GetDelay(int start, int end)
         {
@@ -90,6 +91,7 @@ namespace WzComparerR2
                 FullMove = this.chkFullMove.Checked,
                 FlipX = this.chkFlipX.Checked,
                 FlipY = this.chkFlipY.Checked,
+                Angle = this.txtAngle.ValueObject as int? ?? 0,
 
                 SpeedX = this.txtSpeedX.ValueObject as int? ?? 0,
                 SpeedY = this.txtSpeedY.ValueObject as int? ?? 0,

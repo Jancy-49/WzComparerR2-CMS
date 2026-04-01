@@ -66,7 +66,7 @@ namespace WzComparerR2
 
             IntPtr pVpxCodecCtx = Marshal.AllocHGlobal(Marshal.SizeOf<vpx_codec_ctx_t>());
             IntPtr pVpxCodecDecConfig = Marshal.AllocHGlobal(Marshal.SizeOf<vpx_codec_dec_cfg_t>());
-
+           
             try
             {
                 Unsafe.Copy(pVpxCodecDecConfig.ToPointer(), ref config);

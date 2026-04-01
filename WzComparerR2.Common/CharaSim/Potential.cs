@@ -61,29 +61,26 @@ namespace WzComparerR2.CharaSim
             switch (optionType)
             {
                 case 0: return true;
-                case 10:
-                    return Gear.IsWeapon(gearType)
-               || Gear.IsSubWeapon(gearType) // IsSubWeapon should return `true` for GearType.katara
-               || gearType == GearType.shield;
+                case 10: return Gear.IsWeapon(gearType) 
+                    || Gear.IsSubWeapon(gearType) // IsSubWeapon should return `true` for GearType.katara
+                    || gearType == GearType.shield;
                 case 11:
                     return !CheckOptionType(10, gearType);
-                case 20:
-                    return Gear.IsSubWeapon(gearType)
-               || gearType == GearType.pants
-               || gearType == GearType.shoes
-               || gearType == GearType.cap
-               || gearType == GearType.coat
-               || gearType == GearType.longcoat
-               || gearType == GearType.glove
-               || gearType == GearType.cape
-               || gearType == GearType.belt
-               || gearType == GearType.shoulderPad;
-                case 40:
-                    return gearType == GearType.faceAccessory
-               || gearType == GearType.eyeAccessory
-               || gearType == GearType.ring
-               || gearType == GearType.earrings
-               || gearType == GearType.pendant;
+                case 20: return Gear.IsSubWeapon(gearType)
+                    || gearType == GearType.pants
+                    || gearType == GearType.shoes
+                    || gearType == GearType.cap
+                    || gearType == GearType.coat
+                    || gearType == GearType.longcoat
+                    || gearType == GearType.glove
+                    || gearType == GearType.cape
+                    || gearType == GearType.belt
+                    || gearType == GearType.shoulderPad;
+                case 40: return gearType == GearType.faceAccessory
+                    || gearType == GearType.eyeAccessory
+                    || gearType == GearType.ring
+                    || gearType == GearType.earrings
+                    || gearType == GearType.pendant;
                 case 51: return gearType == GearType.cap;
                 case 52: return gearType == GearType.coat || gearType == GearType.longcoat;
                 case 53: return gearType == GearType.pants;
@@ -148,9 +145,9 @@ namespace WzComparerR2.CharaSim
             return potential;
         }
 
-        public static Potential LoadFromWz(int optID, int optLevel, GlobalFindNodeFunction findNode)
+        public static Potential LoadFromWz(int optID, int optLevel, GlobalFindNodeFunction2 findNode, Wz_File wzf = null)
         {
-            Wz_Node itemWz = findNode("Item\\ItemOption.img");
+            Wz_Node itemWz = findNode("Item\\ItemOption.img", wzf);
             if (itemWz == null)
                 return null;
 

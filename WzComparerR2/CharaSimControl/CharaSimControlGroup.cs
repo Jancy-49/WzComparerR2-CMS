@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Windows.Forms;
 using System.Drawing;
 using System.Text;
-using WzComparerR2.Common;
+using System.Windows.Forms;
 using WzComparerR2.CharaSim;
+using WzComparerR2.Common;
+using WzComparerR2.Config;
 using WzComparerR2.Controls;
+using WzComparerR2.Properties;
 using WzComparerR2.WzLib;
 
 namespace WzComparerR2.CharaSimControl
@@ -25,6 +27,7 @@ namespace WzComparerR2.CharaSimControl
         private AfrmEquip frmEquip;
         private AfrmSkill frmSkill;
         private AfrmUnion frmUnion;
+        private AfrmArchive frmArchive;
         private AfrmJob frmJob;
         private Character character;
         private StringLinker stringLinker;
@@ -121,6 +124,19 @@ namespace WzComparerR2.CharaSimControl
                     frmUnion.Character = this.character;
                 }
                 return frmUnion;
+            }
+        }
+
+        public AfrmArchive UIArchive
+        {
+            get
+            {
+                if (frmArchive == null)
+                {
+                    frmArchive = new AfrmArchive();
+                    frmArchive.KeyDown += new KeyEventHandler(afrm_KeyDown);
+                }
+                return frmArchive;
             }
         }
 

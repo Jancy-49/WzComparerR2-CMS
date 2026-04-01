@@ -9,7 +9,6 @@ using System.Windows.Forms;
 using System.Reflection;
 using DevComponents.Editors;
 using WzComparerR2.Config;
-using Newtonsoft.Json.Linq;
 using WzComparerR2.AvatarCommon;
 
 
@@ -22,17 +21,18 @@ namespace WzComparerR2
             InitializeComponent();
 #if NET6_0_OR_GREATER
             // https://learn.microsoft.com/en-us/dotnet/core/compatibility/fx-core#controldefaultfont-changed-to-segoe-ui-9pt
-            this.Font = new Font(new FontFamily("宋体"), 9f);
+            this.Font = new Font("宋体", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
 #endif
             this.comboBoxEx1.SelectedIndex = 0;
             this.comboBoxEx2.SelectedIndex = 0;
 
             cmbPreferredStringCopyMethod.Items.AddRange(new[]
                 {
-                new ComboItem("原始文本") { Value = 0 },
-                new ComboItem("纯文本") { Value = 1 },
-                new ComboItem("MapleWiki优化文本") { Value = 2 },
+                new ComboItem("Raw String") { Value = 0 },
+                new ComboItem("Plain String") { Value = 1 },
+                //new ComboItem("MapleWiki Optimized") { Value = 2 },
             });
+
             this.comboBoxEx3.Items.AddRange(AvatarCanvas.HairColor.Select(color =>
             {
                 var comboBoxItem = new DevComponents.DotNetBar.ComboBoxItem();
@@ -49,6 +49,9 @@ namespace WzComparerR2
 
             this.comboBoxEx3.SelectedIndex = 0;
             this.comboBoxEx4.SelectedIndex = 0;
+            this.chkShowMiniMapMob.Enabled = this.chkShowMiniMap.Checked;
+            this.chkShowMiniMapNpc.Enabled = this.chkShowMiniMap.Checked;
+            this.chkShowMiniMapPortal.Enabled = this.chkShowMiniMap.Checked;
         }
 
         [Link]
@@ -66,11 +69,25 @@ namespace WzComparerR2
         }
 
         [Link]
+        public bool Item_ShowPurchasePrice
+        {
+            get { return chkShowItemPurchasePrice.Checked; }
+            set { chkShowItemPurchasePrice.Checked = value; }
+        }
+
+        [Link]
         public bool Skill_ShowDelay
         {
             get { return checkBoxX2.Checked; }
             set { checkBoxX2.Checked = value; }
         }
+
+        //[Link]
+        //public bool Skill_ShowArea
+        //{
+        //    get { return checkBoxX16.Checked; }
+        //    set { checkBoxX16.Checked = value; }
+        //}
 
         [Link]
         public DefaultLevel Skill_DefaultLevel
@@ -118,6 +135,27 @@ namespace WzComparerR2
             set { checkBoxX15.Checked = value; }
         }
 
+        //[Link]
+        //public bool Skill_ShowReqSkill
+        //{
+        //    get { return chkShowReqSkill.Checked; }
+        //    set { chkShowReqSkill.Checked = value; }
+        //}
+
+        //[Link]
+        //public bool Skill_ShowSkillValuesByJob
+        //{
+        //    get { return chkShowSkillValuesByJob.Checked; }
+        //    set { chkShowSkillValuesByJob.Checked = value; }
+        //}
+
+        [Link]
+        public bool Skill_ShowParameters
+        {
+            get { return checkBoxX24.Checked; }
+            set { checkBoxX24.Checked = value; }
+        }
+
         [Link]
         public bool Gear_ShowID
         {
@@ -139,6 +177,55 @@ namespace WzComparerR2
             set { checkBoxX5.Checked = value; }
         }
 
+        //[Link]
+        //public bool Item_ShowPurchasePrice
+        //{
+        //    get { return chkShowItemPurchasePrice.Checked; }
+        //    set { chkShowItemPurchasePrice.Checked = value; }
+        //}
+
+        [Link]
+        public bool DamageSkin_ShowDamageSkinID
+        {
+            get { return chkShowDamageSkinID.Checked; }
+            set { chkShowDamageSkinID.Checked = value; }
+        }
+
+        [Link]
+        public bool DamageSkin_ShowDamageSkin
+        {
+            get { return chkShowDamageSkin.Checked; }
+            set { chkShowDamageSkin.Checked = value; }
+        }
+
+        [Link]
+        public bool DamageSkin_UseMiniSize
+        {
+            get { return chkUseMiniSize.Checked; }
+            set { chkUseMiniSize.Checked = value; }
+        }
+
+        [Link]
+        public bool DamageSkin_AlwaysUseMseaFormat
+        {
+            get { return chkAlwaysUseMseaFormat.Checked; }
+            set { chkAlwaysUseMseaFormat.Checked = value; }
+        }
+
+        //[Link]
+        //public bool DamageSkin_DisplayUnitOnSingleLine
+        //{
+        //    get { return chkDisplayUnitOnSingleLine.Checked; }
+        //    set { chkDisplayUnitOnSingleLine.Checked = value; }
+        //}
+
+        [Link]
+        public long DamageSkin_DamageSkinNumber
+        {
+            get { return long.TryParse(txtDamageSkinNumber.Text, out long val) ? val : 0; }
+            set { txtDamageSkinNumber.Text = value.ToString(); }
+        }
+
         [Link]
         public bool Gear_ShowLevelOrSealed
         {
@@ -154,18 +241,26 @@ namespace WzComparerR2
         }
 
         [Link]
-        public bool Gear_AutoTitleWrap
-        {
-            get { return checkBoxX18.Checked; }
-            set { checkBoxX18.Checked = value; }
-        }
-
-        [Link]
         public bool Gear_MaxStar25
         {
             get { return checkBoxX17.Checked; }
             set { checkBoxX17.Checked = value; }
         }
+
+        [Link]
+        public bool Gear_ShowCosmetic
+        {
+            get { return checkBoxX18.Checked; }
+            set { checkBoxX18.Checked = value; }
+        }
+        
+        [Link]
+        public bool Gear_ShowPurchasePrice
+        {
+            get { return chkShowGearPurchasePrice.Checked; }
+            set { chkShowGearPurchasePrice.Checked = value; }
+        }
+
 
         [Link]
         public bool Recipe_ShowID
@@ -196,13 +291,6 @@ namespace WzComparerR2
         }
 
         [Link]
-        public bool Item_ShowLinkedTamingMob
-        {
-            get { return checkBoxX23.Checked; }
-            set { checkBoxX23.Checked = value; }
-        }
-
-        [Link]
         public int Item_CosmeticHairColor
         {
             get { return comboBoxEx3.SelectedIndex; }
@@ -217,62 +305,6 @@ namespace WzComparerR2
         }
 
         [Link]
-        public bool Item_UseAssembleUI
-        {
-            get { return chkUseAssembleUI.Checked; }
-            set { chkUseAssembleUI.Checked = value; }
-        }
-
-        [Link]
-        public bool DamageSkin_ShowDamageSkinID
-        {
-            get { return chkShowDamageSkinID.Checked; }
-            set { chkShowDamageSkinID.Checked = value; }
-        }
-
-        [Link]
-        public bool DamageSkin_ShowDamageSkin
-        {
-            get { return chkShowDamageSkin.Checked; }
-            set { chkShowDamageSkin.Checked = value; }
-        }
-
-        [Link]
-        public bool DamageSkin_UseMiniSize
-        {
-            get { return chkUseMiniSize.Checked; }
-            set { chkUseMiniSize.Checked = value; }
-        }
-
-        [Link]
-        public bool DamageSkin_AlwaysUseMseaFormat
-        {
-            get { return chkAlwaysUseMseaFormat.Checked; }
-            set { chkAlwaysUseMseaFormat.Checked = value; }
-        }
-
-        [Link]
-        public long DamageSkin_DamageSkinNumber
-        {
-            get { return long.TryParse(txtDamageSkinNumber.Text, out long val) ? val : 0; }
-            set { txtDamageSkinNumber.Text = value.ToString(); }
-        }
-
-        [Link]
-        public bool Familiar_AllowOutOfBounds
-        {
-            get { return chkAllowFamiliarOutOfBounds.Checked; }
-            set { chkAllowFamiliarOutOfBounds.Checked = value; }
-        }
-
-        [Link]
-        public bool Familiar_UseCTFamiliarUI
-        {
-            get { return chkUseCTFamiliarUI.Checked; }
-            set { chkUseCTFamiliarUI.Checked = value; }
-        }
-
-        [Link]
         public bool Map_ShowMiniMap
         {
             get { return chkShowMiniMap.Checked; }
@@ -280,104 +312,6 @@ namespace WzComparerR2
         }
 
         [Link]
-        public bool Map_ShowMapObjectID
-        {
-            get { return chkShowMapObjectID.Checked; }
-            set { chkShowMapObjectID.Checked = value; }
-        }
-
-        [Link]
-        public bool Map_ShowMobNpcObjectID
-        {
-            get { return chkShowMobNpcObjectID.Checked; }
-            set { chkShowMobNpcObjectID.Checked = value; }
-        }
-
-        [Link]
-        public bool Map_ShowBgmName
-        {
-            get { return chkShowBgmName.Checked; }
-            set { chkShowBgmName.Checked = value; }
-        }
-
-        [Link]
-        public bool Mob_ShowAllSubMobAtOnce
-        {
-            get { return chkShowAllSubMobAtOnce.Checked; }
-            set { chkShowAllSubMobAtOnce.Checked = value; }
-        }
-
-        [Link]
-        public bool Npc_ShowAllIllustAtOnce
-        {
-            get { return chkShowAllIllustAtOnce.Checked; }
-            set { chkShowAllIllustAtOnce.Checked = value; }
-        }
-
-        [Link]
-        public bool Npc_ShowNpcQuotes
-        {
-            get { return chkShowNpcQuotes.Checked; }
-            set { chkShowNpcQuotes.Checked = value; }
-        }
-
-        [Link]
-        public bool Misc_EnableWorldArchive
-        {
-            get { return chkEnableWorldArchive.Checked; }
-            set { chkEnableWorldArchive.Checked = value; }
-        }
-
-        [Link]
-        public int Quest_DefaultState
-        {
-            get { return comboBoxExQuestState.SelectedIndex; }
-            set { comboBoxExQuestState.SelectedIndex = value; }
-        }
-
-        [Link]
-        public bool Quest_ShowID
-        {
-            get { return chkShowQuestObjectID.Checked; }
-            set { chkShowQuestObjectID.Checked = value; }
-        }
-
-        [Link]
-        public bool Quest_ShowAllStates
-        {
-            get { return chkQAS.Checked; }
-            set { chkQAS.Checked = value; }
-        }
-
-        [Link]
-        public bool Misc_LocatePetEquip
-        {
-            get { return chkLocatePetEquip.Checked; }
-            set { chkLocatePetEquip.Checked = value; }
-        }
-
-        public int PreferredStringCopyMethod
-        {
-            get
-            {
-                return ((cmbPreferredStringCopyMethod.SelectedItem as ComboItem)?.Value as int?) ?? 0;
-            }
-            set
-            {
-                var items = cmbPreferredStringCopyMethod.Items.Cast<ComboItem>();
-                var item = items.FirstOrDefault(_item => _item.Value as int? == value)
-                    ?? items.Last();
-                item.Value = value;
-                cmbPreferredStringCopyMethod.SelectedItem = item;
-            }
-        }
-
-        public bool CopyParsedSkillString
-        {
-            get { return chkCopyParsedSkillString.Checked; }
-            set { chkCopyParsedSkillString.Checked = value; }
-        }
-
         public bool Map_ShowMiniMapMob
         {
             get { return chkShowMiniMapMob.Checked; }
@@ -398,10 +332,32 @@ namespace WzComparerR2
             set { chkShowMiniMapPortal.Checked = value; }
         }
 
-        public bool ShowParameters
+        [Link]
+        public bool Npc_ShowAllIllustAtOnce
         {
-            get { return checkBoxX24.Checked; }
-            set { checkBoxX24.Checked = value; }
+            get { return chkShowAllIllustAtOnce.Checked; }
+            set { chkShowAllIllustAtOnce.Checked = value; }
+        }
+
+        [Link]
+        public int Quest_DefaultState
+        {
+            get { return comboBoxExQuestState.SelectedIndex; }
+            set { comboBoxExQuestState.SelectedIndex = value; }
+        }
+
+        [Link]
+        public bool Npc_ShowNpcQuotes
+        {
+            get { return chkShowNpcQuotes.Checked; }
+            set { chkShowNpcQuotes.Checked = value; }
+        }
+
+        [Link]
+        public bool Quest_ShowAllStates
+        {
+            get { return chkQAS.Checked; }
+            set { chkQAS.Checked = value; }
         }
 
         public bool Enable22AniStyle
@@ -410,15 +366,36 @@ namespace WzComparerR2
             set { chkEnable22AniStyle.Checked = value; }
         }
 
-        private DialogResult enableMonsterBookConfirmation = DialogResult.Yes;
+        [Link]
+        public int Misc_PreferredStringCopyMethod
+        {
+            get
+            {
+                return ((cmbPreferredStringCopyMethod.SelectedItem as ComboItem)?.Value as int?) ?? 0;
+            }
+            set
+            {
+                var items = cmbPreferredStringCopyMethod.Items.Cast<ComboItem>();
+                var item = items.FirstOrDefault(_item => _item.Value as int? == value)
+                    ?? items.Last();
+                item.Value = value;
+                cmbPreferredStringCopyMethod.SelectedItem = item;
+            }
+        }
 
+        [Link]
+        public bool Misc_EnableWorldArchive
+        {
+            get { return chkEnableWorldArchive.Checked; }
+            set { chkEnableWorldArchive.Checked = value; }
+        }
+
+        private DialogResult enableMonsterBookConfirmation = DialogResult.Yes;
 
         public void Load(CharaSimConfig config)
         {
-            this.PreferredStringCopyMethod = config.PreferredStringCopyMethod;
-            this.CopyParsedSkillString = config.CopyParsedSkillString;
             this.Enable22AniStyle = config.Enable22AniStyle;
-            this.ShowParameters = config.Skill.ShowParameters;
+            this.checkBoxX24.Checked = config.Skill.ShowParameters;
             var linkProp = this.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance)
                 .Where(prop => prop.GetCustomAttributes(typeof(LinkAttribute), false).Length > 0);
 
@@ -438,10 +415,8 @@ namespace WzComparerR2
 
         public void Save(CharaSimConfig config)
         {
-            config.PreferredStringCopyMethod = this.PreferredStringCopyMethod;
-            config.CopyParsedSkillString = this.CopyParsedSkillString;
             config.Enable22AniStyle = this.Enable22AniStyle;
-            config.Skill.ShowParameters = this.ShowParameters;
+            config.Skill.ShowParameters = this.checkBoxX24.Checked;
             var linkProp = this.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance)
                 .Where(prop => prop.GetCustomAttributes(typeof(LinkAttribute), false).Length > 0);
 
@@ -458,6 +433,7 @@ namespace WzComparerR2
                 catch { }
             }
         }
+
         private void ChkShowMiniMap_CheckedChanged(object sender, System.EventArgs e)
         {
             this.chkShowMiniMapMob.Enabled = this.chkShowMiniMap.Checked;
@@ -474,7 +450,6 @@ namespace WzComparerR2
 
         private void chkEnableWorldArchive_CheckedChanged(object sender, EventArgs e)
         {
-            this.chkEnableMonsterBook.Enabled = chkEnableWorldArchive.Checked;
             this.chkShowNpcQuotes.Enabled = chkEnableWorldArchive.Checked;
         }
 
@@ -502,24 +477,9 @@ namespace WzComparerR2
 
         private void txtDamageSkinNumber_TextChanged(object sender, EventArgs e)
         {
-            // 过滤非数字字符
+            this.buttonX1.Enabled = !(string.IsNullOrEmpty(txtDamageSkinNumber.Text) || txtDamageSkinNumber.Text == "0");
+
             string digitsOnly = new string(txtDamageSkinNumber.Text.Where(char.IsDigit).ToArray());
-
-            if (txtDamageSkinNumber.Text != digitsOnly)
-            {
-                int cursorPos = txtDamageSkinNumber.SelectionStart;
-                txtDamageSkinNumber.Text = digitsOnly;
-                txtDamageSkinNumber.SelectionStart = Math.Min(cursorPos, txtDamageSkinNumber.Text.Length);
-            }
-
-            // 检查按钮启用条件
-            bool isEnabled = !string.IsNullOrEmpty(txtDamageSkinNumber.Text) &&
-                             txtDamageSkinNumber.Text != "0" &&
-                             long.TryParse(txtDamageSkinNumber.Text, out long number) &&
-                             number > 0 && number < 700000000000L;
-
-            this.buttonX1.Enabled = isEnabled;
-            //this.buttonX1.Enabled = !(string.IsNullOrEmpty(txtDamageSkinNumber.Text) || txtDamageSkinNumber.Text == "0");
 
             if (txtDamageSkinNumber.Text != digitsOnly)
             {

@@ -46,7 +46,7 @@ namespace WzComparerR2.CharaSimControl
             TBrushes22ani["w"] = new TextureBrush(Resource.UIToolTipNew_img_Item_Common_frame_flexible_w, WrapMode.Tile);
             TBrushes22ani["nw"] = new TextureBrush(Resource.UIToolTipNew_img_Item_Common_frame_flexible_nw, WrapMode.Clamp);
             TBrushes22ani["c"] = new TextureBrush(Resource.UIToolTipNew_img_Item_Common_frame_flexible_c, WrapMode.Tile);
-            SetFontFamily("MS Gothic");
+            SetFontFamily("宋体");
         }
 
         public static bool is22aniStyle { get; set; }
@@ -69,6 +69,9 @@ namespace WzComparerR2.CharaSimControl
         public static readonly Font EquipMDMoris9FontBold = new Font("morris9", 12f, FontStyle.Bold, GraphicsUnit.Pixel);
         public static readonly Font ClassSelectFontBold = new Font("Noto Sans SC", 22f, FontStyle.Bold, GraphicsUnit.Pixel);
         public static readonly Font ClassSelectDescFont = new Font("Noto Sans SC", 14f, FontStyle.Bold, GraphicsUnit.Pixel);
+        public static readonly Font ArchiveNameFont = new Font("Noto Sans SC", 16f, FontStyle.Bold, GraphicsUnit.Pixel);
+        public static readonly Font ArchiveNameFont2 = new Font("Noto Sans SC", 12f, FontStyle.Bold, GraphicsUnit.Pixel);
+        public static readonly Font ArchiveNameFont3 = new Font("Noto Sans SC", 24f, FontStyle.Bold, GraphicsUnit.Pixel);
 
         private static PrivateFontCollection _pfc = new PrivateFontCollection();
         public static Font ItemNameFont2 { get; private set; }
@@ -184,6 +187,7 @@ namespace WzComparerR2.CharaSimControl
         public static readonly Brush StatDetailGrayBrush = new SolidBrush(Color.FromArgb(85, 85, 85));
         public static readonly Brush WhiteBrush = new SolidBrush(Color.FromArgb(255, 255, 255));
         public static readonly Brush GrayBrush = new SolidBrush(Color.FromArgb(102, 102, 102));
+        public static readonly Brush GreenBrush = new SolidBrush(Color.FromArgb(0, 255, 0));
         public static readonly Brush JMSGreenBrush = new SolidBrush(Color.FromArgb(119, 255, 0));
         public static readonly Brush ScrollPurpleBrush = new SolidBrush(Color.FromArgb(175, 173, 255));
         public static readonly Brush PotentialNormalBrush = new SolidBrush(Color.FromArgb(133, 145, 159));
@@ -194,6 +198,9 @@ namespace WzComparerR2.CharaSimControl
         public static readonly Color OrangeBrushColor = Color.FromArgb(255, 153, 0);
         public static readonly Brush LocationBrush = new SolidBrush(Color.FromArgb(209, 255, 50));
         public static readonly Brush ItemPriceBrush = new SolidBrush(Color.FromArgb(119, 204, 255));
+        public static readonly Brush ArchiveNameBrush = new SolidBrush(Color.FromArgb(206,255, 255, 234));
+        public static readonly Brush WorldInfoBrush = new SolidBrush(Color.FromArgb(102, 255, 130, 121));
+        public static readonly Brush RegionBrush = new SolidBrush(Color.FromArgb(255, 0, 0));
 
         public static readonly Brush Equip22BrushGray = new SolidBrush(Color.FromArgb(183, 191, 197));
         public static readonly Brush Equip22BrushDarkGray = new SolidBrush(Color.FromArgb(133, 145, 159));
@@ -407,7 +414,7 @@ namespace WzComparerR2.CharaSimControl
                 {
                     r.WordWrapEnabled = true;
                 }
-                r.UseGDIRenderer = true;
+                r.UseGDIRenderer = false;
                 r.FontColorTable = fontColorTable;
                 r.ImageTable = imageTable;
                 r.StrictlyAlignLeft = strictlyAlignLeft;
@@ -430,8 +437,8 @@ namespace WzComparerR2.CharaSimControl
                 {
                     r.WordWrapEnabled = true;
                 }
-                r.UseGDIRenderer = true;
-                r.DrawPlainText(g, s, font, color, x, x1, ref y, height);
+                r.UseGDIRenderer = false;
+                r.DrawPlainText(g, s, font, color, x, x1, ref y, height, alignment);
             }
         }
 
@@ -1054,7 +1061,12 @@ namespace WzComparerR2.CharaSimControl
                 this.infinityRect = new RectangleF(0, 0, ushort.MaxValue, fontLineHeight);
 
                 //base.DrawPlainText(s, font, x1 - x, ref y, height);
-                if (TextRenderer.MeasureText(g, s, font, new Size(int.MaxValue, int.MaxValue), TextFormatFlags.NoPadding).Width <= x1 - x)
+                // 如果字符串包含换行符，直接使用基类的绘制方法以支持换行
+                if (s.Contains("\r\n") || s.Contains("\n"))
+                {
+                    base.DrawPlainText(s, font, x1 - x, ref y, height, alignment);
+                }
+                else if (TextRenderer.MeasureText(g, s, font, new Size(int.MaxValue, int.MaxValue), TextFormatFlags.NoPadding).Width <= x1 - x)
                 {
                     TextRenderer.DrawText(g, s, font, new Point(x, y), color, TextFormatFlags.NoPadding);
                     y += height;

@@ -108,7 +108,7 @@ namespace WzComparerR2.CharaSimControl
                     int enabale_y = -30 - 33 * i;
                     int disabled_y = enabale_y;
                     this.itemTabs[i].TabEnabled = new BitmapOrigin((Bitmap)Resource.ResourceManager.GetObject("UIInventory_img_Inventory_FullMaxAutoBuild_tabcategory_selected_" + i), enable_x, enabale_y);
-                    this.itemTabs[i].TabDisabled = new BitmapOrigin((Bitmap)Resource.ResourceManager.GetObject("UIInventory_img_Inventory_FullMaxAutoBuild_tabcategory_normal_" + i), enable_x, disabled_y);                    
+                    this.itemTabs[i].TabDisabled = new BitmapOrigin((Bitmap)Resource.ResourceManager.GetObject("UIInventory_img_Inventory_FullMaxAutoBuild_tabcategory_normal_" + i), enable_x, disabled_y);
                 }
                 else if (this.fullMode || (this.fullmaxMode && !this.itemTabs[5].Selected))
                 {
@@ -208,10 +208,10 @@ namespace WzComparerR2.CharaSimControl
             this.vScroll.BtnThumb.MouseOver = new BitmapOrigin(Resource.UIInventory_img_Inventory_AutoBuild_scrollslot_enabled_thumb2);
             this.vScroll.BtnThumb.Size = this.vScroll.BtnThumb.Normal.Bitmap.Size;
 
-            this.vScroll.Location = new Point(214, 99);  
+            this.vScroll.Location = new Point(214, 99);
             this.vScroll.Size = new Size(5, 368);
-            this.vScroll.ScrollableLocation = new Point(5, 51);
-            this.vScroll.ScrollableSize = new Size(153, 244);
+            this.vScroll.ScrollableLocation = new Point(0, 51);
+            this.vScroll.ScrollableSize = new Size(242, 244);
             this.vScroll.ValueChanged += new EventHandler(vScroll_ValueChanged);
             this.vScroll.ChildButtonStateChanged += new EventHandler(aCtrl_RefreshCall);
 
@@ -1535,7 +1535,7 @@ namespace WzComparerR2.CharaSimControl
             this.slotLock = false;
             this.waitForRefresh = true;
         }
-        
+
         private void btnSlotLockFull_MouseClick(object sender, MouseEventArgs e)
         {
             this.slotLockFull = true;
@@ -1547,7 +1547,7 @@ namespace WzComparerR2.CharaSimControl
             this.slotLockFull = false;
             this.waitForRefresh = true;
         }
-        
+
         private void btnSlotLockFullMax_MouseClick(object sender, MouseEventArgs e)
         {
             this.slotLockFullMax = true;

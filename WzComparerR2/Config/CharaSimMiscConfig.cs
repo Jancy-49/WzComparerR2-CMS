@@ -21,5 +21,19 @@ namespace WzComparerR2.Config
             get { return (bool)this["locatePetEquip"]; }
             set { this["locatePetEquip"] = value; }
         }
+
+        [ConfigurationProperty("enable22AniStyle", DefaultValue = false)]
+        public bool Enable22AniStyle
+        {
+            get { return (bool)this["enable22AniStyle"]; }
+            set { this["enable22AniStyle"] = value; }
+        }
+
+        [ConfigurationProperty("PreferredStringCopyMethod", DefaultValue = false)]
+        public bool PreferredStringCopyMethod
+        {
+            get { return (bool)this["PreferredStringCopyMethod"]; }
+            set { this["PreferredStringCopyMethod"] = value; }
+        }
     }
 }

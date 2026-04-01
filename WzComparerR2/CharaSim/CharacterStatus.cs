@@ -82,7 +82,7 @@ namespace WzComparerR2.CharaSim
         private CharaProp dropGainR = null;
         private double abnormalDmgR;
         private double expGainR;
-        
+
         private CharaProp starForce = null;
         private CharaProp arcaneForce = null;
         private CharaProp authenticForce = null;
@@ -100,7 +100,7 @@ namespace WzComparerR2.CharaSim
             get { return job; }
             set { job = value; }
         }
-        
+
         /// <summary>
         /// 获取或设置角色的等级。
         /// </summary>
@@ -134,7 +134,7 @@ namespace WzComparerR2.CharaSim
         {
             get { return maxHP; }
         }
-        
+
         /// <summary>
         /// 获取或设置角色的当前MP。
         /// </summary>
@@ -151,7 +151,7 @@ namespace WzComparerR2.CharaSim
         {
             get { return maxMP; }
         }
-        
+
         /// <summary>
         /// 获取或设置角色的当前经验值。
         /// </summary>
@@ -202,7 +202,7 @@ namespace WzComparerR2.CharaSim
         public int Ap
         {
             get { return ap; }
-            set { if (value >= 0)ap = value; }
+            set { if (value >= 0) ap = value; }
         }
 
         /// <summary>
@@ -212,7 +212,7 @@ namespace WzComparerR2.CharaSim
         {
             get { return str; }
         }
-        
+
         /// <summary>
         /// 获取角色的敏捷值。
         /// </summary>
@@ -220,7 +220,7 @@ namespace WzComparerR2.CharaSim
         {
             get { return dex; }
         }
-        
+
         /// <summary>
         /// 获取角色的智力值。
         /// </summary>
@@ -260,7 +260,7 @@ namespace WzComparerR2.CharaSim
         {
             get { return pad; }
         }
-        
+
         /// <summary>
         /// 获取角色的魔法攻击力。
         /// </summary>
@@ -268,7 +268,7 @@ namespace WzComparerR2.CharaSim
         {
             get { return mad; }
         }
-        
+
         /// <summary>
         /// 获取角色的物理防御力。
         /// </summary>
@@ -284,7 +284,7 @@ namespace WzComparerR2.CharaSim
         {
             get { return mdd; }
         }
-       
+
         /// <summary>
         /// 获取角色的物理命中率。
         /// </summary>
@@ -292,7 +292,7 @@ namespace WzComparerR2.CharaSim
         {
             get { return pAcc; }
         }
-        
+
         /// <summary>
         /// 获取角色的魔法命中率。
         /// </summary>
@@ -300,7 +300,7 @@ namespace WzComparerR2.CharaSim
         {
             get { return mAcc; }
         }
-        
+
         /// <summary>
         /// 获取角色的物理回避率。
         /// </summary>
@@ -308,7 +308,7 @@ namespace WzComparerR2.CharaSim
         {
             get { return pEva; }
         }
-        
+
         /// <summary>
         /// 获取角色的魔法回避率。
         /// </summary>
@@ -316,7 +316,7 @@ namespace WzComparerR2.CharaSim
         {
             get { return mEva; }
         }
-        
+
         /// <summary>
         /// 获取角色的暴击率，这是一个百分比属性。
         /// </summary>
@@ -324,7 +324,7 @@ namespace WzComparerR2.CharaSim
         {
             get { return crit; }
         }
-        
+
         /// <summary>
         /// 获取角色的移动速度，这是一个百分比属性。
         /// </summary>
@@ -332,7 +332,7 @@ namespace WzComparerR2.CharaSim
         {
             get { return move; }
         }
-        
+
         /// <summary>
         /// 获取角色的跳跃力，这是一个百分比属性。
         /// </summary>
@@ -340,7 +340,7 @@ namespace WzComparerR2.CharaSim
         {
             get { return jump; }
         }
-        
+
         /*/// <summary>
         /// 获取角色的暴击最大伤害，这是一个隐藏的百分比属性。
         /// </summary>
@@ -348,7 +348,7 @@ namespace WzComparerR2.CharaSim
         {
             get { return critDamMax; }
         }*/
-        
+
         /*/// <summary>
         /// 获取角色的暴击最小伤害，这是一个隐藏的百分比属性。
         /// </summary>
@@ -372,7 +372,7 @@ namespace WzComparerR2.CharaSim
         {
             get { return mastery; }
         }
-        
+
         /// <summary>
         /// 获取角色的攻击力百分比加成，这是一个隐藏的百分比属性。
         /// </summary>

@@ -102,21 +102,21 @@ namespace WzComparerR2.CharaSim
                 case GearPropType.incCDr: return "暴击伤害 : " + sign + value + "%";
                 case GearPropType.knockback: return "直接攻击时" + value + "的比率发生后退现象。";
                 case GearPropType.incPVPDamage: return "大乱斗时追加攻击力 " + sign + value;
-                case GearPropType.incPQEXPr: return "组队任务经验值 " + value + "% 증가";
+                case GearPropType.incPQEXPr: return "组队任务经验值增加" + value + "%";
                 case GearPropType.incEXPr: return "经验值增加" + value + "%";
                 case GearPropType.incBDR:
-                case GearPropType.bdR: return "首领怪攻击力 +" + value + "%";
+                case GearPropType.bdR: return "首领怪物伤害 +" + value + "%";
                 case GearPropType.incIMDR:
-                case GearPropType.imdR: return "无视防御力 : +" + value + "%";
+                case GearPropType.imdR: return "无视怪物防御力 : +" + value + "%";
                 case GearPropType.limitBreak: return "伤害上限突破至" + ToChineseNumberExpr(value) + "。";
                 case GearPropType.reduceReq: return "减少佩戴等级 : - " + value;
                 case GearPropType.nbdR: return "普通怪物伤害 : +" + value + "%";
 
                 case GearPropType.only: return value == 0 ? null : "固有道具";
                 case GearPropType.tradeBlock: return value == 0 ? null : "不可交换";
-                case GearPropType.equipTradeBlock: return value == 0 ? null : "装备后不可交换";
+                case GearPropType.equipTradeBlock: return value == 0 ? null : "装备后无法交换";
                 case GearPropType.accountSharable: return value == 0 ? null : "服务器内只有我的角色之间可以移动";
-                case GearPropType.sharableOnce: return value == 0 ? null : "世界内我的角色间可移动1次\n(移动后不可交换)";
+                case GearPropType.sharableOnce: return value == 0 ? null : "可在世界内我的角色间移动1次\n（移动后无法交换）";
                 case GearPropType.onlyEquip: return value == 0 ? null : "固有装备物品";
                 case GearPropType.notExtend: return value == 0 ? null : "有效时间不可延长";
                 case GearPropType.accountSharableAfterExchange: return value == 0 ? null : "可交易1次\n(交易后只能在世界内我的角色之间移动)";
@@ -142,16 +142,16 @@ namespace WzComparerR2.CharaSim
                 //case GearPropType.plusToSetItem: return value == 0 ? null : "#c装備すると、アイテムセットは2つ装備したものとしてカウントされます。#";
                 case GearPropType.abilityTimeLimited: return value == 0 ? null : "限期能力值";
                 case GearPropType.blockGoldHammer: return value == 0 ? null : "无法使用黄金锤";
-                case GearPropType.colorvar: return value == 0 ? null : "#c该装备可通过染色颜料来变更颜色.#";
+                case GearPropType.colorvar: return value == 0 ? null : "#c该装备可染色#";
                 case GearPropType.cantRepair: return value == 0 ? null : "无法修复";
                 case GearPropType.noLookChange: return value == 0 ? null : "不可使用勋章神秘铁砧";
 
                 case GearPropType.incAllStat_incMHP25: return "全属性: " + sign + value + ", 最大血量 : " + sign + (value * 25);
                 case GearPropType.incAllStat_incMHP50_incMMP50: return "全属性: " + sign + value + ", 最大血量/最大魔量 : " + sign + (value * 50);
-                case GearPropType.incMHP_incMMP: return "最大血量/最大魔量 : " + sign + value;
-                case GearPropType.incMHPr_incMMPr: return "最大血量/最大魔量 : " + sign + value + "%";
+                case GearPropType.incMHP_incMMP: return "最大血量 /最大魔量 : " + sign + value;
+                case GearPropType.incMHPr_incMMPr: return "最大血量 /最大魔量 : " + sign + value + "%";
                 case GearPropType.incPAD_incMAD:
-                case GearPropType.incAD: return "攻击力/魔法攻击力 : " + sign + value;
+                case GearPropType.incAD: return "攻击力 / 魔力 : " + sign + value;
                 case GearPropType.incPDD_incMDD: return "防御力 : " + sign + value;
                 //case GearPropType.incACC_incEVA: return "ACC/AVO :" + sign + value;
 
@@ -223,9 +223,9 @@ namespace WzComparerR2.CharaSim
                 case GearPropType.incPQEXPr: return "组队任务经验值";
                 case GearPropType.incEXPr: return "经验值增加" + value + "%";
                 case GearPropType.incBDR:
-                case GearPropType.bdR: return "首领怪攻击力";
+                case GearPropType.bdR: return "首领怪物伤害";
                 case GearPropType.incIMDR:
-                case GearPropType.imdR: return "无视防御力";
+                case GearPropType.imdR: return "无视怪物防御力";
                 case GearPropType.limitBreak: return "伤害上限突破至" + ToChineseNumberExpr(value) + "。";
                 case GearPropType.reduceReq: return "减少佩戴等级 : - " + value;
                 case GearPropType.nbdR: return "普通怪物伤害";
@@ -234,7 +234,7 @@ namespace WzComparerR2.CharaSim
                 case GearPropType.tradeBlock: return value == 0 ? null : "不可交换";
                 case GearPropType.equipTradeBlock: return value == 0 ? null : "佩戴后不可交换";
                 case GearPropType.accountSharable: return value == 0 ? null : "服务器内只有我的角色之间可以移动";
-                case GearPropType.sharableOnce: return value == 0 ? null : "世界内我的角色间可移动1次\n(移动后不可交换)";
+                case GearPropType.sharableOnce: return value == 0 ? null : "可在世界内我的角色间移动1次\n（移动后无法交换）";
                 case GearPropType.onlyEquip: return value == 0 ? null : "固有装备物品";
                 case GearPropType.notExtend: return value == 0 ? null : "有效时间不可延长";
                 case GearPropType.accountSharableAfterExchange: return value == 0 ? null : "可交易1次\n(交易后只能在世界内我的角色之间移动)";
@@ -242,8 +242,8 @@ namespace WzComparerR2.CharaSim
                 case GearPropType.tradeAvailable:
                     switch (value)
                     {
-                        case 1: return " #c使用宿命剪刀，可以使物品交易1次。#";
-                        case 2: return " #c使用白金宿命剪刀，可以使物品交易1次。#";
+                        case 1: return " #c使用宿命剪刀时可交换1次。#";
+                        case 2: return " #c使用白金宿命剪刀时可交换1次。#";
                         default: return null;
                     }
                 case GearPropType.accountShareTag:
@@ -266,10 +266,10 @@ namespace WzComparerR2.CharaSim
 
                 case GearPropType.incAllStat_incMHP25: return "全属性" + sign + value + ", 最大血量 : " + sign + (value * 25);
                 case GearPropType.incAllStat_incMHP50_incMMP50: return "全属性: " + sign + value + ", 最大血量/最大魔量 : " + sign + (value * 50);
-                case GearPropType.incMHP_incMMP: return "最大血量/最大魔量";
+                case GearPropType.incMHP_incMMP: return "最大血量 /最大魔量";
                 case GearPropType.incMHPr_incMMPr: return "最大血量/最大魔量" + "%";
                 case GearPropType.incPAD_incMAD:
-                case GearPropType.incAD: return "攻击力/魔法攻击力";
+                case GearPropType.incAD: return "攻击力 / 魔力";
                 case GearPropType.incPDD_incMDD: return "防御力";
                 //case GearPropType.incACC_incEVA: return "ACC/AVO :" + sign + value;
 
@@ -421,20 +421,20 @@ namespace WzComparerR2.CharaSim
                     return res;
                 case GearPropType.incBDR:
                 case GearPropType.bdR:
-                    res[0] = "首领怪攻击力";
+                    res[0] = "首领怪物伤害";
                     res[1] = "+" + value + "%";
                     return res;
                 case GearPropType.incIMDR:
                 case GearPropType.imdR:
-                    res[0] = "无视防御力";
+                    res[0] = "无视怪物防御力";
                     res[1] = "+" + value + "%";
                     return res;
                 /*
             case GearPropType.attackSpeed:
                 if (2 <= value && value <= 9)
                 {
-                    res[0] = "공격 속도";
-                    res[1] = $"{10 - value}단계";
+                    res[0] = "攻击速度";
+                    res[1] = $"{10 - value}阶段";
                 }
                 return res;
                 */
@@ -462,16 +462,16 @@ namespace WzComparerR2.CharaSim
                     res[0] = value == 0 ? null : "#$r服务器内只有我的角色之间可以移动#";
                     return res;
                 case GearPropType.sharableOnce:
-                    res[0] = value == 0 ? null : "#$r世界内我的角色间可移动1次(移动后不可交换)#";
+                    res[0] = value == 0 ? null : "#$r可在世界内我的角色间移动1次（移动后无法交换）#";
                     return res;
                 case GearPropType.only:
-                    res[0] = value == 0 ? null : "#$r固有道具#";
+                    res[0] = value == 0 ? null : "#$r无法重复持有#";
                     return res;
                 case GearPropType.onlyEquip:
-                    res[0] = value == 0 ? null : "#$r固有装备物品#";
+                    res[0] = value == 0 ? null : "#$r无法重复装备#";
                     return res;
                 case GearPropType.equipTradeBlock:
-                    res[0] = value == 0 ? null : "#$r装备后不可交换#";
+                    res[0] = value == 0 ? null : "#$r装备后无法交换#";
                     return res;
                 case GearPropType.notExtend:
                     res[0] = value == 0 ? null : " (不可延长)";
@@ -631,7 +631,7 @@ namespace WzComparerR2.CharaSim
                         openAPISubfix += $" #c+{value - standardValue}#"; break;
 
                 }
-                if (openAPISubfix.Length > 0 )
+                if (openAPISubfix.Length > 0)
                 {
                     openAPISubfix = $"({standardValue}" + openAPISubfix + ")";
                 }
@@ -879,7 +879,7 @@ namespace WzComparerR2.CharaSim
                 case GearType.astra: return "阿斯特拉辅助武器";
 
                 case GearType.memorialStaff: return "记忆长杖";
-                
+
                 case GearType.celestialLight: return "星光权杖";
                 case GearType.compass: return "引航指针";
 
@@ -1576,10 +1576,12 @@ namespace WzComparerR2.CharaSim
                 case 11214: return "林之灵";
 
                 case 12000: return "灶门炭治郎";
+                case 12006: return "琦玉";
                 case 12100: return "灶门炭治郎";
                 case 12110: return "灶门炭治郎";
                 case 12111: return "灶门炭治郎";
                 case 12112: return "灶门炭治郎";
+                case 12200: return "琦玉";
 
                 case 13000: return "品克缤";
                 case 13001: return "白雪人";
@@ -1729,6 +1731,144 @@ namespace WzComparerR2.CharaSim
                 default: break;
             }
             return jobid;
+        }
+
+        public static string GetFifthJobName(int skillCode, List<int> jobId)
+        {
+            string jobName = "";
+            switch (jobId.Count)
+            {
+                case 0:
+                    jobName = GetJobName(skillCode / 10000);
+                    break;
+                case 1:
+                    if (jobId[0] == 0)
+                    {
+                        jobName = GetJobName(skillCode / 10000);
+                    }
+                    else
+                    {
+                        jobName = GetJobName(jobId[0]);
+                        jobName = jobName.Contains("(4") ? jobName.Replace("(4", "(5") : jobName + "(5次)";
+                    }
+                    break;
+                default:
+                    bool isSameFaction = true;
+                    int faction = jobId[0] / 1000;
+                    if (faction == 5) faction = 1;
+                    foreach (int id in jobId.Skip(1))
+                    {
+                        if (id == 0) continue;
+                        isSameFaction = isSameFaction && (id / 1000 == faction);
+                    }
+                    if (isSameFaction)
+                    {
+                        switch (faction)
+                        {
+                            case 0: jobName = "5转(冒险家)"; break;
+                            case 1:
+                            case 5: jobName = "5转(希纳斯骑士团)"; break;
+                            case 2: jobName = "5转(英雄)"; break;
+                            case 3: jobName = "5转(反抗者)"; break;
+                            case 4: jobName = "5转(晓之阵)"; break;
+                            case 6: jobName = "5转(诺巴)"; break;
+                            case 10: jobName = "5转(超越者)"; break;
+                            case 11: jobName = "5转(达恩维尔)"; break;
+                            case 12: jobName = "5转(动漫合作)"; break;
+                            case 13: jobName = "5转(怪物)"; break;
+                            case 14: jobName = "5转(好友世界)"; break;
+                            case 15: jobName = "5转(翼人)"; break;
+                            case 16: jobName = "5转(阿尼玛)"; break;
+                            case 17: jobName = "5转(江湖)"; break;
+                            case 18: jobName = "5转(Shine)"; break;
+                        }
+                    }
+                    else
+                    {
+                        jobName = GetJobName(skillCode / 10000);
+                    }
+                    break;
+            }
+            return jobName;
+        }
+
+        public static string GetMobSkillName(int id)
+        {
+            switch (id)
+            {
+                case 100: return "物理攻击力增加";
+                case 101: return "魔法攻击力增加";
+                case 102: return "物理防御力增加";
+                case 103: return "魔法防御力增加";
+                case 105: return "HP吸收";
+
+                case 110: return "周围物理攻击力增加";
+                case 111: return "周围魔法攻击力增加";
+                case 112: return "周围物理防御力增加";
+                case 113: return "周围魔法防御力增加";
+                case 114: return "HP恢复";
+                case 115: return "移动速度增加";
+
+                case 120: return "封印";
+                case 121: return "反转";
+                case 122: return "虚弱";
+                case 123: return "眩晕";
+                case 124: return "诅咒";
+                case 125: return "中毒";
+                case 126: return "缓慢";
+                case 127: return "解除增益";
+                case 128: return "诱惑";
+                case 129: return "驱逐";
+
+                case 131: return "范围持续伤害";
+                case 132: return "混乱";
+                case 133: return "不死";
+                case 134: return "药水封印";
+                case 135: return "不会停止的";
+                case 136: return "暗黑";
+                case 137: return "冰冻";
+                case 138: return "潜能无效";
+
+                case 140: return "无视物理攻击";
+                case 141: return "无视魔法攻击";
+                case 142: return "皮肤硬化";
+                case 143: return "物理攻击反射";
+                case 144: return "魔法攻击反射";
+                case 145: return "攻击反射";
+                case 146: return "无敌";
+
+                case 150: return "物理攻击力增加";
+                case 151: return "魔法攻击力增加";
+                case 152: return "物理防御力增加";
+                case 153: return "魔法防御力增加";
+                case 154: return "命中率增加";
+                case 155: return "回避率增加";
+                case 156: return "移动速度增加";
+
+                case 170: return "传送";
+                case 171: return "爆炸";
+                case 172: return "变异";
+                case 173: return "航空母舰";
+                case 174: return "石化";
+
+                case 200: return "召唤";
+                case 201: return "召唤";
+
+                default: return null;
+            }
+        }
+
+        public static string GetItemCategoryName(Item.ItemType type)
+        {
+            switch (type)
+            {
+                case Item.ItemType.Consume: return "消耗";
+                case Item.ItemType.Install: return "设置";
+                case Item.ItemType.Etc: return "其它";
+                case Item.ItemType.Cash: return "现金";
+                case Item.ItemType.Pet: return "宠物";
+                default: return null;
+            }
         }
 
         public static string ToChineseNumberExpr(long value)

@@ -83,6 +83,7 @@ namespace WzComparerR2.CharaSimControl
         private bool evanmode = false;
         private bool zeromode = false;
         private bool yetipbmode = false;
+        private bool collabmode = false;
         private bool HyperStatVisible = false;
         private bool ZeroexVisible = false;
         BitmapOrigin icon = new BitmapOrigin();
@@ -481,7 +482,7 @@ namespace WzComparerR2.CharaSimControl
             Point baseOffsetnew = calcRenderBaseOffset();
             Size size = new Size(0, 0);
             size.Width += baseOffsetnew.X;
-            if (normalmode || dualblademode || yetipbmode)
+            if (normalmode || dualblademode || yetipbmode || collabmode)
                 size = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/UIWindow2.img/Skill/main/backgrnd"), PluginBase.PluginManager.FindWz).Bitmap.Size;
             else if (evanmode)
                 size = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/UIWindow2.img/SkillEx/main/backgrnd"), PluginBase.PluginManager.FindWz).Bitmap.Size;
@@ -503,7 +504,7 @@ namespace WzComparerR2.CharaSimControl
             //绘制图像
             Bitmap bitmap = new Bitmap(size.Width, size.Height);
             Graphics g = Graphics.FromImage(bitmap);
-            if (normalmode || dualblademode || yetipbmode)
+            if (normalmode || dualblademode || yetipbmode || collabmode)
                 renderBase(g);
             else if (evanmode)
                 render_evan(g);
@@ -531,7 +532,7 @@ namespace WzComparerR2.CharaSimControl
         private void control_event()
         {
             get_tablist(selectJob);
-            if (normalmode || dualblademode || yetipbmode)
+            if (normalmode || dualblademode || yetipbmode || collabmode)
             {
                 this.btnClose.Location = new Point(298, 5);
                 this.btnGuildSkill.Location = new Point(59, 335);
@@ -565,13 +566,13 @@ namespace WzComparerR2.CharaSimControl
                 this.vScroll.BtnNext.Location = new Point(0, 223);
                 this.vScroll.Location = new Point(295, 93);
                 this.vScroll.Size = new Size(11, 235);
-                this.vScroll.ScrollableLocation = new Point(5, 12);
-                this.vScroll.ScrollableSize = new Size(11, 199);
+                this.vScroll.ScrollableLocation = new Point(0, 93);
+                this.vScroll.ScrollableSize = new Size(318, 235);
                 this.vScroll2.BtnNext.Location = new Point(0, 223);
                 this.vScroll2.Location = new Point(153, 93);
                 this.vScroll2.Size = new Size(11, 235);
-                this.vScroll2.ScrollableLocation = new Point(5, 12);
-                this.vScroll2.ScrollableSize = new Size(11, 199);
+                this.vScroll2.ScrollableLocation = new Point(5, 93);
+                this.vScroll2.ScrollableSize = new Size(175, 235);
                 this.btnReset.Location = new Point(10, 335);
                 this.btnHyper.Visible = true;
                 this.btnHyper2.Visible = false;
@@ -597,13 +598,13 @@ namespace WzComparerR2.CharaSimControl
                 this.vScroll.BtnNext.Location = new Point(0, 151);
                 this.vScroll.Location = new Point(265, 218);
                 this.vScroll.Size = new Size(11, 162);
-                this.vScroll.ScrollableLocation = new Point(5, 12);
-                this.vScroll.ScrollableSize = new Size(11, 140);
+                this.vScroll.ScrollableLocation = new Point(6, 218);
+                this.vScroll.ScrollableSize = new Size(278, 162);
                 this.vScroll2.BtnNext.Location = new Point(0, 276);
                 this.vScroll2.Location = new Point(153, 93);
                 this.vScroll2.Size = new Size(11, 287);
-                this.vScroll2.ScrollableLocation = new Point(5, 12);
-                this.vScroll2.ScrollableSize = new Size(11, 265);
+                this.vScroll2.ScrollableLocation = new Point(5, 93);
+                this.vScroll2.ScrollableSize = new Size(163, 287);
                 this.btnReset.Location = new Point(10, 387);
                 this.btnHyper.Visible = false;
                 this.btnHyper2.Visible = true;
@@ -626,13 +627,13 @@ namespace WzComparerR2.CharaSimControl
                 this.vScroll.BtnNext.Location = new Point(0, 227);
                 this.vScroll.Location = new Point(322, 114);
                 this.vScroll.Size = new Size(11, 238);
-                this.vScroll.ScrollableLocation = new Point(5, 12);
-                this.vScroll.ScrollableSize = new Size(11, 216);
+                this.vScroll.ScrollableLocation = new Point(8, 114);
+                this.vScroll.ScrollableSize = new Size(328, 238);
                 this.vScroll2.BtnNext.Location = new Point(0, 148);
                 this.vScroll2.Location = new Point(153, 93);
                 this.vScroll2.Size = new Size(11, 160);
-                this.vScroll2.ScrollableLocation = new Point(5, 12);
-                this.vScroll2.ScrollableSize = new Size(11, 136);
+                this.vScroll2.ScrollableLocation = new Point(6, 93);
+                this.vScroll2.ScrollableSize = new Size(162, 160);
                 this.btnHyper.Visible = false;
                 this.btnHyper2.Visible = false;
                 this.btnEx.Visible = true;
@@ -647,7 +648,7 @@ namespace WzComparerR2.CharaSimControl
             render_bitmap(g, "UI/UIWindow2.img/Skill/main/backgrnd", 0, 0);
             render_bitmap(g, "UI/UIWindow2.img/Skill/main/backgrnd2", 5, 22);
             render_bitmap(g, "UI/UIWindow2.img/Skill/main/backgrnd3", 7, 47);
-            if ((normalmode || yetipbmode) && selectedTab < 5)//右上角技能点数
+            if ((normalmode || yetipbmode || collabmode) && selectedTab < 5)//右上角技能点数
             {
                 render_bitmap(g, "UI/_Canvas/UIWindow2.img/Skill/main/skillPoint", 212, 29); g.DrawString("0", GearGraphics.ItemDetailFont2, GearGraphics.GrayBrush, 296, 31);
             }
@@ -656,9 +657,9 @@ namespace WzComparerR2.CharaSimControl
                 render_bitmap(g, "UI/_Canvas/UIWindow2.img/Skill/main/bg_dual/skillPoint", 245, 29); g.DrawString("0", GearGraphics.ItemDetailFont2, GearGraphics.GrayBrush, 296, 31);
             }
             string jobtab = tab_list[selectedTab];
-            for (int i = 0; i < (dualblademode ? 9 : yetipbmode ? 2 : 7); i++) //绘制技能栏标签
+            for (int i = 0; i < (dualblademode ? 9 : (yetipbmode || collabmode) ? 2 : 7); i++) //绘制技能栏标签
             {
-                if (normalmode || yetipbmode)
+                if (normalmode || yetipbmode || collabmode)
                 {
                     var tabSelObj = Resource.ResourceManager.GetObject(i == selectedTab ? "Skill_main_Tab_selected_" + i : "Skill_main_Tab_enabled_" + i);
                     if (tabSelObj is Bitmap selBitmap) g.DrawImage(selBitmap, 10 + 26 * i, i == selectedTab ? 27 : 29);
@@ -893,7 +894,7 @@ namespace WzComparerR2.CharaSimControl
             skillList.Clear();
             skillList3.Clear();
             skillList4.Clear();
-            if (((normalmode || evanmode || yetipbmode) && selectedTab < 5) || (dualblademode && selectedTab < 7)) //绘制非5转技能
+            if (((normalmode || evanmode || yetipbmode || collabmode) && selectedTab < 5) || (dualblademode && selectedTab < 7)) //绘制非5转技能
             {
                 foreach (Wz_Node wz_Node in PluginManager.FindWz($@"Skill/{jobtab}.img/skill").Nodes)
                 {
@@ -1279,6 +1280,8 @@ namespace WzComparerR2.CharaSimControl
                 case 6400: tab_list = ["6002", "6400", "6410", "6411", "6412", "40004", "6414"]; break;
                 case 6500: tab_list = ["6001", "6500", "6510", "6511", "6512", "40005", "6514"]; break;
                 case 10100: tab_list = ["", "10112", "40001", "10114"]; break;
+                case 12100: tab_list = ["12005", "12100", "40001", ""]; break;
+                case 12200: tab_list = ["12006", "12200", "40005", ""]; break;
                 case 13100: tab_list = ["13000", "13100"]; break;
                 case 13500: tab_list = ["13001", "13500"]; break;
                 case 14200: tab_list = ["14000", "14200", "14210", "14211", "14212", "40002", "14214"]; break;
@@ -1291,16 +1294,19 @@ namespace WzComparerR2.CharaSimControl
                 case 16400: tab_list = ["16000", "16400", "16410", "16411", "16412", "40004", "16414"]; break;
                 case 17200: tab_list = ["17001", "17200", "17210", "17211", "17212", "40002", "17214"]; break;
                 case 17500: tab_list = ["17000", "17500", "17510", "17511", "17512", "40005", "17514"]; break;
+                case 18200: tab_list = ["18000", "18200", "18210", "18211", "18212", "40002", "18214"]; break;
                 default: break;
             }
             switch (selectJob)
             {
-                case 430: normalmode = false; dualblademode = true; evanmode = false; zeromode = false; yetipbmode = false; break;
-                case 2200: normalmode = false; dualblademode = false; evanmode = true; zeromode = false; yetipbmode = false; break;
-                case 10100: normalmode = false; dualblademode = false; evanmode = false; zeromode = true; yetipbmode = false; break;
+                case 430: normalmode = false; dualblademode = true; evanmode = false; zeromode = false; yetipbmode = false; collabmode = false; break;
+                case 2200: normalmode = false; dualblademode = false; evanmode = true; zeromode = false; yetipbmode = false; collabmode = false; break;
+                case 10100: normalmode = false; dualblademode = false; evanmode = false; zeromode = true; yetipbmode = false; collabmode = false; break;
+                case 12100:
+                case 12200: normalmode = false; dualblademode = false; evanmode = false; zeromode = false; yetipbmode = false; collabmode = true; break;
                 case 13100:
-                case 13500: normalmode = false; dualblademode = false; evanmode = false; zeromode = false; yetipbmode = true; break;
-                default: normalmode = true; dualblademode = false; evanmode = false; zeromode = false; yetipbmode = false; break;
+                case 13500: normalmode = false; dualblademode = false; evanmode = false; zeromode = false; yetipbmode = true; collabmode = false; break;
+                default: normalmode = true; dualblademode = false; evanmode = false; zeromode = false; yetipbmode = false; collabmode = false; break;
             }
         }
 
@@ -1676,6 +1682,48 @@ namespace WzComparerR2.CharaSimControl
             }
 
             base.OnMouseClick(e);
+        }
+
+        protected override void OnMouseWheel(MouseEventArgs e)
+        {
+            MouseEventArgs childArgs = new MouseEventArgs(e.Button, e.Clicks, e.X - baseOffset.X, e.Y - baseOffset.Y, e.Delta);
+
+            foreach (AControl ctrl in this.aControls)
+            {
+                ctrl.OnMouseWheel(childArgs);
+            }
+
+            foreach (AControl ctrl in this.evanControls)
+            {
+                ctrl.OnMouseWheel(childArgs);
+            }
+
+            foreach (AControl ctrl in this.zeroControls)
+            {
+                ctrl.OnMouseWheel(childArgs);
+            }
+
+            MouseEventArgs hyperSkillChildArgs = new MouseEventArgs(e.Button, e.Clicks, e.X - HyperSkillRect.X, e.Y - HyperSkillRect.Y, e.Delta);
+
+            foreach (AControl ctrl in this.hyperControls)
+            {
+                ctrl.OnMouseWheel(hyperSkillChildArgs);
+            }
+
+            MouseEventArgs zeroexSkillChildArgs = new MouseEventArgs(e.Button, e.Clicks, e.X - ZeroexRect.X, e.Y - ZeroexRect.Y, e.Delta);
+
+            foreach (AControl ctrl in this.zeroexControls)
+            {
+                ctrl.OnMouseWheel(zeroexSkillChildArgs);
+            }
+
+            if (this.waitForRefresh)
+            {
+                this.Refresh();
+                waitForRefresh = false;
+            }
+
+            base.OnMouseWheel(e);
         }
 
         protected virtual void OnObjectMouseMove(ObjectMouseEventArgs e)

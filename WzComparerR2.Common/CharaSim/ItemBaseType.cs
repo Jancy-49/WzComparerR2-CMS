@@ -12,6 +12,6 @@ namespace WzComparerR2.CharaSim
         Install = 3,
         Etc = 4,
         Cash = 5,
-        Deco = 6,
+        Deco = 6
     }
 }

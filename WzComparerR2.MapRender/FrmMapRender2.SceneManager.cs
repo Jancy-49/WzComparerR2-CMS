@@ -10,6 +10,7 @@ using WzComparerR2.MapRender.Patches2;
 using WzComparerR2.MapRender.UI;
 using Microsoft.Xna.Framework;
 using IE = System.Collections.IEnumerator;
+using WzComparerR2.Rendering;
 
 namespace WzComparerR2.MapRender
 {
@@ -86,7 +87,7 @@ namespace WzComparerR2.MapRender
             yield return new WaitTaskCompletedCoroutine(loadMapTask);
             if (loadMapTask.Exception != null)
             {
-                this.ui.ChatBox.AppendTextSystem($"MapRender 无法加载此地图。{loadMapTask.Exception}");
+                this.ui.ChatBox.AppendTextSystem($"Failed to load map：{loadMapTask.Exception}");
                 this.mapImgLoading = null;
                 this.opacity = 1;
                 yield return cm.Yield(OnSceneRunning());
@@ -151,6 +152,8 @@ namespace WzComparerR2.MapRender
             //加载地图数据
             var mapData = new MapData(this.Services.GetService<IRandom>());
             mapData.Load(this.mapImgLoading.Node, resLoader);
+            mapData.SoundEffPlayer = PlaySoundEff;
+            mapData.LoadMobResource = LoadMobResource;
 
             //处理bgm
             Music newBgm = LoadBgm(mapData);
@@ -180,6 +183,7 @@ namespace WzComparerR2.MapRender
             this.mapImg = this.mapImgLoading;
             this.mapImgLoading = null;
             this.mapData = mapData;
+            this.mapData.EnableMobMovement = this.enableMobMovement;
             this.bgm = newBgm;
             if (willSwitchBgm && this.bgm != null)
             {
@@ -243,6 +247,47 @@ namespace WzComparerR2.MapRender
             return null;
         }
 
+        private Music LoadSoundEff(string path, bool useHolder = false)
+        {
+            var bgmNode = PluginManager.FindWz(path);
+            if (bgmNode != null)
+            {
+                if (bgmNode.Value == null)
+                {
+                    bgmNode = bgmNode.Nodes.FirstOrDefault(n => n.Value is Wz_Sound || n.Value is Wz_Uol);
+                    if (bgmNode == null)
+                    {
+                        return null;
+                    }
+                }
+
+                while (bgmNode.Value is Wz_Uol uol)
+                {
+                    bgmNode = uol.HandleUol(bgmNode);
+                }
+
+                if (useHolder)
+                {
+                    var bgm = resLoader.Load<Music>(bgmNode);
+                    bgm.IsLoop = false;
+                    return bgm;
+                }
+                else
+                {
+                    Wz_Sound bgm = bgmNode.GetValue<Wz_Sound>();
+                    Music sound = null;
+                    if (bgm != null)
+                    {
+                        sound = new Music(bgm);
+                    }
+
+                    sound.IsLoop = false;
+                    return sound;
+                }
+            }
+            return null;
+        }
+
         private void AfterLoadMap(MapData mapData)
         {
             //同步可视化状态
@@ -253,6 +298,7 @@ namespace WzComparerR2.MapRender
 
             //同步UI
             this.renderEnv.Camera.WorldRect = mapData.VRect;
+            ResetCaptureRect();
 
             this.ui.MirrorFrame.Visibility = mapData.ID / 10000000 == 32 ? EmptyKeys.UserInterface.Visibility.Visible : EmptyKeys.UserInterface.Visibility.Collapsed;
 
@@ -454,9 +500,10 @@ namespace WzComparerR2.MapRender
             if (!string.IsNullOrEmpty(viewData.Portal))
             {
                 var portal = this.mapData.Scene.FindPortal(viewData.Portal);
+                var scale = this.renderEnv.Camera.Scale;
                 if (portal != null)
                 {
-                    this.renderEnv.Camera.Center = new Vector2(portal.X, portal.Y);
+                    this.renderEnv.Camera.Center = new Vector2(portal.X * scale, portal.Y * scale);
                 }
                 else
                 {
@@ -514,7 +561,7 @@ namespace WzComparerR2.MapRender
         private IE OnCameraMoving(Point toPos, int ms)
         {
             Vector2 cameraFrom = this.renderEnv.Camera.Center;
-            Vector2 cameraTo = toPos.ToVector2();
+            Vector2 cameraTo = toPos.ToVector2() * this.renderEnv.Camera.Scale;
             for (double i = 0; i < ms; i += cm.GameTime.ElapsedGameTime.TotalMilliseconds)
             {
                 var percent = (i / ms);
@@ -524,6 +571,70 @@ namespace WzComparerR2.MapRender
             }
             this.renderEnv.Camera.Center = cameraTo;
             this.renderEnv.Camera.AdjustToWorldRect();
+        }
+
+        private async Task SetCameraChangedEffect(Vector2 pos)
+        {
+            if (this.mapData.ID / 100 == 9932670)
+            {
+                var bgmRegionsInfo = PluginManager.FindWz($@"Etc\MinigameClient.img\DimensionTower\fieldList\{this.mapData.ID}\bgmRegions");
+                if (bgmRegionsInfo != null)
+                {
+                    var regionNode = bgmRegionsInfo.Nodes.FirstOrDefault(n =>
+                    {
+                        var lt = n.FindNodeByPath("lt").GetValueEx<Wz_Vector>(new Wz_Vector(0, 0)).ToPoint();
+                        var rb = n.FindNodeByPath("rb").GetValueEx<Wz_Vector>(new Wz_Vector(0, 0)).ToPoint();
+
+                        if (pos.X >= lt.X && pos.X <= rb.X && pos.Y >= lt.Y && pos.Y <= rb.Y)
+                        {
+                            return true;
+                        }
+                        return false;
+                    });
+
+                    string bgm;
+                    if (regionNode != null)
+                    {
+                        bgm = regionNode.FindNodeByPath("bgm").GetValueEx<string>("Bgm00/Silence");
+                    }
+                    else
+                    {
+                        bgm = "Bgm00/Silence";
+                    }
+
+                    if (!string.IsNullOrEmpty(bgm))
+                    {
+                        bool willSwitchBgm = this.mapData.Bgm != bgm;
+                        this.mapData.Bgm = bgm;
+                        Music newBgm = LoadBgm(this.mapData);
+                        if (newBgm != null)
+                        {
+                            Task bgmTask = null;
+                            if (willSwitchBgm && this.bgm != null) //准备切换
+                            {
+                                bgmTask = FadeOut(this.bgm, 500);
+                            }
+
+                            if (bgmTask != null)
+                            {
+                                await bgmTask;
+                            }
+
+                            this.bgm = newBgm;
+                            if (willSwitchBgm && this.bgm != null)
+                            {
+                                bgmTask = FadeIn(this.bgm, 500);
+                            }
+
+                            if (bgmTask != null)
+                            {
+                                await bgmTask;
+                            }
+                        }
+                    }
+                }
+            }
+            this.CamaraChangedEffState = true;
         }
 
         private void SceneUpdate()
@@ -540,7 +651,8 @@ namespace WzComparerR2.MapRender
             //需要手动更新数据部分
             this.renderEnv.Camera.AdjustToWorldRect();
             {
-                var rect = this.renderEnv.Camera.ClipRect;
+                //var rect = this.renderEnv.Camera.ClipRect;
+                var rect = this.renderEnv.Camera.ScaledClipRect;
                 this.ui.Minimap.CameraViewPort = new EmptyKeys.UserInterface.Rect(rect.X, rect.Y, rect.Width, rect.Height);
             }
             //更新topbar
@@ -554,6 +666,7 @@ namespace WzComparerR2.MapRender
             }
             //更新tooltip
             UpdateTooltip();
+            UpdateMinimapIcons();
         }
 
         private void MoveToPortal(int? toMap, string pName, string fromPName = null, bool isBack = false)
@@ -581,14 +694,19 @@ namespace WzComparerR2.MapRender
             }
             else //当前地图
             {
-                viewData.ToMapID = null;
-                viewData.ToPortal = null;
+                BlinkPortal(pName);
+            }
+        }
 
-                var portal = this.mapData.Scene.FindPortal(pName);
-                if (portal != null)
-                {
-                    this.cm.StartCoroutine(OnCameraMoving(new Point(portal.X, portal.Y), 500));
-                }
+        private void BlinkPortal(string pName)
+        {
+            viewData.ToMapID = null;
+            viewData.ToPortal = null;
+
+            var portal = this.mapData.Scene.FindPortal(pName);
+            if (portal != null)
+            {
+                this.cm.StartCoroutine(OnCameraMoving(new Point(portal.X, portal.Y), 500));
             }
         }
 

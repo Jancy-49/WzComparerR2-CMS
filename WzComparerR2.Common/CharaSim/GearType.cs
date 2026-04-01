@@ -553,7 +553,7 @@ namespace WzComparerR2.CharaSim
         /// 宝玉 178
         /// </summary>
         jewel = 178,
-         /// <summary>
+        /// <summary>
         /// MSN纸娃娃 179
         /// </summary>
         face_n = 1790,

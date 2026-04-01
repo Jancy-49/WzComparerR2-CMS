@@ -10,6 +10,9 @@ using System.Net;
 using System.Windows.Forms;
 using DevComponents.DotNetBar;
 using DevComponents.Editors;
+using COSXML;
+using COSXML.Model.Bucket;
+using COSXML.Model.Object;
 using WzComparerR2.Config;
 using System.Security.Policy;
 using System.IO;
@@ -180,6 +183,7 @@ namespace WzComparerR2
             get { return txtAPIkey.Text; }
             set { txtAPIkey.Text = value; }
         }
+
         public string GCloudAPIKey
         {
             get { return txtGCloudTranslateAPIkey.Text; }
@@ -194,8 +198,33 @@ namespace WzComparerR2
         public string NxSecretKey
         {
             get { return txtSecretkey.Text; }
-            set { txtSecretkey.Text = value;}
+            set { txtSecretkey.Text = value; }
         }
+
+        public string Bucket
+        {
+            get { return txtBucket.Text; }
+            set { txtBucket.Text = value; }
+        }
+
+        public string Region
+        {
+            get { return txtRegion.Text; }
+            set { txtRegion.Text = value; }
+        }
+
+        public string SecretID
+        {
+            get { return txtSecretID.Text; }
+            set { txtSecretID.Text = value; }
+        }
+
+        public string SecretKey
+        {
+            get { return txtSecretKey.Text; }
+            set { txtSecretKey.Text = value; }
+        }
+
         public int PreferredLayout
         {
             get
@@ -336,6 +365,7 @@ namespace WzComparerR2
                 cmbDesiredLanguage.SelectedItem = item;
             }
         }
+
         private void buttonXCheck_Click(object sender, EventArgs e)
         {
             string respText;
@@ -475,6 +505,14 @@ namespace WzComparerR2
 #endif
         }
 
+        private void btnTest_Click(object sender, EventArgs e)
+        {
+            UploadObject.UploadObject obj = new UploadObject.UploadObject();
+            var config = WcR2Config.Default;
+            obj.CreateDir("test/");
+            //obj.PutObject("test/Skill_80004069[其它]_变更.png", "D:\\Compare\\KMS\\SkillTooltip\\Skill_80004069[其它]_变更.png");
+        }
+
         private void cmbPreferredTranslateEngine_SelectedIndexChanged(object sender, EventArgs e)
         {
             ComboItem selectedItem = (ComboItem)cmbPreferredTranslateEngine.SelectedItem;
@@ -569,6 +607,10 @@ namespace WzComparerR2
             this.DetectCurrency = config.DetectCurrency;
             this.DesiredCurrency = config.DesiredCurrency;
             this.AutoDetectUpdate = config.AutoDetectUpdate;
+            this.Bucket = config.Bucket;
+            this.Region = config.Region;
+            this.SecretID = config.SecretID;
+            this.SecretKey = config.SecretKey;
         }
 
         public void Save(WcR2Config config)
@@ -593,6 +635,10 @@ namespace WzComparerR2
             config.DetectCurrency = this.DetectCurrency;
             config.DesiredCurrency = this.DesiredCurrency;
             config.AutoDetectUpdate = this.AutoDetectUpdate;
+            config.Bucket = this.Bucket;
+            config.Region = this.Region;
+            config.SecretID = this.SecretID;
+            config.SecretKey = this.SecretKey;
         }
     }
 }

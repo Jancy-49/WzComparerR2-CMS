@@ -235,8 +235,7 @@ namespace WzComparerR2.Text
                     drawX = curX;
                 }
                 start = end = -1;
-            }
-            ;
+            };
 
             for (int r = 0; r < runs.Count; r++)
             {
@@ -310,7 +309,7 @@ namespace WzComparerR2.Text
                                 flush(true);
                                 if (this.StrictlyAlignLeft >= 2)
                                 {
-                                    while (r < runs.Count && runs[r].IsWhiteSpace)
+                                    while (r < runs.Count - 1 && runs[r].IsWhiteSpace)
                                     {
                                         r += 1;
                                         run = runs[r];
@@ -322,7 +321,6 @@ namespace WzComparerR2.Text
                                     colorID = run.ColorID;
                                     fontID = run.FontID;
                                 }
-                                start = run.StartIndex;
                                 xOffset = run.X;
                             }
                             if (width - curX < run.Width)

@@ -183,7 +183,7 @@ namespace WzComparerR2.CharaSim
                                                         break;
 
                                                     case "level":
-                                                        activeSkill.Level = pNode.GetValue<int>();
+                                                        activeSkill.Level= pNode.GetValue<int>();
                                                         break;
                                                 }
                                             }
@@ -288,7 +288,7 @@ namespace WzComparerR2.CharaSim
                 }
             }
 
-
+          
             return setItem;
         }
 
@@ -313,7 +313,7 @@ namespace WzComparerR2.CharaSim
                         add = true;
                     }
                 }
-
+                
                 if (add) //提取出被合并项的最大partID
                 {
                     //idx = idx == null ? part.Key : Math.Max(part.Key, idx.Value);

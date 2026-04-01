@@ -57,6 +57,7 @@ namespace WzComparerR2.MapRender.UI
 
         public event EventHandler<MapSpotEventArgs> MapSpotClick;
 
+        private List<Button> buttons { get; set; } = new List<Button>();
         private ObservableCollection<WorldMapInfo> worldMaps;
 
         public WorldMapInfo CurrentWorldMap
@@ -141,14 +142,16 @@ namespace WzComparerR2.MapRender.UI
             Canvas.SetLeft(btnBack, 180);
             Canvas.SetTop(btnBack, 23);
             canvas.Children.Add(btnBack);
+            this.buttons.Add(btnBack);
 
             ImageButton btnClose = new ImageButton();
-            btnClose.Name = "关闭";
+            btnClose.Name = "Close";
             btnClose.Click += BtnClose_Click;
             btnClose.SetResourceReference(UIElement.StyleProperty, MapRenderResourceKey.MapRenderButtonStyle);
             Canvas.SetRight(btnClose, 7);
             Canvas.SetTop(btnClose, 5);
             canvas.Children.Add(btnClose);
+            this.buttons.Add(btnClose);
 
             this.Width = canvasBackTexture.Width;
             this.Height = canvasBackTexture.Height;
@@ -544,7 +547,7 @@ namespace WzComparerR2.MapRender.UI
             return item;
         }
 
-        private void OnMapAreaClick(object obj)
+        private void OnMapAreaClick(object obj, bool ctrlOn)
         {
             if (obj is MapLink)
             {
@@ -568,6 +571,7 @@ namespace WzComparerR2.MapRender.UI
         private void BtnBack_Click(object sender, RoutedEventArgs e)
         {
             this.GoBack();
+            this.DisableButtons();
         }
 
         private void MapArea_RightClick(object obj)
@@ -578,6 +582,23 @@ namespace WzComparerR2.MapRender.UI
         private void BtnClose_Click(object sender, RoutedEventArgs e)
         {
             this.Hide();
+            this.DisableButtons();
+        }
+
+        private void DisableButtons()
+        {
+            foreach (var button in buttons)
+            {
+                button.IsEnabled = false;
+            }
+        }
+
+        public void EnableButtons()
+        {
+            foreach (var button in buttons)
+            {
+                button.IsEnabled = true;
+            }
         }
 
         private void GoBack()
@@ -700,6 +721,20 @@ namespace WzComparerR2.MapRender.UI
                 }
 
                 var baseOrigin = new PointF((int)this.Width / 2, (int)this.Height / 2);
+                if (baseImg?.Texture != null)
+                {
+                    var baseImgRect = new Rect(baseOrigin.X - baseImg.Origin.X, baseOrigin.Y - baseImg.Origin.Y, baseImg.Texture.Width, baseImg.Texture.Height);
+                    // workaround for CMS WorldMap177
+                    int overflowThreshold = 10;
+                    if (baseImgRect.Left < -overflowThreshold || baseImgRect.Right > this.Width + overflowThreshold
+                        || baseImgRect.Top < -overflowThreshold || baseImgRect.Bottom > this.Height + overflowThreshold)
+                    {
+                        // draw baseImg aligned center by adjusting baseOrigin
+                        PointF baseImgOriginNew = new PointF(baseImg.Texture.Width / 2, baseImg.Texture.Height / 2);
+                        PointF originDiff = new PointF(baseImgOriginNew.X - baseImg.Origin.X, baseImgOriginNew.Y - baseImg.Origin.Y);
+                        baseOrigin = new PointF(baseOrigin.X - originDiff.X, baseOrigin.Y - originDiff.Y);
+                    }
+                }
 
                 var drawOrder = new List<DrawItem>();
                 var addItem = new Action<TextureItem, object>((texture, obj) =>

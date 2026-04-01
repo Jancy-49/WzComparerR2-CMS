@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DevComponents.AdvTree;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -17,8 +18,12 @@ namespace WzComparerR2.CharaSim
         public int onlyCash;
         public List<int> SN;
 
-        public static CashPackage CreateFromNode(Wz_Node itemNode, Wz_Node cashPackageNode, GlobalFindNodeFunction findNode)
+        public static CashPackage CreateFromNode(Wz_Node itemNode, Wz_Node cashPackageNode, GlobalFindNodeFunction findNode, Wz_File wzf = null)
         {
+            if (itemNode == null)
+            {
+                return null;
+            }
             CashPackage cashPackage = new CashPackage();
             int value;
             if (itemNode == null
@@ -47,7 +52,7 @@ namespace WzComparerR2.CharaSim
                         }
                         if (pngNode.Value is Wz_Png)
                         {
-                            cashPackage.Icon = BitmapOrigin.CreateFromNode(pngNode, findNode);
+                            cashPackage.Icon = BitmapOrigin.CreateFromNode(pngNode, findNode, wzf);
                         }
 
                         break;

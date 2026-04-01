@@ -22,6 +22,8 @@ using RelayCommand = EmptyKeys.UserInterface.Input.RelayCommand;
 using KeyCode = EmptyKeys.UserInterface.Input.KeyCode;
 using ModifierKeys = EmptyKeys.UserInterface.Input.ModifierKeys;
 using ServiceManager = EmptyKeys.UserInterface.Mvvm.ServiceManager;
+using WzComparerR2.MapRender.Effects;
+using WzComparerR2.Animation;
 #endregion
 
 namespace WzComparerR2.MapRender
@@ -33,12 +35,14 @@ namespace WzComparerR2.MapRender
             graphics = new GraphicsDeviceManager(this);
             graphics.DeviceCreated += Graphics_DeviceCreated;
             graphics.DeviceResetting += Graphics_DeviceResetting;
+            graphics.GraphicsProfile = GraphicsProfile.HiDef;
 
             this.MaxElapsedTime = TimeSpan.MaxValue;
             this.IsFixedTimeStep = false;
             this.TargetElapsedTime = TimeSpan.FromSeconds(1.0 / 60);
             this.InactiveSleepTime = TimeSpan.FromSeconds(1.0 / 30);
             this.IsMouseVisible = true;
+            this.Exiting += (o, e) => this.OnExiting();
 
             this.Content = new WcR2ContentManager(this.Services);
             this.patchVisibility = new PatchVisibility();
@@ -46,6 +50,11 @@ namespace WzComparerR2.MapRender
             this.patchVisibility.LadderRopeVisible = false;
             this.patchVisibility.SkyWhaleVisible = false;
             this.patchVisibility.IlluminantClusterPathVisible = false;
+            this.patchVisibility.SpringPortalPathVisible = false;
+            this.patchVisibility.PortalRangeVisible = false;
+            this.patchVisibility.ObstacleAreaVisible = false;
+            this.patchVisibility.MobHitboxVisible = false;
+            this.patchVisibility.CaptureRectVisible = false;
 
             var form = Form.FromHandle(this.Window.Handle) as Form;
             form.Load += Form_Load;
@@ -55,6 +64,8 @@ namespace WzComparerR2.MapRender
             form.FormClosed += Form_FormClosed;
 
             this.imeHelper = new IMEHandler(this, true);
+            this.Exiting += (o, e) => this.imeHelper.Dispose();
+            this.Disposed += (o, e) => this.imeHelper.Dispose();
             GameExt.FixKeyboard(this);
         }
 
@@ -125,6 +136,10 @@ namespace WzComparerR2.MapRender
         PatchVisibility patchVisibility;
 
         bool prepareCapture;
+        bool captureViewPortOnly;
+        bool ForceCaptureWithResolution;
+        bool showFootholdBoundary;
+        bool enableMobMovement;
         Task captureTask;
         Resolution resolution;
         float opacity;
@@ -143,6 +158,9 @@ namespace WzComparerR2.MapRender
 
         bool isUnloaded;
         bool isExiting;
+
+        bool CamaraChangedEffState = true;
+        Rectangle CaptureRect = new Rectangle();
 
         protected override void Initialize()
         {
@@ -208,6 +226,8 @@ namespace WzComparerR2.MapRender
                     uiWnd.DataContext = new UIOptionsDataModel();
                     uiWnd.OK += UIOption_OK;
                     uiWnd.Cancel += UIOption_Cancel;
+                    uiWnd.ResetSCRect += UIOption_ResetSCRect;
+                    uiWnd.ChkForceClickEvent += UIOption_ChkForceClickEvent;
                     uiWnd.Visible += UiWnd_Visible;
                     uiWnd.Visibility = EmptyKeys.UserInterface.Visibility.Visible;
                     this.ui.Windows.Add(uiWnd);
@@ -220,8 +240,9 @@ namespace WzComparerR2.MapRender
             }), KeyCode.Escape, ModifierKeys.None));
 
             //截图
-            this.ui.InputBindings.Add(new KeyBinding(new RelayCommand(_ => { if (CanCapture()) prepareCapture = true; }), KeyCode.F12, ModifierKeys.None));
-            this.ui.InputBindings.Add(new KeyBinding(new RelayCommand(_ => { if (CanCapture()) prepareCapture = true; }), KeyCode.Scroll, ModifierKeys.None));
+            this.ui.InputBindings.Add(new KeyBinding(new RelayCommand(_ => { if (CanCapture()) prepareCapture = true; captureViewPortOnly = false; }), KeyCode.Scroll, ModifierKeys.None));
+            this.ui.InputBindings.Add(new KeyBinding(new RelayCommand(_ => { if (CanCapture()) prepareCapture = true; captureViewPortOnly = true; }), KeyCode.S, ModifierKeys.Control));
+            this.ui.InputBindings.Add(new KeyBinding(new RelayCommand(_ => this.patchVisibility.CaptureRectVisible = !this.patchVisibility.CaptureRectVisible), KeyCode.S, ModifierKeys.None));
 
             this.ui.InputBindings.Add(new KeyBinding(new RelayCommand(_ => { renderEnv.Camera.AdjustRectEnabled = !renderEnv.Camera.AdjustRectEnabled; }), KeyCode.U, ModifierKeys.Control));
 
@@ -231,7 +252,22 @@ namespace WzComparerR2.MapRender
             this.ui.InputBindings.Add(new KeyBinding(new RelayCommand(_ => this.patchVisibility.ObjVisible = !this.patchVisibility.ObjVisible), KeyCode.D3, ModifierKeys.Control));
             this.ui.InputBindings.Add(new KeyBinding(new RelayCommand(_ => this.patchVisibility.TileVisible = !this.patchVisibility.TileVisible), KeyCode.D4, ModifierKeys.Control));
             this.ui.InputBindings.Add(new KeyBinding(new RelayCommand(_ => this.patchVisibility.NpcVisible = !this.patchVisibility.NpcVisible), KeyCode.D5, ModifierKeys.Control));
-            this.ui.InputBindings.Add(new KeyBinding(new RelayCommand(_ => this.patchVisibility.MobVisible = !this.patchVisibility.MobVisible), KeyCode.D6, ModifierKeys.Control));
+            this.ui.InputBindings.Add(new KeyBinding(new RelayCommand(_ =>
+            {
+                if (!this.patchVisibility.MobVisible)
+                {
+                    this.patchVisibility.MobVisible = true;
+                }
+                else if (!this.patchVisibility.MobHitboxVisible)
+                {
+                    this.patchVisibility.MobHitboxVisible = true;
+                }
+                else
+                {
+                    this.patchVisibility.MobVisible = false;
+                    this.patchVisibility.MobHitboxVisible = false;
+                }
+            }), KeyCode.D6, ModifierKeys.Control));
             this.ui.InputBindings.Add(new KeyBinding(new RelayCommand(_ =>
             {
                 var visible = this.patchVisibility.FootHoldVisible;
@@ -239,6 +275,9 @@ namespace WzComparerR2.MapRender
                 this.patchVisibility.LadderRopeVisible = !visible;
                 this.patchVisibility.SkyWhaleVisible = !visible;
                 this.patchVisibility.IlluminantClusterPathVisible = !visible;
+                this.patchVisibility.SpringPortalPathVisible = !visible;
+                this.patchVisibility.PortalRangeVisible = !visible;
+                this.patchVisibility.ObstacleAreaVisible = !visible;
             }), KeyCode.D7, ModifierKeys.Control));
             this.ui.InputBindings.Add(new KeyBinding(new RelayCommand(_ =>
             {
@@ -269,7 +308,6 @@ namespace WzComparerR2.MapRender
             }), KeyCode.D8, ModifierKeys.Control));
             this.ui.InputBindings.Add(new KeyBinding(new RelayCommand(_ => this.patchVisibility.FrontVisible = !this.patchVisibility.FrontVisible), KeyCode.D9, ModifierKeys.Control));
             this.ui.InputBindings.Add(new KeyBinding(new RelayCommand(_ => this.patchVisibility.EffectVisible = !this.patchVisibility.EffectVisible), KeyCode.D0, ModifierKeys.Control));
-
             //移动操作
             #region 移动操作
             {
@@ -345,9 +383,11 @@ namespace WzComparerR2.MapRender
 
                         case KeyCode.LeftControl:
                             boostMoveFlag |= 0x01;
+                            this.ui.OnCtrlKeyDown();
                             break;
                         case KeyCode.RightControl:
                             boostMoveFlag |= 0x02;
+                            this.ui.OnCtrlKeyDown();
                             break;
 
                         default:
@@ -376,9 +416,11 @@ namespace WzComparerR2.MapRender
 
                         case KeyCode.LeftControl:
                             boostMoveFlag &= ~0x01;
+                            this.ui.OnCtrlKeyUp();
                             break;
                         case KeyCode.RightControl:
                             boostMoveFlag &= ~0x02;
+                            this.ui.OnCtrlKeyUp();
                             break;
                     }
                 };
@@ -388,6 +430,8 @@ namespace WzComparerR2.MapRender
                 //鼠标移动
                 bool isMouseDown = false;
                 var direction2 = Vector2.Zero;
+                int captureRectClickedPos = -1;
+                Point prevMousePos = Point.Zero;
 
                 Action<EmptyKeys.UserInterface.Input.MouseEventArgs> calcMouseMoveDir = e =>
                 {
@@ -415,6 +459,67 @@ namespace WzComparerR2.MapRender
                         isMouseDown = true;
                         calcMouseMoveDir(e);
                     }
+                    else if (e.ChangedButton == EmptyKeys.UserInterface.Input.MouseButton.Left)
+                    {
+                        if (this.patchVisibility.CaptureRectVisible)
+                        {
+                            Rectangle rect = this.renderEnv.Camera.WorldRect;
+                            if (!this.CaptureRect.IsEmpty)
+                            {
+                                rect = this.CaptureRect;
+                            }
+
+                            //  1 | 5 | 2
+                            //  8 | 0 | 6
+                            //  4 | 7 | 3
+                            var mouse = this.renderEnv.Input.MousePosition;
+                            var mousePos = this.renderEnv.Camera.CameraToWorld(mouse);
+                            int x = mousePos.X;
+                            int y = mousePos.Y;
+                            int inner = 15;
+                            int outer = 10;
+                            int pos = -1;
+                            if (rect.Left - outer <= x && x < rect.Left + inner && rect.Top - outer <= y && y < rect.Top + inner)
+                            {
+                                pos = 1;
+                            }
+                            else if (rect.Right - inner <= x && x < rect.Right + outer && rect.Top - outer <= y && y < rect.Top + inner)
+                            {
+                                pos = 2;
+                            }
+                            else if (rect.Right - inner <= x && x < rect.Right + outer && rect.Bottom - inner <= y && y < rect.Bottom + outer)
+                            {
+                                pos = 3;
+                            }
+                            else if (rect.Left - outer <= x && x < rect.Left + inner && rect.Bottom - inner <= y && y < rect.Bottom + outer)
+                            {
+                                pos = 4;
+                            }
+                            else if (rect.Left - outer <= x && x < rect.Right + outer && rect.Top - outer <= y && y < rect.Top + inner)
+                            {
+                                pos = 5;
+                            }
+                            else if (rect.Right - inner <= x && x < rect.Right + outer && rect.Top - outer <= y && y < rect.Bottom + outer)
+                            {
+                                pos = 6;
+                            }
+                            else if (rect.Left - outer <= x && x < rect.Right + outer && rect.Bottom - inner <= y && y < rect.Bottom + outer)
+                            {
+                                pos = 7;
+                            }
+                            else if (rect.Left - outer <= x && x < rect.Left + inner && rect.Top - outer <= y && y < rect.Bottom + outer)
+                            {
+                                pos = 8;
+                            }
+                            else if (rect.Contains(x, y))
+                            {
+                                pos = 0;
+                            }
+
+                            captureRectClickedPos = pos;
+                            prevMousePos = mousePos;
+                        }
+                    }
                 };
                 this.ui.MouseDown += mouseBtnEv;
                 this.attachedEvent.Add(EventDisposable(mouseBtnEv, _ev => this.ui.MouseDown -= _ev));
@@ -424,6 +529,63 @@ namespace WzComparerR2.MapRender
                     if (isMouseDown)
                     {
                         calcMouseMoveDir(e);
+                    }
+                    if (captureRectClickedPos >= 0)
+                    {
+                        var mouse = this.renderEnv.Input.MousePosition;
+                        var mousePos = this.renderEnv.Camera.CameraToWorld(mouse);
+                        var dx = mousePos.X - prevMousePos.X;
+                        var dy = mousePos.Y - prevMousePos.Y;
+                        var minX = 25;
+                        var minY = 25;
+                        Rectangle rect = this.renderEnv.Camera.WorldRect;
+                        if (!this.CaptureRect.IsEmpty)
+                        {
+                            rect = this.CaptureRect;
+                        }
+
+                        if (captureRectClickedPos == 0)
+                        {
+                            rect.X += dx;
+                            rect.Y += dy;
+                        }
+                        if (captureRectClickedPos == 1 || captureRectClickedPos == 4 || captureRectClickedPos == 8) // L
+                        {
+                            var pdx = dx;
+                            rect.Width -= dx;
+                            if (rect.Width < minX)
+                            {
+                                pdx -= Math.Max(0, minX - rect.Width);
+                                rect.Width = minX;
+                            }
+                            rect.X += pdx;
+                        }
+                        if (captureRectClickedPos == 1 || captureRectClickedPos == 2 || captureRectClickedPos == 5) // T
+                        {
+                            var pdy = dy;
+                            rect.Height -= dy;
+                            if (rect.Height < minY)
+                            {
+                                pdy -= Math.Max(0, minY - rect.Height);
+                                rect.Height = minY;
+                            }
+                            rect.Y += pdy;
+                        }
+                        if (captureRectClickedPos == 2 || captureRectClickedPos == 3 || captureRectClickedPos == 6) // R
+                        {
+                            rect.Width += dx;
+                        }
+                        if (captureRectClickedPos == 3 || captureRectClickedPos == 4 || captureRectClickedPos == 7) // B
+                        {
+                            rect.Height += dy;
+                        }
+
+                        rect.Width = Math.Max(minX, rect.Width);
+                        rect.Height = Math.Max(minY, rect.Height);
+                        this.CaptureRect = rect;
+                        var uiWnd = this.ui.Windows.OfType<UIOptions>().FirstOrDefault();
+                        if (uiWnd != null) LoadCaptureRectOptionData(uiWnd.DataContext as UIOptionsDataModel);
+                        prevMousePos = mousePos;
                     }
                 };
                 this.ui.MouseMove += mouseEv;
@@ -436,15 +598,43 @@ namespace WzComparerR2.MapRender
                         isMouseDown = false;
                         direction2 = Vector2.Zero;
                     }
+                    else if (e.ChangedButton == EmptyKeys.UserInterface.Input.MouseButton.Left)
+                    {
+                        captureRectClickedPos = -1;
+                        prevMousePos = Point.Zero;
+                    }
                 };
                 this.ui.MouseUp += mouseBtnEv;
                 this.attachedEvent.Add(EventDisposable(mouseBtnEv, _ev => this.ui.MouseUp -= _ev));
 
+                EmptyKeys.UserInterface.Input.MouseWheelEventHandler mouseWheelEv;
+
+                mouseWheelEv = (o, e) =>
+                {
+                    if (!EmptyKeys.UserInterface.Input.Keyboard.IsControlPressed || e.Delta == 0) return;
+
+                    var beforeMousePos = this.renderEnv.Camera.CameraToWorld(this.renderEnv.Input.MousePosition).ToVector2();
+
+                    this.renderEnv.Camera.ZoomLevel += (int)Math.Round(e.Delta / 120f);
+                    this.renderEnv.Camera.ZoomLevel = MathHelper.Clamp(this.renderEnv.Camera.ZoomLevel, -20, 20);
+
+                    var afterMousePos = this.renderEnv.Camera.CameraToWorld(this.renderEnv.Input.MousePosition).ToVector2();
+                    this.renderEnv.Camera.Center += (beforeMousePos - afterMousePos) * this.renderEnv.Camera.Scale;
+                };
+
+                this.ui.MouseWheel += mouseWheelEv;
+                this.attachedEvent.Add(EventDisposable(mouseWheelEv, _ev => this.ui.MouseWheel -= _ev));
+
                 //更新事件
-                EventHandler ev = (o, e) =>
+                EventHandler ev = async (o, e) =>
                 {
                     this.renderEnv.Camera.Center += direction1 + direction2 * ((boostMoveFlag != 0) ? 3 : 1);
                     keyboardMoveSlowDown();
+                    if (this.CamaraChangedEffState)
+                    {
+                        this.CamaraChangedEffState = false;
+                        await SetCameraChangedEffect(this.renderEnv.Camera.Center / this.renderEnv.Camera.Scale);
+                    }
                 };
                 this.ui.InputUpdated += ev;
                 this.attachedEvent.Add(EventDisposable(ev, _ev => this.ui.InputUpdated -= _ev));
@@ -452,18 +642,21 @@ namespace WzComparerR2.MapRender
             #endregion
 
             //点击事件
-            var disposable = UIHelper.RegisterClickEvent<SceneItem>(this.ui.ContentControl,
-                (sender, point) =>
+            var disposable = UIHelper.RegisterClickEvent<SceneItem>(this.ui, this.ui.ContentControl,
+                (UIElement sender, PointF point) =>
                 {
-                    int x = (int)point.X;
-                    int y = (int)point.Y;
+                    var cameraScale = this.renderEnv.Camera.Scale;
+                    int x = (int)(point.X / cameraScale);
+                    int y = (int)(point.Y / cameraScale);
                     var mouseTarget = this.allItems.Reverse<ItemRect>().FirstOrDefault(item =>
                     {
-                        return item.rect.Contains(x, y) && (item.item is PortalItem || item.item is IlluminantClusterItem || item.item is ReactorItem);
+                        return item.rect.Contains(x, y) && (item.item is PortalItem || item.item is IlluminantClusterItem || item.item is ReactorItem || item.item is LifeItem);
                     });
                     return mouseTarget.item;
                 },
-                this.OnSceneItemClick);
+                    (sceneItem, isRightButton) => this.OnSceneItemClick(
+                        sceneItem,
+                        isRightButton ? EmptyKeys.UserInterface.Input.MouseButton.Right : EmptyKeys.UserInterface.Input.MouseButton.Left));
             this.attachedEvent.Add(disposable);
 
             this.ui.InputBindings.Add(new KeyBinding(new RelayCommand(_ => {
@@ -494,11 +687,39 @@ namespace WzComparerR2.MapRender
             wnd.Hide();
         }
 
+        private void UIOption_ResetSCRect(object sender, EventArgs e)
+        {
+            var wnd = sender as UIOptions;
+            var data = wnd.DataContext as UIOptionsDataModel;
+            ResetCaptureRect();
+            LoadCaptureRectOptionData(data);
+        }
+
+        private void UIOption_ChkForceClickEvent(object sender, EventArgs e)
+        {
+            var wnd = sender as UIOptions;
+            var data = wnd.DataContext as UIOptionsDataModel;
+            this.ForceCaptureWithResolution = data.ForceCaptureWithResolution;
+            if (data.ForceCaptureWithResolution)
+            {
+                ResetCaptureRect();
+                LoadCaptureRectOptionData(data);
+            }
+        }
+
         private void UiWnd_Visible(object sender, RoutedEventArgs e)
         {
             var wnd = sender as UIOptions;
             var data = wnd.DataContext as UIOptionsDataModel;
             LoadOptionData(data);
+            wnd.EnableButtons();
+        }
+
+        private void SpineSelector_Visible(object sender, RoutedEventArgs e)
+        {
+            UISpineSelector wnd = sender as UISpineSelector;
+            wnd.Left = (int)Math.Max(0, (this.ui.Width - wnd.Width) / 2);
+            wnd.Top = (int)Math.Max(0, (this.ui.Height - wnd.Height) / 2);
         }
 
         private void WorldMap_MapSpotClick(object sender, UIWorldMap.MapSpotEventArgs e)
@@ -515,10 +736,10 @@ namespace WzComparerR2.MapRender
 
             StringResult sr = null;
             this.StringLinker?.StringMap.TryGetValue(mapID, out sr);
-            //string mapName = sr?["mapName"] ?? "(null)"; //Kenny ver.
-            //int last = (mapName.LastOrDefault(c => c >= '가' && c <= '힣') - '가') % 28; //Kenny ver.
+            string mapName = sr?["mapName"] ?? "(null)";
+            //int last = (mapName.LastOrDefault(c => c >= '가' && c <= '힣') - '가') % 28;
             var message = string.Format("是否传送到地图\r\n{0} ({1})？", sr?.Name ?? "null", mapID);
-            //var message = mapName + (last == 0 || last == 8 ? "" : "으") + "로 이동하시겠습니까?"; //Kenny ver.
+            //var message = mapName + (last == 0 || last == 8 ? "" : "으") + "로 이동하시겠습니까?";
             MessageBox.Show(message, "提示", MessageBoxButton.OKCancel, callback, false);
         }
 
@@ -556,14 +777,17 @@ namespace WzComparerR2.MapRender
                 case "/help":
                 case "/?":
                     this.ui.ChatBox.AppendTextHelp(@"/help 显示帮助");
-                    this.ui.ChatBox.AppendTextHelp(@"/map (mapID) 跳转地图");
+                    this.ui.ChatBox.AppendTextHelp(@"/map (mapID) 移动至相关地图");
                     this.ui.ChatBox.AppendTextHelp(@"/back 回到上一地图");
                     this.ui.ChatBox.AppendTextHelp(@"/home 回城");
-                    this.ui.ChatBox.AppendTextHelp(@"/history [maxCount] 查看历史地图");
-                    this.ui.ChatBox.AppendTextHelp(@"/minimap 设置迷你地图状态");
-                    this.ui.ChatBox.AppendTextHelp(@"/scene 设置地图场景显示状态");
+                    this.ui.ChatBox.AppendTextHelp(@"/history 查看[maxCount]访问记录");
+                    this.ui.ChatBox.AppendTextHelp(@"/minimap 设置小地图");
+                    this.ui.ChatBox.AppendTextHelp(@"/scene 设置场景");
+                    this.ui.ChatBox.AppendTextHelp(@"/spine 打开骨骼动画指定窗口");
+                    this.ui.ChatBox.AppendTextHelp(@"/summon 召唤怪物");
                     this.ui.ChatBox.AppendTextHelp(@"/quest 任务设定");
-                    this.ui.ChatBox.AppendTextHelp(@"/date 时间设定");
+                    this.ui.ChatBox.AppendTextHelp(@"/questex 任务键值设定");
+                    this.ui.ChatBox.AppendTextHelp(@"/date 日期设定");
                     this.ui.ChatBox.AppendTextHelp(@"/multibgm Multi BGM设定");
                     break;
 
@@ -575,18 +799,18 @@ namespace WzComparerR2.MapRender
                     }
                     else
                     {
-                        this.ui.ChatBox.AppendTextSystem($"缺少地图ID。");
+                        this.ui.ChatBox.AppendTextSystem($"请输入正确的地图ID。");
                     }
                     break;
 
-                case "/return":
+                case "/back":
                     if (this.viewHistory.Count > 0)
                     {
                         this.MoveToLastMap();
                     }
                     else
                     {
-                        this.ui.ChatBox.AppendTextSystem($"前面没有地图。");
+                        this.ui.ChatBox.AppendTextSystem($"上一地图不存在。");
                     }
                     break;
 
@@ -594,7 +818,7 @@ namespace WzComparerR2.MapRender
                     var retMapID = this.mapData?.ReturnMap;
                     if (retMapID == null || retMapID == 999999999)
                     {
-                        this.ui.ChatBox.AppendTextSystem($"回不到那里去。");
+                        this.ui.ChatBox.AppendTextSystem($"无法回城。");
                     }
                     else
                     {
@@ -610,7 +834,7 @@ namespace WzComparerR2.MapRender
                     {
                         historyCount = 5;
                     }
-                    this.ui.ChatBox.AppendTextHelp($"历史地图:{this.viewHistory.Count}");
+                    this.ui.ChatBox.AppendTextHelp($"访问地图个数: ({this.viewHistory.Count})");
                     var node = this.viewHistory.Last;
                     while (node != null && historyCount > 0)
                     {
@@ -627,6 +851,11 @@ namespace WzComparerR2.MapRender
                     break;
 
                 case "/minimap":
+                    if (this.mapData == null)
+                    {
+                        this.ui.ChatBox.AppendTextSystem("地图无法加载。");
+                        break;
+                    }
                     var canvasList = this.mapData?.MiniMap?.ExtraCanvas;
                     switch (arguments.ElementAtOrDefault(1))
                     {
@@ -639,22 +868,27 @@ namespace WzComparerR2.MapRender
                             if (canvasList != null && canvasList.TryGetValue(canvasName, out Texture2D canvas))
                             {
                                 this.ui.Minimap.MinimapCanvas = engine.Renderer.CreateTexture(canvas);
-                                this.ui.ChatBox.AppendTextHelp($"设置小地图: {canvasName}");
+                                this.ui.ChatBox.AppendTextHelp($"小地图变更完毕: {canvasName}");
                             }
                             else
                             {
-                                this.ui.ChatBox.AppendTextSystem($"找不到小地图: {canvasName}");
+                                this.ui.ChatBox.AppendTextSystem($"未找到小地图: {canvasName}");
                             }
                             break;
 
                         default:
-                            this.ui.ChatBox.AppendTextHelp(@"/minimap list 显示所有小地图名称。");
-                            this.ui.ChatBox.AppendTextHelp(@"/minimap set (canvasName) 设置迷你地图。");
+                            this.ui.ChatBox.AppendTextHelp(@"/minimap list 查看小地图目录");
+                            this.ui.ChatBox.AppendTextHelp(@"/minimap set (canvasName) 变更至相关小地图");
                             break;
                     }
                     break;
 
                 case "/scene":
+                    if (this.mapData == null)
+                    {
+                        this.ui.ChatBox.AppendTextSystem("地图无法加载。");
+                        break;
+                    }
                     switch (arguments.ElementAtOrDefault(1))
                     {
                         case "tag":
@@ -668,14 +902,14 @@ namespace WzComparerR2.MapRender
                                         .Distinct()
                                         .OrderBy(tag => tag)
                                         .ToList();
-                                    this.ui.ChatBox.AppendTextHelp($"当前地图tags: {string.Join(", ", mapTags)}");
+                                    this.ui.ChatBox.AppendTextHelp($"标签目录: {string.Join(", ", mapTags)}");
                                     break;
                                 case "info":
                                     var visibleTags = this.patchVisibility.TagsVisible.Where(kv => kv.Value).Select(kv => kv.Key).ToList();
                                     var hiddenTags = this.patchVisibility.TagsVisible.Where(kv => !kv.Value).Select(kv => kv.Key).ToList();
-                                    this.ui.ChatBox.AppendTextHelp($"默认tag显示状态: {this.patchVisibility.DefaultTagVisible}");
-                                    this.ui.ChatBox.AppendTextHelp($"显示tags: {string.Join(", ", visibleTags)}");
-                                    this.ui.ChatBox.AppendTextHelp($"隐藏tags: {string.Join(", ", hiddenTags)}");
+                                    this.ui.ChatBox.AppendTextHelp($"标签初始显示状态: {this.patchVisibility.DefaultTagVisible}");
+                                    this.ui.ChatBox.AppendTextHelp($"查看标签: {string.Join(", ", visibleTags)}");
+                                    this.ui.ChatBox.AppendTextHelp($"隐藏标签: {string.Join(", ", hiddenTags)}");
                                     break;
                                 case "show":
                                     string[] tags = arguments.Skip(3).ToArray();
@@ -685,11 +919,11 @@ namespace WzComparerR2.MapRender
                                         {
                                             this.patchVisibility.SetTagVisible(tag, true);
                                         }
-                                        this.ui.ChatBox.AppendTextHelp($"显示tag: {string.Join(", ", tags)}");
+                                        this.ui.ChatBox.AppendTextHelp($"标签查看完毕: {string.Join(", ", tags)}");
                                     }
                                     else
                                     {
-                                        this.ui.ChatBox.AppendTextSystem("没有输入tagName。");
+                                        this.ui.ChatBox.AppendTextSystem("请输入标签。");
                                     }
                                     break;
                                 case "hide":
@@ -700,11 +934,11 @@ namespace WzComparerR2.MapRender
                                         {
                                             this.patchVisibility.SetTagVisible(tag, false);
                                         }
-                                        this.ui.ChatBox.AppendTextHelp($"隐藏tag: {string.Join(", ", tags)}");
+                                        this.ui.ChatBox.AppendTextHelp($"标签隐藏完毕: {string.Join(", ", tags)}");
                                     }
                                     else
                                     {
-                                        this.ui.ChatBox.AppendTextSystem("没有输入tagName。");
+                                        this.ui.ChatBox.AppendTextSystem("请输入标签。");
                                     }
                                     break;
                                 case "reset":
@@ -712,94 +946,57 @@ namespace WzComparerR2.MapRender
                                     if (tags.Length > 0)
                                     {
                                         this.patchVisibility.ResetTagVisible(tags);
-                                        this.ui.ChatBox.AppendTextHelp($"重置tag: {string.Join(", ", tags)}");
+                                        this.ui.ChatBox.AppendTextHelp($"标签显示状态重新设置完毕: {string.Join(", ", tags)}");
                                     }
                                     else
                                     {
-                                        this.ui.ChatBox.AppendTextSystem("没有输入tagName。");
+                                        this.ui.ChatBox.AppendTextSystem("请输入标签。");
                                     }
                                     break;
                                 case "reset-all":
                                     this.patchVisibility.ResetTagVisible();
-                                    this.ui.ChatBox.AppendTextHelp($"重置所有已设置tag。");
+                                    this.ui.ChatBox.AppendTextHelp($"所有标签显示状态重新设置完毕");
                                     break;
                                 case "set-default":
                                     if (bool.TryParse(arguments.ElementAtOrDefault(3), out bool isVisible))
                                     {
                                         this.patchVisibility.DefaultTagVisible = isVisible;
-                                        this.ui.ChatBox.AppendTextHelp($"设置tag默认显示状态: {isVisible}");
+                                        this.ui.ChatBox.AppendTextHelp($"标签初始显示状态设置完毕: {isVisible}");
                                     }
                                     else
                                     {
-                                        this.ui.ChatBox.AppendTextSystem("参数错误。");
+                                        this.ui.ChatBox.AppendTextSystem("请输入正确的初始值。");
                                     }
                                     break;
                                 default:
-                                    this.ui.ChatBox.AppendTextHelp(@"/scene tag list 获取场景中所有物体的tag。");
-                                    this.ui.ChatBox.AppendTextHelp(@"/scene tag info 获取当前自定义显示状态。");
-                                    this.ui.ChatBox.AppendTextHelp(@"/scene tag show (tagName)... 显示tagName的物体。");
-                                    this.ui.ChatBox.AppendTextHelp(@"/scene tag hide (tagName)... 隐藏tagName的物体。");
-                                    this.ui.ChatBox.AppendTextHelp(@"/scene tag reset (tagName)... 重置指定tagName的显示状态。");
-                                    this.ui.ChatBox.AppendTextHelp(@"/scene tag reset-all 重置所有物体为显示状态。");
-                                    this.ui.ChatBox.AppendTextHelp(@"/scene tag set-default (true/false) 设置所有tag的默认显示状态。");
+                                    this.ui.ChatBox.AppendTextHelp(@"/scene tag list 查看标签目录");
+                                    this.ui.ChatBox.AppendTextHelp(@"/scene tag info 确认当前标示状态");
+                                    this.ui.ChatBox.AppendTextHelp(@"/scene tag show (tagName)... 查看相关标签");
+                                    this.ui.ChatBox.AppendTextHelp(@"/scene tag hide (tagName)... 隐藏相关标签");
+                                    this.ui.ChatBox.AppendTextHelp(@"/scene tag reset (tagName)... 重新设置相关标签显示状态");
+                                    this.ui.ChatBox.AppendTextHelp(@"/scene tag reset-all 重新设置所有标签显示状态");
+                                    this.ui.ChatBox.AppendTextHelp(@"/scene tag set-default (true/false) 设置标签基本显示状态");
                                     break;
                             }
                             break;
 
                         default:
-                            this.ui.ChatBox.AppendTextHelp(@"/scene tag 设置tag相关的显示状态");
-                            break;
-                    }
-                    break;
-
-                case "/quest":
-                    switch (arguments.ElementAtOrDefault(1))
-                    {
-                        case "list":
-                            List<Tuple<int, int>> questList = this?.mapData.Scene.Back.Slots.SelectMany(item => ((BackItem)item).Quest)
-                                .Concat(this?.mapData.Scene.Layers.Nodes.SelectMany(l => ((LayerNode)l).Obj.Slots.SelectMany(item => ((ObjItem)item).Quest)))
-                                .Concat(this?.mapData.Scene.Npcs.SelectMany(item => item.Quest))
-                                .Concat(this?.mapData.Scene.Front.Slots.SelectMany(item => ((BackItem)item).Quest))
-                                .Concat(this?.mapData.Scene.Effect.Slots.Where(item => item is ParticleItem).SelectMany(item => ((ParticleItem)item).Quest))
-                                .Concat(this?.mapData.Scene.Effect.Slots.Where(item => item is ParticleItem).SelectMany(item => ((ParticleItem)item).SubItems).SelectMany(item => item.Quest))
-                                .Distinct().ToList();
-                            this.ui.ChatBox.AppendTextHelp($"相关任务个数: ({questList.Count()})");
-                            foreach (Tuple<int, int> item in questList)
-                            {
-                                Wz_Node questInfoNode = PluginBase.PluginManager.FindWz($@"Quest\QuestInfo.img\{item.Item1}");
-                                string questName = questInfoNode?.Nodes["name"].GetValueEx<string>(null) ?? "null";
-                                this.ui.ChatBox.AppendTextHelp($"  {questName}({item.Item1}) / {item.Item2}");
-                            }
-                            break;
-
-                        case "set":
-                            if (Int32.TryParse(arguments.ElementAtOrDefault(2), out int questID) && questID > -1 && Int32.TryParse(arguments.ElementAtOrDefault(3), out int questState) && questState >= -1 && questState <= 2)
-                            {
-                                this.patchVisibility.SetVisible(questID, questState);
-                                this.mapData.PreloadResource(resLoader);
-                                Wz_Node questInfoNode = PluginBase.PluginManager.FindWz($@"Quest\QuestInfo.img\{questID}");
-                                string questName = questInfoNode?.Nodes["name"].GetValueEx<string>(null) ?? "null";
-                                this.ui.ChatBox.AppendTextSystem($"已将{questName}({questID})的状态变更为{questState}。");
-                            }
-                            else
-                            {
-                                this.ui.ChatBox.AppendTextSystem($"请输入正确的任务状态。");
-                            }
-                            break;
-
-                        default:
-                            this.ui.ChatBox.AppendTextHelp(@"/quest list 查看相关任务目录");
-                            this.ui.ChatBox.AppendTextHelp(@"/quest set (questID) (questState) 设置相关任务的状态");
+                            this.ui.ChatBox.AppendTextHelp(@"/scene tag 设置标签显示状态");
                             break;
                     }
                     break;
 
                 case "/date":
+                    if (this.mapData == null)
+                    {
+                        this.ui.ChatBox.AppendTextSystem("无法加载地图。");
+                        break;
+                    }
                     switch (arguments.ElementAtOrDefault(1))
                     {
                         case "list":
-                            List<Tuple<long, long>> dateList = this?.mapData.Scene.Npcs.SelectMany(item => item.Date).ToList();
-                            this.ui.ChatBox.AppendTextHelp($"相关时间个数: ({dateList.Count()})");
+                            List<Tuple<long, long>> dateList = this.mapData?.Scene.Npcs.SelectMany(item => item.Date).ToList() ?? new();
+                            this.ui.ChatBox.AppendTextHelp($"关联日期个数: ({dateList.Count()})");
                             foreach (Tuple<long, long> item in dateList)
                             {
                                 this.ui.ChatBox.AppendTextHelp($"  {item.Item1} - {item.Item2}");
@@ -811,26 +1008,31 @@ namespace WzComparerR2.MapRender
                             {
                                 this.mapData.Date = datetime;
                                 this.mapData.PreloadResource(resLoader);
-                                this.ui.ChatBox.AppendTextSystem($"已将渲染基准时间变更为{datetime}.");
+                                this.ui.ChatBox.AppendTextSystem($"已将渲染基准日期变更为{datetime}。");
                             }
                             else
                             {
-                                this.ui.ChatBox.AppendTextSystem($"请输入正确的时间。");
+                                this.ui.ChatBox.AppendTextSystem($"请输入正确的日期。");
                             }
                             break;
 
                         default:
-                            this.ui.ChatBox.AppendTextHelp(@"/date list 查看相关时间目录");
-                            this.ui.ChatBox.AppendTextHelp(@"/date set (yyyyMMddHHmm) 设置渲染基准时间");
+                            this.ui.ChatBox.AppendTextHelp(@"/date list 查看关联的日期目录");
+                            this.ui.ChatBox.AppendTextHelp(@"/date set (yyyyMMddHHmm) 设置渲染基准日期");
                             break;
                     }
                     break;
 
                 case "/multibgm":
+                    if (this.mapData == null)
+                    {
+                        this.ui.ChatBox.AppendTextSystem("无法加载地图。");
+                        break;
+                    }
                     switch (arguments.ElementAtOrDefault(1))
                     {
                         case "list":
-                            if (!string.IsNullOrEmpty(this.mapData.Bgm))
+                            if (!string.IsNullOrEmpty(this.mapData?.Bgm))
                             {
                                 var path = new List<string>() { "Sound" };
                                 path.AddRange(this.mapData.Bgm.Split('/'));
@@ -850,10 +1052,11 @@ namespace WzComparerR2.MapRender
                             break;
 
                         case "set":
-                            Music multiBgm = LoadBgm(this.mapData, arguments.ElementAtOrDefault(2));
+                            string bgmName = string.Join(" ", arguments.Skip(2));
+                            Music multiBgm = LoadBgm(this.mapData, bgmName);
                             if (multiBgm != null)
                             {
-                                this.ui.ChatBox.AppendTextSystem($"已将Multi BGM变更为{arguments.ElementAtOrDefault(2)}。");
+                                this.ui.ChatBox.AppendTextSystem($"已将Multi BGM变更为{bgmName}。");
 
                                 Task bgmTask = null;
                                 bool willSwitchBgm = this.bgm != multiBgm;
@@ -881,13 +1084,225 @@ namespace WzComparerR2.MapRender
 
                         default:
                             this.ui.ChatBox.AppendTextHelp(@"/multibgm list 查看Multi BGM目录");
-                            this.ui.ChatBox.AppendTextHelp(@"/multibgm set (multiBgm) 重设相关Multi BGM");
+                            this.ui.ChatBox.AppendTextHelp(@"/multibgm set (multiBgm) 相关Multi BGM重生");
                             break;
                     }
                     break;
 
+                case "/quest":
+                    if (this.mapData == null)
+                    {
+                        this.ui.ChatBox.AppendTextSystem("无法加载地图。");
+                        break;
+                    }
+                    switch (arguments.ElementAtOrDefault(1))
+                    {
+                        case "list":
+                            List<QuestInfo> questList = this.mapData?.Scene.Back.Slots.SelectMany(item => ((BackItem)item).Quest)
+                                .Concat(this.mapData.Scene.Layers.Nodes.SelectMany(l => ((LayerNode)l).Obj.Slots.SelectMany(item => ((ObjItem)item).Quest)))
+                                .Concat(this.mapData.Scene.Npcs.SelectMany(item => item.Quest))
+                                .Concat(this.mapData.Scene.Front.Slots.SelectMany(item => ((BackItem)item).Quest))
+                                .Concat(this.mapData.Scene.Effect.Slots.Where(item => item is ParticleItem).SelectMany(item => ((ParticleItem)item).Quest))
+                                .Concat(this.mapData.Scene.Effect.Slots.Where(item => item is ParticleItem).SelectMany(item => ((ParticleItem)item).SubItems).SelectMany(item => item.Quest))
+                                .Distinct().ToList() ?? new();
+                            this.ui.ChatBox.AppendTextHelp($"关联的任务个数: ({questList.Count()})");
+                            foreach (QuestInfo item in questList)
+                            {
+                                Wz_Node questInfoNode = PluginBase.PluginManager.FindWz($@"Quest\QuestData\{item.ID}.img\QuestInfo")
+                                    ?? PluginBase.PluginManager.FindWz($@"Quest\QuestInfo.img\{item.ID}");
+                                string questName = questInfoNode?.Nodes["name"].GetValueEx<string>(null) ?? "null";
+                                this.ui.ChatBox.AppendTextHelp($"  {questName}({item.ID}) / {item.State}");
+                            }
+                            break;
+
+                        case "set":
+                            if (Int32.TryParse(arguments.ElementAtOrDefault(2), out int questID) && questID > -1 && Int32.TryParse(arguments.ElementAtOrDefault(3), out int questState) && questState >= -1 && questState <= 2)
+                            {
+                                this.patchVisibility.SetQuestVisible(questID, questState);
+                                this.mapData.PreloadResource(resLoader);
+                                Wz_Node questInfoNode = PluginBase.PluginManager.FindWz($@"Quest\QuestData\{questID}.img\QuestInfo")
+                                    ?? PluginBase.PluginManager.FindWz($@"Quest\QuestInfo.img\{questID}");
+                                string questName = questInfoNode?.Nodes["name"].GetValueEx<string>(null) ?? "null";
+                                this.ui.ChatBox.AppendTextSystem($"已将{questName}({questID})的状态变更为{questState}。");
+                            }
+                            else
+                            {
+                                this.ui.ChatBox.AppendTextSystem($"请输入正确的任务状态。");
+                            }
+                            break;
+
+                        default:
+                            this.ui.ChatBox.AppendTextHelp(@"/quest list 查看关联的任务目录");
+                            this.ui.ChatBox.AppendTextHelp(@"/quest set (questID) (questState) 设置相关任务的状态");
+                            break;
+                    }
+                    break;
+
+                case "/questex":
+                    if (this.mapData == null)
+                    {
+                        this.ui.ChatBox.AppendTextSystem("无法加载地图。");
+                        break;
+                    }
+                    switch (arguments.ElementAtOrDefault(1))
+                    {
+                        case "list":
+                            List<QuestExInfo> questList = this.mapData?.Scene.Layers.Nodes.SelectMany(l => ((LayerNode)l).Obj.Slots.SelectMany(item => ((ObjItem)item).Questex))
+                                .Distinct().ToList() ?? new();
+                            this.ui.ChatBox.AppendTextHelp($"关联的任务键个数: ({questList.Count()})");
+                            foreach (QuestExInfo item in questList)
+                            {
+                                Wz_Node questInfoNode = PluginBase.PluginManager.FindWz($@"Quest\QuestData\{item.ID}.img\QuestInfo")
+                                    ?? PluginBase.PluginManager.FindWz($@"Quest\QuestInfo.img\{item.ID}");
+                                string questName = questInfoNode?.Nodes["name"].GetValueEx<string>(null) ?? "null";
+                                this.ui.ChatBox.AppendTextHelp($"  {questName}({item.ID}) / 键:{item.Key}, 初始值:{item.State}");
+                            }
+                            break;
+
+                        case "set":
+                            string qkey = arguments.ElementAtOrDefault(3);
+                            if (Int32.TryParse(arguments.ElementAtOrDefault(2), out int questID) && questID > -1 && Int32.TryParse(arguments.ElementAtOrDefault(4), out int questState) && questState >= -1 && qkey != null)
+                            {
+                                this.patchVisibility.SetQuestVisible(questID, qkey, questState);
+                                this.mapData.PreloadResource(resLoader);
+                                Wz_Node questInfoNode = PluginBase.PluginManager.FindWz($@"Quest\QuestData\{questID}.img\QuestInfo")
+                                    ?? PluginBase.PluginManager.FindWz($@"Quest\QuestInfo.img\{questID}");
+                                string questName = questInfoNode?.Nodes["name"].GetValueEx<string>(null) ?? "null";
+                                this.ui.ChatBox.AppendTextSystem($"已将{questName}({questID}, 键为{qkey})的值变更为{questState}。");
+                            }
+                            else
+                            {
+                                this.ui.ChatBox.AppendTextSystem($"请输入正确的任务ID、键、值。");
+                            }
+                            break;
+
+                        default:
+                            this.ui.ChatBox.AppendTextHelp(@"/questex list 查看关联的任务键目录");
+                            this.ui.ChatBox.AppendTextHelp(@"/questex set (questID) (key) (questState) 设置相关任务键的值");
+                            break;
+                    }
+                    break;
+
+                case "/spine":
+                    if (this.mapData == null)
+                    {
+                        this.ui.ChatBox.AppendTextSystem("无法加载地图。");
+                        break;
+                    }
+                    var uiSpineSelector = this.ui.Windows.OfType<UISpineSelector>().FirstOrDefault();
+                    if (uiSpineSelector == null)
+                    {
+                        uiSpineSelector = new UISpineSelector();
+                        uiSpineSelector.Visible += SpineSelector_Visible;
+                        uiSpineSelector.Visibility = EmptyKeys.UserInterface.Visibility.Visible;
+                        this.ui.Windows.Add(uiSpineSelector);
+                        uiSpineSelector.Parent = this.ui;
+                        uiSpineSelector.Hide();
+                    }
+
+                    var back = this.mapData?.Scene.Back.Slots.OfType<BackItem>().Where(item => item.View.Animator is ISpineAnimator)
+                        .Concat(this.mapData.Scene.Front.Slots.OfType<BackItem>().Where(item => item.View.Animator is ISpineAnimator)).ToList() ?? new();
+                    var obj = this.mapData?.Scene.Layers.Nodes.OfType<LayerNode>()
+                        .Select(layerNode => layerNode.Obj.Slots.OfType<ObjItem>()
+                            .Where(item => item.View.Animator is ISpineAnimator)
+                            .ToList()).ToList() ?? new();
+                    uiSpineSelector.LoadTabContents(back, obj);
+
+                    uiSpineSelector.Show();
+                    break;
+
+                case "/summon":
+                    if (this.mapData == null)
+                    {
+                        this.ui.ChatBox.AppendTextSystem("无法加载地图。");
+                        break;
+                    }
+
+                    CommandParser cp = new CommandParser(CommandParser.SummonSpecs, arguments);
+                    string si = cp.GetPositional(0);
+                    string sx = cp.GetPositional(1);
+                    string sy = cp.GetPositional(2);
+                    bool flip = cp.HasFlag("Flip");
+                    bool regen = cp.HasFlag("Regen");
+
+                    if (string.Equals(si, "preset", StringComparison.OrdinalIgnoreCase))
+                    {
+                        var mapID = this.mapData.ID ?? 0;
+                        IReadOnlyList<string> presets;
+                        if (SummonPreset.MapPresets.TryGetValue(mapID, out presets))
+                        {
+                            if (string.Equals(sx, "list", StringComparison.OrdinalIgnoreCase))
+                            {
+                                int i = 1;
+                                this.ui.ChatBox.AppendTextHelp($"预设个数: ({presets.Count})");
+                                foreach (var preset in presets)
+                                {
+                                    this.ui.ChatBox.AppendTextHelp($"{i++}: {preset}");
+                                }
+                            }
+                            else if (int.TryParse(sx, out int presetIndex))
+                            {
+                                if (presetIndex >= 1 && presetIndex <= presets.Count && SummonPreset.AllPresets.TryGetValue(presets[presetIndex - 1], out var summons))
+                                {
+                                    foreach (var summon in summons)
+                                    {
+                                        this.mapData.SummonMob(summon.MobID, summon.X, summon.Y, z0: summon.Z0, z1: summon.Z1, fh: summon.Foothold, flip: summon.Flip, playRegenMotion: summon.Regen);
+                                    }
+                                    this.ui.ChatBox.AppendTextSystem($@"{presetIndex}号预设已生效。");
+                                }
+                                else
+                                {
+                                    this.ui.ChatBox.AppendTextSystem($@"预设号码错误。");
+                                }
+                            }
+                            else
+                            {
+                                this.ui.ChatBox.AppendTextHelp(@"/summon preset list 查看预设目录");
+                                this.ui.ChatBox.AppendTextHelp(@"/summon preset (x) 执行x号预设");
+                            }
+                        }
+                        else
+                        {
+                            this.ui.ChatBox.AppendTextSystem($@"在当前地图不存在可使用预设。");
+                        }
+                    }
+                    else if (int.TryParse(si, out int mobID))
+                    {
+                        int x, y;
+                        if (!int.TryParse(sx, out x) || !int.TryParse(sy, out y))
+                        {
+                            var p = this.renderEnv.Camera.CameraToWorld(renderEnv.Input.MousePosition);
+                            x = p.X;
+                            y = p.Y;
+                        }
+                        StringResult sr;
+                        string mobName = string.Empty;
+                        if (this.StringLinker != null)
+                        {
+                            this.StringLinker.StringMob.TryGetValue(mobID, out sr);
+                            mobName = sr?.Name ?? "(null)";
+                        }
+                        if (this.mapData.SummonMob(mobID, x, y, z0: 0, z1: 0, fh: -1, flip: flip, playRegenMotion: regen))
+                        {
+                            this.ui.ChatBox.AppendTextSystem($@"怪物已召唤：{mobName}({mobID})");
+                        }
+                        else
+                        {
+                            this.ui.ChatBox.AppendTextSystem($@"无法找到该怪物。({mobID})");
+                        }
+                    }
+                    else
+                    {
+                        this.ui.ChatBox.AppendTextHelp(@"/summon (mobID) 在鼠标位置召唤mobID怪物");
+                        this.ui.ChatBox.AppendTextHelp(@"/summon (mobID) (x) (y) 在x, y位置召唤mobID怪物");
+                        this.ui.ChatBox.AppendTextHelp(@"/summon preset 使用怪物召唤预设");
+                        this.ui.ChatBox.AppendTextHelp(@"-f, --flip 左右翻转召唤");
+                        this.ui.ChatBox.AppendTextHelp(@"-r, --regen 召唤时重生模式再生");
+                    }
+                    break;
+
                 default:
-                    this.ui.ChatBox.AppendTextSystem($"未知的命令: {arguments[0]}");
+                    this.ui.ChatBox.AppendTextSystem($"未知命令: {arguments[0]}");
                     break;
             }
         }
@@ -925,6 +1340,7 @@ namespace WzComparerR2.MapRender
                 {
                     DrawScene(gameTime);
                     DrawTooltipItems(gameTime);
+                    DrawCaptureRect(gameTime);
                 }
                 this.ui.Draw(gameTime.ElapsedGameTime.TotalMilliseconds);
                 this.tooltip.Draw(gameTime, renderEnv);
@@ -961,10 +1377,25 @@ namespace WzComparerR2.MapRender
             var maxTextureWidth = 4096;
             var maxTextureHeight = 4096;
 
-            Rectangle oldRect = this.renderEnv.Camera.WorldRect;
+            Rectangle originalWorldRect = this.renderEnv.Camera.WorldRect;
+            Rectangle oldRect = originalWorldRect;
+            int originalZoomLevel = this.renderEnv.Camera.ZoomLevel;
+            // 보이는 화면만 캡쳐
+            if (captureViewPortOnly)
+            {
+                var scale = this.renderEnv.Camera.Scale;
+                oldRect = new Rectangle((int)(this.renderEnv.Camera.Center.X - this.renderEnv.Camera.Width / 2 / scale), (int)(this.renderEnv.Camera.Center.Y - this.renderEnv.Camera.Height / 2 / scale),
+                    (int)(this.renderEnv.Camera.Width / scale), (int)(this.renderEnv.Camera.Height / scale));
+            }
+            // 스크린샷 커스텀 범위
+            else if (!(this.CaptureRect.IsEmpty || this.CaptureRect.Width == 0 || this.CaptureRect.Height == 0))
+            {
+                oldRect = this.CaptureRect;
+            }
             int width = Math.Min(oldRect.Width, maxTextureWidth);
             int height = Math.Min(oldRect.Height, maxTextureHeight);
             this.renderEnv.Camera.UseWorldRect = true;
+            this.renderEnv.Camera.ZoomLevel = 0;
 
             var target2d = new RenderTarget2D(this.GraphicsDevice, width, height, false, SurfaceFormat.Bgra32, DepthFormat.None, 0, RenderTargetUsage.PreserveContents);
             PngEffect pngEffect = null;
@@ -1032,8 +1463,10 @@ namespace WzComparerR2.MapRender
             pngEffect?.Dispose();
             target2d.Dispose();
 
-            this.renderEnv.Camera.WorldRect = oldRect;
+            //this.renderEnv.Camera.WorldRect = oldRect;
+            this.renderEnv.Camera.WorldRect = originalWorldRect;
             this.renderEnv.Camera.UseWorldRect = false;
+            this.renderEnv.Camera.ZoomLevel = originalZoomLevel;
 
             GraphicsDevice.SetRenderTargets(oldTarget);
             prepareCapture = false;
@@ -1100,7 +1533,7 @@ namespace WzComparerR2.MapRender
 
                 this.cm.StartCoroutine(cm.Post((v) =>
                 {
-                    v.ui.ChatBox.AppendTextHelp($"截图已保存到 {v.outputFileName}。");
+                    v.ui.ChatBox.AppendTextHelp($"截图已保存: {v.outputFileName} ({mapWidth}×{mapHeight})");
                 }, new
                 {
                     this.ui,
@@ -1131,6 +1564,13 @@ namespace WzComparerR2.MapRender
             this.ui.WorldMap.UseImageNameAsInfoName = config.WorldMap_UseImageNameAsInfoName;
             this.batcher.D2DEnabled = config.UseD2dRenderer;
             (this.Content as WcR2ContentManager).UseD2DFont = config.UseD2dRenderer;
+            this.ForceCaptureWithResolution = config.ForceCaptureWithResolution;
+            this.showFootholdBoundary = config.ShowFootholdBoundary;
+            this.enableMobMovement = config.EnableMobMovement;
+            if (this.mapData != null)
+            {
+                this.mapData.EnableMobMovement = this.enableMobMovement;
+            }
         }
 
         private void LoadOptionData(UIOptionsDataModel model)
@@ -1147,6 +1587,10 @@ namespace WzComparerR2.MapRender
             model.ScreenshotBackgroundColor = config.ScreenshotBackgroundColor;
             model.Minimap_CameraRegionVisible = this.ui.Minimap.CameraRegionVisible;
             model.WorldMap_UseImageNameAsInfoName = this.ui.WorldMap.UseImageNameAsInfoName;
+            model.ForceCaptureWithResolution = config.ForceCaptureWithResolution;
+            model.ShowFootholdBoundary = config.ShowFootholdBoundary;
+            model.EnableMobMovement = config.EnableMobMovement;
+            LoadCaptureRectOptionData(model);
         }
 
         private void SaveOptionData(UIOptionsDataModel model)
@@ -1164,7 +1608,55 @@ namespace WzComparerR2.MapRender
             config.ScreenshotBackgroundColor = model.ScreenshotBackgroundColor;
             config.Minimap_CameraRegionVisible = model.Minimap_CameraRegionVisible;
             config.WorldMap_UseImageNameAsInfoName = model.WorldMap_UseImageNameAsInfoName;
+            config.ForceCaptureWithResolution = model.ForceCaptureWithResolution;
+            config.ShowFootholdBoundary = model.ShowFootholdBoundary;
+            config.EnableMobMovement = model.EnableMobMovement;
             WzComparerR2.Config.ConfigManager.Save();
+
+            if (int.TryParse(model.ScLeft, out int left) && int.TryParse(model.ScTop, out int top)
+                && int.TryParse(model.ScRight, out int right) && int.TryParse(model.ScBottom, out int bottom))
+                this.CaptureRect = new Rectangle(left, top, Math.Max(0, right - left), Math.Max(0, bottom - top));
+        }
+
+        private void LoadCaptureRectOptionData(UIOptionsDataModel model)
+        {
+            if (this.CaptureRect.IsEmpty)
+            {
+                Rectangle src = this.renderEnv.Camera.WorldRect;
+
+                model.ScLeft = src.Left.ToString();
+                model.ScTop = src.Top.ToString();
+                model.ScRight = src.Right.ToString();
+                model.ScBottom = src.Bottom.ToString();
+            }
+            else
+            {
+                model.ScLeft = this.CaptureRect.Left.ToString();
+                model.ScTop = this.CaptureRect.Top.ToString();
+                model.ScRight = this.CaptureRect.Right.ToString();
+                model.ScBottom = this.CaptureRect.Bottom.ToString();
+            }
+        }
+
+        private void ResetCaptureRect()
+        {
+            // 해상도 기준으로 스크린샷 최소 크기 조절
+            if (this.ForceCaptureWithResolution)
+            {
+                Rectangle src = this.renderEnv.Camera.WorldRect;
+                if (src.Width < this.renderEnv.Camera.Width)
+                {
+                    src.X -= (this.renderEnv.Camera.Width - src.Width) / 2;
+                    src.Width = this.renderEnv.Camera.Width;
+                }
+                if (src.Height < this.renderEnv.Camera.Height)
+                {
+                    src.Y -= (this.renderEnv.Camera.Height - src.Height) / 2;
+                    src.Height = this.renderEnv.Camera.Height;
+                }
+                this.CaptureRect = src;
+            }
+            else this.CaptureRect = new Rectangle();
         }
         #endregion
 
@@ -1183,12 +1675,6 @@ namespace WzComparerR2.MapRender
                 this.mapData = null;
                 this.isUnloaded = true;
             }
-        }
-
-        protected override void OnExiting(object sender, EventArgs args)
-        {
-            base.OnExiting(sender, args);
-            this.OnExiting();
         }
 
         private void OnExiting()
@@ -1232,8 +1718,9 @@ namespace WzComparerR2.MapRender
 
         private void SwitchResolution()
         {
-            var r = (Resolution)(((int)this.resolution + 1) % 9);
+            var r = (Resolution)(((int)this.resolution + 1) % 4);
             SwitchResolution(r);
+            ResetCaptureRect();
         }
 
         private void SwitchResolution(Resolution r)
@@ -1243,12 +1730,7 @@ namespace WzComparerR2.MapRender
             {
                 case Resolution.Window_800_600:
                 case Resolution.Window_1024_768:
-                case Resolution.Window_1280_720:
                 case Resolution.Window_1366_768:
-                case Resolution.Window_1920_1080:
-                case Resolution.Window_2560_1080:
-                case Resolution.Window_2560_1440:
-                case Resolution.Window_3440_1440:
                     gameWindow.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
                     break;
                 case Resolution.WindowFullScreen:
@@ -1276,13 +1758,8 @@ namespace WzComparerR2.MapRender
         {
             Window_800_600 = 0,
             Window_1024_768 = 1,
-            Window_1280_720 = 2,
-            Window_1366_768 = 3,
-            Window_1920_1080 = 4,
-            Window_2560_1080 = 5,
-            Window_2560_1440 = 6,
-            Window_3440_1440 = 7,
-            WindowFullScreen = 8,
+            Window_1366_768 = 2,
+            WindowFullScreen = 3,
         }
 
         struct ItemRect

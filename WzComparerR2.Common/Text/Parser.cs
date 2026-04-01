@@ -84,7 +84,7 @@ namespace WzComparerR2.Text
                         {
                             case 'r': curChar = '\r'; break;
                             case 'n': curChar = '\n'; break;
-
+                            
                             default: curChar = '\0'; break; // when it is not recognizable escape char (ex. \b)
                         }
                     }

@@ -1,12 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>net48;net6.0-windows;net8.0-windows</TargetFrameworks>
+    <TargetFrameworks>net462;net6.0-windows;net8.0-windows</TargetFrameworks>
     <UseWindowsForms>true</UseWindowsForms>
     <AssemblyName>WzComparerR2.Network</AssemblyName>
     <RootNamespace>WzComparerR2.Network</RootNamespace>
     <IsPublishable>false</IsPublishable>
     <WcR2Plugin>true</WcR2Plugin>
-	<Platforms>AnyCPU;ARM64</Platforms>
   </PropertyGroup>
   <Import Project="$(ProjectDir)..\Build\Common.props" />
   <PropertyGroup Condition="$(DotnetEdition) == 'core'">
@@ -39,7 +38,7 @@
       <HintPath>..\References\DevComponents.DotNetBar2.dll</HintPath>
       <Private>false</Private>
     </Reference>
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.2" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
   </ItemGroup>
   <ItemGroup Condition="Exists('..\Build\CommonAssemblyInfo.cs')">
     <Compile Include="..\Build\CommonAssemblyInfo.cs">

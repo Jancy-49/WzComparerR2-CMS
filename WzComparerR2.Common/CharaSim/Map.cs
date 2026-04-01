@@ -37,8 +37,12 @@ namespace WzComparerR2.CharaSim
         public List<MiniMapIcon> MiniMapPortals { get; set; }
         public List<MiniMapIcon> MiniMapIlluminantClusters { get; set; }
 
-        public static Map CreateFromNode(Wz_Node node, GlobalFindNodeFunction findNode)
+        public static Map CreateFromNode(Wz_Node node, GlobalFindNodeFunction2 findNode, Wz_File wzf = null)
         {
+            if (node == null)
+            {
+                return null;
+            }
             Map map = new Map();
             int mapID;
             Match m = Regex.Match(node.Text, @"^(\d{9})\.img$");
@@ -74,7 +78,7 @@ namespace WzComparerR2.CharaSim
             Wz_Node linkNode = null;
             if (map.Link != null && findNode != null)
             {
-                linkNode = findNode(string.Format(@$"Map\Map\Map{map.Link / 100000000}\{map.Link:d9}.img"));
+                linkNode = findNode(string.Format(@$"Map\Map\Map{map.Link / 100000000}\{map.Link:d9}.img"), wzf);
             }
             if (linkNode == null)
             {
@@ -91,7 +95,7 @@ namespace WzComparerR2.CharaSim
                 map.MiniMapCenterY = miniMapNode.FindNodeByPath("centerY").GetValueEx<int>(0);
             }
 
-            var mapInfo = findNode?.Invoke(string.Format($"Etc/MapObjectInfo.img/{map.MapID}"));
+            var mapInfo = findNode?.Invoke(string.Format($"Etc/MapObjectInfo.img/{map.MapID}"), wzf);
             bool mapObjectInfoReadied = false;
             if (mapInfo != null)
             {
@@ -115,6 +119,7 @@ namespace WzComparerR2.CharaSim
             }
 
             Wz_Node lifeNode = linkNode.FindNodeByPath("life").ResolveUol();
+            Dictionary<int, bool> mobCanFlyDict = new Dictionary<int, bool>();
             if (lifeNode != null)
             {
                 foreach (var life in lifeNode.Nodes)
@@ -139,7 +144,7 @@ namespace WzComparerR2.CharaSim
                                 // 2 : event npc
                                 // 3 : transport
                                 // 4 : trunk
-                                var npcNode = findNode?.Invoke(string.Format($"Npc/{lifeId:D7}.img/info"));
+                                var npcNode = findNode?.Invoke(string.Format($"Npc/{lifeId:D7}.img/info"), wzf);
                                 if (npcNode != null)
                                 {
                                     if (npcNode.FindNodeByPath("shop").GetValueEx<int>(0) != 0 || npcNode.FindNodeByPath("miniMapType").GetValueEx<int>(0) == 1)
@@ -171,8 +176,22 @@ namespace WzComparerR2.CharaSim
                                     map.Mobs.Add(lifeId);
                                 }
                                 MiniMapIcon mobItem = new MiniMapIcon();
+                                bool canFly = false;
+                                if (mobCanFlyDict.ContainsKey(lifeId))
+                                {
+                                    canFly = mobCanFlyDict[lifeId];
+                                }
+                                else
+                                {
+                                    var mobNode = findNode?.Invoke($"Mob\\{lifeId:d7}.img", wzf);
+                                    if (mobNode != null && mobNode.FindNodeByPath("fly") != null)
+                                    {
+                                        canFly = true;
+                                    }
+                                    mobCanFlyDict.Add(lifeId, canFly);
+                                }
                                 mobItem.X = life.FindNodeByPath("x").GetValueEx<int>(0);
-                                mobItem.Y = life.FindNodeByPath("cy").GetValueEx<int>(0);
+                                mobItem.Y = life.FindNodeByPath(canFly ? "y" : "cy").GetValueEx<int>(0);
                                 map.MiniMapMobs.Add(mobItem);
                                 break;
                             default:

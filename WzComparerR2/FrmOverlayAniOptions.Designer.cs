@@ -1,6 +1,4 @@
-﻿using DevComponents.DotNetBar;
-
-namespace WzComparerR2
+﻿namespace WzComparerR2
 {
     partial class FrmOverlayAniOptions // base code from FrmGifClipOptions
     {
@@ -46,6 +44,9 @@ namespace WzComparerR2
             this.labelX9 = new DevComponents.DotNetBar.LabelX();
             this.labelX10 = new DevComponents.DotNetBar.LabelX();
             this.labelX7 = new DevComponents.DotNetBar.LabelX();
+            this.labelX11 = new DevComponents.DotNetBar.LabelX();
+            this.labelX12 = new DevComponents.DotNetBar.LabelX();
+            this.labelX13 = new DevComponents.DotNetBar.LabelX();
             this.txtDelayOffset = new DevComponents.Editors.IntegerInput();
             this.txtMoveX = new DevComponents.Editors.IntegerInput();
             this.txtMoveY = new DevComponents.Editors.IntegerInput();
@@ -55,6 +56,7 @@ namespace WzComparerR2
             this.txtSpeedY = new DevComponents.Editors.IntegerInput();
             this.txtGoX = new DevComponents.Editors.IntegerInput();
             this.txtGoY = new DevComponents.Editors.IntegerInput();
+            this.txtAngle = new DevComponents.Editors.IntegerInput();
             this.txtPngDelay = new DevComponents.Editors.IntegerInput();
             this.chkFullMove = new DevComponents.DotNetBar.Controls.CheckBoxX();
             this.chkFlipX = new DevComponents.DotNetBar.Controls.CheckBoxX();
@@ -71,6 +73,7 @@ namespace WzComparerR2
             ((System.ComponentModel.ISupportInitialize)(this.txtSpeedY)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.txtGoX)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.txtGoY)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.txtAngle)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.txtPngDelay)).BeginInit();
             this.tableLayoutPanel2.SuspendLayout();
             this.SuspendLayout();
@@ -81,7 +84,7 @@ namespace WzComparerR2
             this.buttonOK.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.buttonOK.ColorTable = DevComponents.DotNetBar.eButtonColor.OrangeWithBackground;
             this.buttonOK.DialogResult = System.Windows.Forms.DialogResult.OK;
-            this.buttonOK.Location = new System.Drawing.Point(40, 3);
+            this.buttonOK.Location = new System.Drawing.Point(67, 3);
             this.buttonOK.Margin = new System.Windows.Forms.Padding(35, 3, 4, 3);
             this.buttonOK.Name = "buttonOK";
             this.buttonOK.Size = new System.Drawing.Size(88, 23);
@@ -89,7 +92,7 @@ namespace WzComparerR2
             this.buttonOK.Symbol = "";
             this.buttonOK.SymbolSize = 1F;
             this.buttonOK.TabIndex = 11;
-            this.buttonOK.Text = "确定";
+            this.buttonOK.Text = "确认";
             // 
             // buttonCancel
             // 
@@ -121,7 +124,10 @@ namespace WzComparerR2
             this.tableLayoutPanel1.Controls.Add(this.labelX8, 1, 4);
             this.tableLayoutPanel1.Controls.Add(this.labelX9, 1, 5);
             this.tableLayoutPanel1.Controls.Add(this.labelX10, 1, 6);
-            this.tableLayoutPanel1.Controls.Add(this.labelX7, 1, 8);
+            this.tableLayoutPanel1.Controls.Add(this.labelX7, 1, 12);
+            this.tableLayoutPanel1.Controls.Add(this.labelX11, 1, 8);
+            this.tableLayoutPanel1.Controls.Add(this.labelX12, 1, 9);
+            this.tableLayoutPanel1.Controls.Add(this.labelX13, 1, 10);
             this.tableLayoutPanel1.Controls.Add(this.txtDelayOffset, 2, 0);
             this.tableLayoutPanel1.Controls.Add(this.txtMoveX, 2, 1);
             this.tableLayoutPanel1.Controls.Add(this.txtMoveY, 4, 1);
@@ -131,7 +137,8 @@ namespace WzComparerR2
             this.tableLayoutPanel1.Controls.Add(this.txtSpeedY, 4, 4);
             this.tableLayoutPanel1.Controls.Add(this.txtGoX, 2, 5);
             this.tableLayoutPanel1.Controls.Add(this.txtGoY, 4, 5);
-            this.tableLayoutPanel1.Controls.Add(this.txtPngDelay, 2, 8);
+            this.tableLayoutPanel1.Controls.Add(this.txtAngle, 2, 10);
+            this.tableLayoutPanel1.Controls.Add(this.txtPngDelay, 2, 12);
             this.tableLayoutPanel1.Controls.Add(this.chkFullMove, 2, 6);
             this.tableLayoutPanel1.Controls.Add(this.chkFlipX, 2, 8);
             this.tableLayoutPanel1.Controls.Add(this.chkFlipY, 2, 9);
@@ -139,7 +146,7 @@ namespace WzComparerR2
             this.tableLayoutPanel1.Location = new System.Drawing.Point(9, 8);
             this.tableLayoutPanel1.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
-            this.tableLayoutPanel1.RowCount = 9;
+            this.tableLayoutPanel1.RowCount = 13;
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 20F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 20F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 20F));
@@ -149,13 +156,17 @@ namespace WzComparerR2
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 20F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 10F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 20F));
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(383, 220);
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 20F));
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 20F));
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 10F));
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 20F));
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(383, 272);
             this.tableLayoutPanel1.TabIndex = 2;
             // 
             // labelX1
             // 
-            this.labelX1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-            | System.Windows.Forms.AnchorStyles.Left)
+            this.labelX1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             // 
             // 
@@ -164,143 +175,191 @@ namespace WzComparerR2
             this.labelX1.Location = new System.Drawing.Point(4, 3);
             this.labelX1.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.labelX1.Name = "labelX1";
-            this.tableLayoutPanel1.SetRowSpan(this.labelX1, 6);
-            this.labelX1.Size = new System.Drawing.Size(55, 144);
+            this.tableLayoutPanel1.SetRowSpan(this.labelX1, 9);
+            this.labelX1.Size = new System.Drawing.Size(55, 182);
             this.labelX1.TabIndex = 0;
             this.labelX1.Text = "设置";
             // 
             // labelX2
             // 
-            this.labelX2.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-            | System.Windows.Forms.AnchorStyles.Left)
+            this.labelX2.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             // 
             // 
             // 
             this.labelX2.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
-            this.labelX2.Location = new System.Drawing.Point(284, 59);
+            this.labelX2.Location = new System.Drawing.Point(284, 51);
             this.labelX2.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.labelX2.Name = "labelX2";
-            this.labelX2.Size = new System.Drawing.Size(17, 22);
+            this.labelX2.Size = new System.Drawing.Size(17, 18);
             this.labelX2.TabIndex = 12;
             this.labelX2.Text = "-";
             // 
             // labelX3
             // 
-            this.labelX3.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-            | System.Windows.Forms.AnchorStyles.Left)
+            this.labelX3.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             // 
             // 
             // 
             this.labelX3.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
-            this.labelX3.Location = new System.Drawing.Point(40, 3);
+            this.labelX3.Location = new System.Drawing.Point(67, 3);
             this.labelX3.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.labelX3.Name = "labelX3";
-            this.labelX3.Size = new System.Drawing.Size(132, 22);
+            this.labelX3.Size = new System.Drawing.Size(132, 18);
             this.labelX3.TabIndex = 8;
-            this.labelX3.Text = "启动延时(ms)";
+            this.labelX3.Text = "开始延时(ms)";
             // 
             // labelX4
             // 
-            this.labelX4.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-            | System.Windows.Forms.AnchorStyles.Left)
+            this.labelX4.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             // 
             // 
             // 
             this.labelX4.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
-            this.labelX4.Location = new System.Drawing.Point(67, 31);
+            this.labelX4.Location = new System.Drawing.Point(67, 27);
             this.labelX4.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.labelX4.Name = "labelX4";
-            this.labelX4.Size = new System.Drawing.Size(132, 22);
+            this.labelX4.Size = new System.Drawing.Size(132, 18);
             this.labelX4.TabIndex = 9;
             this.labelX4.Text = "XY位置(px)";
             // 
             // labelX6
             // 
-            this.labelX6.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-            | System.Windows.Forms.AnchorStyles.Left)
+            this.labelX6.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             // 
             // 
             // 
             this.labelX6.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
-            this.labelX6.Location = new System.Drawing.Point(67, 59);
+            this.labelX6.Location = new System.Drawing.Point(67, 51);
             this.labelX6.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.labelX6.Name = "labelX6";
-            this.labelX6.Size = new System.Drawing.Size(132, 22);
+            this.labelX6.Size = new System.Drawing.Size(132, 18);
             this.labelX6.TabIndex = 11;
             this.labelX6.Text = "选择帧";
             // 
             // labelX8
             // 
-            this.labelX8.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-            | System.Windows.Forms.AnchorStyles.Left)
+            this.labelX8.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             // 
             // 
             // 
             this.labelX8.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
-            this.labelX8.Location = new System.Drawing.Point(67, 97);
+            this.labelX8.Location = new System.Drawing.Point(67, 85);
             this.labelX8.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.labelX8.Name = "labelX8";
-            this.labelX8.Size = new System.Drawing.Size(132, 22);
+            this.labelX8.Size = new System.Drawing.Size(132, 18);
             this.labelX8.TabIndex = 12;
             this.labelX8.Text = "XY移动速度(px/秒)";
             // 
             // labelX9
             // 
-            this.labelX9.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-            | System.Windows.Forms.AnchorStyles.Left)
+            this.labelX9.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             // 
             // 
             // 
             this.labelX9.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
-            this.labelX9.Location = new System.Drawing.Point(67, 125);
+            this.labelX9.Location = new System.Drawing.Point(67, 109);
             this.labelX9.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.labelX9.Name = "labelX9";
-            this.labelX9.Size = new System.Drawing.Size(132, 22);
+            this.labelX9.Size = new System.Drawing.Size(132, 18);
             this.labelX9.TabIndex = 12;
             this.labelX9.Text = "XY移动距离(px)";
             // 
             // labelX10
             // 
-            this.labelX10.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-            | System.Windows.Forms.AnchorStyles.Left)
+            this.labelX10.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             // 
             // 
             // 
             this.labelX10.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
-            this.labelX10.Location = new System.Drawing.Point(67, 153);
+            this.labelX10.Location = new System.Drawing.Point(67, 133);
             this.labelX10.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.labelX10.Name = "labelX10";
-            this.labelX10.Size = new System.Drawing.Size(132, 22);
+            this.labelX10.Size = new System.Drawing.Size(132, 18);
             this.labelX10.TabIndex = 12;
             this.labelX10.Text = "调整移动距离";
             // 
             // labelX7
             // 
-            this.labelX7.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-            | System.Windows.Forms.AnchorStyles.Left)
+            this.labelX7.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             // 
             // 
             // 
             this.labelX7.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
-            this.labelX7.Location = new System.Drawing.Point(67, 191);
+            this.labelX7.Location = new System.Drawing.Point(67, 249);
             this.labelX7.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.labelX7.Name = "labelX7";
-            this.labelX7.Size = new System.Drawing.Size(132, 26);
+            this.labelX7.Size = new System.Drawing.Size(132, 20);
             this.labelX7.TabIndex = 12;
             this.labelX7.Text = "PNG延时(ms)";
             // 
+            // labelX11
+            // 
+            this.labelX11.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            // 
+            // 
+            // 
+            this.labelX11.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
+            this.labelX11.Location = new System.Drawing.Point(67, 167);
+            this.labelX11.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.labelX11.Name = "labelX11";
+            this.labelX11.Size = new System.Drawing.Size(132, 18);
+            this.labelX11.TabIndex = 12;
+            this.labelX11.Text = "左右翻转";
+            // 
+            // labelX12
+            // 
+            this.labelX12.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            // 
+            // 
+            // 
+            this.labelX12.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
+            this.labelX12.Location = new System.Drawing.Point(67, 191);
+            this.labelX12.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.labelX12.Name = "labelX12";
+            this.labelX12.Size = new System.Drawing.Size(132, 18);
+            this.labelX12.TabIndex = 12;
+            this.labelX12.Text = "上下翻转";
+            // 
+            // labelX13
+            // 
+            this.labelX13.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            // 
+            // 
+            // 
+            this.labelX13.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
+            this.labelX13.Location = new System.Drawing.Point(67, 215);
+            this.labelX13.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.labelX13.Name = "labelX13";
+            this.labelX13.Size = new System.Drawing.Size(132, 18);
+            this.labelX13.TabIndex = 12;
+            this.labelX13.Text = "旋转角度";
+            // 
             // txtDelayOffset
             // 
-            this.txtDelayOffset.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-            | System.Windows.Forms.AnchorStyles.Left)
+            this.txtDelayOffset.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             // 
             // 
@@ -322,8 +381,8 @@ namespace WzComparerR2
             // 
             // txtMoveX
             // 
-            this.txtMoveX.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-            | System.Windows.Forms.AnchorStyles.Left)
+            this.txtMoveX.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             // 
             // 
@@ -332,7 +391,7 @@ namespace WzComparerR2
             this.txtMoveX.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
             this.txtMoveX.ButtonFreeText.Shortcut = DevComponents.DotNetBar.eShortcut.F2;
             this.txtMoveX.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.txtMoveX.Location = new System.Drawing.Point(207, 31);
+            this.txtMoveX.Location = new System.Drawing.Point(207, 27);
             this.txtMoveX.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.txtMoveX.MaxValue = 8192;
             this.txtMoveX.MinValue = -8192;
@@ -343,8 +402,8 @@ namespace WzComparerR2
             // 
             // txtMoveY
             // 
-            this.txtMoveY.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-            | System.Windows.Forms.AnchorStyles.Left)
+            this.txtMoveY.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             // 
             // 
@@ -353,7 +412,7 @@ namespace WzComparerR2
             this.txtMoveY.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
             this.txtMoveY.ButtonFreeText.Shortcut = DevComponents.DotNetBar.eShortcut.F2;
             this.txtMoveY.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.txtMoveY.Location = new System.Drawing.Point(309, 31);
+            this.txtMoveY.Location = new System.Drawing.Point(309, 27);
             this.txtMoveY.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.txtMoveY.MaxValue = 8192;
             this.txtMoveY.MinValue = -8192;
@@ -364,8 +423,8 @@ namespace WzComparerR2
             // 
             // txtFrameStart
             // 
-            this.txtFrameStart.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-            | System.Windows.Forms.AnchorStyles.Left)
+            this.txtFrameStart.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             // 
             // 
@@ -374,7 +433,7 @@ namespace WzComparerR2
             this.txtFrameStart.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
             this.txtFrameStart.ButtonFreeText.Shortcut = DevComponents.DotNetBar.eShortcut.F2;
             this.txtFrameStart.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.txtFrameStart.Location = new System.Drawing.Point(207, 59);
+            this.txtFrameStart.Location = new System.Drawing.Point(207, 51);
             this.txtFrameStart.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.txtFrameStart.MaxValue = 8192;
             this.txtFrameStart.MinValue = 0;
@@ -385,8 +444,8 @@ namespace WzComparerR2
             // 
             // txtFrameEnd
             // 
-            this.txtFrameEnd.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-            | System.Windows.Forms.AnchorStyles.Left)
+            this.txtFrameEnd.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             // 
             // 
@@ -395,7 +454,7 @@ namespace WzComparerR2
             this.txtFrameEnd.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
             this.txtFrameEnd.ButtonFreeText.Shortcut = DevComponents.DotNetBar.eShortcut.F2;
             this.txtFrameEnd.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.txtFrameEnd.Location = new System.Drawing.Point(309, 59);
+            this.txtFrameEnd.Location = new System.Drawing.Point(309, 51);
             this.txtFrameEnd.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.txtFrameEnd.MaxValue = 8192;
             this.txtFrameEnd.MinValue = 0;
@@ -406,8 +465,8 @@ namespace WzComparerR2
             // 
             // txtSpeedX
             // 
-            this.txtSpeedX.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-            | System.Windows.Forms.AnchorStyles.Left)
+            this.txtSpeedX.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             // 
             // 
@@ -416,10 +475,10 @@ namespace WzComparerR2
             this.txtSpeedX.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
             this.txtSpeedX.ButtonFreeText.Shortcut = DevComponents.DotNetBar.eShortcut.F2;
             this.txtSpeedX.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.txtSpeedX.Location = new System.Drawing.Point(207, 97);
+            this.txtSpeedX.Location = new System.Drawing.Point(207, 85);
             this.txtSpeedX.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.txtSpeedX.MaxValue = 8192;
-            this.txtSpeedX.MinValue = -8192;
+            this.txtSpeedX.MaxValue = 100000;
+            this.txtSpeedX.MinValue = -100000;
             this.txtSpeedX.Name = "txtSpeedX";
             this.txtSpeedX.ShowUpDown = true;
             this.txtSpeedX.Size = new System.Drawing.Size(69, 21);
@@ -427,8 +486,8 @@ namespace WzComparerR2
             // 
             // txtSpeedY
             // 
-            this.txtSpeedY.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-            | System.Windows.Forms.AnchorStyles.Left)
+            this.txtSpeedY.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             // 
             // 
@@ -437,10 +496,10 @@ namespace WzComparerR2
             this.txtSpeedY.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
             this.txtSpeedY.ButtonFreeText.Shortcut = DevComponents.DotNetBar.eShortcut.F2;
             this.txtSpeedY.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.txtSpeedY.Location = new System.Drawing.Point(309, 97);
+            this.txtSpeedY.Location = new System.Drawing.Point(309, 85);
             this.txtSpeedY.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.txtSpeedY.MaxValue = 8192;
-            this.txtSpeedY.MinValue = -8192;
+            this.txtSpeedY.MaxValue = 100000;
+            this.txtSpeedY.MinValue = -100000;
             this.txtSpeedY.Name = "txtSpeedY";
             this.txtSpeedY.ShowUpDown = true;
             this.txtSpeedY.Size = new System.Drawing.Size(70, 21);
@@ -448,8 +507,8 @@ namespace WzComparerR2
             // 
             // txtGoX
             // 
-            this.txtGoX.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-            | System.Windows.Forms.AnchorStyles.Left)
+            this.txtGoX.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             // 
             // 
@@ -458,7 +517,7 @@ namespace WzComparerR2
             this.txtGoX.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
             this.txtGoX.ButtonFreeText.Shortcut = DevComponents.DotNetBar.eShortcut.F2;
             this.txtGoX.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.txtGoX.Location = new System.Drawing.Point(207, 125);
+            this.txtGoX.Location = new System.Drawing.Point(207, 109);
             this.txtGoX.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.txtGoX.MaxValue = 16384;
             this.txtGoX.MinValue = 0;
@@ -469,8 +528,8 @@ namespace WzComparerR2
             // 
             // txtGoY
             // 
-            this.txtGoY.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-            | System.Windows.Forms.AnchorStyles.Left)
+            this.txtGoY.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             // 
             // 
@@ -479,7 +538,7 @@ namespace WzComparerR2
             this.txtGoY.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
             this.txtGoY.ButtonFreeText.Shortcut = DevComponents.DotNetBar.eShortcut.F2;
             this.txtGoY.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.txtGoY.Location = new System.Drawing.Point(309, 125);
+            this.txtGoY.Location = new System.Drawing.Point(309, 109);
             this.txtGoY.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.txtGoY.MaxValue = 16384;
             this.txtGoY.MinValue = 0;
@@ -488,10 +547,32 @@ namespace WzComparerR2
             this.txtGoY.Size = new System.Drawing.Size(70, 21);
             this.txtGoY.TabIndex = 8;
             // 
+            // txtAngle
+            // 
+            this.txtAngle.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            // 
+            // 
+            // 
+            this.txtAngle.BackgroundStyle.Class = "DateTimeInputBackground";
+            this.txtAngle.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
+            this.txtAngle.ButtonFreeText.Shortcut = DevComponents.DotNetBar.eShortcut.F2;
+            this.tableLayoutPanel1.SetColumnSpan(this.txtAngle, 3);
+            this.txtAngle.ForeColor = System.Drawing.SystemColors.ControlText;
+            this.txtAngle.Location = new System.Drawing.Point(207, 215);
+            this.txtAngle.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.txtAngle.MaxValue = 3600;
+            this.txtAngle.MinValue = -3600;
+            this.txtAngle.Name = "txtAngle";
+            this.txtAngle.ShowUpDown = true;
+            this.txtAngle.Size = new System.Drawing.Size(172, 21);
+            this.txtAngle.TabIndex = 12;
+            // 
             // txtPngDelay
             // 
-            this.txtPngDelay.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-            | System.Windows.Forms.AnchorStyles.Left)
+            this.txtPngDelay.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             // 
             // 
@@ -502,14 +583,14 @@ namespace WzComparerR2
             this.tableLayoutPanel1.SetColumnSpan(this.txtPngDelay, 3);
             this.txtPngDelay.Enabled = false;
             this.txtPngDelay.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.txtPngDelay.Location = new System.Drawing.Point(207, 191);
+            this.txtPngDelay.Location = new System.Drawing.Point(207, 249);
             this.txtPngDelay.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.txtPngDelay.MaxValue = 65530;
             this.txtPngDelay.MinValue = 0;
             this.txtPngDelay.Name = "txtPngDelay";
             this.txtPngDelay.ShowUpDown = true;
             this.txtPngDelay.Size = new System.Drawing.Size(172, 21);
-            this.txtPngDelay.TabIndex = 10;
+            this.txtPngDelay.TabIndex = 13;
             this.txtPngDelay.Value = 120;
             // 
             // chkFullMove
@@ -518,11 +599,11 @@ namespace WzComparerR2
             // 
             // 
             this.chkFullMove.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
-            this.chkFullMove.Location = new System.Drawing.Point(206, 153);
+            this.chkFullMove.Location = new System.Drawing.Point(206, 133);
             this.chkFullMove.Name = "chkFullMove";
-            this.chkFullMove.Size = new System.Drawing.Size(57, 17);
+            this.chkFullMove.Size = new System.Drawing.Size(57, 15);
             this.chkFullMove.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
-            superTooltipInfo2.BodyText = "为匹配设定的移动距离，在设置范围内重复添加缺失帧。";
+            superTooltipInfo2.BodyText = "为调整设置的移动距离，从设置范围内反复追加不足的帧。";
             superTooltipInfo2.Color = DevComponents.DotNetBar.eTooltipColor.System;
             superTooltipInfo2.FooterVisible = false;
             this.superTooltip1.SetSuperTooltip(this.chkFullMove, superTooltipInfo2);
@@ -534,11 +615,11 @@ namespace WzComparerR2
             // 
             // 
             this.chkFlipX.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
-            this.chkFlipX.Location = new System.Drawing.Point(206, 173);
+            this.chkFlipX.Location = new System.Drawing.Point(206, 167);
             this.chkFlipX.Name = "chkFlipX";
             this.chkFlipX.Size = new System.Drawing.Size(19, 15);
             this.chkFlipX.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
-            superTooltipInfo3.BodyText = "左右范围";
+            superTooltipInfo3.BodyText = "左右翻转";
             superTooltipInfo3.Color = DevComponents.DotNetBar.eTooltipColor.System;
             superTooltipInfo3.FooterVisible = false;
             this.superTooltip1.SetSuperTooltip(this.chkFlipX, superTooltipInfo3);
@@ -550,11 +631,11 @@ namespace WzComparerR2
             // 
             // 
             this.chkFlipY.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
-            this.chkFlipY.Location = new System.Drawing.Point(206, 198);
+            this.chkFlipY.Location = new System.Drawing.Point(206, 191);
             this.chkFlipY.Name = "chkFlipY";
             this.chkFlipY.Size = new System.Drawing.Size(57, 15);
             this.chkFlipY.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
-            superTooltipInfo4.BodyText = "上下范围";
+            superTooltipInfo4.BodyText = "上下翻转";
             superTooltipInfo4.Color = DevComponents.DotNetBar.eTooltipColor.System;
             superTooltipInfo4.FooterVisible = false;
             this.superTooltip1.SetSuperTooltip(this.chkFlipY, superTooltipInfo4);
@@ -572,7 +653,7 @@ namespace WzComparerR2
             this.tableLayoutPanel2.Controls.Add(this.buttonCancel, 1, 0);
             this.tableLayoutPanel2.Controls.Add(this.buttonOK, 0, 0);
             this.tableLayoutPanel2.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.tableLayoutPanel2.Location = new System.Drawing.Point(9, 228);
+            this.tableLayoutPanel2.Location = new System.Drawing.Point(9, 280);
             this.tableLayoutPanel2.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.tableLayoutPanel2.Name = "tableLayoutPanel2";
             this.tableLayoutPanel2.RowCount = 1;
@@ -588,7 +669,7 @@ namespace WzComparerR2
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.buttonCancel;
-            this.ClientSize = new System.Drawing.Size(401, 266);
+            this.ClientSize = new System.Drawing.Size(401, 318);
             this.Controls.Add(this.tableLayoutPanel1);
             this.Controls.Add(this.tableLayoutPanel2);
             this.DoubleBuffered = true;
@@ -610,6 +691,7 @@ namespace WzComparerR2
             ((System.ComponentModel.ISupportInitialize)(this.txtSpeedY)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.txtGoX)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.txtGoY)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.txtAngle)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.txtPngDelay)).EndInit();
             this.tableLayoutPanel2.ResumeLayout(false);
             this.ResumeLayout(false);
@@ -632,6 +714,7 @@ namespace WzComparerR2
         private DevComponents.Editors.IntegerInput txtSpeedY;
         private DevComponents.Editors.IntegerInput txtGoX;
         private DevComponents.Editors.IntegerInput txtGoY;
+        private DevComponents.Editors.IntegerInput txtAngle;
         private DevComponents.DotNetBar.LabelX labelX1;
         private DevComponents.DotNetBar.LabelX labelX2;
         private DevComponents.DotNetBar.LabelX labelX3;
@@ -641,6 +724,9 @@ namespace WzComparerR2
         private DevComponents.DotNetBar.LabelX labelX8;
         private DevComponents.DotNetBar.LabelX labelX9;
         private DevComponents.DotNetBar.LabelX labelX10;
+        private DevComponents.DotNetBar.LabelX labelX11;
+        private DevComponents.DotNetBar.LabelX labelX12;
+        private DevComponents.DotNetBar.LabelX labelX13;
         private DevComponents.DotNetBar.Controls.CheckBoxX chkFullMove;
         private DevComponents.DotNetBar.Controls.CheckBoxX chkFlipX;
         private DevComponents.DotNetBar.Controls.CheckBoxX chkFlipY;

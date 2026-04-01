@@ -18,6 +18,7 @@ using MRes = WzComparerR2.MapRender.Properties.Resources;
 using static WzComparerR2.MapRender.UI.TooltipHelper;
 using TextureBlock = WzComparerR2.MapRender.UI.UIGraphics.RenderBlock<Microsoft.Xna.Framework.Graphics.Texture2D>;
 using WzComparerR2.Config;
+using WzComparerR2.CharaSim;
 
 namespace WzComparerR2.MapRender.UI
 {
@@ -68,15 +69,30 @@ namespace WzComparerR2.MapRender.UI
         private void LoadContent(ContentManager content)
         {
             var res = new NineFormResource();
-            res.N = content.Load<Texture2D>(nameof(Res.UIToolTip_img_Item_Frame2_n));
-            res.NE = content.Load<Texture2D>(nameof(Res.UIToolTip_img_Item_Frame2_ne));
-            res.E = content.Load<Texture2D>(nameof(Res.UIToolTip_img_Item_Frame2_e));
-            res.SE = content.Load<Texture2D>(nameof(Res.UIToolTip_img_Item_Frame2_se));
-            res.S = content.Load<Texture2D>(nameof(Res.UIToolTip_img_Item_Frame2_s));
-            res.SW = content.Load<Texture2D>(nameof(Res.UIToolTip_img_Item_Frame2_sw));
-            res.W = content.Load<Texture2D>(nameof(Res.UIToolTip_img_Item_Frame2_w));
-            res.NW = content.Load<Texture2D>(nameof(Res.UIToolTip_img_Item_Frame2_nw));
-            res.C = content.Load<Texture2D>(nameof(Res.UIToolTip_img_Item_Frame2_c));
+            if (CharaSimConfig.Default.Enable22AniStyle)
+            {
+                res.N = content.Load<Texture2D>(nameof(Res.UIToolTipNew_img_Item_Common_frame_flexible_n));
+                res.NE = content.Load<Texture2D>(nameof(Res.UIToolTipNew_img_Item_Common_frame_flexible_ne));
+                res.E = content.Load<Texture2D>(nameof(Res.UIToolTipNew_img_Item_Common_frame_flexible_e));
+                res.SE = content.Load<Texture2D>(nameof(Res.UIToolTipNew_img_Item_Common_frame_flexible_se));
+                res.S = content.Load<Texture2D>(nameof(Res.UIToolTipNew_img_Item_Common_frame_flexible_s));
+                res.SW = content.Load<Texture2D>(nameof(Res.UIToolTipNew_img_Item_Common_frame_flexible_sw));
+                res.W = content.Load<Texture2D>(nameof(Res.UIToolTipNew_img_Item_Common_frame_flexible_w));
+                res.NW = content.Load<Texture2D>(nameof(Res.UIToolTipNew_img_Item_Common_frame_flexible_nw));
+                res.C = content.Load<Texture2D>(nameof(Res.UIToolTipNew_img_Item_Common_frame_flexible_c));
+            }
+            else
+            {
+                res.N = content.Load<Texture2D>(nameof(Res.UIToolTip_img_Item_Frame2_n));
+                res.NE = content.Load<Texture2D>(nameof(Res.UIToolTip_img_Item_Frame2_ne));
+                res.E = content.Load<Texture2D>(nameof(Res.UIToolTip_img_Item_Frame2_e));
+                res.SE = content.Load<Texture2D>(nameof(Res.UIToolTip_img_Item_Frame2_se));
+                res.S = content.Load<Texture2D>(nameof(Res.UIToolTip_img_Item_Frame2_s));
+                res.SW = content.Load<Texture2D>(nameof(Res.UIToolTip_img_Item_Frame2_sw));
+                res.W = content.Load<Texture2D>(nameof(Res.UIToolTip_img_Item_Frame2_w));
+                res.NW = content.Load<Texture2D>(nameof(Res.UIToolTip_img_Item_Frame2_nw));
+                res.C = content.Load<Texture2D>(nameof(Res.UIToolTip_img_Item_Frame2_c));
+            }
             this.Resource = res;
         }
 
@@ -93,6 +109,10 @@ namespace WzComparerR2.MapRender.UI
             else if (target is IlluminantClusterItem)
             {
                 return DrawItem(gameTime, env, (IlluminantClusterItem)target);
+            }
+            else if (target is ObjItem)
+            {
+                return DrawItem(gameTime, env, (ObjItem)target);
             }
             else if (target is ReactorItem)
             {
@@ -153,7 +173,14 @@ namespace WzComparerR2.MapRender.UI
                             blocks.Add(blocks2[i]);
                         }
                         size.X = Math.Max(size.X, size2.X);
-                        size.Y = current.Y + size2.Y;
+                        current.Y += size2.Y;
+
+                        var aniName = (item.View?.Animator as StateMachineAnimator)?.GetCurrent();
+                        if (aniName != null)
+                        {
+                            blocks.Add(PrepareTextLine(env.Fonts.TooltipContentFont, "动作: " + aniName, ref current, Color.White, ref size.X));
+                        }
+                        size.Y = current.Y;
                     }
                     break;
 
@@ -194,7 +221,7 @@ namespace WzComparerR2.MapRender.UI
             sb.Append("类型: ").Append(item.Type);
             if (pTypeName != null)
             {
-                sb.Append(" (").Append(pTypeName).Append(")");
+                sb.Append("(").Append(pTypeName).Append(")");
             }
             sb.AppendLine();
 
@@ -203,7 +230,7 @@ namespace WzComparerR2.MapRender.UI
             {
                 this.StringLinker?.StringMap.TryGetValue(item.ToMap.Value, out sr);
                 string toMapName = sr?.Name;
-                sb.Append(" (").Append(sr?.Name ?? "null").Append(")");
+                sb.Append("(").Append(sr?.Name ?? "null").Append(")");
             }
             sb.AppendLine();
 
@@ -227,6 +254,11 @@ namespace WzComparerR2.MapRender.UI
                 }
             }
 
+            if (item.HRange > 0 && item.VRange > 0)
+            {
+                sb.AppendLine($"范围: {item.HRange}×{item.VRange}");
+            }
+
             sb.Length -= 2;
 
             blocks.Add(PrepareTextLine(env.Fonts.TooltipContentFont, sb.ToString(), ref current, Color.White, ref size.X));
@@ -244,7 +276,7 @@ namespace WzComparerR2.MapRender.UI
             var sb = new StringBuilder();
             sb.Append("名称: ").AppendLine(item.Name);
 
-            sb.AppendLine("类型: 发光体群落");
+            sb.AppendLine("类型: 发光体群集");
 
             sb.Length -= 2;
 
@@ -253,6 +285,72 @@ namespace WzComparerR2.MapRender.UI
             return new TooltipContent() { blocks = blocks, size = size };
         }
 
+        private TooltipContent DrawItem(GameTime gameTime, RenderEnv env, ObjItem item)
+        {
+            var blocks = new List<TextBlock>();
+            Vector2 size = Vector2.Zero;
+            Vector2 current = Vector2.Zero;
+
+            if (item.Obstacle)
+            {
+                var sb = new StringBuilder();
+
+                sb.Append("伤害: ").AppendLine(item.Damage.ToString());
+
+                if (item.Impact > 0)
+                    sb.Append("强度: ").AppendLine(item.Impact.ToString());
+
+                int angle = item.Angle > 0 ? item.Angle : item.Dir * 30;
+                if (angle > 0)
+                {
+                    angle = (angle - 1) % 360 + 1;
+                    angle = item.View.Flip ? 360 - angle : angle;
+                    sb.Append("角度: ").Append((angle).ToString());
+
+                    sb.Append(" (");
+                    switch (((angle + 23) % 360) / 45)
+                    {
+                        case 0:
+                            sb.Append("↑");
+                            break;
+                        case 1:
+                            sb.Append("↗");
+                            break;
+                        case 2:
+                            sb.Append("→");
+                            break;
+                        case 3:
+                            sb.Append("↘");
+                            break;
+                        case 4:
+                            sb.Append("↓");
+                            break;
+                        case 5:
+                            sb.Append("↙");
+                            break;
+                        case 6:
+                            sb.Append("←");
+                            break;
+                        case 7:
+                            sb.Append("↖");
+                            break;
+                        default:
+                            break;
+                    }   
+                    sb.AppendLine(")");
+                }
+
+                if (item.Disease > 0 && item.DiseaseLevel > 0)
+                {
+                    sb.Append("异常状态: ").AppendLine($"{ItemStringHelper.GetMobSkillName(item.Disease)} ({item.DiseaseLevel})");
+                }
+
+                sb.Length -= 2;
+                blocks.Add(PrepareTextLine(env.Fonts.TooltipContentFont, sb.ToString(), ref current, Color.White, ref size.X));
+                size.Y = current.Y;
+            }
+            return new TooltipContent() { blocks = blocks, size = size };
+        }
 
         private TooltipContent DrawItem(GameTime gameTime, RenderEnv env, ReactorItem item)
         {
@@ -331,6 +429,7 @@ namespace WzComparerR2.MapRender.UI
             var spot = item.Spot;
             if (spot != null)
             {
+                if (spot.MapNo.Count == 0) return new TooltipContent();
                 //计算属性要求 获取怪物列表和npc列表
                 int spotBarrier = 0, spotBarrierArc = 0, spotBarrierAut = 0;
                 var mobNames = new List<string>();
@@ -401,8 +500,8 @@ namespace WzComparerR2.MapRender.UI
                             this.StringLinker?.StringNpc.TryGetValue(npcID, out sr);
                             string npcText = sr?.Name ?? npcID.ToString();
                             var npcInfo = PluginManager.FindWz(string.Format("Npc/{0:D7}.img/info", npcID));
-                            var hide = npcInfo.Nodes["hide"].GetValueEx<int>(0);
-                            var hideName = npcInfo.Nodes["hideName"].GetValueEx<int>(0);
+                            var hide = npcInfo?.Nodes["hide"].GetValueEx<int>(0);
+                            var hideName = npcInfo?.Nodes["hideName"].GetValueEx<int>(0);
                             if ((hide != 0 || hideName != 0) && npcNames.Contains(npcText))
                             {
                                 npcNames[npcNames.IndexOf(npcText)] = "";
@@ -761,16 +860,19 @@ namespace WzComparerR2.MapRender.UI
                 }
             }
 
-            var cover = Res.UIToolTip_img_Item_Frame2_cover.ToTexture(env.GraphicsDevice);
-            var coverRect = new Rectangle((int)position.X + 3,
-                (int)position.Y + 3,
-                Math.Min((int)preferSize.X - 6, cover.Width),
-                Math.Min((int)preferSize.Y - 6, cover.Height));
-            var sourceRect = new Rectangle(0,
-                0,
-                Math.Min((int)preferSize.X - 6, cover.Width),
-                Math.Min((int)preferSize.Y - 6, cover.Height));
-            env.Sprite.Draw(cover, coverRect, sourceRect, Color.White);
+            if (!CharaSimConfig.Default.Enable22AniStyle)
+            {
+                var cover = Res.UIToolTip_img_Item_Frame2_cover.ToTexture(env.GraphicsDevice);
+                var coverRect = new Rectangle((int)position.X + 3,
+                    (int)position.Y + 3,
+                    Math.Min((int)preferSize.X - 6, cover.Width),
+                    Math.Min((int)preferSize.Y - 6, cover.Height));
+                var sourceRect = new Rectangle(0,
+                    0,
+                    Math.Min((int)preferSize.X - 6, cover.Width),
+                    Math.Min((int)preferSize.Y - 6, cover.Height));
+                env.Sprite.Draw(cover, coverRect, sourceRect, Color.White);
+            }
 
             if (content.textures != null)
             {

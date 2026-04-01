@@ -122,24 +122,19 @@ namespace WzComparerR2.CharaSimControl
             this.pageNext.MouseClick += new MouseEventHandler(pageNext_MouseClick);
 
             btns();
-            for (int i = 0; i < btnSelectedJobs.Count; i++)
-            {
-                ACtrlButton btnSelectedJob = btnSelectedJobs[i];
-                btnSelectedJob.MouseOver = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/Login.img/ClassSelect/list/class/layer:classCover"), PluginBase.PluginManager.FindWz);
-                btnSelectedJob.Size = new Size(152, 74);
-                btnSelectedJob.Visible = true;
-                btnSelectedJob.ButtonStateChanged += new EventHandler(aCtrl_RefreshCall);
-                btnSelectedJob.MouseClick += new MouseEventHandler(btnSelectedJob_MouseClick);
-            }
         }
 
         private void btns()
         {
             for (int i = 0; i < 42; i++)
             {
-                //if ((pageIndex * 7 + i + 1) > job_list.Count) continue;
                 var btnSelectedJob = new ACtrlButton();
+                btnSelectedJob.MouseOver = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/Login.img/ClassSelect/list/class/layer:classCover"), PluginBase.PluginManager.FindWz);
                 btnSelectedJob.Location = new Point(375 + 161 * (i / 7), 113 + 81 * (i % 7));
+                btnSelectedJob.Size = new Size(152, 74);
+                btnSelectedJob.Visible = true;
+                btnSelectedJob.ButtonStateChanged += new EventHandler(aCtrl_RefreshCall);
+                btnSelectedJob.MouseClick += new MouseEventHandler(btnSelectedJob_MouseClick);
                 btnSelectedJobs.Add(btnSelectedJob);
             }
         }
@@ -148,7 +143,7 @@ namespace WzComparerR2.CharaSimControl
         {
             this.preRender();
             this.SetBitmap(this.Bitmap);
-            this.CaptionRectangle = new Rectangle(this.baseOffset, new Size(1366, 768));
+            this.CaptionRectangle = new Rectangle(this.baseOffset, new Size(1366, 24));
             this.Location = newLocation;
             base.Refresh();
         }
@@ -176,15 +171,14 @@ namespace WzComparerR2.CharaSimControl
 
         private void control_event()
         {
-            if (pageIndex != 0)
-                pagePrev.Visible = true;
-            else
-                pagePrev.Visible = false;
-            if ((pageIndex * 7 + 42) >= job_list.Count)
-                pageNext.Visible = false;
-            else
-                pageNext.Visible = true;
-            this.hScroll.Maximum = 2;
+            pagePrev.Visible = pageIndex != 0;
+            pageNext.Visible = (pageIndex * 7 + 42) < job_list.Count;
+            this.hScroll.Maximum = job_list.Count > 42 ? job_list.Count / 7 - 5 : 0;
+            for (int i = 0; i < 42; i++)
+            {
+                btnSelectedJobs[i].Visible = (i + pageIndex * 7) < job_list.Count;
+            }
+            if (selectIndex < 0) selectIndex = 0;//防报错
         }
 
         private void renderBase(Graphics g)
@@ -198,18 +192,18 @@ namespace WzComparerR2.CharaSimControl
             render_bitmap(g, "UI/Login.img/ClassSelect/list/backgrnd1", 378, 81);
             g.DrawImage(Resource.ClassSelect_back_2_0, 50, 13);
             render_bitmap(g, $"UI/Login.img/ClassSelect/desc/info/{job_list[selectIndex].ToString()}/className", 48, 44);
-            render_bitmap(g, $"UI/Login.img/ClassSelect/desc/info/{job_list[selectIndex].ToString()}/jobMark", 50, 199);
+            render_bitmap(g, $"UI/Login.img/ClassSelect/desc/info/{job_list[selectIndex].ToString()}/jobMark", 50, 169);
             string subName = PluginManager.FindWz($@"UI/Login.img/ClassSelect/desc/info/{job_list[selectIndex].ToString()}/subName").GetValueEx<string>(null);
             string desc = PluginManager.FindWz($@"UI/Login.img/ClassSelect/desc/info/{job_list[selectIndex].ToString()}/desc").GetValueEx<string>(null).Replace("\\n", "\r\n");
             string race = PluginManager.FindWz($@"UI/Login.img/ClassSelect/desc/info/{job_list[selectIndex].ToString()}/race").GetValueEx<string>(null).Replace("\\n", "\r\n");
             string move = PluginManager.FindWz($@"UI/Login.img/ClassSelect/desc/info/{job_list[selectIndex].ToString()}/move").GetValueEx<string>(null).Replace("\\n", "\r\n");
             string stat = PluginManager.FindWz($@"UI/Login.img/ClassSelect/desc/info/{job_list[selectIndex].ToString()}/stat").GetValueEx<string>(null).Replace("\\n", "\r\n");
-            g.DrawString(subName, GearGraphics.ClassSelectFontBold, GearGraphics.WhiteBrush, 48f, 223f);
-            int picH = 263;
-            GearGraphics.DrawPlainText(g, desc, GearGraphics.ClassSelectDescFont, Color.FromArgb(255, 255, 255), 50, 345, ref picH, 16);
-            g.DrawString(race, GearGraphics.ClassSelectDescFont, GearGraphics.WhiteBrush, 143f, 383f);
-            g.DrawString(move, GearGraphics.ClassSelectDescFont, GearGraphics.WhiteBrush, 143f, 415f);
-            g.DrawString(stat, GearGraphics.ClassSelectDescFont, GearGraphics.WhiteBrush, 143f, 447f);
+            g.DrawString(subName, GearGraphics.ClassSelectFontBold, GearGraphics.WhiteBrush, 48f, 193f);
+            int picH = 233;
+            GearGraphics.DrawPlainText(g, desc, GearGraphics.ClassSelectDescFont, Color.FromArgb(255, 255, 255), 50, 305, ref picH, 16);
+            g.DrawString(race, GearGraphics.ClassSelectDescFont, GearGraphics.WhiteBrush, 143f, 356f);
+            g.DrawString(move, GearGraphics.ClassSelectDescFont, GearGraphics.WhiteBrush, 143f, 388f);
+            g.DrawString(stat, GearGraphics.ClassSelectDescFont, GearGraphics.WhiteBrush, 143f, 421f);
             for (int i = pageIndex * 7; i < 42 + pageIndex * 7; i++)
             {
                 if ((i + 1) > job_list.Count) continue;
@@ -218,6 +212,7 @@ namespace WzComparerR2.CharaSimControl
             render_bitmap(g, "UI/_Canvas/Login.img/ClassSelect/list/class/layer:classCover", 375 + 161 * (selectIndex / 7 - pageIndex), 113 + 81 * (selectIndex % 7));
             //g.DrawImage(Resource.ClassSelect_list_class_layerclassCover, 375 + 161 * (selectIndex / 7 - pageIndex), 113 + 81 * (selectIndex % 7));
             g.DrawString(job_list.Count.ToString(), GearGraphics.ClassSelectDescFont, GearGraphics.WhiteBrush, 1111f, 16f);
+
             foreach (AControl aCtrl in this.aControls)
             {
                 aCtrl.Draw(g);
@@ -257,10 +252,6 @@ namespace WzComparerR2.CharaSimControl
                 if (buttonIndex >= 0)
                 {
                     selectIndex = buttonIndex + pageIndex * 7;
-                    if (selectIndex >= job_list.Count)
-                    {
-                        selectIndex -= 7;
-                    }
                     waitForRefresh = true;
                     Refresh();
                 }
@@ -286,6 +277,8 @@ namespace WzComparerR2.CharaSimControl
         private void pagePrev_MouseClick(object sender, MouseEventArgs e)
         {
             pageIndex -= 1;
+            this.hScroll.Value = pageIndex;
+            this.scrollValue = this.hScroll.Value;
             if (selectIndex >= ((pageIndex + 5) * 7 - 1) && selectIndex < (pageIndex + 6) * 7)
                 selectIndex -= 7;
             waitForRefresh = true;
@@ -295,6 +288,8 @@ namespace WzComparerR2.CharaSimControl
         private void pageNext_MouseClick(object sender, MouseEventArgs e)
         {
             pageIndex += 1;
+            this.hScroll.Value = pageIndex;
+            this.scrollValue = this.hScroll.Value;
             if (selectIndex >= 0 && selectIndex < (pageIndex + 1) * 7)
                 selectIndex += 7;
             waitForRefresh = true;
@@ -304,6 +299,7 @@ namespace WzComparerR2.CharaSimControl
         private void hScroll_ValueChanged(object sender, EventArgs e)
         {
             this.scrollValue = this.hScroll.Value;
+            pageIndex = scrollValue;
             this.waitForRefresh = true;
         }
 
@@ -332,7 +328,6 @@ namespace WzComparerR2.CharaSimControl
 
         protected override void OnMouseDown(MouseEventArgs e)
         {
-            selectIndex += 1;
             MouseEventArgs childArgs = new MouseEventArgs(e.Button, e.Clicks, e.X - baseOffset.X, e.Y - baseOffset.Y, e.Delta);
 
             foreach (AControl ctrl in this.aControls)
@@ -351,7 +346,6 @@ namespace WzComparerR2.CharaSimControl
 
         protected override void OnMouseUp(MouseEventArgs e)
         {
-            selectIndex -= 1;
             MouseEventArgs childArgs = new MouseEventArgs(e.Button, e.Clicks, e.X - baseOffset.X, e.Y - baseOffset.Y, e.Delta);
 
             foreach (AControl ctrl in this.aControls)
@@ -384,6 +378,24 @@ namespace WzComparerR2.CharaSimControl
             }
 
             base.OnMouseClick(e);
+        }
+
+        protected override void OnMouseWheel(MouseEventArgs e)
+        {
+            MouseEventArgs childArgs = new MouseEventArgs(e.Button, e.Clicks, e.X - baseOffset.X, e.Y - baseOffset.Y, e.Delta);
+
+            foreach (AControl ctrl in this.aControls)
+            {
+                ctrl.OnMouseWheel(childArgs);
+            }
+
+            if (this.waitForRefresh)
+            {
+                this.Refresh();
+                waitForRefresh = false;
+            }
+
+            base.OnMouseWheel(e);
         }
     }
 }

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using WzComparerR2.WzLib;
+using static WzComparerR2.MapRender.UI.UIWorldMap;
 
 namespace WzComparerR2.MapRender
 {
@@ -9,26 +10,30 @@ namespace WzComparerR2.MapRender
     {
         public LifeInfo()
         {
-            this.speed = -100;
+            this.speed = 0;
+            this.Revive = new List<int>();
         }
 
         public int level;
         public long maxHP;
         public long maxMP;
         public int speed;
+        public int flySpeed;
+        public int chaseSpeed;
         public int PADamage;
         public int PDDamage;
         public int PDRate;
         public int MADamage;
         public int MDDamage;
         public int MDRate;
-        //public int acc;
-        //public int eva;
-        public long pushed;
+        public int acc;
+        public int eva;
+        public int pushed;
         public int exp;
         public ElemAttr elemAttr;
         public bool undead;
         public bool boss;
+        public List<int> Revive { get; private set; }
 
         public struct ElemAttr
         {
@@ -69,15 +74,17 @@ namespace WzComparerR2.MapRender
                         case "maxHP": lifeInfo.maxHP = node.GetValueEx<long>(0); break;
                         case "maxMP": lifeInfo.maxMP = node.GetValueEx<long>(0); break;
                         case "speed": lifeInfo.speed = node.GetValueEx<int>(0); break;
+                        case "flySpeed": lifeInfo.flySpeed = node.GetValueEx<int>(0); break;
+                        case "chaseSpeed": lifeInfo.chaseSpeed = node.GetValueEx<int>(0); break;
                         case "PADamage": lifeInfo.PADamage = node.GetValueEx<int>(0); break;
                         case "PDDamage": lifeInfo.PDDamage = node.GetValueEx<int>(0); break;
                         case "PDRate": lifeInfo.PDRate = node.GetValueEx<int>(0); break;
                         case "MADamage": lifeInfo.MADamage = node.GetValueEx<int>(0); break;
                         case "MDDamage": lifeInfo.MDDamage = node.GetValueEx<int>(0); break;
                         case "MDRate": lifeInfo.MDRate = node.GetValueEx<int>(0); break;
-                        //case "acc": lifeInfo.acc = node.GetValueEx<int>(0); break; //no longer used
-                        //case "eva": lifeInfo.eva = node.GetValueEx<int>(0); break; //no longer used
-                        case "pushed": lifeInfo.pushed = node.GetValueEx<long>(0); break;
+                        case "acc": lifeInfo.acc = node.GetValueEx<int>(0); break;
+                        case "eva": lifeInfo.eva = node.GetValueEx<int>(0); break;
+                        case "pushed": lifeInfo.pushed = node.GetValueEx<int>(0); break;
                         case "exp": lifeInfo.exp = node.GetValueEx<int>(0); break;
                         case "undead": lifeInfo.undead = node.GetValueEx<int>(0) != 0; break;
                         case "boss": lifeInfo.boss = node.GetValueEx<int>(0) != 0; break;
@@ -96,6 +103,17 @@ namespace WzComparerR2.MapRender
                                     case 'D': lifeInfo.elemAttr.D = resist; break;
                                     case 'P': lifeInfo.elemAttr.P = resist; break;
                                 }
+                            }
+                            break;
+                        case "revive":
+                            for (int i = 0; ; i++)
+                            {
+                                var reviveNode = node.FindNodeByPath(i.ToString());
+                                if (reviveNode == null)
+                                {
+                                    break;
+                                }
+                                lifeInfo.Revive.Add(reviveNode.GetValue<int>());
                             }
                             break;
                     }

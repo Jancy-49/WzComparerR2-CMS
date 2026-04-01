@@ -12,6 +12,7 @@ namespace WzComparerR2.MapRender.Patches2
         public int Ani { get; set; }
         public string No { get; set; }
         public string SpineAni { get; set; }
+        public int? SpineNo { get; set; }
         public int X { get; set; }
         public int Y { get; set; }
         public int Cx { get; set; }
@@ -23,8 +24,7 @@ namespace WzComparerR2.MapRender.Patches2
         public int ScreenMode { get; set; }
         public bool Flip { get; set; }
         public bool IsFront { get; set; }
-        public List<Tuple<int, int>> Quest { get; set; }
-        
+        public List<QuestInfo> Quest { get; private set; } = new List<QuestInfo>();
 
         public ItemView View { get; set; }
 
@@ -36,6 +36,7 @@ namespace WzComparerR2.MapRender.Patches2
                 Ani = node.Nodes["ani"].GetValueEx<int>(0),
                 No = node.Nodes["no"].GetValueEx<string>(null),
                 SpineAni = node.Nodes["spineAni"].GetValueEx<string>(null),
+                SpineNo = node.Nodes["spineNo"].GetValueEx<int?>(null),
 
                 X = node.Nodes["x"].GetValueEx(0),
                 Y = node.Nodes["y"].GetValueEx(0),
@@ -54,14 +55,10 @@ namespace WzComparerR2.MapRender.Patches2
             if (!string.IsNullOrWhiteSpace(backTags))
             {
                 item.Tags = backTags.Split(',').Select(tag => tag.Trim()).ToArray();
-            }
-            item.Quest = new List<Tuple<int, int>>();
-            if (node.Nodes["backTags"] != null)
-            {
-                int questID;
-                if (int.TryParse(node.Nodes["backTags"].GetValueEx<string>(null), out questID))
+
+                if (int.TryParse(backTags, out int questID))
                 {
-                    item.Quest.Add(Tuple.Create(questID, 1));
+                    item.Quest.Add(new QuestInfo(questID, 1));
                 }
             }
             return item;

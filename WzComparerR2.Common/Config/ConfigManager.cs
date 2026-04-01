@@ -68,10 +68,19 @@ namespace WzComparerR2.Config
             return false;
         }
 
+        /// <summary>
+        /// 对此方法的调用不应为尾调用, 否则<see cref="Assembly.GetCallingAssembly"/>会因尾调用优化出错.
+        /// </summary>
+        /// <seealso cref="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.assembly.getcallingassembly?redirectedfrom=MSDN&view=netcore-3.1#System_Reflection_Assembly_GetCallingAssembly"/>
         public static void RegisterAllSection()
         {
             var asm = Assembly.GetCallingAssembly();
-            var secTypes = asm.GetExportedTypes().Where(type => {
+            RegisterAllSection(asm);
+        }
+
+       public static void RegisterAllSection(Assembly assembly)
+        {
+            var secTypes = assembly.GetExportedTypes().Where(type => {
                 try
                 {
                     var baseType = type.BaseType;

@@ -24,31 +24,31 @@ namespace WzComparerR2.CharaSim
         private int pBuffRate; //被动buff百分比 如盾防精通
         private long totalMax;
         private bool smart; //当前的技能buff增加值是否为smart
-        
+
         public long BaseVal
         {
             get { return baseVal; }
             set { baseVal = value; }
         }
-        
+
         public int GearAdd
         {
             get { return gearAdd; }
             set { gearAdd = value; }
         }
-        
+
         public int BuffAdd
         {
             get { return buffAdd; }
             set { buffAdd = value; }
         }
-        
+
         public int EBuffAdd
         {
             get { return eBuffAdd; }
             set { eBuffAdd = value; }
         }
-        
+
         public int Rate
         {
             get { return rate; }
@@ -60,13 +60,13 @@ namespace WzComparerR2.CharaSim
             get { return aBuffRate; }
             set { aBuffRate = value; }
         }
-        
+
         public int PBuffRate
         {
             get { return pBuffRate; }
             set { pBuffRate = value; }
         }
-        
+
         public bool Smart
         {
             get { return smart; }

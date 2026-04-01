@@ -297,13 +297,18 @@ namespace WzComparerR2
                 FrameAnimationData.ApplyFlip(this.GraphicsDevice, aniItem.Data, options.FlipX, options.FlipY);
             }
 
+            if (options.Angle != 0)
+            {
+                FrameAnimationData.ApplyRotation(this.GraphicsDevice, aniItem.Data, options.Angle);
+            }
+
             if ((options.SpeedX != 0 && options.GoX != 0) || (options.SpeedY != 0 && options.GoY != 0))
             {
                 FrameAnimationData.ApplyMovement(this.GraphicsDevice, aniItem.Data, options.SpeedX, options.SpeedY, options.GoX, options.GoY, options.FullMove, options.AniStart, ref frameEnd);
             }
             var newAniItem = new FrameAnimator(FrameAnimationData.MergeAnimationData(baseAniItem.Data, aniItem.Data,
                     this.GraphicsDevice, options.AniOffset, options.PosX, options.PosY, options.AniStart, frameEnd));
-
+            
             if (removeTopItem) RemoveTopItem();
             AddItem(newAniItem);
 
@@ -354,25 +359,33 @@ namespace WzComparerR2
                 {
                     var alphaTimeline = GetAlphaTimeline(options);
                     frameEnd = alphaTimeline.Count - 1;
-                    switch (options.RectType)
+                    switch (options.ShapeType)
                     {
-                        case 0:
+                        case OverlayShapeType.Rectangle:
                             var width = -options.RectLT.X + options.RectRB.X;
                             var height = -options.RectLT.Y + options.RectRB.Y;
                             if (width <= 0 || height <= 0)
                             {
-                                MessageBoxEx.Show("输入范围错误。", "范围设置错误");
+                                MessageBoxEx.Show("输入范围无效。", "范围设置错误");
                                 return;
                             }
                             aniItemData = FrameAnimationData.CreateRectData(this.GraphicsDevice, config.OverlayRectColor.Value, alphaTimeline);
                             break;
-                        case 1:
+                        case OverlayShapeType.Circle:
                             if (options.RectRadius <= 0)
                             {
-                                MessageBoxEx.Show("输入半径错误。", "范围设置错误");
+                                MessageBoxEx.Show("输入半径无效。", "范围设置错误");
                                 return;
                             }
                             aniItemData = FrameAnimationData.CreateCircleData(this.GraphicsDevice, options.RectRadius, config.OverlayRectColor.Value, alphaTimeline);
+                            break;
+                        case OverlayShapeType.Polygon:
+                            if (options.Vertices.Count <= 2)
+                            {
+                                MessageBoxEx.Show("顶点最少需要3个。", "范围设置错误");
+                                return;
+                            }
+                            aniItemData = FrameAnimationData.CreatePolygonData(this.GraphicsDevice, options.Vertices, config.OverlayRectColor.Value, alphaTimeline);
                             break;
                         default:
                             break;
@@ -484,12 +497,12 @@ namespace WzComparerR2
             }
 
             return ret.GroupBy(t => new { t.Alpha, t.LT, t.RB }).Select(g => new FrameAnimationData.TimelineData()
-            {
-                LT = g.Key.LT,
-                RB = g.Key.RB,
-                Alpha = g.Key.Alpha,
-                Delay = g.Sum(t => t.Delay)
-            }).ToList();
+                {
+                    LT = g.Key.LT,
+                    RB = g.Key.RB,
+                    Alpha = g.Key.Alpha,
+                    Delay = g.Sum(t => t.Delay)
+                }).ToList();
         }
 
         private List<FrameAnimationData.TimelineData> GetAutoAreaTimeline(OverlayOptions options, FrameAnimationData data)
@@ -1026,7 +1039,7 @@ namespace WzComparerR2
 
             if (this.ShowInfo && this.XnaFont != null)
             {
-                //UpdateInfoText();
+                UpdateInfoText();
                 sprite.Begin();
                 sprite.DrawStringEx(this.XnaFont, this.sbInfo, Vector2.Zero, Color.Black);
                 sprite.End();
@@ -1050,7 +1063,7 @@ namespace WzComparerR2
                 // this is too lag so we don't support dragging gifs!
                 return;
             }
-
+            
             var imgObj = new ImageDataObject(null, fileName);
             this.DoDragDrop(imgObj, System.Windows.Forms.DragDropEffects.Copy);
             e.Handled = true;
@@ -1061,7 +1074,7 @@ namespace WzComparerR2
             this.sbInfo.Clear();
             if (ShowOverlayAni)
             {
-                this.sbInfo.Append("动画嵌套中\n");
+                this.sbInfo.Append("애니메이션 중첩 중\n");
                 this.Padding = new System.Windows.Forms.Padding(0, 28, 0, 0);
             }
             else
@@ -1088,7 +1101,7 @@ namespace WzComparerR2
                 }
                 */
                 time = this.CurrentTime;
-                this.sbInfo.AppendFormat("位置: {0}, 比例: {1:p0}, 播放: {2} / {3}",
+                this.sbInfo.AppendFormat("pos: {0}, scale: {1:p0}, play: {2} / {3}",
                     aniItem.Position,
                     base.GlobalScale,
                     //aniItem.Length <= 0 ? 0 : (time % aniItem.Length),
@@ -1096,6 +1109,21 @@ namespace WzComparerR2
                     this.MaxLength <= 0 ? 0 : (time % this.MaxLength),
                     this.MaxLength);
             }
+        }
+
+        public void DoPause()
+        {
+            base.Pause();
+        }
+
+        public void DoResume()
+        {
+            base.Resume();
+        }
+
+        public void DoTimeUpdate(int ms)
+        {
+            base.UpdateTimeOffset(ms);
         }
 
         public void DisposeAnimationItem(AnimationItem animationItem)
@@ -1135,7 +1163,7 @@ namespace WzComparerR2
                 case SpineAnimatorV2 spineV2:
                     if (spineV2.Skeleton != null)
                     {
-                        foreach (var slot in spineV2.Skeleton.Slots.Items)
+                        foreach(var slot in spineV2.Skeleton.Slots.Items)
                         {
                             var atlasRegion = (slot.Attachment switch
                             {

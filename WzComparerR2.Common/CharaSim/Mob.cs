@@ -116,8 +116,12 @@ namespace WzComparerR2.CharaSim
                 return this.AvatarLook != null;
             }
         }
-        public static Mob CreateFromNode(Wz_Node node, GlobalFindNodeFunction findNode)
+        public static Mob CreateFromNode(Wz_Node node, GlobalFindNodeFunction findNode, GlobalFindNodeFunction2 findNode2, Wz_File wzf = null)
         {
+            if (node == null)
+            {
+                return null;
+            }
             int mobID;
             Match m = Regex.Match(node.Text, @"^(\d{7})\.img$");
             if (!(m.Success && Int32.TryParse(m.Result("$1"), out mobID)))
@@ -255,7 +259,7 @@ namespace WzComparerR2.CharaSim
                 Wz_Node linkNode = null;
                 if (mobInfo.Link != null && findNode != null)
                 {
-                    linkNode = findNode(string.Format("Mob\\{0:d7}.img", mobInfo.Link));
+                    linkNode = findNode2(string.Format("Mob\\{0:d7}.img", mobInfo.Link), wzf);
                 }
                 if (linkNode == null)
                 {
@@ -264,9 +268,9 @@ namespace WzComparerR2.CharaSim
 
                 var imageFrame = new BitmapOrigin();
 
-                foreach (var action in new[] { "stand", "move", "fly" })
+                foreach (var action in new[] { @"stand\0", @"move\0", @"fly\0", @"info\thumbnail", @"info\default\0" })
                 {
-                    var actNode = linkNode.FindNodeByPath(action + @"\0");
+                    var actNode = linkNode.FindNodeByPath(action);
                     if (actNode != null)
                     {
                         imageFrame = BitmapOrigin.CreateFromNode(actNode, findNode);

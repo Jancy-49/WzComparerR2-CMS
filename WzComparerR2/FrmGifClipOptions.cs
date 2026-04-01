@@ -17,7 +17,7 @@ namespace WzComparerR2
         {
 #if NET6_0_OR_GREATER
             // https://learn.microsoft.com/en-us/dotnet/core/compatibility/fx-core#controldefaultfont-changed-to-segoe-ui-9pt
-            this.Font = new Font(new FontFamily("MS PGothic"), 9f);
+            this.Font = new Font("宋体", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
 #endif
             InitializeComponent();
         }
@@ -103,7 +103,7 @@ namespace WzComparerR2
 
         private void txtTime_ValueObjectChanged(object sender, EventArgs e)
         {
-            LockEvent(() => this.onUpdateDuration(false));
+            LockEvent(()=>this.onUpdateDuration(false));
         }
 
         private void txtTimeNew_ValueObjectChanged(object sender, EventArgs e)
@@ -182,30 +182,6 @@ namespace WzComparerR2
                     controls[6].ValueObject = (int)Math.Round(0.01 * width.Value * (int)txtScale.ValueObject);
                     controls[7].ValueObject = (int)Math.Round(0.01 * height.Value * (int)txtScale.ValueObject);
                 }
-            }
-        }
-
-        private void chk768Preset_CheckedChanged(object sender, EventArgs e)
-        {
-            if (chk768Preset.Checked)
-            {
-                txtClipLeftNew.Value = -683;
-                txtClipTopNew.Value = -384;
-                txtClipRightNew.Value = 683;
-                txtClipBottomNew.Value = 384;
-                txtWidthNew.Value = 1366;
-                txtHeightNew.Value = 768;
-                txtClipLeftNew.Enabled = false;
-                txtClipTopNew.Enabled = false;
-                txtClipRightNew.Enabled = false;
-                txtClipBottomNew.Enabled = false;
-            }
-            else
-            {
-                txtClipLeftNew.Enabled = true;
-                txtClipTopNew.Enabled = true;
-                txtClipRightNew.Enabled = true;
-                txtClipBottomNew.Enabled = true;
             }
         }
     }

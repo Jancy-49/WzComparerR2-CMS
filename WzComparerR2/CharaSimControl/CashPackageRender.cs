@@ -254,7 +254,7 @@ namespace WzComparerR2.CharaSimControl
                 }
                 if (limit != null && limit.Length > 0)
                 {
-                    TextRenderer.DrawText(g, "< " + limit + "限定出售 >", GearGraphics.ItemDetailFont, new Point(cashBitmap.Width, picH), ((SolidBrush)GearGraphics.OrangeBrush4).Color, TextFormatFlags.HorizontalCenter);
+                    TextRenderer.DrawText(g, "< " + limit + "限量销售 >", GearGraphics.ItemDetailFont, new Point(cashBitmap.Width, picH), ((SolidBrush)GearGraphics.OrangeBrush4).Color, TextFormatFlags.HorizontalCenter);
                     picH += 12;
                 }
             }
@@ -404,7 +404,7 @@ namespace WzComparerR2.CharaSimControl
                     }
                     break;
             }
-  
+
 
             bool hasLine = false;
             picH -= 0;//default is 4
@@ -684,6 +684,15 @@ namespace WzComparerR2.CharaSimControl
                     }
                 }
             }
+        }
+
+        private Wz_Node FindWzNode(string path)
+        {
+            if (SourceWzFile != null)
+            {
+                return PluginManager.FindWz(path, SourceWzFile);
+            }
+            return PluginBase.PluginManager.FindWz(path);
         }
     }
 }

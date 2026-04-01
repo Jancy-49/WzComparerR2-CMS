@@ -18,6 +18,7 @@ namespace WzComparerR2.CharaSim
             this.Reward = new QuestReward();
             this.Category = new List<int>();
             this.Check1Items = new Dictionary<string, Check1Item>();
+            this.Check1Infoex = new Dictionary<string, bool>();
         }
 
         private int _state {  get; set; }
@@ -40,6 +41,7 @@ namespace WzComparerR2.CharaSim
         public int MedalCategory { get; set; }
         public List<int> Category { get; set; }
         public Dictionary<string, Check1Item> Check1Items { get; set; }
+        public Dictionary<string, bool> Check1Infoex { get; set; }
         public int State
         {
             get
@@ -132,7 +134,6 @@ namespace WzComparerR2.CharaSim
                         case "npc":
                             var npcID = propNode.GetValueEx<int>(0);
                             Wz_Node npcNode = findNode2.Invoke(string.Format("Npc/{0:D7}.img", npcID), wzf);
-                            if (npcNode == null) npcNode = findNode2.Invoke("Npc/0002007.img", wzf); // Use Maple GM or Event Guide (イベントガイド) as placeholder NPC when NPC IMG does not exist
                             quest.Check0Npc = Npc.CreateFromNode(npcNode, findNode, findNode2, wzf); break;
                         case "lvmin":
                             quest.Lvmin = propNode.GetValueEx<int>(0); break;
@@ -167,6 +168,16 @@ namespace WzComparerR2.CharaSim
                             break;
                         case "npc":
                             quest.Check1NpcID = propNode.GetValueEx<int>(0); break;
+                        case "infoex":
+                            foreach (var subNode in propNode.Nodes)
+                            {
+                                var exVariable = subNode.FindNodeByPath("exVariable").GetValueEx<string>("");
+                                var cond = subNode.FindNodeByPath("cond").GetValueEx<int>(0);
+                                if (!quest.Check1Infoex.ContainsKey(exVariable))
+                                    quest.Check1Infoex.Add(exVariable, cond > 0 ? true : false);
+                            }
+                            break;
+
                     }
                 }
             }

@@ -1,15 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using WzComparerR2.WzLib;
-using WzComparerR2.PluginBase;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Content;
 using WzComparerR2.Animation;
-using WzComparerR2.Rendering;
 using WzComparerR2.Common;
+using WzComparerR2.PluginBase;
+using WzComparerR2.Rendering;
+using WzComparerR2.WzLib;
+using WzComparerR2.AvatarCommon;
 
 namespace WzComparerR2.MapRender
 {
@@ -78,13 +77,29 @@ namespace WzComparerR2.MapRender
             return (T)holder.Resource;
         }
 
-        public object LoadAnimationData(Wz_Node node)
+        public object LoadAnimationData(Wz_Node node, string forceAssetName = null)
         {
             object aniData;
-            string assetName = node.FullPathToFile;
+            string assetName = forceAssetName ?? node.FullPathToFile;
             if (!loadedAnimationData.TryGetValue(assetName, out aniData))
             {
                 aniData = InnerLoadAnimationData(node);
+                if (aniData == null)
+                {
+                    return null;
+                }
+                loadedAnimationData[assetName] = aniData;
+            }
+            return aniData;
+        }
+
+        public object LoadAvatarAnimationData(Wz_Node node, string action)
+        {
+            object aniData;
+            string assetName = string.Join("\\", new[] { node.FullPathToFile, action });
+            if (!loadedAnimationData.TryGetValue(assetName, out aniData))
+            {
+                aniData = InnerLoadAvatarAnimationData(node, action);
                 if (aniData == null)
                 {
                     return null;
@@ -302,6 +317,10 @@ namespace WzComparerR2.MapRender
                     return new Music(sound);
                 }
             }
+            else if (assetType == typeof(MsShader))
+            {
+                return this.LoadMsShader(node);
+            }
             return null;
         }
 
@@ -324,8 +343,16 @@ namespace WzComparerR2.MapRender
                 }
                 else if (node.Value == null && node.Nodes.Count > 0) //分析目录
                 {
-                    string spine = node.Nodes["spine"].GetValueEx<string>(null);
-                    if (spine != null) //读取spine动画
+                    if (node.Nodes["type"]?.Value is string type)
+                    {
+                        switch (type)
+                        {
+                            case "sprite":
+                                var msSprite = this.LoadMsSpriteData(node);
+                                return msSprite;
+                        }
+                    }
+                    else if (node.Nodes["spine"]?.Value is string spine)
                     {
                         var textureLoader = new SpineTextureLoader(this, node);
                         textureLoader.EnableTextureMissingFallback = true;
@@ -347,6 +374,7 @@ namespace WzComparerR2.MapRender
                             {
                                 return InnerLoadAnimationData(frameNode);
                             }
+
                             var frame = LoadFrame(frameNode);
                             frames.Add(frame);
                         }
@@ -354,6 +382,48 @@ namespace WzComparerR2.MapRender
                         return new RepeatableFrameAnimationData(frames) { Repeat = repeat };
                     }
                 }
+            }
+            return null;
+        }
+
+        private object InnerLoadAvatarAnimationData(Wz_Node node, string action)
+        {
+            if (node != null && (node = node.ResolveUol()) != null)
+            {
+                var frames = new List<Frame>();
+
+                var avatar = new AvatarCanvasManager();
+
+                foreach (var component in node.Nodes)
+                {
+                    switch (component.Text)
+                    {
+                        case "skin":
+                            var skin = component.GetValueEx<int>(0);
+                            avatar.AddBodyFromSkin(skin);
+                            break;
+
+                        case "ear":
+                            var type = component.GetValueEx<int>(0);
+                            avatar.SetEarType(type);
+                            break;
+
+                        default:
+                            var gearID = component.GetValueEx<int>(0);
+                            avatar.AddGear(gearID);
+                            break;
+                    }
+                }
+
+                for (int i = 0; i < avatar.GetActionFrameCount(action + "1"); i++)
+                {
+                    var frame = avatar.GetTexture2DFrame(action + "1", avatar.GetStandardEmotion(), i, 0, 0, this.GraphicsDevice);
+                    frames.Add(frame);
+                }
+
+                avatar.ClearCanvas();
+
+                return new RepeatableFrameAnimationData(frames) { Repeat = true };
             }
             return null;
         }
@@ -379,9 +449,11 @@ namespace WzComparerR2.MapRender
                 Texture = atlas.Texture,
                 AtlasRect = atlas.SrcRect,
                 Z = node.Nodes["z"].GetValueEx(0),
-                Delay = node.Nodes["delay"].GetValueEx(100),
+                Delay = node.Nodes["delay"].GetValueEx(120),
                 Blend = node.Nodes["blend"].GetValueEx(0) != 0,
-                Origin = (node.Nodes["origin"]?.Value as Wz_Vector)?.ToPoint() ?? Point.Zero
+                Origin = (node.Nodes["origin"]?.Value as Wz_Vector)?.ToPoint() ?? Point.Zero,
+                LT = (node.Nodes["lt"]?.Value as Wz_Vector)?.ToPoint() ?? Point.Zero,
+                RB = (node.Nodes["rb"]?.Value as Wz_Vector)?.ToPoint() ?? Point.Zero,
             };
             frame.A0 = node.Nodes["a0"].GetValueEx(255);
             frame.A1 = node.Nodes["a1"].GetValueEx(frame.A0);
@@ -403,7 +475,7 @@ namespace WzComparerR2.MapRender
                     return SpineAnimationDataV4.Create(detectionResult, textureLoader);
                 }
             }
-
+            
             return null;
         }
 
@@ -415,13 +487,105 @@ namespace WzComparerR2.MapRender
                 holder.Resource = new Texture2D(this.GraphicsDevice, width, height, false, SurfaceFormat.Alpha8);
                 loadedItems[path] = holder;
             }
+
             //结算计数器
             if (isCounting)
             {
                 holder.Count++;
             }
+
             //特殊处理
             return (Texture2D)holder.Resource;
+        }
+
+        private MsCustomSpriteData LoadMsSpriteData(Wz_Node node)
+        {
+            var textures = new List<MsCustomTexture>();
+            // load textures
+            for (int i = 0; ; i++)
+            {
+                Wz_Node textureNode = node.Nodes[i.ToString()];
+                if (textureNode == null)
+                {
+                    break;
+                }
+                var textureArray = new List<Texture2D>();
+                for (int j = 0; ; j++)
+                {
+                    Wz_Node textureIndexNode = textureNode.Nodes[j.ToString()];
+                    if (textureIndexNode == null)
+                    {
+                        break;
+                    }
+                    var linkNode = textureIndexNode.GetLinkedSourceNode(PluginManager.FindWz);
+                    textureArray.Add(this.Load<Texture2D>(linkNode));
+                }
+                var addressU = textureNode.Nodes["address_u"].GetValueEx<int>(0);
+                var addressV = textureNode.Nodes["address_v"].GetValueEx<int>(0);
+                textures.Add(new MsCustomTexture
+                {
+                    Texture = textureArray.FirstOrDefault(),
+                    Textures = textureArray.ToArray(),
+                    AddressU = addressU,
+                    AddressV = addressV,
+                });
+            }
+            // load shader
+            string shaderName = node.Nodes["shader"].GetValueEx<string>(null);
+            MsShader shader = null;
+            if (shaderName != null)
+            {
+                Wz_Node shaderNode = node.GetNodeWzImage()?.Node.FindNodeByPath(false, shaderName.Split('/'));
+                if (shaderNode != null)
+                {
+                    shader = this.Load<MsShader>(shaderNode);
+                }
+            }
+
+            var msSprite = new MsCustomSpriteData()
+            {
+                Textures = textures.ToArray(),
+                Shader = shader,
+            };
+            return msSprite;
+        }
+
+        private MsShader LoadMsShader(Wz_Node node)
+        {
+            var shader = new MsShader();
+            shader.ID = node.Nodes["id"]?.GetValueEx<string>(null);
+            if (node.Nodes["constant"] is Wz_Node constantRoot)
+            {
+                foreach (var constantNode in constantRoot.Nodes)
+                {
+                    if (constantNode.Nodes.Count > 0) // read as vector
+                    {
+                        if (constantNode.Nodes["x"]?.Value is float x)
+                        {
+                            if (constantNode.Nodes["y"]?.Value is float y)
+                            {
+                                if (constantNode.Nodes["z"]?.Value is float z)
+                                {
+                                    shader.Constants.Add(constantNode.Text, new MsShaderConstant(x, y, z));
+                                }
+                                else
+                                {
+                                    shader.Constants.Add(constantNode.Text, new MsShaderConstant(x, y));
+                                }
+                            }
+                            else
+                            {
+                                shader.Constants.Add(constantNode.Text, new MsShaderConstant(x));
+                            }
+                        }
+                    }
+                    else if (constantNode.Value is float x) // read as scalar
+                    {
+                        shader.Constants.Add(constantNode.Text, new MsShaderConstant(x));
+                    }
+                }
+            }
+            return shader;
         }
 
         protected virtual void Dispose(bool disposing)
@@ -492,17 +656,9 @@ namespace WzComparerR2.MapRender
             {
                 texture = null;
                 var frameNode = this.TopNode.FindNodeByPath(path);
+                frameNode = frameNode?.ResolveUol();
 
-                while (frameNode.Value is Wz_Uol uol)
-                {
-                    Wz_Node uolNode = uol.HandleUol(frameNode);
-                    if (uolNode != null)
-                    {
-                        frameNode = uolNode;
-                    }
-                }
-
-                if (frameNode.Value is Wz_Png)
+                if (frameNode?.Value is Wz_Png)
                 {
                     var linkNode = frameNode.GetLinkedSourceNode(PluginManager.FindWz);
                     // workaround for KMST 1172, skeleton atlas and other obj may link to the same png node.
@@ -510,11 +666,10 @@ namespace WzComparerR2.MapRender
                     texture = BaseLoader.Load<TextureAtlas>(linkNode).Texture;
                     return true;
                 }
-
                 return false;
             }
-            private Texture2D CreateEmptyTexture(string path, int width, int height) => this.BaseLoader.CreateEmptyTexture(path, width, height);
 
+            private Texture2D CreateEmptyTexture(string path, int width, int height) => this.BaseLoader.CreateEmptyTexture(path, width, height);
         }
     }
 }

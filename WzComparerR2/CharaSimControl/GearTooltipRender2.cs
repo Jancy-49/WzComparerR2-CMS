@@ -1,21 +1,22 @@
-﻿using System;
+﻿using SharpDX.Direct3D11;
+using SharpDX.DXGI;
+using SharpDX.X3DAudio;
+using System;
+using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using System.Drawing;
 using System.Drawing.Drawing2D;
+using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
-using Resource = CharaSimResource.Resource;
-using WzComparerR2.Common;
+using WzComparerR2.AvatarCommon;
 using WzComparerR2.CharaSim;
-using WzComparerR2.WzLib;
+using WzComparerR2.Common;
 using WzComparerR2.PluginBase;
-using System.Collections;
-using SharpDX.DXGI;
-using SharpDX.Direct3D11;
-using System.Security.Cryptography;
-using SharpDX.X3DAudio;
+using WzComparerR2.WzLib;
+using Resource = CharaSimResource.Resource;
 
 namespace WzComparerR2.CharaSimControl
 {
@@ -46,6 +47,7 @@ namespace WzComparerR2.CharaSimControl
         private CharacterStatus charStat;
 
         public Gear Gear { get; set; }
+        private AvatarCanvasManager avatar;
 
         public override object TargetItem
         {
@@ -62,6 +64,8 @@ namespace WzComparerR2.CharaSimControl
         public bool ShowSpeed { get; set; }
         public bool ShowLevelOrSealed { get; set; }
         public bool ShowMedalTag { get; set; } = true;
+        public bool MaxStar25 { get; set; } = false;
+        public bool ShowCosmetic { get; set; }
         public bool ShowCashPurchasePrice { get; set; }
         public bool IsCombineProperties { get; set; } = true;
         public bool AutoTitleWrap { get; set; }
@@ -70,6 +74,7 @@ namespace WzComparerR2.CharaSimControl
         public bool CompareMode { get; set; } = false;
         private bool isCurrencyConversionEnabled = (Translator.DefaultDesiredCurrency != "none");
         private string titleLanguage = "";
+        public int LoadedCommoditiesSlot { get; set; } = 0;
 
         private bool isPostNEXTClient;
         private bool isMsnClient;
@@ -223,6 +228,10 @@ namespace WzComparerR2.CharaSimControl
             var orange3FontColorTable = new Dictionary<string, Color>()
             {
                 { "c", ((SolidBrush)GearGraphics.OrangeBrush3).Color },
+            };
+            var itemPriceColorTable = new Dictionary<string, Color>()
+            {
+                { "$S", ((SolidBrush)GearGraphics.ItemPriceBrush).Color },
             };
             int value, value2;
 
@@ -714,15 +723,66 @@ namespace WzComparerR2.CharaSimControl
                 picH += 15;
 
                 Wz_Node android = PluginBase.PluginManager.FindWz(string.Format("Etc/Android/{0:D4}.img", value)) ?? PluginBase.PluginManager.FindWz("Etc/Android/0001.img");
-
-                int morphID = android?.Nodes["info"]?.Nodes["morphID"]?.GetValueEx<int>(0) ?? 0;
-                BitmapOrigin appearance = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz(morphID != 0 ? string.Format("Morph/{0:D4}.img/stand/0", morphID) : "Npc/0010300.img/stand/0"), PluginBase.PluginManager.FindWz);
-                appearance.Bitmap.RotateFlip(RotateFlipType.RotateNoneFlipX);
-
-                g.DrawImage(appearance.Bitmap, 63, picH + 9);
-                picH += 9 + appearance.Bitmap.Height + 13;
-
                 Wz_Node costume = android?.Nodes["costume"];
+                Wz_Node basic = android?.Nodes["basic"];
+
+                BitmapOrigin appearance = new BitmapOrigin();
+                int morphID = android?.Nodes["info"]?.Nodes["morphID"]?.GetValueEx<int>(0) ?? 0;
+                if (Gear.ToolTIpPreview.Bitmap != null)
+                {
+                    appearance = Gear.ToolTIpPreview;
+                    g.DrawImage(appearance.Bitmap, (bitmap.Width - appearance.Bitmap.Width) / 2 + 13, picH);
+                    picH += appearance.Bitmap.Height;
+                }
+                else
+                {
+                    if (morphID != 0)
+                    {
+                        appearance = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz(string.Format("Morph/{0:D4}.img/stand/0", morphID), this.SourceWzFile), PluginBase.PluginManager.FindWz, this.SourceWzFile);
+                    }
+                    if (appearance.Bitmap == null)
+                    {
+                        if (this.avatar == null)
+                        {
+                            this.avatar = new AvatarCanvasManager(this.SourceWzFile);
+                        }
+
+                        var skin = costume?.Nodes["skin"]?.Nodes["0"].GetValueEx<int?>(null);
+                        var hair = costume?.Nodes["hair"]?.Nodes["0"].GetValueEx<int?>(null);
+                        var face = costume?.Nodes["face"]?.Nodes["0"].GetValueEx<int?>(null);
+
+                        this.avatar.AddBodyFromSkin(skin.GetValueOrDefault(2015));
+                        this.avatar.AddGears([hair.GetValueOrDefault(30000), face.GetValueOrDefault(20000)]);
+
+                        if (basic != null)
+                        {
+                            foreach (var node in basic.Nodes)
+                            {
+                                var gearID = node.GetValueEx<int>(0);
+                                this.avatar.AddGear(gearID);
+                            }
+                        }
+
+                        appearance = this.avatar.GetBitmapOrigin();
+
+                        this.avatar.ClearCanvas();
+                    }
+
+                    if (appearance.Bitmap != null)
+                    {
+                        var imgrect = new Rectangle(Math.Max(appearance.Origin.X - 50, 0),
+                        Math.Max(appearance.Origin.Y - 100, 0),
+                        Math.Min(appearance.Bitmap.Width, appearance.Origin.X + 50) - Math.Max(appearance.Origin.X - 50, 0),
+                        Math.Min(appearance.Origin.Y, 100));
+
+                        g.DrawImage(appearance.Bitmap, 88 - Math.Min(appearance.Origin.X, 50), picH + Math.Max(80 - appearance.Origin.Y, 0), imgrect, GraphicsUnit.Pixel);
+
+                        picH += 100;
+                    }
+                }
+                //BitmapOrigin appearance = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz(morphID != 0 ? string.Format("Morph/{0:D4}.img/stand/0", morphID) : "Npc/0010300.img/stand/0"), PluginBase.PluginManager.FindWz);
+                //appearance.Bitmap.RotateFlip(RotateFlipType.RotateNoneFlipX);
+
                 List<string> randomParts = new List<string>();
                 if (costume?.Nodes["face"]?.Nodes["1"] != null)
                 {
@@ -1326,6 +1386,7 @@ namespace WzComparerR2.CharaSimControl
             bool willDrawMedalTag = this.ShowMedalTag && this.Gear.Sample.Bitmap == null
                 && this.Gear.Props.TryGetValue(GearPropType.medalTag, out value)
                 && this.TryGetMedalResource(value, out medalResNode);
+            bool isCosmetic = Gear.IsCosmetic(Gear.type);
 
             //判断是否绘制技能desc
             string levelDesc = null;
@@ -1358,6 +1419,33 @@ namespace WzComparerR2.CharaSimControl
                     string medalName = GearGraphics.GetNameTagString(sr);
                     GearGraphics.DrawNameTag(g, medalResNode, medalName.Replace("의 훈장", "").Replace("的勋章", ""), bitmap.Width, ref picH);
                     picH += 4;
+                }
+                else if (this.ShowCosmetic && Gear.type != GearType.android && isCosmetic)
+                {
+                    if (this.avatar == null)
+                    {
+                        this.avatar = new AvatarCanvasManager(this.SourceWzFile);
+                    }
+
+                    if (Gear.ItemID / 20000 == 0)
+                    {
+                        this.avatar.AddBodyFromSkin(Gear.ItemID % 10000);
+                    }
+                    else
+                    {
+                        this.avatar.AddBodyFromSkin(2015);
+                        this.avatar.AddGear(Gear.ItemID);
+                    }
+
+                    var cosmeticSample = this.avatar.GetBitmapOrigin();
+                    this.avatar.ClearCanvas();
+
+                    g.DrawImage(cosmeticSample.Bitmap, bitmap.Width / 2 - cosmeticSample.Origin.X, picH);
+                    picH += cosmeticSample.Bitmap.Height;
+                    picH += 4;
+
+                    //this.AvatarSample = new Bitmap(cosmeticSample.Bitmap);
+                    cosmeticSample.Bitmap.Dispose();
                 }
                 if (!string.IsNullOrEmpty(sr.Desc))
                 {
@@ -1467,7 +1555,20 @@ namespace WzComparerR2.CharaSimControl
                 }
             }
 
-
+            if (Gear.Cash && ShowCashPurchasePrice)
+            {
+                if (CharaSimLoader.LoadedCommodityPricesByItemId[LoadedCommoditiesSlot].ContainsKey(Gear.ItemID))
+                {
+                    var priceInfo = CharaSimLoader.LoadedCommodityPricesByItemId[LoadedCommoditiesSlot][Gear.ItemID].FirstOrDefault();
+                    int price = priceInfo.Price;
+                    string currency = priceInfo.Meso ? "金币" : "现金";
+                    if (price > 0)
+                    {
+                        picH += 16;
+                        GearGraphics.DrawString(g, "#$S- 购买价格: " + ItemStringHelper.ToCJKNumberExpr(price) + currency + "#", GearGraphics.EquipDetailFont, itemPriceColorTable, 13, 244, ref picH, 16);
+                    }
+                }
+            }
             picH += 2;
             format.Dispose();
             g.Dispose();
@@ -1758,7 +1859,7 @@ namespace WzComparerR2.CharaSimControl
                         int right = width - 18;
                         GearGraphics.DrawNewTooltipBack(g, 0, 0, width, picHeight);
                         g.DrawImage(Resource.UIToolTip_img_Item_Frame2_cover, 3, 3);
-                        TextRenderer.DrawText(g, "宠物列表", GearGraphics.ItemDetailFont, new Point(width, picH), Color.FromArgb(255, 255, 255), TextFormatFlags.HorizontalCenter);
+                        TextRenderer.DrawText(g, "宠物列表", GearGraphics.ItemDetailFont, new Point(width, picH), Color.FromArgb(204, 255, 0), TextFormatFlags.HorizontalCenter);
                         int iconLeft = 15;
                         int txtLeft = 55;
                         for (int index = 0; index < reqColumns; index++)
@@ -2122,7 +2223,7 @@ namespace WzComparerR2.CharaSimControl
                 extraReq = ItemStringHelper.GetExtraJobReqString(Gear.type) ??
                 (Gear.Props.TryGetValue(GearPropType.reqSpecJob, out value) ? ItemStringHelper.GetExtraJobReqString(value) : null);
             }
-            
+
             Image jobImage = extraReq == null ? Resource.UIToolTip_img_Item_Equip_Job_normal : extraReq.Contains("\r\n") ? Resource.UIToolTip_img_Item_Equip_Job_expand2 : Resource.UIToolTip_img_Item_Equip_Job_expand;
             g.DrawImage(jobImage, 10, picH);
 
@@ -2160,7 +2261,8 @@ namespace WzComparerR2.CharaSimControl
             {
                 StringFormat format = new StringFormat();
                 format.Alignment = StringAlignment.Center;
-                if (extraReq.Contains("\r\n")) {
+                if (extraReq.Contains("\r\n"))
+                {
                     int currentPicH = picH + 24;
                     string[] extraReqLines = extraReq.Split(new string[] { "\r\n" }, StringSplitOptions.None);
                     foreach (string line in extraReqLines)
@@ -2213,6 +2315,11 @@ namespace WzComparerR2.CharaSimControl
             int maxStar = Math.Max(Gear.GetMaxStar(isPostNEXTClient), Gear.Star);
             if (maxStar > 0)
             {
+                if (maxStar == 30 && this.MaxStar25)
+                {
+                    maxStar -= 5;
+                }
+
                 for (int i = 0; i < maxStar; i += 15)
                 {
                     int starLine = Math.Min(maxStar - i, 15);

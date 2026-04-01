@@ -4,7 +4,7 @@ using WzComparerR2.WzLib;
 
 namespace WzComparerR2.CharaSim
 {
-    public class Familiar
+    public class Familiar : IDisposable
     {
         public Familiar()
         {
@@ -22,7 +22,7 @@ namespace WzComparerR2.CharaSim
         public string FamiliarAttribute { get; set; }
         public BitmapOrigin FamiliarCover { get; set; }
 
-        public static Familiar CreateFromNode(Wz_Node node, GlobalFindNodeFunction findNode)
+        public static Familiar CreateFromNode(Wz_Node node, GlobalFindNodeFunction findNode, Wz_File wzf = null)
         {
             if (node == null)
                 return null;
@@ -36,6 +36,13 @@ namespace WzComparerR2.CharaSim
             Familiar familiar = new Familiar();
 
             familiar.FamiliarID = familiarID;
+
+            Wz_Node standNode = node.FindNodeByPath("stand\\0").ResolveUol();
+            if (standNode != null)
+            {
+                familiar.FamiliarCover = BitmapOrigin.CreateFromNode(standNode, findNode);
+            }
+
             Wz_Node infoNode = node.FindNodeByPath("info").ResolveUol();
 
             if (infoNode != null)
@@ -73,17 +80,20 @@ namespace WzComparerR2.CharaSim
                                 }
                             }
                             break;
+                        case "portrait":
+                            familiar.FamiliarCover = BitmapOrigin.CreateFromNode(subNode, findNode, wzf);
+                            break;
                     }
                 }
             }
 
-            Wz_Node standNode = node.FindNodeByPath("stand\\0").ResolveUol();
-            if (standNode != null)
-            {
-                familiar.FamiliarCover = BitmapOrigin.CreateFromNode(standNode, findNode);
-            }
-
             return familiar;
+        }
+
+        public void Dispose()
+        {
+            if (this.FamiliarCover.Bitmap != null)
+                this.FamiliarCover.Bitmap.Dispose();
         }
     }
 }

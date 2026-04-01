@@ -14,6 +14,7 @@ using WzComparerR2.WzLib;
 using System.Security.Cryptography.X509Certificates;
 using System.Runtime.InteropServices;
 using System.Threading;
+using Newtonsoft.Json.Linq;
 
 namespace WzComparerR2.CharaSimControl
 {
@@ -25,7 +26,7 @@ namespace WzComparerR2.CharaSimControl
             for (int i = 0; i < sec.Length; i++)
                 sec[i] = 1 << i;
 
-            hyperStatList = new int[] { 80000400, 80000401, 80000402, 80000403, 80000404, 80000405, 80000406, 80000409, 80000410, 80000412, 80000413, 80000414, 80000416, 80000419, 80000420, 80000421, 80000422 };
+            hyperStatList = new int[] { 80000400, 80000401, 80000402, 80000403, 80000404, 80000405, 80000406, 80000409, 80000410, 80000412, 80000413, 80000414, 80000422, 80000416, 80000419, 80000420, 80000421 };
             hyperStatBitmapList = hyperStatList.Select(id => Resource.ResourceManager.GetObject("UICharacterInfo_img_common_detailStat_HyperStat_Window_statList_" + id) as Bitmap).ToArray();
 
             initCtrl();
@@ -45,6 +46,7 @@ namespace WzComparerR2.CharaSimControl
         private Skill[] hyperStatSkillList;
 
         private ContextMenuStrip menu;
+        private ACtrlVScroll vScroll;
         private ACtrlButton btnClose;
         private ACtrlButton btntoggleDetailOpen;
         private ACtrlButton btntoggleDetailClose;
@@ -89,6 +91,14 @@ namespace WzComparerR2.CharaSimControl
         private ACtrlButton btnLVUp12;
         private ACtrlButton btnReduce;
         private bool waitForRefresh;
+
+        public JObject resultJson = null;//基础信息
+        public JObject resultJson2 = null;//人气度信息
+        public JObject resultJson3 = null;//角色属性信息
+        private string character_name = "WzComparerR2";
+        private string character_class = "元素师";
+        private int character_level = 281;
+        private int popularity = 0;
 
         public event ObjectMouseEventHandler ObjectMouseMove;
         public event EventHandler ObjectMouseLeave;
@@ -165,6 +175,33 @@ namespace WzComparerR2.CharaSimControl
             this.menu.Items.Add(new ToolStripMenuItem("复制", null, tsmiCopy_Click));
             this.menu.Items.Add(new ToolStripMenuItem("保存PNG", null, tsmiSave_Click));
             this.MouseClick += AfrmStat_MouseClick;
+
+            this.vScroll = new ACtrlVScroll();  //鼠标滑轮区域
+
+            this.vScroll.PicBase.Normal = new BitmapOrigin(Resource.VScr9_enabled_base);
+            this.vScroll.PicBase.Disabled = new BitmapOrigin(Resource.VScr9_disabled_base);
+
+            this.vScroll.BtnPrev.Normal = new BitmapOrigin(Resource.VScr9_enabled_prev0);
+            this.vScroll.BtnPrev.Pressed = new BitmapOrigin(Resource.VScr9_enabled_prev1);
+            this.vScroll.BtnPrev.MouseOver = new BitmapOrigin(Resource.VScr9_enabled_prev2);
+            this.vScroll.BtnPrev.Disabled = new BitmapOrigin(Resource.VScr9_enabled_prev0);
+            this.vScroll.BtnPrev.Size = this.vScroll.BtnPrev.Normal.Bitmap.Size;
+            this.vScroll.BtnPrev.Location = new Point(0, 0);
+
+            this.vScroll.BtnNext.Normal = new BitmapOrigin(Resource.VScr9_enabled_next0);
+            this.vScroll.BtnNext.Pressed = new BitmapOrigin(Resource.VScr9_enabled_next1);
+            this.vScroll.BtnNext.MouseOver = new BitmapOrigin(Resource.VScr9_enabled_next2);
+            this.vScroll.BtnNext.Disabled = new BitmapOrigin(Resource.VScr9_enabled_next0);
+            this.vScroll.BtnNext.Size = this.vScroll.BtnNext.Normal.Bitmap.Size;
+
+            this.vScroll.BtnThumb.Normal = new BitmapOrigin(Resource.VScr9_enabled_thumb0);
+            this.vScroll.BtnThumb.Pressed = new BitmapOrigin(Resource.VScr9_enabled_thumb1);
+            this.vScroll.BtnThumb.MouseOver = new BitmapOrigin(Resource.VScr9_enabled_thumb2);
+            this.vScroll.BtnThumb.Size = this.vScroll.BtnThumb.Normal.Bitmap.Size;
+
+            this.vScroll.Visible = false;
+            //this.vScroll.ValueChanged += new EventHandler(vScroll_ValueChanged);
+            this.vScroll.ChildButtonStateChanged += new EventHandler(aCtrl_RefreshCall);
 
             this.btnClose = new ACtrlButton(); //主页关闭按钮
             this.btnClose.Normal = new BitmapOrigin(Resource.UICharacterInfo_img_common_main_buttonclose_normal_0);
@@ -408,13 +445,13 @@ namespace WzComparerR2.CharaSimControl
 
             this.btnCash = new ACtrlButton();
             this.btnCash.Location = new Point(27, 280);
-            this.btnCash.Size = new Size(111, 20);
+            this.btnCash.Size = new Size(89, 20);
             this.btnCash.ButtonStateChanged += new EventHandler(aCtrl_RefreshCall);
             this.btnCash.MouseClick += new MouseEventHandler(btnCash_MouseClick);
 
             this.btnCashPreset = new ACtrlButton();
-            this.btnCashPreset.Location = new Point(138, 280);
-            this.btnCashPreset.Size = new Size(111, 20);
+            this.btnCashPreset.Location = new Point(116, 280);
+            this.btnCashPreset.Size = new Size(89, 20);
             this.btnCashPreset.ButtonStateChanged += new EventHandler(aCtrl_RefreshCall);
             this.btnCashPreset.MouseClick += new MouseEventHandler(btnCashPreset_MouseClick);
         }
@@ -423,6 +460,7 @@ namespace WzComparerR2.CharaSimControl
         {
             get
             {
+                yield return vScroll;
                 yield return btnClose;
                 yield return btntoggleDetailOpen;
                 yield return btntoggleDetailClose;
@@ -495,6 +533,7 @@ namespace WzComparerR2.CharaSimControl
                 Bitmap.Dispose();
 
             setControlState();
+            get_charinfo();
 
             Point baseOffsetnew = calcRenderBaseOffset();
             Size size = Resource.UICharacterInfo_img_common_main_backgrnd.Size;
@@ -601,6 +640,7 @@ namespace WzComparerR2.CharaSimControl
                 this.EquipVisible = false;
                 this.SkillVisible = false;
                 this.CashVisible = false;
+                this.vScroll.Visible = false;
             }
             else if (this.EquipVisible && this.DetailVisible)
             {
@@ -612,6 +652,7 @@ namespace WzComparerR2.CharaSimControl
                 this.StatVisible = false;
                 this.SkillVisible = false;
                 this.CashVisible = false;
+                this.vScroll.Visible = false;
             }
             else if (this.SkillVisible && this.DetailVisible)
             {
@@ -623,6 +664,7 @@ namespace WzComparerR2.CharaSimControl
                 this.StatVisible = false;
                 this.EquipVisible = false;
                 this.CashVisible = false;
+                this.vScroll.Visible = true;
             }
             else if (this.CashVisible && this.DetailVisible)
             {
@@ -634,6 +676,7 @@ namespace WzComparerR2.CharaSimControl
                 this.StatVisible = false;
                 this.EquipVisible = false;
                 this.SkillVisible = false;
+                this.vScroll.Visible = false;
             }
             else
             {
@@ -646,6 +689,7 @@ namespace WzComparerR2.CharaSimControl
                 this.EquipVisible = false;
                 this.SkillVisible = false;
                 this.CashVisible = false;
+                this.vScroll.Visible = false;
             }
             if (this.AbilityVisible && this.StatVisible)
             {
@@ -714,6 +758,20 @@ namespace WzComparerR2.CharaSimControl
                 {
                     setButtonEnabled(ctrl as ACtrlButton, true);
                 }
+            }
+        }
+
+        private void get_charinfo()
+        {
+            if (resultJson != null)
+            {
+                this.character_name = resultJson["character_name"].ToString();
+                this.character_class = resultJson["character_class"].ToString();
+                this.character_level = resultJson["character_level"].ToObject<int>();
+            }
+            if (resultJson2 != null)
+            {
+                this.popularity = resultJson2["popularity"].ToObject<int>();
             }
         }
 
@@ -791,12 +849,12 @@ namespace WzComparerR2.CharaSimControl
             if (this.character != null)
             {
                 CharacterStatus charStat = this.character.Status;
-                g.DrawString(this.character.Name, GearGraphics.ItemDetailFont, GearGraphics.WhiteBrush, (472f - g.MeasureString(this.character.Name, GearGraphics.ItemDetailFont).Width) / 2, 174f);
-                g.DrawString(ItemStringHelper.GetJobName(charStat.Job), GearGraphics.ItemDetailFont, GearGraphics.WhiteBrush, (150f - g.MeasureString(ItemStringHelper.GetJobName(charStat.Job), GearGraphics.ItemDetailFont).Width) / 2, 44f);
+                g.DrawString(character_name, GearGraphics.ItemDetailFont, GearGraphics.WhiteBrush, (472f - g.MeasureString(this.character.Name, GearGraphics.ItemDetailFont).Width) / 2, 174f);
+                g.DrawString(character_class, GearGraphics.ItemDetailFont, GearGraphics.WhiteBrush, (150f - g.MeasureString(character_class, GearGraphics.ItemDetailFont).Width) / 2, 44f);
                 g.DrawString(string.IsNullOrEmpty(this.character.Guild) ? "  King丶Back" : this.character.Guild.PadLeft(12), GearGraphics.ItemDetailFont, GearGraphics.GrayBrush, 373f, 150f);
                 g.DrawString("-", GearGraphics.ItemDetailFont, GearGraphics.GrayBrush, 444f - g.MeasureString("-", GearGraphics.ItemDetailFont).Width, 173f);
-                g.DrawString(charStat.Pop.ToString().PadLeft(5), GearGraphics.ItemDetailFont, GearGraphics.GrayBrush, 92f, 173f);
-                g.DrawString(charStat.Level.ToString().PadLeft(3), GearGraphics.LevelBoldFont, GearGraphics.WhiteBrush, 234f, 35f);
+                g.DrawString(popularity.ToString().PadLeft(5), GearGraphics.ItemDetailFont, GearGraphics.GrayBrush, 92f, 173f);
+                g.DrawString(character_level.ToString().PadLeft(3), GearGraphics.LevelBoldFont, GearGraphics.WhiteBrush, 234f, 35f);
                 g.DrawString(charStat.UnionLevel.ToString().PadLeft(5), GearGraphics.ItemDetailFont, GearGraphics.GrayBrush, 92f, 129f);
                 g.DrawString(charStat.DojoFloor.ToString().PadLeft(3) + "层", GearGraphics.ItemDetailFont, GearGraphics.GrayBrush, 92f, 151f);
             }
@@ -920,7 +978,7 @@ namespace WzComparerR2.CharaSimControl
                 g.DrawString(charStat.TamingMobDurationIncR.GetSum() + "%", GearGraphics.ItemDetailFont, charStat.TamingMobDurationIncR.BuffAdd > 0 ? Brushes.Red : GearGraphics.WhiteBrush, 451f, y, format);
 
                 y = 594f;
-                switch(statFont)
+                switch (statFont)
                 {
                     case 1:
                         g.DrawImage(Resource.UICharacterInfo_img_common_detailStat_canvasutilityFont, 24, 594);  //三选一属性第1页
@@ -971,7 +1029,7 @@ namespace WzComparerR2.CharaSimControl
             g.DrawImage(Resource.UICharacterInfo_img_remote_detailEquip_tabsymbolTab_normal_1, 354, 280);
             switch (this.ArcAut)
             {
-                case 1: 
+                case 1:
                     g.DrawImage(Resource.UICharacterInfo_img_remote_detailEquip_tabsymbolTab_selected_0, 262, 280);
                     g.DrawImage(Resource.UICharacterInfo_img_remote_detailEquip_ArcEquip_backgrnd, 262, 305);
                     g.DrawImage(Resource.UICharacterInfo_img_remote_detailEquip_ArcEquip_slotVector1_canvasslot, 280, 384);
@@ -981,7 +1039,7 @@ namespace WzComparerR2.CharaSimControl
                     g.DrawImage(Resource.UICharacterInfo_img_remote_detailEquip_ArcEquip_slotVector1_canvasslot, 330, 476);
                     g.DrawImage(Resource.UICharacterInfo_img_remote_detailEquip_ArcEquip_slotVector1_canvasslot, 380, 476);
                     break;
-                case 2: 
+                case 2:
                     g.DrawImage(Resource.UICharacterInfo_img_remote_detailEquip_tabsymbolTab_selected_1, 354, 280);
                     g.DrawImage(Resource.UICharacterInfo_img_remote_detailEquip_AutEquip_backgrnd, 262, 305);
                     g.DrawImage(Resource.UICharacterInfo_img_remote_detailEquip_AutEquip_slotVector1_canvasslot, 282, 384);
@@ -1002,20 +1060,20 @@ namespace WzComparerR2.CharaSimControl
             g.DrawImage(Resource.UICharacterInfo_img_remote_detail_tabdetailTab_selected_2, 238, 242);
             g.DrawImage(Resource.UICharacterInfo_img_remote_detailSkill_canvasskill, 13, 269);
             g.DrawImage(Resource.UICharacterInfo_img_remote_detailSkill_tabtypeTab_normal_0, 28, 285);
-            g.DrawImage(Resource.UICharacterInfo_img_remote_detailSkill_tabtypeTab_normal_1, 169, 285);  
+            g.DrawImage(Resource.UICharacterInfo_img_remote_detailSkill_tabtypeTab_normal_1, 169, 285);
             g.DrawImage(Resource.UICharacterInfo_img_remote_detailSkill_tabtypeTab_normal_2, 310, 285);
             int skillNum = 12;
             switch (this.SkillTab)
             {
-                case 1: 
+                case 1:
                     g.DrawImage(Resource.UICharacterInfo_img_remote_detailSkill_tabtypeTab_selected_0, 28, 285);
                     renderSkillBack(g, skillNum);
                     break;
-                case 2: 
+                case 2:
                     g.DrawImage(Resource.UICharacterInfo_img_remote_detailSkill_tabtypeTab_selected_1, 169, 285);
                     renderSkillBack(g, skillNum);
                     break;
-                case 3: 
+                case 3:
                     g.DrawImage(Resource.UICharacterInfo_img_remote_detailSkill_tabtypeTab_selected_2, 310, 285);
                     renderSkillBack(g, skillNum);
                     break;
@@ -1038,11 +1096,11 @@ namespace WzComparerR2.CharaSimControl
             g.DrawImage(Resource.UICharacterInfo_img_remote_detail_tabdetailTab_selected_3, 351, 242);
             g.DrawImage(Resource.UICharacterInfo_img_remote_detailCash_canvascash, 13, 269);
             g.DrawImage(Resource.UICharacterInfo_img_remote_detailCash_tabcashTab_normal_0, 28, 280);
-            g.DrawImage(Resource.UICharacterInfo_img_remote_detailCash_tabcashTab_normal_1, 139, 280);
+            g.DrawImage(Resource.UICharacterInfo_img_remote_detailCash_tabcashTab_normal_1, 117, 280);
             switch (this.CashPreset)
             {
                 case 1: g.DrawImage(Resource.UICharacterInfo_img_remote_detailCash_tabcashTab_selected_0, 28, 280); break;
-                case 2: g.DrawImage(Resource.UICharacterInfo_img_remote_detailCash_tabcashTab_selected_1, 139, 280); break;
+                case 2: g.DrawImage(Resource.UICharacterInfo_img_remote_detailCash_tabcashTab_selected_1, 117, 280); break;
                 default: break;
             }
             g.ResetTransform();
@@ -1082,7 +1140,7 @@ namespace WzComparerR2.CharaSimControl
                 default: break;
             }
             float ydistance = 22f;
-            var series = new[] { hyperLv, hyperLv2, hyperLv3, hyperLv4, hyperLv5, hyperLv6, hyperLv7, hyperLv8, hyperLv9, hyperLv10, hyperLv11, hyperLv12, hyperLv13, hyperLv14, hyperLv15, hyperLv16, hyperLv17};
+            var series = new[] { hyperLv, hyperLv2, hyperLv3, hyperLv4, hyperLv5, hyperLv6, hyperLv7, hyperLv8, hyperLv9, hyperLv10, hyperLv11, hyperLv12, hyperLv13, hyperLv14, hyperLv15, hyperLv16, hyperLv17 };
             int count = 0;
             foreach (var param in series)
             {
@@ -1122,8 +1180,8 @@ namespace WzComparerR2.CharaSimControl
             p.Offset(-11, -41);
             if (p.X < 0 || p.Y < 0)
                 return -1;
-            int idx = p.Y / 18;
-            if (new Rectangle(new Point(0, idx * 18), new Size(71, 16)).Contains(p))
+            int idx = p.Y / 22;
+            if (new Rectangle(new Point(0, idx * 22), new Size(71, 16)).Contains(p))
                 return idx;
             else
                 return -1;
@@ -1261,7 +1319,7 @@ namespace WzComparerR2.CharaSimControl
         {
             if (this.StatVisible && this.DetailVisible)
             {
-                switch(statFont)
+                switch (statFont)
                 {
                     case 1: statFont = 2; break;
                     case 2: statFont = 3; break;

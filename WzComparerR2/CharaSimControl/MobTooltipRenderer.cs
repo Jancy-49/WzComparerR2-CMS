@@ -33,8 +33,14 @@ namespace WzComparerR2.CharaSimControl
         public bool EnableWorldArchive { get; set; }
         public bool EnableMonsterBook { get; set; }
         private AvatarCanvasManager avatar { get; set; }
+        public Dictionary<int, HashSet<string>> DiffMobTags { get; set; } = new Dictionary<int, HashSet<string>>();
         private WorldArchiveTooltipRender WorldArchiveRender { get; set; }
         public override Bitmap Render()
+        {
+            return Render(false);
+        }
+
+        public Bitmap Render(bool doHighlight)
         {
             if (MobInfo == null)
             {
@@ -44,6 +50,7 @@ namespace WzComparerR2.CharaSimControl
             Bitmap bmp = new Bitmap(1, 1, PixelFormat.Format32bppArgb);
             Bitmap subMobBmpTooltip = null;
             Graphics g = Graphics.FromImage(bmp);
+            doHighlight = doHighlight && this.DiffMobTags.ContainsKey(MobInfo.ID);
 
             //预绘制
             List<TextBlock> titleBlocks = new List<TextBlock>();
@@ -104,7 +111,7 @@ namespace WzComparerR2.CharaSimControl
                 {
                     try
                     {
-                        Mob subMobInfo = Mob.CreateFromNode(PluginManager.FindWz(string.Format(@"Mob\{0:D7}.img", MobInfo.QuestCountGroupMobID[i]), this.SourceWzFile), PluginManager.FindWz);
+                        Mob subMobInfo = Mob.CreateFromNode(PluginManager.FindWz(string.Format(@"Mob\{0:D7}.img", MobInfo.QuestCountGroupMobID[i]), this.SourceWzFile), PluginManager.FindWz, PluginManager.FindWz);
                         subRenderer.MobInfo = subMobInfo;
                         subRenderer.EnableWorldArchive = false;
                         subMobBmps[i] = subRenderer.Render();
@@ -267,19 +274,35 @@ namespace WzComparerR2.CharaSimControl
                     picY += 16;
                 }
 
-                propBlocks.Add(PrepareText(g, "等级: " + MobInfo.Level, GearGraphics.ItemDetailFont, Brushes.White, 0, picY));
+                if (doHighlight && this.DiffMobTags[MobInfo.ID].Contains("level"))
+                    propBlocks.Add(PrepareText(g, "等级: " + MobInfo.Level, GearGraphics.ItemDetailFont, GearGraphics.Equip22BrushRare, 0, picY));
+                else
+                    propBlocks.Add(PrepareText(g, "等级: " + MobInfo.Level, GearGraphics.ItemDetailFont, Brushes.White, 0, picY));
                 string hpNum = !string.IsNullOrEmpty(MobInfo.FinalMaxHP) ? this.AddCommaSeparators(MobInfo.FinalMaxHP) : MobInfo.MaxHP.ToString("N0");
-                propBlocks.Add(PrepareText(g, "血量: " + hpNum, GearGraphics.ItemDetailFont, Brushes.White, 0, picY += 16));
+                if (doHighlight && this.DiffMobTags[MobInfo.ID].Contains("maxHP"))
+                    propBlocks.Add(PrepareText(g, "血量: " + hpNum, GearGraphics.ItemDetailFont, GearGraphics.Equip22BrushRare, 0, picY += 16));
+                else
+                    propBlocks.Add(PrepareText(g, "血量: " + hpNum, GearGraphics.ItemDetailFont, Brushes.White, 0, picY += 16));
                 string mpNum = !string.IsNullOrEmpty(MobInfo.FinalMaxMP) ? this.AddCommaSeparators(MobInfo.FinalMaxMP) : MobInfo.MaxMP.ToString("N0");
                 propBlocks.Add(PrepareText(g, "魔量: " + mpNum, GearGraphics.ItemDetailFont, Brushes.White, 0, picY += 16));
                 propBlocks.Add(PrepareText(g, "物理攻击力: " + MobInfo.PADamage, GearGraphics.ItemDetailFont, Brushes.White, 0, picY += 16));
                 propBlocks.Add(PrepareText(g, "魔法攻击力: " + MobInfo.MADamage, GearGraphics.ItemDetailFont, Brushes.White, 0, picY += 16));
-                propBlocks.Add(PrepareText(g, "物理防御力: " + MobInfo.PDRate + "%", GearGraphics.ItemDetailFont, Brushes.White, 0, picY += 16));
-                propBlocks.Add(PrepareText(g, "魔法防御力: " + MobInfo.MDRate + "%", GearGraphics.ItemDetailFont, Brushes.White, 0, picY += 16));
+
+                if (doHighlight && this.DiffMobTags[MobInfo.ID].Contains("PDRate"))
+                    propBlocks.Add(PrepareText(g, "物理防御力: " + MobInfo.PDRate + "%", GearGraphics.ItemDetailFont, GearGraphics.Equip22BrushRare, 0, picY += 16));
+                else
+                    propBlocks.Add(PrepareText(g, "物理防御力: " + MobInfo.PDRate + "%", GearGraphics.ItemDetailFont, Brushes.White, 0, picY += 16));
+                if (doHighlight && this.DiffMobTags[MobInfo.ID].Contains("MDRate"))
+                    propBlocks.Add(PrepareText(g, "魔法防御力: " + MobInfo.MDRate + "%", GearGraphics.ItemDetailFont, GearGraphics.Equip22BrushRare, 0, picY += 16));
+                else
+                    propBlocks.Add(PrepareText(g, "魔法防御力: " + MobInfo.MDRate + "%", GearGraphics.ItemDetailFont, Brushes.White, 0, picY += 16));
                 propBlocks.Add(PrepareText(g, "命中值: " + MobInfo.Acc, GearGraphics.ItemDetailFont, Brushes.White, 0, picY += 16));
                 propBlocks.Add(PrepareText(g, "回避值: " + MobInfo.Eva, GearGraphics.ItemDetailFont, Brushes.White, 0, picY += 16));
                 propBlocks.Add(PrepareText(g, "击退: " + MobInfo.Pushed.ToString("N0"), GearGraphics.ItemDetailFont, Brushes.White, 0, picY += 16));
-                propBlocks.Add(PrepareText(g, "经验值: " + MobInfo.Exp.ToString("N0"), GearGraphics.ItemDetailFont, Brushes.White, 0, picY += 16));
+                if (doHighlight && this.DiffMobTags[MobInfo.ID].Contains("exp"))
+                    propBlocks.Add(PrepareText(g, "经验值: " + MobInfo.Exp.ToString("N0"), GearGraphics.ItemDetailFont, GearGraphics.Equip22BrushRare, 0, picY += 16));
+                else
+                    propBlocks.Add(PrepareText(g, "经验值: " + MobInfo.Exp.ToString("N0"), GearGraphics.ItemDetailFont, Brushes.White, 0, picY += 16));
                 if (MobInfo.CharismaEXP > 0)
                 {
                     propBlocks.Add(PrepareText(g, "领导力: +" + MobInfo.CharismaEXP, GearGraphics.ItemDetailFont, Brushes.White, 0, picY += 16));

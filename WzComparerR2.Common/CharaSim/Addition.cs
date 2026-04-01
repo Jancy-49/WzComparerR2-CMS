@@ -25,7 +25,7 @@ namespace WzComparerR2.CharaSim
             {
                 case AdditionType.boss:
                     sb = new StringBuilder();
-                    sb.Append("攻击BOSS时，");
+                    sb.Append("攻击首领怪时，");
                     {
                         string v1;
                         if (this.Props.TryGetValue("prob", out v1))
@@ -43,7 +43,7 @@ namespace WzComparerR2.CharaSim
                         }
                         if (this.Props.TryGetValue("damage", out val))
                         {
-                            sb.AppendFormat("爆击伤害增加{0}%\r\n", val);
+                            sb.AppendFormat("暴击伤害增加{0}%\r\n", val);
                         }
                         if (sb.Length > 2)
                         {
@@ -79,7 +79,7 @@ namespace WzComparerR2.CharaSim
                     }
                     return sb.ToString();
                 case AdditionType.mobcategory:
-                    return "攻击" + ItemStringHelper.GetMobCategoryName(Convert.ToInt32(this.Props["category"])) + "怪物时，造成" + this.Props["damage"] + "%额外伤害";
+                    return ItemStringHelper.GetMobCategoryName(Convert.ToInt32(this.Props["category"])) + " 몬스터 공격 시, " + this.Props["damage"] + "% 추가 데미지";
                 case AdditionType.mobdie:
                     sb = new StringBuilder();
                     {
@@ -137,7 +137,11 @@ namespace WzComparerR2.CharaSim
                         props.Sort();
                         foreach (GearPropType type in props)
                         {
-                            sb.AppendLine(ItemStringHelper.GetGearPropString(type, Convert.ToInt32(Props[Enum.GetName(typeof(GearPropType), type)])));
+                            var text = ItemStringHelper.GetGearPropString(type, Convert.ToInt32(Props[Enum.GetName(typeof(GearPropType), type)]));
+                            if (!string.IsNullOrEmpty(text))
+                            {
+                                sb.AppendLine(text);
+                            }
                         }
                     }
                     if (sb.Length > 0)

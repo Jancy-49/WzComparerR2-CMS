@@ -36,6 +36,20 @@ namespace WzComparerR2.Config
             set { this["showReqSkill"] = value; }
         }
 
+        [ConfigurationProperty("showArea", DefaultValue = true)]
+        public bool ShowArea
+        {
+            get { return (bool)this["showArea"]; }
+            set { this["showArea"] = value; }
+        }
+
+        [ConfigurationProperty("showSkillValuesByJob", DefaultValue = true)]
+        public bool ShowSkillValuesByJob
+        {
+            get { return (bool)this["showSkillValuesByJob"]; }
+            set { this["showSkillValuesByJob"] = value; }
+        }
+
         [ConfigurationProperty("displayCooltimeMSAsSec", DefaultValue = true)]
         public bool DisplayCooltimeMSAsSec
         {
@@ -57,11 +71,11 @@ namespace WzComparerR2.Config
             set { this["ignoreEvalError"] = value; }
         }
 
-        [ConfigurationProperty("showparemeters", DefaultValue = true)]
+        [ConfigurationProperty("showParemeters", DefaultValue = true)]
         public bool ShowParameters
         {
-            get { return (bool)this["showparemeters"]; }
-            set { this["showparemeters"] = value; }
+            get { return (bool)this["showParemeters"]; }
+            set { this["showParemeters"] = value; }
         }
 
         [ConfigurationProperty("defaultLevel", DefaultValue = DefaultLevel.LevelMax)]

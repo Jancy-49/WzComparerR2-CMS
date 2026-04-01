@@ -29,6 +29,13 @@ namespace WzComparerR2.Config
             set { this["linkRecipeItem"] = value; }
         }
 
+        [ConfigurationProperty("showPurchasePrice", DefaultValue = true)]
+        public bool ShowPurchasePrice
+        {
+            get { return (bool)this["showPurchasePrice"]; }
+            set { this["showPurchasePrice"] = value; }
+        }
+
         [ConfigurationProperty("showCashPurchasePrice", DefaultValue = true)]
         public bool ShowCashPurchasePrice
         {

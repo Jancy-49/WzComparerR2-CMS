@@ -7,6 +7,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using WzComparerR2.WzLib;
 using WzComparerR2.Common;
+using WzComparerR2.MapRender.Effects;
 using WzComparerR2.MapRender.Patches2;
 using WzComparerR2.PluginBase;
 using WzComparerR2.Animation;
@@ -21,6 +22,8 @@ namespace WzComparerR2.MapRender
             this.Scene = new MapScene();
             this.MiniMap = new MiniMap();
             this.Tooltips = new List<TooltipItem>();
+            this.Events = new List<MapEvent>();
+            this.FootholdManager = new FootholdManager();
             this.Date = DateTime.Now;
 
             this.random = random;
@@ -40,10 +43,6 @@ namespace WzComparerR2.MapRender
         public int? ReturnMap { get; set; }
         public bool HideMinimap { get; set; }
         public int FieldLimit { get; set; }
-
-        public int? Barrier { get; set; }
-        public int? BarrierArc { get; set; }
-        public int? BarrierAut { get; set; }
         public string FieldScript { get; set; }
 
         public MiniMap MiniMap { get; private set; }
@@ -52,9 +51,45 @@ namespace WzComparerR2.MapRender
 
         public MapScene Scene { get; private set; }
         public IList<TooltipItem> Tooltips { get; private set; }
+        public List<MapEvent> Events { get; private set; }
+        public FootholdManager FootholdManager { get; private set; }
         public DateTime Date { get; set; }
+        public bool EnableMobMovement
+        {
+            get { return enableMobMovement; }
+            set
+            {
+                if (enableMobMovement == value)
+                {
+                    return;
+                }
+
+                enableMobMovement = value;
+                var hs = new HashSet<int>();
+                this.moveLayerQueue.Clear();
+                foreach (var life in this.Scene.Mobs)
+                {
+                    if (life.Controller != null)
+                    {
+                        if (!value)
+                        {
+                            life.Controller.SetDied(blockRevive: true);
+                            if (hs.Add(life.Controller.ID)) PlaySoundEff(life.Controller.ID, "Die");
+                            else life.Controller.PlayRegenSound = false; // 소리 테러 방지
+                        }
+                        life.Controller.MovementEnabled = value;
+                    }
+                }
+            }
+        }
+        public Action<string> SoundEffPlayer;
+        public Action<LifeItem> LoadMobResource;
 
         private readonly IRandom random;
+        private bool enableMobMovement;
+        private List<Tuple<SceneItem, int, int>> moveLayerQueue = new();
+        private List<Tuple<SceneItem, int>> addToLayerQueue = new();
+        private List<SceneItem> removeFromLayerQueue = new();
 
         public void Load(Wz_Node mapImgNode, ResourceLoader resLoader)
         {
@@ -104,6 +139,7 @@ namespace WzComparerR2.MapRender
             }
             if ((node = mapImgNode.Nodes["foothold"]) != null)
             {
+                this.Scene.FootholdContainerById.Clear();
                 for (int i = 0; i <= 7; i++)
                 {
                     var fhLevel = node.Nodes[i.ToString()];
@@ -112,6 +148,7 @@ namespace WzComparerR2.MapRender
                         LoadFoothold(fhLevel, i);
                     }
                 }
+                FootholdManager.Build(this.Scene.Layers);
             }
             if ((node = mapImgNode.Nodes["life"]) != null)
             {
@@ -149,6 +186,10 @@ namespace WzComparerR2.MapRender
             {
                 LoadLight(node);
             }
+            if ((node = mapImgNode.Nodes["effect"]) != null)
+            {
+                LoadEvents(node);
+            }
 
             //计算地图大小
             CalcMapSize();
@@ -182,10 +223,6 @@ namespace WzComparerR2.MapRender
             this.HideMinimap = infoNode.Nodes["hideMinimap"].GetValueEx(false);
             this.FieldLimit = infoNode.Nodes["fieldLimit"].GetValueEx(0);
             this.FieldScript = infoNode.Nodes["fieldScript"].GetValueEx<string>(null);
-
-            this.Barrier = infoNode.Nodes["barrier"].GetValueEx<int>();
-            this.BarrierArc = infoNode.Nodes["barrierArc"].GetValueEx<int>();
-            this.BarrierAut = infoNode.Nodes["barrierAut"].GetValueEx<int>();
         }
 
         private void LoadMinimap(Wz_Node miniMapNode, ResourceLoader resLoader)
@@ -287,9 +324,11 @@ namespace WzComparerR2.MapRender
                     var item = FootholdItem.LoadFromNode(node);
                     item.ID = int.Parse(node.Text);
                     item.Name = $"fh_{level}_{group.Text}_{node.Text}";
+                    item.LayerLevel = level;
 
                     var fhSceneNode = new ContainerNode<FootholdItem>() { Item = item };
                     layerSceneNode.Foothold.Nodes.Add(fhSceneNode);
+                    this.Scene.FootholdContainerById[item.ID] = fhSceneNode;
                 }
             }
         }
@@ -300,6 +339,7 @@ namespace WzComparerR2.MapRender
             var lifeNodeList = !isCategory ? lifeNode.Nodes : lifeNode.Nodes.SelectMany(n => n.Nodes);
 
             int i = 0;
+            var hs = new HashSet<int>();
             foreach (var node in lifeNodeList)
             {
                 var item = LifeItem.LoadFromNode(node);
@@ -314,14 +354,14 @@ namespace WzComparerR2.MapRender
                     item.Index = int.Parse(node.Text);
                 }
 
-                /*if (item.Type == LifeItem.LifeType.Npc)
+                if (item.Type == LifeItem.LifeType.Npc)
                 {
                     var npcNode = PluginManager.FindWz(string.Format("Npc/{0:D7}.img/info", item.ID));
                     if ((npcNode?.Nodes["hide"].GetValueEx(0) ?? 0) != 0)
                     {
                         continue;
                     }
-                }*/
+                }
 
                 //直接绑定foothold
                 ContainerNode<FootholdItem> fhNode;
@@ -333,6 +373,11 @@ namespace WzComparerR2.MapRender
                 {
                     Scene.Fly.Sky.Slots.Add(item);
                 }
+
+                // init controller
+                item.Controller = new BehaviorController(item, FootholdManager, movementEnabled: this.EnableMobMovement);
+                item.Controller.InitRandom(this.random);
+                if (!hs.Add(item.Controller.ID)) item.Controller.PlayRegenSound = false; // 소리 테러 방지
             }
         }
 
@@ -542,6 +587,21 @@ namespace WzComparerR2.MapRender
             this.Light = mapLight;
         }
 
+        private void LoadEvents(Wz_Node effectNode)
+        {
+            foreach (var node in effectNode.Nodes)
+            {
+                var index = node.Text;
+                var type = node.FindNodeByPath("type").GetValueEx<string>(null);
+                var defaultAnimation = node.FindNodeByPath("defaultAnimation").GetValueEx<string>(null);
+                var changedAnimation = node.FindNodeByPath("changedAnimation").GetValueEx<string>(null);
+                var tags = node.FindNodeByPath("tags").GetValueEx<string>(null);
+                var item = new MapEvent(index, type, defaultAnimation, changedAnimation, tags);
+
+                this.Events.Add(item);
+            }
+        }
+
         private void CalcMapSize()
         {
             if (!this.VRect.IsEmpty)
@@ -600,6 +660,10 @@ namespace WzComparerR2.MapRender
 
         private ContainerNode<FootholdItem> FindFootholdByID(int fhID)
         {
+            if (this.Scene.FootholdContainerById.TryGetValue(fhID, out var ret))
+            {
+                return ret;
+            }
             return this.Scene.Layers.Nodes.OfType<LayerNode>()
                 .SelectMany(layerNode => layerNode.Foothold.Nodes).OfType<ContainerNode<FootholdItem>>()
                 .FirstOrDefault(fhNode => fhNode.Item.ID == fhID);
@@ -670,7 +734,7 @@ namespace WzComparerR2.MapRender
             {
                 case 0: aniDir = "back"; break;
                 case 1: aniDir = "ani"; break;
-                case 2: aniDir = "spine"; break;
+                case 2: aniDir = $"spine{back.SpineNo}"; break;
                 default: throw new Exception($"Unknown back ani value: {back.Ani}.");
             }
             string path = $@"Map\Back\{back.BS}.img\{aniDir}\{back.No}";
@@ -688,7 +752,8 @@ namespace WzComparerR2.MapRender
             var aniItem = resLoader.LoadAnimationData(path);
             obj.View = new ObjItem.ItemView()
             {
-                Animator = CreateAnimator(aniItem, obj.SpineAni)
+                Animator = CreateAnimator(aniItem, obj.SpineAni),
+                Flip = obj.Flip
             };
         }
 
@@ -720,6 +785,7 @@ namespace WzComparerR2.MapRender
                     if (mobNode != null)
                     {
                         life.LifeInfo = LifeInfo.CreateFromNode(mobNode);
+                        life.Controller.SetSpeed(life.LifeInfo.speed, life.LifeInfo.flySpeed, life.LifeInfo.chaseSpeed);
                     }
 
                     //获取link
@@ -733,15 +799,21 @@ namespace WzComparerR2.MapRender
                     //加载动画
                     if (mobNode != null)
                     {
-                        var aniItem = this.CreateSMAnimator(mobNode, resLoader);
+                        var aniItem = this.CreateSMAnimator(mobNode, resLoader, forceCreateRegen: true);
                         if (aniItem != null)
                         {
-                            AddMobAI(aniItem);
                             life.View = new LifeItem.ItemView()
                             {
                                 Animator = aniItem
                             };
                         }
+                        var effAniItem = this.CreateEffectAnimationData(mobNode, resLoader);
+                        if (effAniItem != null)
+                        {
+                            (life.View.Animator as StateMachineAnimator)?.SetEffectData(effAniItem);
+                        }
+                        AddMobAI(life);
+                        life.Controller.InitFlyState();
                     }
                     break;
 
@@ -750,12 +822,14 @@ namespace WzComparerR2.MapRender
                     var npcNode = PluginManager.FindWz(path);
 
                     //TODO: 加载npc数据
+
                     life.HideName = (npcNode?.FindNodeByPath(@"info\hideName")?.GetValueEx<int>(0) ?? 0) != 0;
                     var customFontNode = npcNode?.FindNodeByPath(@"info\customFont:func");
                     if (customFontNode != null)
                     {
                         life.CustomFont = LifeItem.LoadCustomFontFunc(customFontNode);
                     }
+
                     int? npcLink = npcNode?.FindNodeByPath(@"info\link").GetValueEx<int>();
                     if (npcLink != null)
                     {
@@ -822,6 +896,11 @@ namespace WzComparerR2.MapRender
                 path = $@"Map\MapHelper.img\portal\game\{typeName}\{imgName}";
 
                 var aniNode = PluginManager.FindWz(path);
+                if (aniNode == null)
+                {
+                    path = $@"Map\MapHelper.img\portal\game\{typeName}";
+                    aniNode = PluginManager.FindWz(path);
+                }
                 if (aniNode != null)
                 {
                     bool useParts = new[] { "portalStart", "portalContinue", "portalExit" }
@@ -951,7 +1030,7 @@ namespace WzComparerR2.MapRender
                         for (int i = 0; i < particle.SubItems.Length; i++)
                         {
                             var subItem = particle.SubItems[i];
-                            if (subItem.Quest.Exists(quest => !resLoader.PatchVisibility.IsVisible(quest.Item1, quest.Item2)))
+                            if (subItem.Quest.Exists(quest => !resLoader.PatchVisibility.IsQuestVisible(quest.ID, quest.State)))
                             {
                                 continue;
                             }
@@ -970,40 +1049,113 @@ namespace WzComparerR2.MapRender
             }
         }
 
-        private StateMachineAnimator CreateSMAnimator(Wz_Node node, ResourceLoader resLoader)
+        public void LoadResource(ResourceLoader resLoader, SceneItem item)
+        {
+            if (item is BackItem)
+            {
+                PreloadResource(resLoader, (BackItem)item);
+            }
+            else if (item is ObjItem)
+            {
+                PreloadResource(resLoader, (ObjItem)item);
+            }
+            else if (item is TileItem)
+            {
+                PreloadResource(resLoader, (TileItem)item);
+            }
+            else if (item is LifeItem)
+            {
+                PreloadResource(resLoader, (LifeItem)item);
+            }
+            else if (item is PortalItem)
+            {
+                PreloadResource(resLoader, (PortalItem)item);
+            }
+            else if (item is IlluminantClusterItem)
+            {
+                PreloadResource(resLoader, (IlluminantClusterItem)item);
+            }
+            else if (item is ReactorItem)
+            {
+                PreloadResource(resLoader, (ReactorItem)item);
+            }
+            else if (item is ParticleItem)
+            {
+                PreloadResource(resLoader, (ParticleItem)item);
+            }
+        }
+
+        private StateMachineAnimator CreateSMAnimator(Wz_Node node, ResourceLoader resLoader, bool forceCreateRegen = false)
         {
             var aniData = new Dictionary<string, RepeatableFrameAnimationData>();
-            foreach (var actionNode in node.Nodes)
+            if ((node.Nodes["info"]?.Nodes["component"]?.Nodes?.Count ?? 0) > 0)
             {
-                var actName = actionNode.Text;
-                if (actName != "info" && !actName.StartsWith("condition"))
+                var componentNode = node.Nodes["info"]?.Nodes["component"];
+                foreach (var actName in new[] { "stand", "walk" })
                 {
-                    var ani = resLoader.LoadAnimationData(actionNode) as RepeatableFrameAnimationData;
+                    var ani = resLoader.LoadAvatarAnimationData(componentNode, actName) as RepeatableFrameAnimationData;
                     if (ani != null)
                     {
                         aniData.Add(actName, ani);
                     }
                 }
             }
-            long date = Int64.Parse(Date.ToString("yyyyMMddHHmm"));
-            foreach (var conditionNode in node.Nodes.Where(n => n.Text.StartsWith("condition")))
+            else
             {
-                if ((conditionNode.Nodes.Any(n => n.Text.All(char.IsDigit)) && conditionNode.Nodes.Where(n => n.Text.All(char.IsDigit)).All(n => resLoader.PatchVisibility.IsVisibleExact(int.Parse(n.Text), Convert.ToInt32(n.Value)))) || (conditionNode.Nodes["dateStart"].GetValueEx<long>(0) <= date && date <= conditionNode.Nodes["dateEnd"].GetValueEx<long>(0)))
+                if (forceCreateRegen && node.Nodes["regen"] == null)
                 {
-                    aniData.Clear();
-                    foreach (var conditionedActionNode in conditionNode.Nodes)
+                    var actionNode = node.FindNodeByPath("stand\\0") ?? node.FindNodeByPath("fly\\0") ?? node.FindNodeByPath("move\\0");
+                    if (actionNode != null)
                     {
-                        var conditionedActName = conditionedActionNode.Text;
-                        if (conditionedActName != "dateStart" && conditionedActName != "dateEnd")
+                        var ani = new RepeatableFrameAnimationData((resLoader.LoadAnimationData(actionNode, node.FullPathToFile + "_regen") as FrameAnimationData).Frames);
+                        if (ani != null)
                         {
-                            var ani = resLoader.LoadAnimationData(conditionedActionNode) as RepeatableFrameAnimationData;
-                            if (ani != null)
+                            var frame = ani.Frames.FirstOrDefault();
+                            if (frame != null)
                             {
-                                aniData.Add(conditionNode.Text + "/" + conditionedActName, ani);
+                                frame.Delay = 120;
+                                frame.A0 = 0;
+                                aniData.Add("regen", ani);
                             }
                         }
                     }
-                    break;
+                }
+                foreach (var actionNode in node.Nodes)
+                {
+                    var actName = actionNode.Text;
+                    if (actName != "info" && !actName.StartsWith("condition"))
+                    {
+                        var ani = resLoader.LoadAnimationData(actionNode) as RepeatableFrameAnimationData;
+                        if (ani != null)
+                        {
+                            if (!((actName.StartsWith("attack") || actName.StartsWith("skill")) &&
+                                (ani.Frames.Count == 1 && ani.Frames[0].Texture?.Width == 1 && ani.Frames[0].Texture?.Height == 1))) // 의미없는 ani는 추가x
+                            {
+                                aniData.Add(actName, ani);
+                            }
+                        }
+                    }
+                }
+                long date = Int64.Parse(Date.ToString("yyyyMMddHHmm"));
+                foreach (var conditionNode in node.Nodes.Where(n => n.Text.StartsWith("condition")))
+                {
+                    if ((conditionNode.Nodes.Any(n => n.Text.All(char.IsDigit)) && conditionNode.Nodes.Where(n => n.Text.All(char.IsDigit)).All(n => resLoader.PatchVisibility.IsQuestVisibleExact(int.Parse(n.Text), Convert.ToInt32(n.Value)))) || (conditionNode.Nodes["dateStart"].GetValueEx<long>(0) <= date && date <= conditionNode.Nodes["dateEnd"].GetValueEx<long>(0)))
+                    {
+                        aniData.Clear();
+                        foreach (var conditionedActionNode in conditionNode.Nodes)
+                        {
+                            var conditionedActName = conditionedActionNode.Text;
+                            if (conditionedActName != "dateStart" && conditionedActName != "dateEnd")
+                            {
+                                var ani = resLoader.LoadAnimationData(conditionedActionNode) as RepeatableFrameAnimationData;
+                                if (ani != null)
+                                {
+                                    aniData.Add(conditionNode.Text + "/" + conditionedActName, ani);
+                                }
+                            }
+                        }
+                        break;
+                    }
                 }
             }
             if (aniData.Count > 0)
@@ -1014,6 +1166,31 @@ namespace WzComparerR2.MapRender
             {
                 return null;
             }
+        }
+
+        private Dictionary<string, RepeatableFrameAnimationData> CreateEffectAnimationData(Wz_Node node, ResourceLoader resLoader)
+        {
+            var aniData = new Dictionary<string, RepeatableFrameAnimationData>();
+            foreach (var actionNode in node.Nodes)
+            {
+                var effectNode = actionNode.FindNodeByPath("info\\effect");
+                if (effectNode != null)
+                {
+                    var delay = effectNode.ParentNode?.FindNodeByPath("effectAfter")?.GetValueEx<int>(0) ?? 0;
+                    var ani = resLoader.LoadAnimationData(effectNode) as RepeatableFrameAnimationData;
+                    if (ani != null)
+                    {
+                        if (delay > 0)
+                        {
+                            var firstFrame = ani.Frames.FirstOrDefault();
+                            if (firstFrame != null && !(firstFrame.Texture == null && firstFrame.Delay == delay))
+                                ani.Frames.Insert(0, new Frame() { Delay = delay });
+                        }
+                        aniData.Add(actionNode.Text + "_effect", ani);
+                    }
+                }
+            }
+            return aniData;
         }
 
         private object CreateAnimator(object animationData, string aniName = null)
@@ -1034,47 +1211,212 @@ namespace WzComparerR2.MapRender
                     }
                     return spineAni;
 
+                case MsCustomSpriteData msSpriteData:
+                    var defaultTexture = msSpriteData.Textures[0].Texture;
+                    return new MsCustomSprite()
+                    {
+                        Size = new Vector2(defaultTexture.Width, defaultTexture.Height),
+                        Material = ShaderMaterialFactory.Create(msSpriteData),
+                    };
+
                 default:
                     return null;
             }
         }
 
-        private void AddMobAI(StateMachineAnimator ani)
+        private void AddMobAI(LifeItem life)
         {
-            var actions = new[] { "stand", "say", "mouse", "move", "hand", "laugh", "eye" };
+            StateMachineAnimator ani = life.View.Animator as StateMachineAnimator;
+            BehaviorController bc = life.Controller;
+            if (ani == null || bc == null) return;
+
+            bc.SetAnimationList(ani.Data.States);
+
+            string Prefer(params string[] names)
+            {
+                foreach (var n in names)
+                    if (ani.Data.States.Contains(n)) return n;
+                return null;
+            }
+
+            void SetIfDifferent(string name)
+            {
+                if (string.IsNullOrEmpty(name) || ani.GetCurrent() == name) return;
+                ani.SetAnimation(name);
+            }
+
+            void SetEffectIfDifferent(string name)
+            {
+                if (string.IsNullOrEmpty(name) || ani.GetCurrentEffect() == name) return;
+                ani.SetEffectAnimation(name);
+            }
+
+            bc.StateChanged += (o, e) =>
+            {
+                var bState = e.BState;
+                var hState = e.HState;
+                var vState = e.VState;
+                var pState = e.PState;
+                string aniName;
+                string defaultMoveAni = pState == BehaviorController.ProvokeState.Chase ? "chase" : "move";
+
+                switch (bState)
+                {
+                    case BehaviorController.BaseState.Idle: // goto check VState if Idle else return
+                        break;
+
+                    case BehaviorController.BaseState.Regen:
+                        aniName = Prefer("regen");
+                        if (aniName == null)
+                        {
+                            bc.EndRegen();
+                            return;
+                        }
+                        SetIfDifferent(aniName);
+                        if (bc.PlayRegenSound) PlaySoundEff(bc.ID, "Regen");
+                        return;
+
+                    case BehaviorController.BaseState.Hit:
+                        aniName = Prefer("hit1", "hit");
+                        if (aniName == null)
+                        {
+                            bc.RecoverHit();
+                            return;
+                        }
+                        SetIfDifferent(aniName);
+                        return;
+
+                    case BehaviorController.BaseState.Died:
+                        aniName = Prefer("die1", "die");
+                        if (aniName == null)
+                        {
+                            TrySummonMob(bc);
+                            if (bc.NoRegen)
+                            {
+                                RequestRemoveFromLayer(bc.Owner);
+                                break;
+                            }
+                            bc.RecoverDied();
+                            return;
+                        }
+                        SetIfDifferent(aniName);
+                        return;
+
+                    case BehaviorController.BaseState.Attack:
+                        aniName = Prefer(bc.SelectedAttack);
+                        if (aniName == null)
+                        {
+                            bc.EndAttack();
+                            return;
+                        }
+                        SetIfDifferent(aniName);
+                        SetEffectIfDifferent(aniName + "_effect");
+                        return;
+
+                    default:
+                        goto case BehaviorController.BaseState.Idle;
+                }
+
+                switch (vState)
+                {
+                    case BehaviorController.VerticalState.Fly:
+                        SetIfDifferent(Prefer("fly"));
+                        break;
+
+                    case BehaviorController.VerticalState.Jump:
+                    case BehaviorController.VerticalState.Fall:
+                        SetIfDifferent(Prefer("jump", "fly", "stand", "move"));
+                        break;
+
+                    case BehaviorController.VerticalState.Stop:
+                        if (hState == BehaviorController.HorizontalState.MoveL ||
+                            hState == BehaviorController.HorizontalState.MoveR)
+                        {
+                            SetIfDifferent(Prefer(defaultMoveAni, "fly"));
+                            if (e.StateType == BehaviorController.StateType.Horizontal &&
+                                (BehaviorController.HorizontalState)e.PrevState == BehaviorController.HorizontalState.Stop)
+                                PlaySoundEff(bc.ID, "Move");
+                        }
+                        else
+                        {
+                            SetIfDifferent(Prefer("stand", "fly"));
+                        }
+                        break;
+
+                    default:
+                        goto case BehaviorController.VerticalState.Stop;
+                }
+            };
+
+            bc.LayerChanged += (o, e) =>
+            {
+                var prevLayer = e.PrevLayer;
+                var newLayer = e.NewLayer;
+                RequestMoveLayer(bc.Owner, prevLayer, newLayer);
+            };
+
             ani.AnimationEnd += (o, e) =>
             {
                 switch (e.CurrentState)
                 {
                     case "regen":
-                        if (ani.Data.States.Contains("stand")) e.NextState = "stand";
-                        else if (ani.Data.States.Contains("fly")) e.NextState = "fly";
+                        bc.EndRegen();
                         break;
 
                     case "stand":
-                        if (ani.Data.States.Contains("jump") && this.random.NextPercent(0.05f))
+                    case "fly":
+                    case "jump":
+                    case "chase":
+                        e.NextState = e.CurrentState;
+                        break;
+
+                    case "move":
+                        e.NextState = e.CurrentState;
+                        PlaySoundEff(bc.ID, "Move");
+                        break;
+
+                    case "hit1":
+                    case "hit":
+                        bc.RecoverHit();
+                        break;
+
+                    case "die1":
+                    case "die":
+                        TrySummonMob(bc);
+                        if (bc.NoRegen)
                         {
-                            e.NextState = "jump";
+                            RequestRemoveFromLayer(bc.Owner);
+                            break;
                         }
-                        else if (ani.Data.States.Contains("move") && this.random.NextPercent(0.3f))
-                        {
-                            e.NextState = "move";
-                        }
-                        else
-                        {
-                            e.NextState = e.CurrentState;
-                        }
+                        bc.RecoverDied();
+                        break;
+
+                    case string s when s.StartsWith("attack") || s.StartsWith("skill"):
+                        bc.EndAttack();
                         break;
 
                     default:
                         goto case "regen";
                 }
             };
+
+            ani.EffectAnimationEnd += (o, e) =>
+            {
+                switch (e.CurrentState)
+                {
+                    case string s when s.Contains("effect"):
+                        e.NextState = "invisible";
+                        break;
+
+                    default:
+                        break;
+                }
+            };
         }
 
         private void AddNpcAI(StateMachineAnimator ani)
         {
-            var actions = new[] { "stand", "say", "mouse", "move", "hand", "laugh", "eye" };
+            var actions = new[] { "stand", "say", "mouse", "move", "hand", "laugh", "eye", "walk" };
             var availActions = ani.Data.States.Where(act => !act.EndsWith("_old") && Array.Exists(actions, acts => act.Contains(acts))).ToArray();
             if (availActions.Length > 0)
             {
@@ -1102,6 +1444,151 @@ namespace WzComparerR2.MapRender
                 mapImgNode = null;
                 return false;
             }
+        }
+
+        private void PlaySoundEff(int mobID, string path)
+        {
+            SoundEffPlayer?.Invoke($@"Sound\Mob.img\{mobID:D7}\" + path);
+        }
+
+        public void TrySummonMob(BehaviorController controller)
+        {
+            if (controller == null || controller.BlockRevive) return;
+
+            TrySummonMob(controller.Owner.LifeInfo.Revive, controller.ID, (int)controller.CurPos.X, (int)controller.CurPos.Y, 0, controller.Owner.Index + 1, controller.CurFoothold);
+        }
+
+        public void TrySummonMob(List<int> mobList, int parent, int x, int y, int z0, int z1, int f)
+        {
+            if (mobList.Count == 0) return;
+            foreach (var summon in mobList)
+            {
+                if (summon != parent)
+                {
+                    SummonMob(summon, x, y, z0: z0, z1: z1, fh: f, flip: false);
+                }
+            }
+        }
+
+        public bool SummonMob(int id, int x, int y, int z0, int z1, int fh, bool flip, bool playRegenMotion = false)
+        {
+            var path = $@"Mob\{id:D7}.img";
+            var mobNode = PluginManager.FindWz(path);
+            LifeItem mob = LifeItem.Create(id, LifeItem.LifeType.Mob, x, y, index: z1, flip: flip);
+            if (mobNode != null && mob != null)
+            {
+                // init controller
+                mob.Controller = new BehaviorController(mob, FootholdManager, movementEnabled: this.EnableMobMovement, summoned: true, playRegenMotion: playRegenMotion);
+                mob.Controller.InitRandom(this.random);
+
+                LoadMobResource?.Invoke(mob);
+                RequestAddToLayer(mob, mob.Controller.CurLayerFoothold);
+                return true;
+            }
+            else return false;
+        }
+
+        private void RequestMoveLayer(LifeItem lifeItem, int prev, int next)
+        {
+            if (lifeItem == null || prev == 0 || next == 0 || prev == next) return;
+
+            moveLayerQueue.Add(new Tuple<SceneItem, int, int>(lifeItem, prev, next));
+        }
+
+        private void RequestAddToLayer(LifeItem lifeItem, int foothold)
+        {
+            if (lifeItem == null || foothold == 0) return;
+
+            addToLayerQueue.Add(new Tuple<SceneItem, int>(lifeItem, foothold));
+        }
+
+        private void RequestRemoveFromLayer(LifeItem lifeItem)
+        {
+            if (lifeItem == null) return;
+
+            removeFromLayerQueue.Add(lifeItem);
+        }
+
+        public void ExecuteQueue()
+        {
+            ExecuteMoveLayerQueue();
+            ExecuteAddToLayerQueue();
+            ExecuteRemoveFromLayerQueue();
+        }
+
+        private void ExecuteMoveLayerQueue()
+        {
+            foreach (var task in moveLayerQueue)
+            {
+                SceneItem target = task.Item1;
+                int prev = task.Item2;
+                int next = task.Item3;
+                if (prev != -1)
+                {
+                    ContainerNode<FootholdItem> prevFHNode = FindFootholdByID(prev);
+                    if (prevFHNode.Slots.Remove(target))
+                    {
+                        if (next != -1)
+                        {
+                            ContainerNode<FootholdItem> nextFHNode = FindFootholdByID(next);
+                            nextFHNode.Slots.Add(target);
+                        }
+                        else
+                        {
+                            Scene.Fly.Sky.Slots.Add(target);
+                        }
+                    }
+                }
+                else
+                {
+                    if (Scene.Fly.Sky.Slots.Remove(target))
+                    {
+                        if (next != -1)
+                        {
+                            ContainerNode<FootholdItem> nextFHNode = FindFootholdByID(next);
+                            nextFHNode.Slots.Add(target);
+                        }
+                        else
+                        {
+                            Scene.Fly.Sky.Slots.Add(target);
+                        }
+                    }
+                }
+            }
+            moveLayerQueue.Clear();
+        }
+
+        private void ExecuteAddToLayerQueue()
+        {
+            foreach (var task in addToLayerQueue)
+            {
+                SceneItem target = task.Item1;
+                int foothold = task.Item2;
+                ContainerNode<FootholdItem> fhNode;
+                if (foothold != -1 && (fhNode = FindFootholdByID(foothold)) != null)
+                {
+                    fhNode.Slots.Add(target);
+                }
+                else
+                {
+                    Scene.Fly.Sky.Slots.Add(target);
+                }
+            }
+            addToLayerQueue.Clear();
+        }
+
+        private void ExecuteRemoveFromLayerQueue()
+        {
+            foreach (var target in removeFromLayerQueue)
+            {
+                foreach (var fhNode in this.Scene.Layers.Nodes.OfType<LayerNode>()
+                .SelectMany(layerNode => layerNode.Foothold.Nodes).OfType<ContainerNode<FootholdItem>>())
+                {
+                    if (fhNode.Slots.Remove(target)) break;
+                }
+                Scene.Fly.Sky.Slots.Remove(target);
+            }
+            removeFromLayerQueue.Clear();
         }
     }
 }

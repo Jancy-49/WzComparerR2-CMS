@@ -1,13 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>net48;net6.0-windows;net8.0-windows</TargetFrameworks>
+    <TargetFrameworks>net462;net6.0-windows;net8.0-windows</TargetFrameworks>
     <UseWindowsForms>true</UseWindowsForms>
     <AssemblyName>WzComparerR2.MapRender</AssemblyName>
     <RootNamespace>WzComparerR2.MapRender</RootNamespace>
     <IsPublishable>false</IsPublishable>
     <GenerateResourceUsePreserializedResources>true</GenerateResourceUsePreserializedResources>
     <WcR2Plugin>true</WcR2Plugin>
-	<Platforms>AnyCPU;ARM64</Platforms>
   </PropertyGroup>
   <Import Project="$(ProjectDir)..\Build\Common.props" />
   <PropertyGroup Condition="$(DotnetEdition) == 'core'">
@@ -43,6 +42,10 @@
       <Private>false</Private>
       <ExcludeAssets>all</ExcludeAssets>
     </ProjectReference>
+    <ProjectReference Include="..\WzComparerR2\WzComparerR2.csproj">
+      <Private>false</Private>
+      <ExcludeAssets>all</ExcludeAssets>
+    </ProjectReference>
     <Reference Include="DevComponents.DotNetBar2">
       <HintPath>..\References\DevComponents.DotNetBar2.dll</HintPath>
       <Private>false</Private>
@@ -67,12 +70,15 @@
     <PackageReference Include="ManagedBass" Version="3.1.1" ExcludeAssets="runtime" />
     <PackageReference Include="SharpDX" Version="$(SharpDXVersion)" ExcludeAssets="runtime" />
     <PackageReference Include="SharpDX.RawInput" Version="$(SharpDXVersion)" NoWarn="NU1701" />
-    <PackageReference Include="System.Resources.Extensions" Version="7.0.0" ExcludeAssets="runtime" />
+    <PackageReference Include="System.Resources.Extensions" Version="$(SystemResourcesExtensionsVersion)" ExcludeAssets="runtime" />
   </ItemGroup>
   <ItemGroup Condition="Exists('..\Build\CommonAssemblyInfo.cs')">
     <Compile Include="..\Build\CommonAssemblyInfo.cs">
       <Link>Properties\CommonAssemblyInfo.cs</Link>
     </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Effects\Resources\Native\*" />
   </ItemGroup>
   <Import Project="$(ProjectDir)..\Build\WcR2Plugin.targets" />
 </Project>

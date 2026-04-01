@@ -25,9 +25,27 @@ namespace WzComparerR2.AvatarCommon
             this.CosmeticFaceColor = 0;
         }
 
+        public AvatarCanvasManager(Wz_File sourceWzFile) : this()
+        {
+            this.SourceWzFile = sourceWzFile;
+        }
+
         private AvatarCanvas canvas;
         private int CosmeticHairColor;
         private int CosmeticFaceColor;
+        private Wz_File SourceWzFile;
+
+        public void AddBodyFromSkin(int skin)
+        {
+            var skinID = (skin % 2000) + 2000;
+            Wz_Node bodyNode = PluginBase.PluginManager.FindWz($@"Character\0000{skinID:D4}.img", this.SourceWzFile)
+                        ?? PluginBase.PluginManager.FindWz($@"Character\00002000.img", this.SourceWzFile);
+            Wz_Node headNode = PluginBase.PluginManager.FindWz($@"Character\0001{skinID:D4}.img", this.SourceWzFile)
+                ?? PluginBase.PluginManager.FindWz($@"Character\00012000.img", this.SourceWzFile);
+
+            this.canvas.AddPart(bodyNode);
+            this.canvas.AddPart(headNode);
+        }
 
         public void AddBodyFromSkin3(int skin)
         {
@@ -106,7 +124,7 @@ namespace WzComparerR2.AvatarCommon
 
         public BitmapOrigin GetBitmapOrigin()
         {
-            return GetBitmapOrigin("stand1", "default", 0, 0, 0);
+            return GetBitmapOrigin("stand1", GetStandardEmotion(), 0, 0, 0);
         }
 
         public BitmapOrigin GetBitmapOrigin(string actionName, string emotionName, int bodyFrame, int faceFrame, int tamingFrame)
@@ -219,6 +237,19 @@ namespace WzComparerR2.AvatarCommon
             }
 
             return node.GetValueEx<int>(0);
+        }
+
+        public string GetStandardEmotion()
+        {
+            if (this.canvas.Emotions.Contains("default"))
+            {
+                return "default";
+            }
+            else if (this.canvas.Emotions.Contains("blink"))
+            {
+                return "blink";
+            }
+            else return this.canvas.Emotions.FirstOrDefault();
         }
 
         public void ClearCanvas()

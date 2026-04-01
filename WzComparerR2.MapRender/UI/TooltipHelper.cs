@@ -2,49 +2,13 @@
 using System.Collections.Generic;
 using System.Text;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 using WzComparerR2.Common;
 using WzComparerR2.Rendering;
 
 namespace WzComparerR2.MapRender.UI
 {
-
     public static class TooltipHelper
     {
-        private static string ToCJKNumberExpr(long value)
-        {
-            var sb = new StringBuilder(16);
-            bool firstPart = true;
-            if (value >= 1_0000_0000_0000)
-            {
-                long part = value / 1_0000_0000;
-                sb.AppendFormat("{0}兆", part); // Korean: 조, Chinese+Japanese: 兆
-                value -= part * 1_0000_0000;
-                firstPart = false;
-            }
-            if (value >= 1_0000_0000)
-            {
-                long part = value / 1_0000_0000;
-                sb.AppendFormat("{0}亿", part); // Korean: 억, TradChinese+Japanese: 億, SimpChinese: 亿
-                value -= part * 1_0000_0000;
-                firstPart = false;
-            }
-            if (value >= 1_0000)
-            {
-                long part = value / 1_0000;
-                sb.Append(firstPart ? null : " ");
-                sb.AppendFormat("{0}万", part); // Korean: 만, TradChinese: 萬, SimpChinese+Japanese: 万
-                value -= part * 1_0000;
-                firstPart = false;
-            }
-            if (value > 0)
-            {
-                sb.Append(firstPart ? null : " ");
-                sb.AppendFormat("{0}", value);
-            }
-
-            return sb.Length > 0 ? sb.ToString() : "0";
-        }
         public static TextBlock PrepareTextBlock(IWcR2Font font, string text, ref Vector2 pos, Color color)
         {
             Vector2 size = font.MeasureString(text);
@@ -104,15 +68,13 @@ namespace WzComparerR2.MapRender.UI
             size = Vector2.Zero;
 
             blocks.Add(PrepareTextLine(fonts.TooltipContentFont, "等级: " + info.level + (info.boss ? " (首领怪)" : null), ref current, Color.White, ref size.X));
-            blocks.Add(PrepareTextLine(fonts.TooltipContentFont, "血量: " + ToCJKNumberExpr(info.maxHP), ref current, Color.White, ref size.X));
-            blocks.Add(PrepareTextLine(fonts.TooltipContentFont, "魔量: " + ToCJKNumberExpr(info.maxMP), ref current, Color.White, ref size.X));
-            blocks.Add(PrepareTextLine(fonts.TooltipContentFont, "物理攻击力: " + ToCJKNumberExpr(info.PADamage), ref current, Color.White, ref size.X));
-            blocks.Add(PrepareTextLine(fonts.TooltipContentFont, "魔法攻击力: " + ToCJKNumberExpr(info.MADamage), ref current, Color.White, ref size.X));
-            blocks.Add(PrepareTextLine(fonts.TooltipContentFont, "物理防御率: " + info.PDRate + "%", ref current, Color.White, ref size.X));
-            blocks.Add(PrepareTextLine(fonts.TooltipContentFont, "魔法防御率: " + info.MDRate + "%", ref current, Color.White, ref size.X));
+            blocks.Add(PrepareTextLine(fonts.TooltipContentFont, "血量/魔量: " + info.maxHP + " / " + info.maxMP, ref current, Color.White, ref size.X));
+            blocks.Add(PrepareTextLine(fonts.TooltipContentFont, "物理/魔法攻击力: " + info.PADamage + " / " + info.MADamage, ref current, Color.White, ref size.X));
+            blocks.Add(PrepareTextLine(fonts.TooltipContentFont, "物理/魔法防御力: " + info.PDRate + "% / " + info.MDRate + "%", ref current, Color.White, ref size.X));
+            blocks.Add(PrepareTextLine(fonts.TooltipContentFont, "回避/命中值: " + info.acc + " / " + info.eva, ref current, Color.White, ref size.X));
             blocks.Add(PrepareTextLine(fonts.TooltipContentFont, "击退: " + info.pushed, ref current, Color.White, ref size.X));
-            blocks.Add(PrepareTextLine(fonts.TooltipContentFont, "经验值: " + ToCJKNumberExpr(info.exp), ref current, Color.White, ref size.X));
-            if (info.undead) blocks.Add(PrepareTextLine(fonts.TooltipContentFont, "不死型", ref current, Color.White, ref size.X));
+            blocks.Add(PrepareTextLine(fonts.TooltipContentFont, "经验值: " + info.exp, ref current, Color.White, ref size.X));
+            if (info.undead) blocks.Add(PrepareTextLine(fonts.TooltipContentFont, "不死: 1", ref current, Color.White, ref size.X));
             StringBuilder sb;
             if ((sb = GetLifeElemAttrString(ref info.elemAttr)).Length > 0)
                 blocks.Add(PrepareTextLine(fonts.TooltipContentFont, "属性: " + sb.ToString(), ref current, Color.White, ref size.X));
@@ -245,8 +207,6 @@ namespace WzComparerR2.MapRender.UI
                         return Color.White;
                 }
             }
-
-
         }
     }
 }

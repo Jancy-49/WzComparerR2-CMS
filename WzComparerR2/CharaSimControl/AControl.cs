@@ -77,5 +77,6 @@ namespace WzComparerR2.CharaSimControl
         }
 
         public event MouseEventHandler MouseClick;
+        //public event MouseEventHandler MouseMove;
     }
 }

@@ -280,7 +280,7 @@ namespace WzComparerR2.MapRender.Effects
         {
             if (!nativeShaderDescriptions.TryGetValue(shaderName, out var nativeShaderDesc))
             {
-                throw new ArgumentException($"'{shaderName}' のシェーダーの説明が見つかりません。", nameof(shaderName));
+                throw new ArgumentException($"Can't find shader description of '{shaderName}'.", nameof(shaderName));
             }
 
             var asm = Assembly.GetAssembly(typeof(EffectResources));

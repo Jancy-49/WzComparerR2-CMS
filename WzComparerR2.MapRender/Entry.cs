@@ -20,33 +20,29 @@ namespace WzComparerR2.MapRender
 
         }
 
-#if MapRenderV1
+        #if MapRenderV1
         private RibbonBar bar;
         private ButtonItem btnItemMapRender;
         private FrmMapRender mapRenderGame1;
-#endif
+        #endif
 
         private RibbonBar bar2;
         private ButtonItem btnItemMapRenderV2;
         private FrmMapRender2 mapRenderGame2;
 
-        //NoOptimization防止Assembly.GetCallingAssembly因尾调用优化出错
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoOptimization)]
         protected override void OnLoad()
         {
-#if MapRenderV1
+            #if MapRenderV1
             this.bar = Context.AddRibbonBar("Modules", "地图渲染");
             btnItemMapRender = new ButtonItem("", "地图渲染");
             btnItemMapRender.Click += btnItem_Click;
             bar.Items.Add(btnItemMapRender);
-#endif
-
+            #endif
             this.bar2 = Context.AddRibbonBar("Modules", "地图渲染");
-            btnItemMapRenderV2 = new ButtonItem("", "地图渲染");
+            btnItemMapRenderV2 = new ButtonItem("", "地图渲染V2");
             btnItemMapRenderV2.Click += btnItem_Click;
             bar2.Items.Add(btnItemMapRenderV2);
-
-            ConfigManager.RegisterAllSection();
+            ConfigManager.RegisterAllSection(this.GetType().Assembly);
         }
 
         void btnItem_Click(object sender, EventArgs e)
@@ -61,7 +57,7 @@ namespace WzComparerR2.MapRender
                 {
                     if (wzFile == null || wzFile.Type != Wz_Type.Map)
                     {
-                        if (MessageBoxEx.Show("所选Img不属于Map.wz，是否继续？", "提示", MessageBoxButtons.OKCancel) != DialogResult.OK)
+                        if (MessageBoxEx.Show("未选择Map.wz的地图img。是否继续进行？", "警告", MessageBoxButtons.OKCancel) != DialogResult.OK)
                         {
                             goto exit;
                         }
@@ -71,7 +67,10 @@ namespace WzComparerR2.MapRender
                     if (!sl.HasValues) //生成默认stringLinker
                     {
                         sl = new StringLinker();
-                        sl.Load(PluginManager.FindWz(Wz_Type.String).GetValueEx<Wz_File>(null), PluginManager.FindWz(Wz_Type.Item).GetValueEx<Wz_File>(null), PluginManager.FindWz(Wz_Type.Etc).GetValueEx<Wz_File>(null), PluginManager.FindWz(Wz_Type.Quest).GetValueEx<Wz_File>(null));
+                        sl.Load(PluginManager.FindWz(Wz_Type.String).GetValueEx<Wz_File>(null),
+                            PluginManager.FindWz(Wz_Type.Item).GetValueEx<Wz_File>(null),
+                            PluginManager.FindWz(Wz_Type.Etc).GetValueEx<Wz_File>(null),
+                            PluginManager.FindWz(Wz_Type.Quest).GetValueEx<Wz_File>(null));
                     }
 
                     //开始绘制
@@ -104,36 +103,36 @@ namespace WzComparerR2.MapRender
                         else
 #endif
                         {
-                                if (this.mapRenderGame2 != null)
-                                {
-                                    // post message to the opening game.
-                                    this.mapRenderGame2.LoadMap(img);
-                                    return;
-                                }
-                                else
-                                {
-                                    this.mapRenderGame2 = new FrmMapRender2() { StringLinker = sl };
-                                    this.mapRenderGame2.Window.Title = "MapRender " + this.Version;
-                                    this.mapRenderGame2.LoadMap(img);
+                            if (this.mapRenderGame2 != null)
+                            {
+                                // post message to the opening game.
+                                this.mapRenderGame2.LoadMap(img);
+                                return;
+                            }
+                            else
+                            {
+                                this.mapRenderGame2 = new FrmMapRender2() { StringLinker = sl };
+                                this.mapRenderGame2.Window.Title = "MapRender " + this.Version;
+                                this.mapRenderGame2.LoadMap(img);
 
-                                    try
+                                try
+                                {
+                                    using (this.mapRenderGame2)
                                     {
-                                        using (this.mapRenderGame2)
-                                        {
-                                            this.mapRenderGame2.Run();
-                                        }
+                                        this.mapRenderGame2.Run();
                                     }
-                                    finally
-                                    {
-                                        this.mapRenderGame2 = null;
-                                    }
+                                }
+                                finally
+                                {
+                                    this.mapRenderGame2 = null;
                                 }
                             }
+                        }
 #if !DEBUG
                         }
                         catch (Exception ex)
                         {
-                            PluginManager.LogError("MapRender", ex, "MapRender Error:");
+                            PluginManager.LogError("MapRender", ex, "MapRender error:");
                             MessageBoxEx.Show(ex.ToString(), "MapRender");
                         }
 #endif
@@ -145,10 +144,10 @@ namespace WzComparerR2.MapRender
                 }
             }
 
-            MessageBoxEx.Show("没有选择一个map的img", "错误");
+            MessageBoxEx.Show("请从Map.wz选择地图img。", "错误");
 
-        exit:
-        return;
+            exit:
+            return;
         }
 
     }

@@ -1,23 +1,23 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
-using System.Security.Cryptography;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using AES = System.Security.Cryptography.Aes;
-
-#if NET6_0_OR_GREATER
-using HtmlAgilityPack;
-using System.Net; 
-using KMS = MapleStory.OpenAPI.KMS;
-using MSEA = MapleStory.OpenAPI.MSEA;
-using MapleStory.OpenAPI.Common;
-using System.Net.Http;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
+using System.Text.RegularExpressions;
+using System.IO;
+using AES = System.Security.Cryptography.Aes;
+using System.Security.Cryptography;
+using System.Runtime.CompilerServices;
+
+#if NET6_0_OR_GREATER
+using KMS = MapleStory.OpenAPI.KMS;
+using MSEA = MapleStory.OpenAPI.MSEA;
+using TMS = MapleStory.OpenAPI.TMS;
+using MapleStory.OpenAPI.Common;
+using System.Net.Http;
 using System.Text.Json;
 using System.Text.Encodings.Web;
-
 
 namespace WzComparerR2.OpenAPI
 {
@@ -45,6 +45,14 @@ namespace WzComparerR2.OpenAPI
                     }
                     break;
 
+                case "TMS":
+                    this.region = 2;
+                    if (API_TMS == null)
+                    {
+                        API_TMS = new TMS.MapleStoryAPI(apiKey);
+                    }
+                    break;
+
                 default:
                     break;
             }
@@ -54,6 +62,7 @@ namespace WzComparerR2.OpenAPI
         private int region;
         private KMS.MapleStoryAPI API_KMS;
         private MSEA.MapleStoryAPI API_MSEA;
+        private TMS.MapleStoryAPI API_TMS;
 
         public bool CheckSameAPIKey(string apiKey)
         {
@@ -68,6 +77,8 @@ namespace WzComparerR2.OpenAPI
                     return this.region == 0;
                 case "MSEA":
                     return this.region == 1;
+                case "TMS":
+                    return this.region == 2;
                 default:
                     return false;
             }
@@ -88,6 +99,10 @@ namespace WzComparerR2.OpenAPI
                         character = await API_MSEA.GetCharacter(characterName);
                         return character.OCID;
 
+                    case 2:
+                        character = await API_TMS.GetCharacter(characterName);
+                        return character.OCID;
+
                     default:
                         return null;
                 }
@@ -97,219 +112,16 @@ namespace WzComparerR2.OpenAPI
                 switch (e.ErrorCode)
                 {
                     case MapleStoryAPIErrorCode.OPENAPI00004:
-                        throw new Exception(Utils.GetExceptionMsg(e, forceMsg: $"キャラクター名が正しくありません。"));
+                        throw new Exception(Utils.GetExceptionMsg(e, forceMsg: $"角色名无效。"));
                     default:
                         throw new Exception(Utils.GetExceptionMsg(e));
                 }
+                
             }
             catch
             {
                 throw;
             }
-        }
-
-        public async Task<bool> isJMSUnderMaintenance()
-        {
-            try
-            {
-                using (HttpClient client = new HttpClient(new HttpClientHandler { AllowAutoRedirect = false }))
-                {
-                    string url = "https://maplestory.nexon.co.jp/maintenance";
-                    HttpResponseMessage response = await client.GetAsync(url);
-
-                    if (response.StatusCode == System.Net.HttpStatusCode.ServiceUnavailable)
-                    {
-                        return true;
-                    }
-                    else
-                    {
-                        return false;
-                    }
-                }
-            }
-            catch
-            {
-                return true;
-            }
-        }
-
-        public async Task<string> GetAvatarCode(string characterName, string region)
-        {
-            string serviceBackend = "";
-            string avatarCode = "";
-            string jmsBaseUrl = "https://maplestory.nexon.co.jp";
-            string b64CharName = Uri.EscapeDataString(Convert.ToBase64String(Encoding.UTF8.GetBytes(characterName)));
-            switch (region)
-            {
-                default:
-                    return avatarCode;
-                case "KMS":
-                    serviceBackend = "https://maple.dakgg.io/api/v1/bypass/characters/" + Uri.EscapeDataString(characterName); // Used Maple GG API
-                    break;
-                case "JMS":
-                    serviceBackend = $"{jmsBaseUrl}/community/avatar/search/?writer=" + Uri.EscapeDataString(characterName);
-                    break;
-                case "GMS-NA":
-                    serviceBackend = "https://www.nexon.com/api/maplestory/no-auth/ranking/v2/na?type=overall&id=weekly&character_name=" + Uri.EscapeDataString(characterName);
-                    break;
-                case "GMS-EU":
-                    serviceBackend = "https://www.nexon.com/api/maplestory/no-auth/ranking/v2/eu?type=overall&id=weekly&character_name=" + Uri.EscapeDataString(characterName);
-                    break;
-                case "MSEA":
-                    serviceBackend = "https://msea.dakgg.io/api/v1/bypass/characters/" + Uri.EscapeDataString(characterName); // Used Maple GG API
-                    break;
-                case "TMS":
-                    serviceBackend = "https://tw-event.beanfun.com/MapleStory/api/UnionWebRank/GetRank";
-                    break;
-                case "MSN":
-                    serviceBackend = "https://msu.io/maplestoryn/api/gateway/msn/ranking/by-name?characterName=" + Uri.EscapeDataString(characterName);
-                    break;
-            }
-            try
-            {
-                if (region == "JMS")
-                {
-                    var client = new HttpClient();
-                    client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36");
-                    string rankingAvatarCode = await client.GetStringAsync("https://api.hikaricalyx.com/WcR2-JMS/v1/GetRankingChar?CharacterName=" + b64CharName);
-                    if (!string.IsNullOrEmpty(rankingAvatarCode))
-                    {
-                        avatarCode = rankingAvatarCode;
-                        return avatarCode;
-                    }
-                    bool isUnderMaintenance = await isJMSUnderMaintenance();
-                    if (isUnderMaintenance)
-                    {
-                        throw new Exception("JMSはメンテナンス中です。");
-                    }
-                    string html = await client.GetStringAsync(serviceBackend);
-                    HtmlDocument doc = new HtmlDocument();
-                    doc.LoadHtml(html);
-
-                    var avatarLinks = doc.DocumentNode.SelectNodes("//a[@href]")
-                        ?.Select(node => WebUtility.HtmlDecode(node.GetAttributeValue("href", "")))
-                        .Where(href => href.StartsWith("/mypage/avatar"))
-                        .Select(href => $"{jmsBaseUrl}{href}")
-                        .ToList();
-
-                    if (avatarLinks != null && avatarLinks.Count == 2)
-                    {
-                        string avatarHtml = await client.GetStringAsync(avatarLinks[0]);
-                        HtmlDocument avatarDoc = new HtmlDocument();
-                        avatarDoc.LoadHtml(avatarHtml);
-
-                        avatarCode = avatarDoc.DocumentNode.SelectNodes("//img[@src]")
-                            ?.Select(node => node.GetAttributeValue("src", ""))
-                            .FirstOrDefault(src => src.StartsWith("//avatar-maplestory.nexon.co.jp")).Replace("//avatar-maplestory.nexon.co.jp/Character/", "").Replace(".png", "");
-                    }
-                    else if (avatarLinks.Count > 2)
-                    {
-                        EdgeWebView webView = new EdgeWebView();
-                        EdgeWebView.webViewUri = serviceBackend;
-                        EdgeWebView.customCheckUri = "https://maplestory.nexon.co.jp";
-                        EdgeWebView.customCheckCondition = "https://maplestory.nexon.co.jp/mypage/avatar";
-                        webView.ShowDialog();
-                        string avatarHtml = await client.GetStringAsync(webView.currentUri);
-                        HtmlDocument avatarDoc = new HtmlDocument();
-                        avatarDoc.LoadHtml(avatarHtml);
-
-                        avatarCode = avatarDoc.DocumentNode.SelectNodes("//img[@src]")
-                            ?.Select(node => node.GetAttributeValue("src", ""))
-                            .FirstOrDefault(src => src.StartsWith("//avatar-maplestory.nexon.co.jp")).Replace("//avatar-maplestory.nexon.co.jp/Character/", "").Replace(".png", "");
-                    }
-                    else
-                    {
-                        throw new Exception("キャラクターが見つかりません。JMS公式サイトにて代表キャラクターを登録してください。");
-                    }
-                }
-                else if (region.StartsWith("GMS"))
-                {
-                    var client = new HttpClient();
-                    client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36");
-                    var response = await client.GetAsync(serviceBackend);
-                    if (response.IsSuccessStatusCode)
-                    {
-                        var json = await response.Content.ReadAsStringAsync();
-                        using JsonDocument doc = JsonDocument.Parse(json);
-                        JsonElement root = doc.RootElement;
-                        JsonElement ranksArray = root.GetProperty("ranks");
-
-                        if (ranksArray.GetArrayLength() > 0)
-                        {
-                            avatarCode = ranksArray[0].GetProperty("characterImgURL").GetString().Replace("https://msavatar1.nexon.net/Character/", "").Replace(".png", "");
-                        }
-                    }
-                    else
-                    {
-                        avatarCode = "";
-                    }
-                }
-                else if (region == "MSEA" || region == "KMS")
-                {
-                    var client = new HttpClient();
-                    client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36");
-                    var response = await client.GetAsync(serviceBackend);
-                    if (response.IsSuccessStatusCode)
-                    {
-                        var json = await response.Content.ReadAsStringAsync();
-                        using JsonDocument doc = JsonDocument.Parse(json);
-                        JsonElement root = doc.RootElement;
-                        if (root.TryGetProperty("data", out JsonElement dataElement) &&
-                            dataElement.TryGetProperty("characterBasic", out JsonElement characterBasicElement) &&
-                            characterBasicElement.TryGetProperty("character_image", out JsonElement characterImageElement))
-                        {
-                            avatarCode = characterImageElement.GetString().Replace("https://open.api.nexon.com/static/maplestorysea/character/look/", "").Replace("https://open.api.nexon.com/static/maplestory/character/look/", "");
-                        }
-                    }
-                    else
-                    {
-                        avatarCode = "";
-                    }
-                }
-                else if (region == "TMS")
-                {
-                    var client = new HttpClient();
-                    client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36");
-                    string jsonPayload = $"{{\"RankType\":1,\"GameWorldId\":\"-1\",\"CharacterName\":\"{characterName}\"}}";
-                    var content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
-                    var response = await client.PostAsync(serviceBackend, content);
-                    if (response.IsSuccessStatusCode)
-                    {
-                        var json = await response.Content.ReadAsStringAsync();
-                        using JsonDocument doc = JsonDocument.Parse(json);
-                        JsonElement root = doc.RootElement;
-                        if (root.TryGetProperty("Data", out JsonElement dataElement) &&
-                            dataElement.TryGetProperty("CharacterLookCipherText", out JsonElement characterLookCipherText))
-                        {
-                            avatarCode = characterLookCipherText.GetString();
-                        }
-                    }
-                    else
-                    {
-                        avatarCode = "";
-                    }
-                }
-                else if (region == "MSN")
-                {
-                    EdgeWebView webView = new EdgeWebView();
-                    EdgeWebView.webViewUri = serviceBackend;
-                    webView.ShowDialog();
-                    var json = webView.jsonResult;
-                    using JsonDocument doc = JsonDocument.Parse(json);
-                    JsonElement root = doc.RootElement;
-                    if (root.TryGetProperty("ranking", out JsonElement rankingData) &&
-                        rankingData.TryGetProperty("imageUrl", out JsonElement imageUrl))
-                    {
-                        avatarCode = imageUrl.GetString().Replace("https://market-static.msu.io/msu/platform/charimages/transient/", "").Replace(".png", "");
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
-
-            return avatarCode;
         }
 
         public async Task<UnpackedAvatarData> GetAvatarResult(string ocid)
@@ -326,8 +138,12 @@ namespace WzComparerR2.OpenAPI
                     case 1:
                         basic = await API_MSEA.GetCharacterBasic(ocid);
                         break;
+
+                    case 2:
+                        basic = await API_TMS.GetCharacterBasic(ocid);
+                        break;
                 }
-                var m = Regex.Match(basic.CharacterImage, @"look/([A-Z]+)$");
+                var m = Regex.Match(basic.CharacterImage, @"look/([A-Z]+)");
                 if (m.Success)
                 {
                     var data = m.Groups[1].Value;
@@ -358,72 +174,6 @@ namespace WzComparerR2.OpenAPI
             }
         }
 
-        public async Task<UnpackedAvatarData> ParseAvatarCode(string avatarCode)
-        {
-            try
-            {
-                var decrypted = Utils.Decrypt(avatarCode);
-                var version = Utils.CheckVer(decrypted);
-
-                var unpackedData = new UnpackedAvatarData(version);
-
-                Utils.Unpack(unpackedData, decrypted);
-                unpackedData.SetProperties();
-
-                return unpackedData;
-            }
-            catch (MapleStoryAPIException e)
-            {
-                switch (e.ErrorCode)
-                {
-                    default:
-                        throw new Exception(Utils.GetExceptionMsg(e));
-                }
-            }
-            catch
-            {
-                throw;
-            }
-        }
-
-        public async Task<UnpackedAvatarData> ParseCharacterLookCipherText(string cipherText)
-        {
-            if (cipherText.StartsWith("0x"))
-                cipherText = cipherText.Substring(2).PadRight(256, '0');
-
-            int length = cipherText.Length / 2;
-            byte[] bytes = new byte[length];
-
-            for (int i = 0; i < length; i++)
-            {
-                bytes[i] = Convert.ToByte(cipherText.Substring(i * 2, 2), 16);
-            }
-            try
-            {
-                var decrypted = bytes;
-                var version = Utils.CheckVer(decrypted);
-
-                var unpackedData = new UnpackedAvatarData(version);
-
-                Utils.Unpack(unpackedData, decrypted);
-                unpackedData.SetProperties();
-
-                return unpackedData;
-            }
-            catch (MapleStoryAPIException e)
-            {
-                switch (e.ErrorCode)
-                {
-                    default:
-                        throw new Exception(Utils.GetExceptionMsg(e));
-                }
-            }
-            catch
-            {
-                throw;
-            }
-        }
-
         public async Task<LoadedAvatarData> GetAvatarResult2(string ocid)
         {
             var result = new LoadedAvatarData();
@@ -438,7 +188,7 @@ namespace WzComparerR2.OpenAPI
         private async Task GetAvatarItems(string ocid, LoadedAvatarData result)
         {
             try
-            {
+            { 
                 result.ItemList = new List<string>();
 
                 dynamic item = null;
@@ -450,6 +200,10 @@ namespace WzComparerR2.OpenAPI
 
                     case 1:
                         item = await API_MSEA.GetCharacterItemEquipment(ocid);
+                        break;
+
+                    case 2:
+                        item = await API_TMS.GetCharacterItemEquipment(ocid);
                         break;
                 }
                 result.Preset = item.PresetNo ?? 0;
@@ -491,6 +245,10 @@ namespace WzComparerR2.OpenAPI
 
                     case 1:
                         item = await API_MSEA.GetCharacterCashItemEquipment(ocid);
+                        break;
+
+                    case 2:
+                        item = await API_TMS.GetCharacterCashItemEquipment(ocid);
                         break;
                 }
                 result.CashPreset = item.PresetNo ?? 0;
@@ -540,8 +298,12 @@ namespace WzComparerR2.OpenAPI
                     case 1:
                         item = await API_MSEA.GetCharacterBeautyEquipment(ocid);
                         break;
+
+                    case 2:
+                        item = await API_TMS.GetCharacterBeautyEquipment(ocid);
+                        break;
                 }
-                result.Gender = item.CharacterGender == "남" ? 0 : 1;
+                result.Gender = item.CharacterGender == "男" ? 0 : 1;
 
                 result.HairInfo = new Dictionary<string, string>
                 {
@@ -563,9 +325,9 @@ namespace WzComparerR2.OpenAPI
                 {
                     { "SkinName", item.CharacterSkin?.SkinName ?? "" },
                     { "ColorStyle", item.CharacterSkin?.ColorStyle ?? "" },
-                    { "Hue", item.CharacterSkin?.Hue.ToString() ?? "" },
-                    { "Saturation", item.CharacterSkin?.Saturation.ToString() ?? "" },
-                    { "Brightness", item.CharacterSkin?.Brightness.ToString() ?? "" },
+                    { "Hue", (item.CharacterSkin?.Hue as int?).ToString() ?? "" },
+                    { "Saturation", (item.CharacterSkin?.Saturation as int?).ToString() ?? "" },
+                    { "Brightness", (item.CharacterSkin?.Brightness as int?).ToString() ?? "" },
                 };
             }
             catch (MapleStoryAPIException e)
@@ -582,25 +344,30 @@ namespace WzComparerR2.OpenAPI
             }
         }
 
-        public async Task Debug()
+        public async Task<UnpackedAvatarData> Debug(string cname = "昌燮")
         {
             var data = "";
-            var cname = "창섭";
-            var ocid = await GetCharacterOCID(cname);
-            MapleStory.OpenAPI.Common.DTO.CharacterBasicDTO basic = null;
-            switch (region)
+            if (cname.Length <= 10)
             {
-                case 0:
-                    basic = await API_KMS.GetCharacterBasic(ocid);
-                    break;
-                case 1:
-                    basic = await API_MSEA.GetCharacterBasic(ocid);
-                    break;
+                var ocid = await GetCharacterOCID(cname);
+                MapleStory.OpenAPI.Common.DTO.CharacterBasicDTO basic = null;
+                switch (region)
+                {
+                    case 0:
+                        basic = await API_KMS.GetCharacterBasic(ocid);
+                        break;
+                    case 1:
+                        basic = await API_MSEA.GetCharacterBasic(ocid);
+                        break;
+                    case 2:
+                        basic = await API_TMS.GetCharacterBasic(ocid);
+                        break;
+                }
+                var m = Regex.Match(basic.CharacterImage, @"look/([A-Z]+)");
+                if (m.Success)
+                    data = m.Groups[1].Value;
             }
-            var m = Regex.Match(basic.CharacterImage, @"look/([A-Z]+)$");
-            if (m.Success)
-                data = m.Groups[1].Value;
-
+            else data = cname;
             var decrypted = Utils.Decrypt(data);
             var version = Utils.CheckVer(decrypted);
 
@@ -625,7 +392,7 @@ namespace WzComparerR2.OpenAPI
 
             result.SetProperties();
 
-            return;
+            return result;
         }
     }
 
@@ -643,34 +410,34 @@ namespace WzComparerR2.OpenAPI
                 switch (e.ErrorCode)
                 {
                     case MapleStoryAPIErrorCode.OPENAPI00001:
-                        msg = "サーバー内部エラー";
+                        msg = "服务器错误。";
                         break;
                     case MapleStoryAPIErrorCode.OPENAPI00002:
-                        msg = "権限はありません。";
+                        msg = "无权限。";
                         break;
                     case MapleStoryAPIErrorCode.OPENAPI00003:
-                        msg = "キャラクターを接続して更新してください。";
+                        msg = "请连接角色后更新。";
                         break;
                     case MapleStoryAPIErrorCode.OPENAPI00004:
-                        msg = "入力値が無効です。";
+                        msg = "输入值无效。";
                         break;
                     case MapleStoryAPIErrorCode.OPENAPI00005:
-                        msg = "APIキーが無効です。";
+                        msg = "API密钥无效。";
                         break;
                     case MapleStoryAPIErrorCode.OPENAPI00006:
-                        msg = "無効なゲームまたはAPI PATH";
+                        msg = "无效的游戏或API PATH";
                         break;
                     case MapleStoryAPIErrorCode.OPENAPI00007:
-                        msg = "API呼び出し量を超えました。";
+                        msg = "API呼叫量初始化。";
                         break;
                     case MapleStoryAPIErrorCode.OPENAPI00009:
-                        msg = "データ準備中です。";
+                        msg = "数据正在准备中。";
                         break;
                     case MapleStoryAPIErrorCode.OPENAPI00010:
-                        msg = "ゲームをチェックしています。";
+                        msg = "游戏正在维护中。";
                         break;
                     case MapleStoryAPIErrorCode.OPENAPI00011:
-                        msg = "APIチェック中です。";
+                        msg = "API正在维护中。";
                         break;
                     default:
                         msg = e.Message;
@@ -678,7 +445,7 @@ namespace WzComparerR2.OpenAPI
                 }
             }
 
-            return $"{msg} ({e.ErrorCode.ToString()})\r\n場所: {funcName}";
+            return $"{msg} ({e.ErrorCode.ToString()})\r\n位置: {funcName}";
         }
 
         public static string ToJson(this object obj)
@@ -748,12 +515,37 @@ namespace WzComparerR2.OpenAPI
                 {
                     res.Unpacked.InsertRange(k + 1, new[] { new DataInfo("cashWeaponID", 10), new DataInfo("cashWeaponGender", 2) });
                 }
-                foreach (var type in new[] { "Cap", "Coat", "Pants", "Shoes", "Gloves", "Cape", "Weapon", "Skin" })
+                foreach (var type in new[] { "Cap", "FaceAcc", "EyeAcc", "EarAcc", "Coat", "Pants", "Shoes", "Gloves", "Cape", "Shield", "Weapon", "Skin" })
                 {
                     if (res.Version >= 27 && value == 1 && res.Unpacked[k].Name == $"has{type}Prism")
                     {
-                        res.Unpacked.InsertRange(k + 1, new[] { new DataInfo($"{type.ToLower()}PrismColorType", 3), new DataInfo($"{type.ToLower()}PrismBrightness", 8), new DataInfo($"{type.ToLower()}PrismSaturation", 8), new DataInfo($"{type.ToLower()}PrismHue", 9) });
+                        string[] indexs;
+                        bool addOn = false;
+                        if (res.Version >= 33 && type != "Skin")
+                        {
+                            indexs = new[] { "", "2" };
+                            addOn = true;
+                        }
+                        else
+                        {
+                            indexs = new[] { "" };
+                        }
+
+                        var items = new List<DataInfo>();
+                        foreach (var index in indexs)
+                        {
+                            if (addOn)
+                            {
+                                items.Add(new DataInfo($"{type.ToLower()}Prism{index}On", 3));
+                            }
+                            items.AddRange(new[] { new DataInfo($"{type.ToLower()}Prism{index}ColorType", 3), new DataInfo($"{type.ToLower()}Prism{index}Brightness", 8), new DataInfo($"{type.ToLower()}Prism{index}Saturation", 8), new DataInfo($"{type.ToLower()}Prism{index}Hue", 9), });
+                        }
+                        res.Unpacked.InsertRange(k + 1, items);
                     }
+                }
+                if (res.Version >= 39 && value != 0 && res.Unpacked[k].Name == $"subWeaponType")
+                {
+                    res.Unpacked.InsertRange(k + 1, new[] { new DataInfo("shieldID", 10), new DataInfo("shieldGender", 4) });
                 }
             }
             return;
@@ -761,7 +553,9 @@ namespace WzComparerR2.OpenAPI
 
         public static int CheckVer(byte[] pack)
         {
-            return pack[pack.Length - 9];
+            if (pack.Length <= 0) return 0;
+
+            return pack[pack.Length - pack.Length / 16 - 1];
         }
 
         private static readonly byte[] aesKey = {0x10, 0x04, 0x3F, 0x11,
@@ -777,10 +571,18 @@ namespace WzComparerR2.OpenAPI
         public static readonly Dictionary<int, List<DataInfo>> Structure = new Dictionary<int, List<DataInfo>>
         {
             // not fully decoded yet
-            { 26, new List<DataInfo>() {new DataInfo("gender", 1), new DataInfo("skinID", 10), new DataInfo("face50k", 1), new DataInfo("faceID", 10), new DataInfo("faceGender", 4), new DataInfo("hair10k", 4), new DataInfo("hairID", 10), new DataInfo("hairGender", 4), new DataInfo("capID", 10), new DataInfo("capGender", 3), new DataInfo("faceAccID", 10), new DataInfo("faceAccGender", 2), new DataInfo("eyeAccID", 10), new DataInfo("eyeAccGender", 2), new DataInfo("earAccID", 10), new DataInfo("earAccGender", 2), new DataInfo("isLongCoat", 1), new DataInfo("coatID", 10), new DataInfo("coatGender", 4), new DataInfo("pantsID", 10), new DataInfo("pantsGender", 2), new DataInfo("shoesID", 10), new DataInfo("shoesGender", 2), new DataInfo("glovesID", 10), new DataInfo("glovesGender", 2), new DataInfo("capeID", 10), new DataInfo("capeGender", 2), new DataInfo("isNotBlade", 1), new DataInfo("isSubWeapon", 1), new DataInfo("shieldID", 10), new DataInfo("shieldGender", 4), new DataInfo("isCashWeapon", 1), new DataInfo("weaponID", 10), new DataInfo("weaponGender", 2), new DataInfo("weaponType", 8), new DataInfo("earType", 4), new DataInfo("mixHairColor", 4), new DataInfo("mixHairRatio", 7), new DataInfo("unknown1", 1), new DataInfo("mixFaceInfo", 10), new DataInfo("unknown2", 2), new DataInfo("jobWingTailType", 2), new DataInfo("unknown3", 30), new DataInfo("weaponMotionType", 2), new DataInfo("unknown4", 11) } },
-            { 27, new List<DataInfo>() {new DataInfo("gender", 1), new DataInfo("skinID", 10), new DataInfo("face50k", 1), new DataInfo("faceID", 10), new DataInfo("faceGender", 4), new DataInfo("hair10k", 4), new DataInfo("hairID", 10), new DataInfo("hairGender", 4), new DataInfo("capID", 10), new DataInfo("capGender", 3), new DataInfo("faceAccID", 10), new DataInfo("faceAccGender", 2), new DataInfo("eyeAccID", 10), new DataInfo("eyeAccGender", 2), new DataInfo("earAccID", 10), new DataInfo("earAccGender", 2), new DataInfo("isLongCoat", 1), new DataInfo("coatID", 10), new DataInfo("coatGender", 4), new DataInfo("pantsID", 10), new DataInfo("pantsGender", 2), new DataInfo("shoesID", 10), new DataInfo("shoesGender", 2), new DataInfo("glovesID", 10), new DataInfo("glovesGender", 2), new DataInfo("capeID", 10), new DataInfo("capeGender", 2), new DataInfo("isNotBlade", 1), new DataInfo("isSubWeapon", 1), new DataInfo("shieldID", 10), new DataInfo("shieldGender", 4), new DataInfo("isCashWeapon", 1), new DataInfo("weaponID", 10), new DataInfo("weaponGender", 2), new DataInfo("weaponType", 8), new DataInfo("earType", 4), new DataInfo("mixHairColor", 4), new DataInfo("mixHairRatio", 7), new DataInfo("unknown1", 1), new DataInfo("mixFaceInfo", 10), new DataInfo("unknown2", 2), new DataInfo("jobWingTailType", 2), new DataInfo("unknown3", 30), new DataInfo("weaponMotionType", 2), new DataInfo("unknown4", 11), new DataInfo("hasCapPrism", 1), new DataInfo("hasCoatPrism", 1), new DataInfo("hasPantsPrism", 1), new DataInfo("hasShoesPrism", 1), new DataInfo("hasGlovesPrism", 1), new DataInfo("hasCapePrism", 1), new DataInfo("hasWeaponPrism", 1), new DataInfo("hasSkinPrism", 1) } },
-            { 28, new List<DataInfo>() {new DataInfo("gender", 1), new DataInfo("skinID", 10), new DataInfo("face50k", 1), new DataInfo("faceID", 10), new DataInfo("faceGender", 4), new DataInfo("hair10k", 4), new DataInfo("hairID", 10), new DataInfo("hairGender", 4), new DataInfo("capID", 10), new DataInfo("capGender", 3), new DataInfo("faceAccID", 10), new DataInfo("faceAccGender", 2), new DataInfo("eyeAccID", 10), new DataInfo("eyeAccGender", 2), new DataInfo("earAccID", 10), new DataInfo("earAccGender", 2), new DataInfo("isLongCoat", 1), new DataInfo("coatID", 10), new DataInfo("coatGender", 4), new DataInfo("pantsID", 10), new DataInfo("pantsGender", 2), new DataInfo("shoesID", 10), new DataInfo("shoesGender", 2), new DataInfo("glovesID", 10), new DataInfo("glovesGender", 2), new DataInfo("capeID", 10), new DataInfo("capeGender", 2), new DataInfo("isNotBlade", 1), new DataInfo("isSubWeapon", 1), new DataInfo("shieldID", 10), new DataInfo("shieldGender", 4), new DataInfo("isCashWeapon", 1), new DataInfo("weaponID", 10), new DataInfo("weaponGender", 2), new DataInfo("weaponType", 8), new DataInfo("earType", 4), new DataInfo("mixHairColor", 4), new DataInfo("mixHairRatio", 7), new DataInfo("unknown1", 1), new DataInfo("mixFaceInfo", 10), new DataInfo("unknown2", 2), new DataInfo("jobWingTailType", 2), new DataInfo("unknown3", 30), new DataInfo("weaponMotionType", 2), new DataInfo("unknown4", 11), new DataInfo("hasCapPrism", 1), new DataInfo("hasCoatPrism", 1), new DataInfo("hasPantsPrism", 1), new DataInfo("hasShoesPrism", 1), new DataInfo("hasGlovesPrism", 1), new DataInfo("hasCapePrism", 1), new DataInfo("hasWeaponPrism", 1), new DataInfo("hasSkinPrism", 1), new DataInfo("ringID1", 10), new DataInfo("ringGender1", 4), new DataInfo("ringID2", 10), new DataInfo("ringGender2", 4), new DataInfo("ringID3", 10), new DataInfo("ringGender3", 4), new DataInfo("ringID4", 10), new DataInfo("ringGender4", 4), new DataInfo("unknown5", 32), new DataInfo("unknown6", 32), new DataInfo("unknown7", 32), new DataInfo("unknown8", 16) } },
-            { 29, new List<DataInfo>() {new DataInfo("gender", 1), new DataInfo("skinID", 10), new DataInfo("face50k", 1), new DataInfo("faceID", 10), new DataInfo("faceGender", 4), new DataInfo("hair10k", 4), new DataInfo("hairID", 10), new DataInfo("hairGender", 4), new DataInfo("capID", 10), new DataInfo("capGender", 3), new DataInfo("faceAccID", 10), new DataInfo("faceAccGender", 2), new DataInfo("eyeAccID", 10), new DataInfo("eyeAccGender", 2), new DataInfo("earAccID", 10), new DataInfo("earAccGender", 2), new DataInfo("isLongCoat", 1), new DataInfo("coatID", 10), new DataInfo("coatGender", 4), new DataInfo("pantsID", 10), new DataInfo("pantsGender", 2), new DataInfo("shoesID", 10), new DataInfo("shoesGender", 4), new DataInfo("glovesID", 10), new DataInfo("glovesGender", 2), new DataInfo("capeID", 10), new DataInfo("capeGender", 2), new DataInfo("isNotBlade", 1), new DataInfo("isSubWeapon", 1), new DataInfo("shieldID", 10), new DataInfo("shieldGender", 4), new DataInfo("isCashWeapon", 1), new DataInfo("weaponID", 10), new DataInfo("weaponGender", 2), new DataInfo("weaponType", 8), new DataInfo("earType", 4), new DataInfo("mixHairColor", 4), new DataInfo("mixHairRatio", 7), new DataInfo("unknown1", 1), new DataInfo("mixFaceInfo", 10), new DataInfo("unknown2", 2), new DataInfo("jobWingTailType", 2), new DataInfo("unknown3", 30), new DataInfo("weaponMotionType", 2), new DataInfo("unknown4", 11), new DataInfo("hasCapPrism", 1), new DataInfo("hasCoatPrism", 1), new DataInfo("hasPantsPrism", 1), new DataInfo("hasShoesPrism", 1), new DataInfo("hasGlovesPrism", 1), new DataInfo("hasCapePrism", 1), new DataInfo("hasWeaponPrism", 1), new DataInfo("hasSkinPrism", 1), new DataInfo("ringID1", 10), new DataInfo("ringGender1", 4), new DataInfo("ringID2", 10), new DataInfo("ringGender2", 4), new DataInfo("ringID3", 10), new DataInfo("ringGender3", 4), new DataInfo("ringID4", 10), new DataInfo("ringGender4", 4), new DataInfo("unknown5", 32), new DataInfo("unknown6", 32), new DataInfo("unknown7", 32), new DataInfo("unknown8", 16) } },
+            { 26, new List<DataInfo>() {new DataInfo("gender", 1), new DataInfo("skinID", 10), new DataInfo("face50k", 1), new DataInfo("faceID", 10), new DataInfo("faceGender", 4), new DataInfo("hair10k", 4), new DataInfo("hairID", 10), new DataInfo("hairGender", 4), new DataInfo("capID", 10), new DataInfo("capGender", 3), new DataInfo("faceAccID", 10), new DataInfo("faceAccGender", 2), new DataInfo("eyeAccID", 10), new DataInfo("eyeAccGender", 2), new DataInfo("earAccID", 10), new DataInfo("earAccGender", 2), new DataInfo("isLongCoat", 1), new DataInfo("coatID", 10), new DataInfo("coatGender", 4), new DataInfo("pantsID", 10), new DataInfo("pantsGender", 2), new DataInfo("shoesID", 10), new DataInfo("shoesGender", 2), new DataInfo("glovesID", 10), new DataInfo("glovesGender", 2), new DataInfo("capeID", 10), new DataInfo("capeGender", 2), new DataInfo("subWeaponType", 2), new DataInfo("shieldID", 10), new DataInfo("shieldGender", 4), new DataInfo("isCashWeapon", 1), new DataInfo("weaponID", 10), new DataInfo("weaponGender", 2), new DataInfo("weaponType", 8), new DataInfo("earType", 4), new DataInfo("mixHairColor", 4), new DataInfo("mixHairRatio", 8), new DataInfo("mixFaceInfo", 10), new DataInfo("unknown1", 2), new DataInfo("jobWingTailType", 2), new DataInfo("unknown2", 6), new DataInfo("eventJob", 3), new DataInfo("unknown2_2", 21), new DataInfo("weaponMotionType", 2), new DataInfo("unknown3", 11) } },
+            { 27, new List<DataInfo>() {new DataInfo("gender", 1), new DataInfo("skinID", 10), new DataInfo("face50k", 1), new DataInfo("faceID", 10), new DataInfo("faceGender", 4), new DataInfo("hair10k", 4), new DataInfo("hairID", 10), new DataInfo("hairGender", 4), new DataInfo("capID", 10), new DataInfo("capGender", 3), new DataInfo("faceAccID", 10), new DataInfo("faceAccGender", 2), new DataInfo("eyeAccID", 10), new DataInfo("eyeAccGender", 2), new DataInfo("earAccID", 10), new DataInfo("earAccGender", 2), new DataInfo("isLongCoat", 1), new DataInfo("coatID", 10), new DataInfo("coatGender", 4), new DataInfo("pantsID", 10), new DataInfo("pantsGender", 2), new DataInfo("shoesID", 10), new DataInfo("shoesGender", 2), new DataInfo("glovesID", 10), new DataInfo("glovesGender", 2), new DataInfo("capeID", 10), new DataInfo("capeGender", 2), new DataInfo("subWeaponType", 2), new DataInfo("shieldID", 10), new DataInfo("shieldGender", 4), new DataInfo("isCashWeapon", 1), new DataInfo("weaponID", 10), new DataInfo("weaponGender", 2), new DataInfo("weaponType", 8), new DataInfo("earType", 4), new DataInfo("mixHairColor", 4), new DataInfo("mixHairRatio", 8), new DataInfo("mixFaceInfo", 10), new DataInfo("unknown1", 2), new DataInfo("jobWingTailType", 2), new DataInfo("unknown2", 6), new DataInfo("eventJob", 3), new DataInfo("unknown2_2", 21), new DataInfo("weaponMotionType", 2), new DataInfo("unknown3", 11), new DataInfo("hasCapPrism", 1), new DataInfo("hasCoatPrism", 1), new DataInfo("hasPantsPrism", 1), new DataInfo("hasShoesPrism", 1), new DataInfo("hasGlovesPrism", 1), new DataInfo("hasCapePrism", 1), new DataInfo("hasWeaponPrism", 1), new DataInfo("hasSkinPrism", 1) } },
+            { 28, new List<DataInfo>() {new DataInfo("gender", 1), new DataInfo("skinID", 10), new DataInfo("face50k", 1), new DataInfo("faceID", 10), new DataInfo("faceGender", 4), new DataInfo("hair10k", 4), new DataInfo("hairID", 10), new DataInfo("hairGender", 4), new DataInfo("capID", 10), new DataInfo("capGender", 3), new DataInfo("faceAccID", 10), new DataInfo("faceAccGender", 2), new DataInfo("eyeAccID", 10), new DataInfo("eyeAccGender", 2), new DataInfo("earAccID", 10), new DataInfo("earAccGender", 2), new DataInfo("isLongCoat", 1), new DataInfo("coatID", 10), new DataInfo("coatGender", 4), new DataInfo("pantsID", 10), new DataInfo("pantsGender", 2), new DataInfo("shoesID", 10), new DataInfo("shoesGender", 2), new DataInfo("glovesID", 10), new DataInfo("glovesGender", 2), new DataInfo("capeID", 10), new DataInfo("capeGender", 2), new DataInfo("subWeaponType", 2), new DataInfo("shieldID", 10), new DataInfo("shieldGender", 4), new DataInfo("isCashWeapon", 1), new DataInfo("weaponID", 10), new DataInfo("weaponGender", 2), new DataInfo("weaponType", 8), new DataInfo("earType", 4), new DataInfo("mixHairColor", 4), new DataInfo("mixHairRatio", 8), new DataInfo("mixFaceInfo", 10), new DataInfo("unknown1", 2), new DataInfo("jobWingTailType", 2), new DataInfo("unknown2", 6), new DataInfo("eventJob", 3), new DataInfo("unknown2_2", 21), new DataInfo("weaponMotionType", 2), new DataInfo("unknown3", 11), new DataInfo("hasCapPrism", 1), new DataInfo("hasCoatPrism", 1), new DataInfo("hasPantsPrism", 1), new DataInfo("hasShoesPrism", 1), new DataInfo("hasGlovesPrism", 1), new DataInfo("hasCapePrism", 1), new DataInfo("hasWeaponPrism", 1), new DataInfo("hasSkinPrism", 1), new DataInfo("ringID1", 10), new DataInfo("ringGender1", 4), new DataInfo("ringID2", 10), new DataInfo("ringGender2", 4), new DataInfo("ringID3", 10), new DataInfo("ringGender3", 4), new DataInfo("ringID4", 10), new DataInfo("ringGender4", 4), new DataInfo("unknown4", 32), new DataInfo("unknown5", 32), new DataInfo("unknown6", 32), new DataInfo("unknown7", 16) } },
+            { 29, new List<DataInfo>() {new DataInfo("gender", 1), new DataInfo("skinID", 10), new DataInfo("face50k", 1), new DataInfo("faceID", 10), new DataInfo("faceGender", 4), new DataInfo("hair10k", 4), new DataInfo("hairID", 10), new DataInfo("hairGender", 4), new DataInfo("capID", 10), new DataInfo("capGender", 3), new DataInfo("faceAccID", 10), new DataInfo("faceAccGender", 2), new DataInfo("eyeAccID", 10), new DataInfo("eyeAccGender", 2), new DataInfo("earAccID", 10), new DataInfo("earAccGender", 2), new DataInfo("isLongCoat", 1), new DataInfo("coatID", 10), new DataInfo("coatGender", 4), new DataInfo("pantsID", 10), new DataInfo("pantsGender", 2), new DataInfo("shoesID", 10), new DataInfo("shoesGender", 4), new DataInfo("glovesID", 10), new DataInfo("glovesGender", 2), new DataInfo("capeID", 10), new DataInfo("capeGender", 2), new DataInfo("subWeaponType", 2), new DataInfo("shieldID", 10), new DataInfo("shieldGender", 4), new DataInfo("isCashWeapon", 1), new DataInfo("weaponID", 10), new DataInfo("weaponGender", 2), new DataInfo("weaponType", 8), new DataInfo("earType", 4), new DataInfo("mixHairColor", 4), new DataInfo("mixHairRatio", 8), new DataInfo("mixFaceInfo", 10), new DataInfo("unknown1", 2), new DataInfo("jobWingTailType", 2), new DataInfo("unknown2", 6), new DataInfo("eventJob", 3), new DataInfo("unknown2_2", 21), new DataInfo("weaponMotionType", 2), new DataInfo("unknown3", 11), new DataInfo("hasCapPrism", 1), new DataInfo("hasCoatPrism", 1), new DataInfo("hasPantsPrism", 1), new DataInfo("hasShoesPrism", 1), new DataInfo("hasGlovesPrism", 1), new DataInfo("hasCapePrism", 1), new DataInfo("hasWeaponPrism", 1), new DataInfo("hasSkinPrism", 1), new DataInfo("ringID1", 10), new DataInfo("ringGender1", 4), new DataInfo("ringID2", 10), new DataInfo("ringGender2", 4), new DataInfo("ringID3", 10), new DataInfo("ringGender3", 4), new DataInfo("ringID4", 10), new DataInfo("ringGender4", 4), new DataInfo("unknown4", 32), new DataInfo("unknown5", 32), new DataInfo("unknown6", 32), new DataInfo("unknown7", 16) } },
+            { 30, new List<DataInfo>() {new DataInfo("gender", 1), new DataInfo("skinID", 10), new DataInfo("face50k", 1), new DataInfo("faceID", 10), new DataInfo("faceGender", 4), new DataInfo("hair10k", 4), new DataInfo("hairID", 10), new DataInfo("hairGender", 4), new DataInfo("capID", 10), new DataInfo("capGender", 3), new DataInfo("faceAccID", 10), new DataInfo("faceAccGender", 2), new DataInfo("eyeAccID", 10), new DataInfo("eyeAccGender", 2), new DataInfo("earAccID", 10), new DataInfo("earAccGender", 2), new DataInfo("isLongCoat", 1), new DataInfo("coatID", 10), new DataInfo("coatGender", 4), new DataInfo("pantsID", 10), new DataInfo("pantsGender", 2), new DataInfo("shoesID", 10), new DataInfo("shoesGender", 4), new DataInfo("glovesID", 10), new DataInfo("glovesGender", 2), new DataInfo("capeID", 10), new DataInfo("capeGender", 2), new DataInfo("subWeaponType", 2), new DataInfo("shieldID", 10), new DataInfo("shieldGender", 4), new DataInfo("isCashWeapon", 1), new DataInfo("weaponID", 10), new DataInfo("weaponGender", 2), new DataInfo("weaponType", 8), new DataInfo("earType", 4), new DataInfo("mixHairColor", 4), new DataInfo("mixHairRatio", 8), new DataInfo("mixFaceInfo", 10), new DataInfo("unknown1", 4), new DataInfo("jobWingTailType", 8), new DataInfo("jobWingTailTypeDetail", 2), new DataInfo("unknown2", 6), new DataInfo("eventJob", 3), new DataInfo("unknown2_2", 21), new DataInfo("weaponMotionType", 2), new DataInfo("unknown3", 11), new DataInfo("hasCapPrism", 1), new DataInfo("hasCoatPrism", 1), new DataInfo("hasPantsPrism", 1), new DataInfo("hasShoesPrism", 1), new DataInfo("hasGlovesPrism", 1), new DataInfo("hasCapePrism", 1), new DataInfo("hasWeaponPrism", 1), new DataInfo("hasSkinPrism", 1), new DataInfo("ringID1", 10), new DataInfo("ringGender1", 4), new DataInfo("ringID2", 10), new DataInfo("ringGender2", 4), new DataInfo("ringID3", 10), new DataInfo("ringGender3", 4), new DataInfo("ringID4", 10), new DataInfo("ringGender4", 4), new DataInfo("unknown4", 32), new DataInfo("unknown5", 32), new DataInfo("unknown6", 32), new DataInfo("unknown7", 16) } },
+            { 31, new List<DataInfo>() {new DataInfo("gender", 1), new DataInfo("skinID", 10), new DataInfo("face50k", 1), new DataInfo("faceID", 10), new DataInfo("faceGender", 4), new DataInfo("hair10k", 4), new DataInfo("hairID", 10), new DataInfo("hairGender", 4), new DataInfo("capID", 10), new DataInfo("capGender", 3), new DataInfo("faceAccID", 10), new DataInfo("faceAccGender", 2), new DataInfo("eyeAccID", 10), new DataInfo("eyeAccGender", 2), new DataInfo("earAccID", 10), new DataInfo("earAccGender", 2), new DataInfo("isLongCoat", 1), new DataInfo("coatID", 10), new DataInfo("coatGender", 4), new DataInfo("pantsID", 10), new DataInfo("pantsGender", 2), new DataInfo("shoesID", 10), new DataInfo("shoesGender", 4), new DataInfo("glovesID", 10), new DataInfo("glovesGender", 2), new DataInfo("capeID", 10), new DataInfo("capeGender", 2), new DataInfo("subWeaponType", 2), new DataInfo("shieldID", 10), new DataInfo("shieldGender", 4), new DataInfo("isCashWeapon", 1), new DataInfo("weaponID", 10), new DataInfo("weaponGender", 2), new DataInfo("weaponType", 8), new DataInfo("earType", 4), new DataInfo("mixHairColor", 4), new DataInfo("mixHairRatio", 8), new DataInfo("mixFaceInfo", 10), new DataInfo("unknown1", 4), new DataInfo("jobWingTailType", 8), new DataInfo("jobWingTailTypeDetail", 2), new DataInfo("unknown2", 6), new DataInfo("eventJob", 3), new DataInfo("unknown2_2", 21), new DataInfo("weaponMotionType", 2), new DataInfo("unknown3", 11), new DataInfo("hasCapPrism", 1), new DataInfo("hasFaceAccPrism", 1), new DataInfo("hasEyeAccPrism", 1), new DataInfo("hasEarAccPrism", 1), new DataInfo("hasCoatPrism", 1), new DataInfo("hasPantsPrism", 1), new DataInfo("hasShoesPrism", 1), new DataInfo("hasGlovesPrism", 1), new DataInfo("hasCapePrism", 1), new DataInfo("hasShieldPrism", 1), new DataInfo("hasWeaponPrism", 1), new DataInfo("hasSkinPrism", 1), new DataInfo("ringID1", 10), new DataInfo("ringGender1", 4), new DataInfo("ringID2", 10), new DataInfo("ringGender2", 4), new DataInfo("ringID3", 10), new DataInfo("ringGender3", 4), new DataInfo("ringID4", 10), new DataInfo("ringGender4", 4), new DataInfo("unknown4", 32), new DataInfo("unknown5", 32), new DataInfo("unknown6", 32), new DataInfo("unknown7", 16) } },
+            { 32, new List<DataInfo>() {new DataInfo("gender", 1), new DataInfo("skinID", 10), new DataInfo("face50k", 1), new DataInfo("faceID", 10), new DataInfo("faceGender", 4), new DataInfo("hair10k", 4), new DataInfo("hairID", 10), new DataInfo("hairGender", 4), new DataInfo("capID", 10), new DataInfo("capGender", 3), new DataInfo("faceAccID", 10), new DataInfo("faceAccGender", 2), new DataInfo("eyeAccID", 10), new DataInfo("eyeAccGender", 2), new DataInfo("earAccID", 10), new DataInfo("earAccGender", 2), new DataInfo("isLongCoat", 1), new DataInfo("coatID", 10), new DataInfo("coatGender", 4), new DataInfo("pantsID", 10), new DataInfo("pantsGender", 2), new DataInfo("shoesID", 10), new DataInfo("shoesGender", 4), new DataInfo("glovesID", 10), new DataInfo("glovesGender", 2), new DataInfo("capeID", 10), new DataInfo("capeGender", 2), new DataInfo("subWeaponType", 2), new DataInfo("shieldID", 10), new DataInfo("shieldGender", 4), new DataInfo("isCashWeapon", 1), new DataInfo("weaponID", 10), new DataInfo("weaponGender", 2), new DataInfo("weaponType", 8), new DataInfo("earType", 4), new DataInfo("mixHairColor", 4), new DataInfo("mixHairRatio", 8), new DataInfo("mixFaceInfo", 10), new DataInfo("unknown1", 4), new DataInfo("jobWingTailType", 8), new DataInfo("jobWingTailTypeDetail", 2), new DataInfo("unknown2", 6), new DataInfo("eventJob", 3), new DataInfo("unknown2_2", 21), new DataInfo("weaponMotionType", 2), new DataInfo("unknown3", 11), new DataInfo("showEffectFlags", 4), new DataInfo("hasCapPrism", 1), new DataInfo("hasFaceAccPrism", 1), new DataInfo("hasEyeAccPrism", 1), new DataInfo("hasEarAccPrism", 1), new DataInfo("hasCoatPrism", 1), new DataInfo("hasPantsPrism", 1), new DataInfo("hasShoesPrism", 1), new DataInfo("hasGlovesPrism", 1), new DataInfo("hasCapePrism", 1), new DataInfo("hasShieldPrism", 1), new DataInfo("hasWeaponPrism", 1), new DataInfo("hasSkinPrism", 1), new DataInfo("ringID1", 10), new DataInfo("ringGender1", 4), new DataInfo("ringID2", 10), new DataInfo("ringGender2", 4), new DataInfo("ringID3", 10), new DataInfo("ringGender3", 4), new DataInfo("ringID4", 10), new DataInfo("ringGender4", 4), new DataInfo("unknown4", 32), new DataInfo("unknown5", 32), new DataInfo("unknown6", 32), new DataInfo("unknown7", 16) } },
+            { 33, new List<DataInfo>() {new DataInfo("gender", 1), new DataInfo("skinID", 10), new DataInfo("face50k", 1), new DataInfo("faceID", 10), new DataInfo("faceGender", 4), new DataInfo("hair10k", 4), new DataInfo("hairID", 10), new DataInfo("hairGender", 4), new DataInfo("capID", 10), new DataInfo("capGender", 3), new DataInfo("faceAccID", 10), new DataInfo("faceAccGender", 2), new DataInfo("eyeAccID", 10), new DataInfo("eyeAccGender", 2), new DataInfo("earAccID", 10), new DataInfo("earAccGender", 2), new DataInfo("isLongCoat", 1), new DataInfo("coatID", 10), new DataInfo("coatGender", 4), new DataInfo("pantsID", 10), new DataInfo("pantsGender", 2), new DataInfo("shoesID", 10), new DataInfo("shoesGender", 4), new DataInfo("glovesID", 10), new DataInfo("glovesGender", 2), new DataInfo("capeID", 10), new DataInfo("capeGender", 2), new DataInfo("subWeaponType", 2), new DataInfo("shieldID", 10), new DataInfo("shieldGender", 4), new DataInfo("isCashWeapon", 1), new DataInfo("weaponID", 10), new DataInfo("weaponGender", 2), new DataInfo("weaponType", 8), new DataInfo("earType", 4), new DataInfo("mixHairColor", 4), new DataInfo("mixHairRatio", 8), new DataInfo("mixFaceInfo", 10), new DataInfo("unknown1", 4), new DataInfo("jobWingTailType", 8), new DataInfo("jobWingTailTypeDetail", 2), new DataInfo("unknown2", 6), new DataInfo("eventJob", 3), new DataInfo("unknown2_2", 21), new DataInfo("weaponMotionType", 2), new DataInfo("unknown3", 11), new DataInfo("showEffectFlags", 4), new DataInfo("hasCapPrism", 1), new DataInfo("hasFaceAccPrism", 1), new DataInfo("hasEyeAccPrism", 1), new DataInfo("hasEarAccPrism", 1), new DataInfo("hasCoatPrism", 1), new DataInfo("hasPantsPrism", 1), new DataInfo("hasShoesPrism", 1), new DataInfo("hasGlovesPrism", 1), new DataInfo("hasCapePrism", 1), new DataInfo("hasShieldPrism", 1), new DataInfo("hasWeaponPrism", 1), new DataInfo("hasSkinPrism", 1), new DataInfo("ringID1", 10), new DataInfo("ringGender1", 4), new DataInfo("ringID2", 10), new DataInfo("ringGender2", 4), new DataInfo("ringID3", 10), new DataInfo("ringGender3", 4), new DataInfo("ringID4", 10), new DataInfo("ringGender4", 4), new DataInfo("unknown4", 32), new DataInfo("unknown5", 32), new DataInfo("unknown6", 32), new DataInfo("unknown7", 16) } },
+            { 34, new List<DataInfo>() {new DataInfo("gender", 1), new DataInfo("skinID", 10), new DataInfo("face50k", 1), new DataInfo("faceID", 10), new DataInfo("faceGender", 4), new DataInfo("hair10k", 4), new DataInfo("hairID", 10), new DataInfo("hairGender", 4), new DataInfo("capID", 10), new DataInfo("capGender", 3), new DataInfo("faceAccID", 10), new DataInfo("faceAccGender", 2), new DataInfo("eyeAccID", 10), new DataInfo("eyeAccGender", 2), new DataInfo("earAccID", 10), new DataInfo("earAccGender", 2), new DataInfo("isLongCoat", 1), new DataInfo("coatID", 10), new DataInfo("coatGender", 4), new DataInfo("pantsID", 10), new DataInfo("pantsGender", 2), new DataInfo("shoesID", 10), new DataInfo("shoesGender", 4), new DataInfo("glovesID", 10), new DataInfo("glovesGender", 2), new DataInfo("capeID", 10), new DataInfo("capeGender", 2), new DataInfo("subWeaponType", 2), new DataInfo("shieldID", 10), new DataInfo("shieldGender", 4), new DataInfo("isCashWeapon", 1), new DataInfo("weaponID", 10), new DataInfo("weaponGender", 2), new DataInfo("weaponType", 8), new DataInfo("earType", 4), new DataInfo("mixHairColor", 4), new DataInfo("mixHairRatio", 8), new DataInfo("mixFaceInfo", 10), new DataInfo("unknown1", 4), new DataInfo("jobWingTailType", 8), new DataInfo("jobWingTailTypeDetail", 2), new DataInfo("unknown2", 6), new DataInfo("eventJob", 3), new DataInfo("unknown2_2", 21), new DataInfo("weaponMotionType", 2), new DataInfo("unknown3", 11), new DataInfo("showEffectFlags", 4), new DataInfo("emotionFaceAccID", 10), new DataInfo("emotionFaceAccGender", 2), new DataInfo("hasCapPrism", 1), new DataInfo("hasFaceAccPrism", 1), new DataInfo("hasEyeAccPrism", 1), new DataInfo("hasEarAccPrism", 1), new DataInfo("hasCoatPrism", 1), new DataInfo("hasPantsPrism", 1), new DataInfo("hasShoesPrism", 1), new DataInfo("hasGlovesPrism", 1), new DataInfo("hasCapePrism", 1), new DataInfo("hasShieldPrism", 1), new DataInfo("hasWeaponPrism", 1), new DataInfo("hasSkinPrism", 1), new DataInfo("ringID1", 10), new DataInfo("ringGender1", 4), new DataInfo("ringID2", 10), new DataInfo("ringGender2", 4), new DataInfo("ringID3", 10), new DataInfo("ringGender3", 4), new DataInfo("ringID4", 10), new DataInfo("ringGender4", 4), new DataInfo("unknown4", 32), new DataInfo("unknown5", 32), new DataInfo("unknown6", 32), new DataInfo("unknown7", 16) } },
+            { 35, new List<DataInfo>() {new DataInfo("gender", 1), new DataInfo("skinID", 10), new DataInfo("face50k", 1), new DataInfo("faceID", 10), new DataInfo("faceGender", 4), new DataInfo("hair10k", 4), new DataInfo("hairID", 10), new DataInfo("hairGender", 4), new DataInfo("capID", 10), new DataInfo("capGender", 3), new DataInfo("faceAccID", 10), new DataInfo("faceAccGender", 2), new DataInfo("eyeAccID", 10), new DataInfo("eyeAccGender", 2), new DataInfo("earAccID", 10), new DataInfo("earAccGender", 2), new DataInfo("isLongCoat", 1), new DataInfo("coatID", 10), new DataInfo("coatGender", 4), new DataInfo("pantsID", 10), new DataInfo("pantsGender", 2), new DataInfo("shoesID", 10), new DataInfo("shoesGender", 4), new DataInfo("glovesID", 10), new DataInfo("glovesGender", 2), new DataInfo("capeID", 10), new DataInfo("capeGender", 2), new DataInfo("subWeaponType", 2), new DataInfo("shieldID", 10), new DataInfo("shieldGender", 4), new DataInfo("isCashWeapon", 1), new DataInfo("weaponID", 10), new DataInfo("weaponGender", 2), new DataInfo("weaponType", 8), new DataInfo("earType", 4), new DataInfo("mixHairColor", 4), new DataInfo("mixHairRatio", 8), new DataInfo("mixFaceInfo", 10), new DataInfo("unknown1", 4), new DataInfo("jobWingTailType", 8), new DataInfo("jobWingTailTypeDetail", 2), new DataInfo("unknown2", 6), new DataInfo("eventJob", 3), new DataInfo("unknown2_2", 21), new DataInfo("weaponMotionType", 2), new DataInfo("unknown3", 11), new DataInfo("showEffectFlags", 4), new DataInfo("emotionFaceAccID", 10), new DataInfo("emotionFaceAccGender", 2), new DataInfo("hasCapPrism", 1), new DataInfo("hasFaceAccPrism", 1), new DataInfo("hasEyeAccPrism", 1), new DataInfo("hasEarAccPrism", 1), new DataInfo("hasCoatPrism", 1), new DataInfo("hasPantsPrism", 1), new DataInfo("hasShoesPrism", 1), new DataInfo("hasGlovesPrism", 1), new DataInfo("hasCapePrism", 1), new DataInfo("hasShieldPrism", 1), new DataInfo("hasWeaponPrism", 1), new DataInfo("hasSkinPrism", 1), new DataInfo("ringID1", 10), new DataInfo("ringGender1", 4), new DataInfo("ringID2", 10), new DataInfo("ringGender2", 4), new DataInfo("ringID3", 10), new DataInfo("ringGender3", 4), new DataInfo("ringID4", 10), new DataInfo("ringGender4", 4), new DataInfo("unknown4", 32), new DataInfo("unknown5", 32), new DataInfo("unknown6", 32), new DataInfo("unknown7", 16) } },
+            { 36, new List<DataInfo>() {new DataInfo("gender", 1), new DataInfo("skinID", 10), new DataInfo("face50k", 1), new DataInfo("faceID", 10), new DataInfo("faceGender", 4), new DataInfo("hair10k", 4), new DataInfo("hairID", 10), new DataInfo("hairGender", 4), new DataInfo("capID", 10), new DataInfo("capGender", 3), new DataInfo("faceAccID", 10), new DataInfo("faceAccGender", 2), new DataInfo("eyeAccID", 10), new DataInfo("eyeAccGender", 2), new DataInfo("earAccID", 10), new DataInfo("earAccGender", 2), new DataInfo("isLongCoat", 1), new DataInfo("coatID", 10), new DataInfo("coatGender", 4), new DataInfo("pantsID", 10), new DataInfo("pantsGender", 2), new DataInfo("shoesID", 10), new DataInfo("shoesGender", 4), new DataInfo("glovesID", 10), new DataInfo("glovesGender", 2), new DataInfo("capeID", 10), new DataInfo("capeGender", 2), new DataInfo("subWeaponType", 2), new DataInfo("shieldID", 10), new DataInfo("shieldGender", 4), new DataInfo("isCashWeapon", 1), new DataInfo("weaponID", 10), new DataInfo("weaponGender", 2), new DataInfo("weaponType", 8), new DataInfo("earType", 4), new DataInfo("mixHairColor", 4), new DataInfo("mixHairRatio", 8), new DataInfo("mixFaceInfo", 10), new DataInfo("unknown1", 4), new DataInfo("jobWingTailType", 8), new DataInfo("jobWingTailTypeDetail", 2), new DataInfo("unknown2", 6), new DataInfo("eventJob", 3), new DataInfo("unknown2_2", 21), new DataInfo("weaponMotionType", 2), new DataInfo("unknown3", 11), new DataInfo("showEffectFlags", 4), new DataInfo("emotionFaceAccID", 10), new DataInfo("emotionFaceAccGender", 2), new DataInfo("hasCapPrism", 1), new DataInfo("hasFaceAccPrism", 1), new DataInfo("hasEyeAccPrism", 1), new DataInfo("hasEarAccPrism", 1), new DataInfo("hasCoatPrism", 1), new DataInfo("hasPantsPrism", 1), new DataInfo("hasShoesPrism", 1), new DataInfo("hasGlovesPrism", 1), new DataInfo("hasCapePrism", 1), new DataInfo("hasShieldPrism", 1), new DataInfo("hasWeaponPrism", 1), new DataInfo("hasSkinPrism", 1), new DataInfo("ringID1", 10), new DataInfo("ringGender1", 4), new DataInfo("ringID2", 10), new DataInfo("ringGender2", 4), new DataInfo("ringID3", 10), new DataInfo("ringGender3", 4), new DataInfo("ringID4", 10), new DataInfo("ringGender4", 4), new DataInfo("unknown4", 32), new DataInfo("unknown5", 32), new DataInfo("unknown6", 32), new DataInfo("unknown7", 16) } },
+            { 39, new List<DataInfo>() {new DataInfo("gender", 1), new DataInfo("skinID", 10), new DataInfo("face50k", 1), new DataInfo("faceID", 10), new DataInfo("faceGender", 4), new DataInfo("hair10k", 4), new DataInfo("hairID", 10), new DataInfo("hairGender", 4), new DataInfo("capID", 10), new DataInfo("capGender", 3), new DataInfo("faceAccID", 10), new DataInfo("faceAccGender", 2), new DataInfo("eyeAccID", 10), new DataInfo("eyeAccGender", 2), new DataInfo("earAccID", 10), new DataInfo("earAccGender", 2), new DataInfo("isLongCoat", 1), new DataInfo("coatID", 10), new DataInfo("coatGender", 4), new DataInfo("pantsID", 10), new DataInfo("pantsGender", 2), new DataInfo("shoesID", 10), new DataInfo("shoesGender", 4), new DataInfo("glovesID", 10), new DataInfo("glovesGender", 2), new DataInfo("capeID", 10), new DataInfo("capeGender", 4), new DataInfo("subWeaponType", 3), new DataInfo("uk2_1", 1), new DataInfo("isCashWeapon", 1), new DataInfo("weaponID", 10), new DataInfo("weaponGender", 2), new DataInfo("weaponType", 8), new DataInfo("earType", 4), new DataInfo("mixHairColor", 4), new DataInfo("mixHairRatio", 8), new DataInfo("mixFaceInfo", 10), new DataInfo("unknown1", 4), new DataInfo("jobWingTailType", 8), new DataInfo("jobWingTailTypeDetail", 2), new DataInfo("unknown2", 6), new DataInfo("eventJob", 3), new DataInfo("unknown2_2", 21), new DataInfo("weaponMotionType", 2), new DataInfo("unknown3", 11), new DataInfo("showEffectFlags", 4), new DataInfo("emotionFaceAccID", 10), new DataInfo("emotionFaceAccGender", 2), new DataInfo("hasCapPrism", 1), new DataInfo("hasFaceAccPrism", 1), new DataInfo("hasEyeAccPrism", 1), new DataInfo("hasEarAccPrism", 1), new DataInfo("hasCoatPrism", 1), new DataInfo("hasPantsPrism", 1), new DataInfo("hasShoesPrism", 1), new DataInfo("hasGlovesPrism", 1), new DataInfo("hasCapePrism", 1), new DataInfo("hasShieldPrism", 1), new DataInfo("hasWeaponPrism", 1), new DataInfo("hasSkinPrism", 1), new DataInfo("ringID1", 10), new DataInfo("ringGender1", 4), new DataInfo("ringID2", 10), new DataInfo("ringGender2", 4), new DataInfo("ringID3", 10), new DataInfo("ringGender3", 4), new DataInfo("ringID4", 10), new DataInfo("ringGender4", 4), new DataInfo("unknown4", 32), new DataInfo("unknown5", 32), new DataInfo("unknown6", 32), new DataInfo("unknown7", 16) } },
         };
 
         public static readonly int[] WeaponsKMS = { -1, 130, 131, 132, 133, 137, 138, 140, 141, 142,

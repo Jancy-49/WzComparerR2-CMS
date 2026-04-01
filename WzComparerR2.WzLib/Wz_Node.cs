@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Xml;
 using System.Reflection;
 using System.Text.RegularExpressions;
@@ -451,13 +452,17 @@ namespace WzComparerR2.WzLib
         {
             if (other != null)
             {
-                return string.Compare(this.Text, other.Text, StringComparison.Ordinal);
+                //return string.Compare(this.Text, other.Text, StringComparison.Ordinal);
+                return StrCmpLogicalW(this.Text, other.Text);
             }
             else
             {
                 return 1;
             }
         }
+
+        [DllImport("shlwapi.dll", CharSet = CharSet.Unicode)]
+        static extern int StrCmpLogicalW(string psz1, string psz2);
     }
 
     public static class Wz_NodeExtension
@@ -480,8 +485,7 @@ namespace WzComparerR2.WzLib
         {
             if (node == null)
                 return null;
-            Wz_Uol uol;
-            while ((uol = node?.GetValueEx<Wz_Uol>(null)) != null)
+            while (node?.Value is Wz_Uol uol)
             {
                 node = uol.HandleUol(node);
             }
@@ -563,7 +567,7 @@ namespace WzComparerR2.WzLib
             return wzImg;
         }
 
-        public static void DumpAsXml(this Wz_Node node, XmlWriter writer)
+        public static void DumpAsXml(this Wz_Node node, XmlWriter writer) 
         {
             DumpAsXml(node, writer, null);
         }
@@ -573,18 +577,15 @@ namespace WzComparerR2.WzLib
             object value = node.Value;
 
             // 过滤：根据 tag 名称（类名小写）匹配
-            if (filterTags != null && value != null)
-            {
+            if (filterTags != null && value != null) {
                 var currentTag = value.GetType().Name.ToLower();  // 例如 "wz_int"
-                foreach (var tag in filterTags)
-                {
-                    if (tag != null && currentTag == tag.Trim().ToLower())
-                    {
+                foreach (var tag in filterTags) {
+                    if (tag != null && currentTag == tag.Trim().ToLower()) {
                         return; // 匹配到，跳过输出
                     }
                 }
             }
-
+            
             if (value == null || value is Wz_Image)
             {
                 writer.WriteStartElement("dir");
@@ -599,7 +600,7 @@ namespace WzComparerR2.WzLib
                 writer.WriteAttributeString("format", ((int)png.Format).ToString());
                 writer.WriteAttributeString("scale", png.Scale.ToString());
                 writer.WriteAttributeString("pages", png.Pages.ToString());
-                for (int i = 0; i < png.ActualPages; i++)
+                for(int i = 0; i < png.ActualPages; i++)
                 {
                     using (var bmp = png.ExtractPng())
                     {

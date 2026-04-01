@@ -25,7 +25,7 @@ namespace WzComparerR2
             this.origin = origin;
         }
 
-        public Bitmap bitmap;
+        private Bitmap bitmap;
         private Point origin;
 
         /// <summary>
@@ -67,7 +67,7 @@ namespace WzComparerR2
                     return new Rectangle(this.OpOrigin, this.bitmap.Size);
             }
         }
-        // public static BitmapOrigin CreateFromNode(Wz_Node node, GlobalFindNodeFunction findNode)
+
         public static BitmapOrigin CreateFromNode(Wz_Node node, GlobalFindNodeFunction findNode, Wz_File wzf = null)
         {
             BitmapOrigin bp = new BitmapOrigin();
@@ -75,14 +75,9 @@ namespace WzComparerR2
             {
                 return bp;
             }
-            //Wz_Uol uol;
-            //while ((uol = node.GetValue<Wz_Uol>(null)) != null)
-            //{
-            //    node = uol.HandleUol(node);
-            //}
             node = node.HandleFullUol(findNode);
+
             //获取linkNode
-            //var linkNode = node.GetLinkedSourceNode(findNode);
             var linkNode = node.GetLinkedSourceNode(findNode, wzf);
             Wz_Png png = linkNode?.GetValue<Wz_Png>() ?? (Wz_Png)node.Value;
 

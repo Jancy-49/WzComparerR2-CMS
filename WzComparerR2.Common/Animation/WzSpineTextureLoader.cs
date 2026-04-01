@@ -26,6 +26,7 @@ namespace WzComparerR2.Animation
         public GraphicsDevice GraphicsDevice { get; private set; }
 
         public GlobalFindNodeFunction FindNodeFunction { get; set; }
+
         public bool EnableTextureMissingFallback { get; set; }
 
         public void Load(Spine.AtlasPage page, string path)
@@ -67,7 +68,7 @@ namespace WzComparerR2.Animation
             var frameNode = this.TopNode.FindNodeByPath(path);
             frameNode = frameNode.ResolveUol();
 
-            if (frameNode.Value is Wz_Png)
+            if (frameNode?.Value is Wz_Png)
             {
                 var linkNode = frameNode.GetLinkedSourceNode(FindNodeFunction);
                 Wz_Png png = (linkNode ?? frameNode).GetValue<Wz_Png>();

@@ -41,6 +41,7 @@ namespace WzComparerR2.CharaSimControl
         private ACtrlButton btnEquip;
         private ACtrlButton btnEquipTab;
         private ACtrlButton btnPetTab;
+        private ACtrlButton btnException;
         private ACtrlButton btnEnhanceWeapon;
         private ACtrlButton btnCube;
         private ACtrlButton btnexOption;
@@ -236,6 +237,16 @@ namespace WzComparerR2.CharaSimControl
             this.btnPetTab.Visible = true;
             this.btnPetTab.ButtonStateChanged += new EventHandler(aCtrl_RefreshCall);
             this.btnPetTab.MouseClick += new System.Windows.Forms.MouseEventHandler(btnPetTab_MouseClick);
+
+            this.btnException = new ACtrlButton();
+            this.btnException.Normal = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIEquip.img/Equip/PetTab/button:Exception/normal/0"), PluginBase.PluginManager.FindWz);
+            this.btnException.Pressed = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIEquip.img/Equip/PetTab/button:Exception/pressed/0"), PluginBase.PluginManager.FindWz);
+            this.btnException.MouseOver = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIEquip.img/Equip/PetTab/button:Exception/mouseOver/0"), PluginBase.PluginManager.FindWz);
+            this.btnException.Disabled = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIEquip.img/Equip/PetTab/button:Exception/disabled/0"), PluginBase.PluginManager.FindWz);
+            this.btnException.Location = new Point(27, 421);
+            this.btnException.Size = new Size(190, 27);
+            this.btnException.Visible = false;
+            this.btnException.ButtonStateChanged += new EventHandler(aCtrl_RefreshCall);
 
             this.btnEnhanceWeapon = new ACtrlButton();
             this.btnEnhanceWeapon.Location = new Point(244, 31);
@@ -718,6 +729,7 @@ namespace WzComparerR2.CharaSimControl
                     this.btnInheritance.Visible = false;
                     this.btnNPC.Visible = false;
                     this.btnPotential.Visible = false;
+                    this.btnException.Visible = false;
                 }
                 else if (petMode)
                 {
@@ -740,6 +752,8 @@ namespace WzComparerR2.CharaSimControl
                     this.btnInheritance.Visible = false;
                     this.btnNPC.Visible = false;
                     this.btnPotential.Visible = false;
+                    if (CMSMode)
+                        this.btnException.Visible = true;
                 }
                 else if (enchanceMode)
                 {
@@ -762,6 +776,7 @@ namespace WzComparerR2.CharaSimControl
                     this.btnDragonClose.Visible = false;
                     this.btnMechanicOpen.Visible = false;
                     this.btnMechanicClose.Visible = false;
+                    this.btnException.Visible = false;
                 }
                 this.btnEquipTab.Visible = true;
                 this.btnPetTab.Visible = true;
@@ -860,6 +875,7 @@ namespace WzComparerR2.CharaSimControl
                 this.btnInheritance.Visible = false;
                 this.btnNPC.Visible = false;
                 this.btnPotential.Visible = false;
+                this.btnException.Visible = false;
             }
             if (KMSMode)
             {
@@ -924,6 +940,7 @@ namespace WzComparerR2.CharaSimControl
                 {
                     render_bitmap(g, "UI/_Canvas/UIEquip.img/Equip/main/tab:detailTab/normal/0", 11, 31);
                     render_bitmap(g, "UI/_Canvas/UIEquip.img/Equip/main/tab:detailTab/selected/1", 184, 31);
+
                 }
                 else
                 {
@@ -933,8 +950,15 @@ namespace WzComparerR2.CharaSimControl
                 }
                 render_bitmap(g, "UI/_Canvas/UIEquip.img/Equip/PetTab/canvas:pet", 12, 61);
                 render_slot(g, "UI/UIEquip.img/Equip/PetTab/SlotName");
+                if (CMSMode)
+                {
+                    render_bitmap(g, "UI/_Canvas/UIEquip.img/Equip/PetTab/AutoSkill/1", 24, 331);
+                    render_bitmap(g, "UI/_Canvas/UIEquip.img/Equip/PetTab/petPotion/1", 24, 353);
+                    render_bitmap(g, "UI/_Canvas/UIEquip.img/Equip/PetTab/PetFood/1", 24, 375);
+                    render_bitmap(g, "UI/_Canvas/UIEquip.img/Equip/PetTab/ItemRoot/1", 24, 397);
+                }
             }
-            else if(enchanceMode && zeroMode)//神之子武器强化模式
+            else if (enchanceMode && zeroMode)//神之子武器强化模式
             {
                 render_bitmap(g, "UI/_Canvas/UIEquip.img/Equip/ZeroTab/canvas:Zero", 12, 61);
                 render_bitmap(g, "UI/_Canvas/UIEquip.img/Equip/main/tab:detailTab2/normal/0", 11, 31);
@@ -945,11 +969,11 @@ namespace WzComparerR2.CharaSimControl
                 render_bitmap(g, "UI/_Canvas/UIEquip.img/Equip/ZeroTab/button:ok/disabled/0", 144, 163);
                 render_bitmap(g, "UI/_Canvas/UIEquip.img/Equip/ZeroTab/button:cancel/disabled/0", 144, 187);
             }
-            if (this.character != null
-                && (this.character.Status.Job / 100 == 23 || this.character.Status.Job == 2002))
-            {
-                g.DrawImage(Resource.Equip_character_magicArrow, 142, 126);
-            }
+            //if (this.character != null
+            //    && (this.character.Status.Job / 100 == 23 || this.character.Status.Job == 2002))
+            //{
+            //    g.DrawImage(Resource.Equip_character_magicArrow, 142, 126);
+            //}
 
             foreach (AControl aCtrl in this.aControls)
             {
@@ -1246,7 +1270,10 @@ namespace WzComparerR2.CharaSimControl
                     if (MechanicVisible) yield return btnMechanicClose;
                 }
                 else if (CMSMode)
+                {
                     yield return btnEffectSetting;
+                    yield return btnException;
+                }
                 yield return btnTitle;
                 yield return btnTotem;
                 yield return btnSymbol;

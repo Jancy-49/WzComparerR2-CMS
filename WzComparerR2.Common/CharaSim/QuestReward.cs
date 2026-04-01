@@ -30,12 +30,12 @@ namespace WzComparerR2.CharaSim
 
         public string ExpString
         {
-            get { return "经验值" + this.Exp.ToString("N0"); }
+            get { return "经验值 " + this.Exp.ToString("N0"); }
         }
 
         public string MesoString
         {
-            get { return "金币" + this.Meso.ToString("N0"); }
+            get { return "金币 " + this.Meso.ToString("N0"); }
         }
 
         public static QuestReward CreateFromNode(Wz_Node rewardNode)

@@ -22,8 +22,9 @@ namespace WzComparerR2.AvatarCommon
 
         public static unsafe Bitmap Apply(Bitmap src, int type, int hue, int saturation, int brightness, bool isEffect = false)
         {
+            if (src == null) return null;
             if (!Valid(type, hue, saturation, brightness))
-                return src == null ? null : new Bitmap(src);
+                return new Bitmap(src);
 
             var dst = new Bitmap(src.Width, src.Height, PixelFormat.Format32bppArgb);
             var srcData = src.LockBits(new Rectangle(0, 0, src.Width, src.Height), ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
@@ -43,40 +44,48 @@ namespace WzComparerR2.AvatarCommon
                     var hsv = new HSV(0, 0, 0);
                     SetHSVfromRGB(ref rgb, ref hsv);
 
-                    bool convert = CheckColorType(type, (int)hsv.Hue);
+                    bool convert = CheckColorType(type, ref hsv);
+                    bool not16bitcolor = false;
                     if ((rgb.R == 0 && rgb.G == 0 && rgb.B == 0) || (rgb.R == 255 && rgb.G == 255 && rgb.B == 255) || a == 0)
                     {
                         convert = false;
                     }
                     if (convert)
                     {
-                        RGB addRGB = new RGB(0, 0, 0);
-                        bool[] breakUpperBound = [isEffect || rgb.R > 238, isEffect || rgb.G > 238, isEffect || rgb.B > 238];
+                        if (rgb.R % 17 != 0 || rgb.G % 17 != 0 || rgb.B % 17 != 0)
+                        {
+                            not16bitcolor = true;
+                        }
 
                         if (hue > 0)
                         {
                             hsv.Hue = (hsv.Hue + hue) % 360;
-                            SetRGBfromHSV(ref rgb, ref hsv, isEffect);
+                            SetRGBfromHSV(ref rgb, ref hsv, isEffect || not16bitcolor);
                         }
+
+                        RGB addRGB = new RGB(0, 0, 0);
+                        bool[] breakUpperBound = [isEffect || not16bitcolor || rgb.R > 238, isEffect || not16bitcolor || rgb.G > 238, isEffect || not16bitcolor || rgb.B > 238];
 
                         if (saturation != 100 && hsv.Saturation != 0)
                         {
-                            var ds = (saturation - 100) / 100f;
-                            hsv.Saturation = Clamp(hsv.Saturation + ds, 0, 1);
+                            if (saturation > 100)
+                                hsv.Saturation = Clamp(hsv.Saturation + (saturation - 100) / 100f, 0, 1);
+                            else
+                                hsv.Saturation = hsv.Saturation * saturation / 100f;
 
                             SetRGBfromHSV(ref rgb, ref hsv, false, doRounding: false);
                         }
 
                         if (brightness != 100)
                         {
-                            addRGB = CalcBrightness(ref rgb, brightness, isEffect);
+                            addRGB = CalcBrightness(ref rgb, brightness, isEffect || not16bitcolor);
                         }
 
                         rgb.R = Clamp(rgb.R + addRGB.R, 0, breakUpperBound[0] ? 255 : 238);
                         rgb.G = Clamp(rgb.G + addRGB.G, 0, breakUpperBound[1] ? 255 : 238);
                         rgb.B = Clamp(rgb.B + addRGB.B, 0, breakUpperBound[2] ? 255 : 238);
 
-                        if (!isEffect)
+                        if (!(isEffect || not16bitcolor))
                         {
                             rgb.R = (int)ApplyStep(rgb.R);
                             rgb.G = (int)ApplyStep(rgb.G);
@@ -275,9 +284,10 @@ namespace WzComparerR2.AvatarCommon
             return addRGB;
         }
 
-        private static bool CheckColorType(int type, int hue)
+        private static bool CheckColorType(int type, ref HSV hsv)
         {
             bool convert = true;
+            int hue = (int)hsv.Hue;
             switch (type)
             {
                 case 0:
@@ -285,7 +295,7 @@ namespace WzComparerR2.AvatarCommon
                     break;
                 case 1:
                     // 빨간색 계열
-                    if (hue >= 30 && hue <= 330) convert = false;
+                    if ((hue >= 30 && hue <= 330) || hsv.Saturation == 0) convert = false;
                     break;
                 case 2:
                     // 노란색 계열
