@@ -37,14 +37,14 @@
 |:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
 |0  |K   |F   |P   |C   |L   |H   |O   |B   |M   |A   |
 |1  |   |E   |O  |D   |K   |G   |E/F/P   |A   |N   |B   |
-|2  |   |   |N   |A   |J   |F   |M   |D   |O   |C   |
-|3  |   |   |M   |B   |I   |E   |N   |C   |P   |D   |
+|2  |   |H   |N   |A   |J   |F   |M   |D   |O   |C   |
+|3  |   |G   |M   |B   |I   |E   |N   |C   |P   |D   |
 |4  |   |B   |L   |G   |   |D   |K   |F   |I   |E   |
 |5  |   |A   |K   |H   |   |C   |E/F?   |E   |J   |F   |
-|6  |   |   |J   |E   |   |G   |E/F?   |H   |K   |G   |
+|6  |   |   |J   |E   |   |B   |E/F?   |H   |K   |G   |
 |7  |   |   |I   |F   |   |A   |J   |G   |L   |H   |
-|8  |   |   |H   |   |   |   |G   |J   |E   |I   |
-|9  |   |   |G   |   |   |   |H   |I   |F   |J   |
+|8  |   |   |H   |K   |   |P   |G   |J   |E   |I   |
+|9  |   |   |G   |I   |   |O   |H   |I   |F   |J   |
 
 例如，以下SkillIcon URL 表示技能ID 80000047。
 ```
