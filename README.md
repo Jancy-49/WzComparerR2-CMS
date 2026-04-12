@@ -44,6 +44,7 @@
 |7  |   |   |   |   |   |   |   |   |L   |H   |
 |8  |   |   |H   |   |   |   |   |   |E   |I   |
 |9  |   |   |   |   |   |   |   |   |   |   |
+
 例如，以下SkillIcon URL 表示技能ID 80000047。
 ```
 https://open.api.nexon.com/static/maplestory/skill/icon/KFHCLHOBIH
