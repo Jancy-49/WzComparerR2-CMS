@@ -37,8 +37,8 @@
 |:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
 |0  |K   |F   |P   |C   |L   |H   |O   |B   |M   |A   |
 |1  |   |E   |O  |D   |K   |G   |E/F/P   |A   |N   |B   |
-|2  |   |H   |N   |A   |J   |F   |M   |D   |O   |C   |
-|3  |   |G   |M   |B   |I   |E   |N   |C   |P   |D   |
+|2  |   |   |N   |A   |J   |F   |M   |D   |O   |C   |
+|3  |   |   |M   |B   |I   |E   |N   |C   |P   |D   |
 |4  |   |B   |L   |G   |P   |D   |K   |F   |I   |E   |
 |5  |   |A   |K   |H   |O   |C   |E/F?   |E   |J   |F   |
 |6  |   |   |J   |E   |N   |B   |E/F?   |H   |K   |G   |
