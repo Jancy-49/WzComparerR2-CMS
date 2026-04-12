@@ -39,10 +39,10 @@
 |1  |   |E   |O  |D   |K   |G   |E/F/P   |A   |N   |B   |
 |2  |   |H   |N   |A   |J   |F   |M   |D   |O   |C   |
 |3  |   |G   |M   |B   |I   |E   |N   |C   |P   |D   |
-|4  |   |B   |L   |G   |   |D   |K   |F   |I   |E   |
-|5  |   |A   |K   |H   |   |C   |E/F?   |E   |J   |F   |
-|6  |   |   |J   |E   |   |B   |E/F?   |H   |K   |G   |
-|7  |   |   |I   |F   |   |A   |J   |G   |L   |H   |
+|4  |   |B   |L   |G   |P   |D   |K   |F   |I   |E   |
+|5  |   |A   |K   |H   |O   |C   |E/F?   |E   |J   |F   |
+|6  |   |   |J   |E   |N   |B   |E/F?   |H   |K   |G   |
+|7  |   |   |I   |F   |M   |A   |J   |G   |L   |H   |
 |8  |   |   |H   |K   |   |P   |G   |J   |E   |I   |
 |9  |   |   |G   |I   |   |O   |H   |I   |F   |J   |
 
