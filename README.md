@@ -36,15 +36,15 @@
 |   |1st |2nd |3rd |4th |5th |6th |7th |8th |9th|10th|
 |:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
 |0  |K   |F   |P   |C   |L   |H   |O   |B   |M   |A   |
-|1  |   |E   |   |D   |K   |G   |E/F/P   |A   |N   |B   |
+|1  |   |E   |O  |D   |K   |G   |E/F/P   |A   |N   |B   |
 |2  |   |   |N   |A   |J   |F   |M   |D   |O   |C   |
-|3  |   |   |M   |B   |I   |   |N   |C   |P   |D   |
+|3  |   |   |M   |B   |I   |E   |N   |C   |P   |D   |
 |4  |   |B   |L   |G   |   |D   |K   |F   |I   |E   |
-|5  |   |A   |K   |H   |   |C   |   |E   |J   |F   |
-|6  |   |   |J   |   |   |G   |   |H   |K   |G   |
-|7  |   |   |   |F   |   |A   |J   |G   |L   |H   |
+|5  |   |A   |K   |H   |   |C   |E/F?   |E   |J   |F   |
+|6  |   |   |J   |E   |   |G   |E/F?   |H   |K   |G   |
+|7  |   |   |I   |F   |   |A   |J   |G   |L   |H   |
 |8  |   |   |H   |   |   |   |G   |J   |E   |I   |
-|9  |   |   |   |   |   |   |   |I   |F   |J   |
+|9  |   |   |G   |   |   |   |H   |I   |F   |J   |
 
 例如，以下SkillIcon URL 表示技能ID 80000047。
 ```
