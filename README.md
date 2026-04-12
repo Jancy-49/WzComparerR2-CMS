@@ -46,7 +46,7 @@
 |8  |   |   |H   |K   |   |P   |G   |J   |E   |I   |
 |9  |   |   |G   |I   |   |O   |H   |I   |F   |J   |
 
-例如，以下SkillIcon URL 表示技能ID 0080000047。（往前补0至十位数）
+例如，以下SkillIcon URL 表示技能ID 80000047。（往前补0至十位数）
 ```
 https://open.api.nexon.com/static/maplestory/skill/icon/KFHCLHOBIH
 ```
