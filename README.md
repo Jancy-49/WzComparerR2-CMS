@@ -28,7 +28,7 @@
 
 # NX OpenAPI
 - [了解如何获取API密钥。](https://openapi.nexon.com/guide/prepare-in-advance/)
-- 无法使用其他国家或地区的NexonID。只能使用韩国NexonID。
+- 只能用KMS、MSEA和TMS地区的ID。
 - [了解有关OpenAPI功能的更多信息。](https://openapi.nexon.com/game/maplestory/)
 
 ### SkillID to NX OpenAPI SkillIcon Filename
