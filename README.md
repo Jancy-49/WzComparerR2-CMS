@@ -10,6 +10,7 @@
 
 # Tooltip
 - EasyCompare可输出Skilltooltip、Itemtooltip、Eqptooltip、MapTooltip、Mobtooltip、Npctooltip、QuestTooltip和AchvTooltip
+- 数据库可批量导出SkillTooltip
 
 # Modules
 - **WzComparerR2** 主程序
@@ -34,16 +35,16 @@
 ### SkillID to NX OpenAPI SkillIcon Filename
 |   |1st |2nd |3rd |4th |5th |6th |7th |8th |9th|10th|
 |:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
-|0  |K   |F   |   |C   |L   |H   |O   |B   |   |A   |
-|1  |   |   |   |   |   |   |P   |A   |N   |B   |
-|2  |   |   |   |   |   |   |   |D   |   |   |
-|3  |   |   |   |   |   |   |   |C   |   |   |
-|4  |   |   |   |   |   |   |   |   |I   |E   |
-|5  |   |   |   |   |   |   |   |E   |   |   |
-|6  |   |   |   |   |   |   |   |   |K   |   |
-|7  |   |   |   |   |   |   |   |   |L   |H   |
+|0  |K   |F   |P   |C   |L   |H   |O   |B   |M   |A   |
+|1  |   |   |   |   |   |G   |P   |A   |N   |B   |
+|2  |   |   |   |   |   |F   |M   |D   |O   |C   |
+|3  |   |   |   |   |I   |   |N   |C   |   |D   |
+|4  |   |B   |   |   |   |   |   |   |I   |E   |
+|5  |   |A   |   |H   |   |   |   |E   |J   |F   |
+|6  |   |   |   |   |   |   |   |H   |K   |G   |
+|7  |   |   |   |   |   |A   |   |G   |L   |H   |
 |8  |   |   |H   |   |   |   |   |   |E   |I   |
-|9  |   |   |   |   |   |   |   |   |   |   |
+|9  |   |   |   |   |   |   |   |   |   |J   |
 
 例如，以下SkillIcon URL 表示技能ID 80000047。
 ```
