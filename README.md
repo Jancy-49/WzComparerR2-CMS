@@ -36,7 +36,7 @@
 |   |1st |2nd |3rd |4th |5th |6th |7th |8th |9th|10th|
 |:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
 |0  |K   |F   |P   |C   |L   |H   |O   |B   |M   |A   |
-|1  |   |E   |O  |D   |K   |G   |E/F/P   |A   |N   |B   |
+|1  |   |E   |O  |D   |K   |G   |P   |A   |N   |B   |
 |2  |   |   |N   |A   |J   |F   |M   |D   |O   |C   |
 |3  |   |   |M   |B   |I   |E   |N   |C   |P   |D   |
 |4  |   |B   |L   |G   |P   |D   |K   |F   |I   |E   |
