@@ -63,7 +63,7 @@ https://open.api.nexon.com/static/maplestory/skill/icon/KFHCLHOBIH
 |6  |    |    |J   |E   |N   |B   |I   |H   |
 |7  |    |    |I   |F   |M   |A   |J   |G   |
 |8  |    |    |H   |K   |D   |P   |G   |J   |
-|9  |    |    |G   |I   |C   |O   |H   |I   |
+|9  |    |    |G   |L   |C   |O   |H   |I   |
 
 例如，以下ItemIcon URL 表示道具ID 1802767。（往前补0至8位）
 ```
