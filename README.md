@@ -52,20 +52,20 @@ https://open.api.nexon.com/static/maplestory/skill/icon/KFHCLHOBIH
 ```
 
 ### ItemID to NX OpenAPI ItemIcon Filename
-|   |1st |2nd |3rd |4th |5th |6th |7th |
-|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
-|0  |    |P   |C   |L   |H   |O   |B   |
-|1  |E   |O   |D   |A   |G   |P   |A   |
-|2  |H   |N   |A   |J   |F   |M   |D   |
-|3  |G   |M   |B   |I   |E   |N   |C   |
-|4  |B   |L   |G   |P   |D   |K   |F   |
-|5  |A   |K   |H   |O   |C   |L   |E   |
-|6  |    |J   |E   |N   |B   |I   |H   |
-|7  |    |I   |F   |M   |A   |J   |G   |
-|8  |    |H   |K   |D   |P   |G   |J   |
-|9  |    |G   |I   |C   |O   |H   |I   |
+|  |1st   |2nd |3rd |4th |5th |6th |7th |8th |
+|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
+|0  |K    |    |P   |C   |L   |H   |O   |B   |
+|1  |    |E   |O   |D   |K   |G   |P   |A   |
+|2  |    |H   |N   |A   |J   |F   |M   |D   |
+|3  |    |G   |M   |B   |I   |E   |N   |C   |
+|4  |    |B   |L   |G   |P   |D   |K   |F   |
+|5  |    |A   |K   |H   |O   |C   |L   |E   |
+|6  |    |    |J   |E   |N   |B   |I   |H   |
+|7  |    |    |I   |F   |M   |A   |J   |G   |
+|8  |    |    |H   |K   |D   |P   |G   |J   |
+|9  |    |    |G   |I   |C   |O   |H   |I   |
 
-例如，以下ItemIcon URL 表示道具ID 1802767。
+例如，以下ItemIcon URL 表示道具ID 1802767。（往前补0至8位）
 ```
 https://open.api.nexon.com/static/maplestory/ItemIcon/KEHCJAIG.png
 ```
