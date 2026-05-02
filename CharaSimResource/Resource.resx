@@ -1142,6 +1142,36 @@
 	<data name="UIWindow2_img_MiniMap_MaxMapMirror_w" type="System.Resources.ResXFileRef, System.Windows.Forms">
 		<value>Resources\UIWindow2.img.MiniMap.MaxMapMirror.w.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
 	</data>
+	<data name="UICharacterInfo_img_remote_detailSkill_scroll_slot_enabled_base" type="System.Resources.ResXFileRef, System.Windows.Forms">
+		<value>Resources\UICharacterInfo.img.remote.detailSkill.scroll_slot.enabled.base.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+	</data>
+	<data name="UICharacterInfo_img_remote_detailSkill_scroll_slot_enabled_prev0" type="System.Resources.ResXFileRef, System.Windows.Forms">
+		<value>Resources\UICharacterInfo.remote.detailSkill.scroll_slot.enabled.prev0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+	</data>
+	<data name="UICharacterInfo_img_remote_detailSkill_scroll_slot_enabled_prev1" type="System.Resources.ResXFileRef, System.Windows.Forms">
+		<value>Resources\UICharacterInfo.remote.detailSkill.scroll_slot.enabled.prev1.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+	</data>
+	<data name="UICharacterInfo_img_remote_detailSkill_scroll_slot_enabled_prev2" type="System.Resources.ResXFileRef, System.Windows.Forms">
+		<value>Resources\UICharacterInfo.remote.detailSkill.scroll_slot.enabled.prev2.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+	</data>
+	<data name="UICharacterInfo_img_remote_detailSkill_scroll_slot_enabled_next0" type="System.Resources.ResXFileRef, System.Windows.Forms">
+		<value>Resources\UICharacterInfo.remote.detailSkill.scroll_slot.enabled.next0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+	</data>
+	<data name="UICharacterInfo_img_remote_detailSkill_scroll_slot_enabled_next1" type="System.Resources.ResXFileRef, System.Windows.Forms">
+		<value>Resources\UICharacterInfo.remote.detailSkill.scroll_slot.enabled.next1.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+	</data>
+	<data name="UICharacterInfo_img_remote_detailSkill_scroll_slot_enabled_next2" type="System.Resources.ResXFileRef, System.Windows.Forms">
+		<value>Resources\UICharacterInfo.remote.detailSkill.scroll_slot.enabled.next2.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+	</data>
+	<data name="UICharacterInfo_img_remote_detailSkill_scroll_slot_enabled_thumb0" type="System.Resources.ResXFileRef, System.Windows.Forms">
+		<value>Resources\UICharacterInfo.img.remote.detailSkill.scroll_slot.enabled.thumb0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+	</data>
+	<data name="UICharacterInfo_img_remote_detailSkill_scroll_slot_enabled_thumb1" type="System.Resources.ResXFileRef, System.Windows.Forms">
+		<value>Resources\UICharacterInfo.img.remote.detailSkill.scroll_slot.enabled.thumb1.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+	</data>
+	<data name="UICharacterInfo_img_remote_detailSkill_scroll_slot_enabled_thumb2" type="System.Resources.ResXFileRef, System.Windows.Forms">
+		<value>Resources\UICharacterInfo.img.remote.detailSkill.scroll_slot.enabled.thumb2.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+	</data>
 	<data name="UICharacterInfo_img_remote_detailStat_ability_abilityTitle_epic_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
 		<value>Resources\UICharacterInfo.img.remote.detailStat.ability.abilityTitle.epic.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
 	</data>
@@ -1417,6 +1447,9 @@
 	</data>
 	<data name="UICharacterInfo_img_common_main_layername" type="System.Resources.ResXFileRef, System.Windows.Forms">
 		<value>Resources\UICharacterInfo.img.common.main.layername.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+	</data>
+	<data name="UICharacterInfo_img_common_main_layer_genesisPass" type="System.Resources.ResXFileRef, System.Windows.Forms">
+		<value>Resources\UICharacterInfo.common.main.layer_genesisPass.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
 	</data>
 	<data name="UICharacterInfo_img_customBackground_0_icon" type="System.Resources.ResXFileRef, System.Windows.Forms">
 		<value>Resources\UICharacterInfo.img.customBackground.0.icon.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
@@ -1877,6 +1910,9 @@
 	<data name="UICharacterInfo_img_remote_detailCash_canvascash" type="System.Resources.ResXFileRef, System.Windows.Forms">
 		<value>Resources\UICharacterInfo.img.remote.detailCash.canvascash.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
 	</data>
+	<data name="UICharacterInfo_img_remote_detailCash_canvaspreset" type="System.Resources.ResXFileRef, System.Windows.Forms">
+		<value>Resources\UICharacterInfo.img.remote.detailCash.canvaspreset.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+	</data>
 	<data name="UICharacterInfo_img_remote_detailCash_tabcashTab_normal_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
 		<value>Resources\UICharacterInfo.img.remote.detailCash.tabcashTab.normal.0.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
 	</data>
@@ -1888,6 +1924,9 @@
 	</data>
 	<data name="UICharacterInfo_img_remote_detailCash_tabcashTab_selected_1" type="System.Resources.ResXFileRef, System.Windows.Forms">
 		<value>Resources\UICharacterInfo.img.remote.detailCash.tabcashTab.selected.1.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+	</data>
+	<data name="UICharacterInfo_img_remote_detailEquip_skillRingEquip_canvas_skillRing" type="System.Resources.ResXFileRef, System.Windows.Forms">
+		<value>Resources\UICharacterInfo.img.remote.detailEquip.skillRingEquip.canvas_skillRing.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
 	</data>
 	<data name="UICharacterInfo_img_remote_detailEquip_ArcEquip_backgrnd" type="System.Resources.ResXFileRef, System.Windows.Forms">
 		<value>Resources\UICharacterInfo.img.remote.detailEquip.ArcEquip.backgrnd.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
@@ -5043,6 +5082,39 @@
 	</data>
 	<data name="mapleUnion_unionInfo_layerartifactExpGauge" type="System.Resources.ResXFileRef, System.Windows.Forms">
 		<value>Resources\mapleUnion.unionInfo.layerartifactExpGauge.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+	</data>
+	<data name="mapleUnion_attackerSetting_scroll_attackerScroll_enabled_base" type="System.Resources.ResXFileRef, System.Windows.Forms">
+		<value>Resources\mapleUnion.attackerSetting.scroll_attackerScroll.enabled.base.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+	</data>
+	<data name="mapleUnion_attackerSetting_scroll_attackerScroll_disabled_base" type="System.Resources.ResXFileRef, System.Windows.Forms">
+		<value>Resources\mapleUnion.attackerSetting.scroll_attackerScroll.disabled.base.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+	</data>
+	<data name="mapleUnion_attackerSetting_scroll_attackerScroll_enabled_prev0" type="System.Resources.ResXFileRef, System.Windows.Forms">
+		<value>Resources\mapleUnion.attackerSetting.scroll_attackerScroll.enabled.prev0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+	</data>
+	<data name="mapleUnion_attackerSetting_scroll_attackerScroll_enabled_prev1" type="System.Resources.ResXFileRef, System.Windows.Forms">
+		<value>Resources\mapleUnion.attackerSetting.scroll_attackerScroll.enabled.prev1.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+	</data>
+	<data name="mapleUnion_attackerSetting_scroll_attackerScroll_enabled_prev2" type="System.Resources.ResXFileRef, System.Windows.Forms">
+		<value>Resources\mapleUnion.attackerSetting.scroll_attackerScroll.enabled.prev2.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+	</data>
+	<data name="mapleUnion_attackerSetting_scroll_attackerScroll_enabled_next0" type="System.Resources.ResXFileRef, System.Windows.Forms">
+		<value>Resources\mapleUnion.attackerSetting.scroll_attackerScroll.enabled.next0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+	</data>
+	<data name="mapleUnion_attackerSetting_scroll_attackerScroll_enabled_next1" type="System.Resources.ResXFileRef, System.Windows.Forms">
+		<value>Resources\mapleUnion.attackerSetting.scroll_attackerScroll.enabled.next1.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+	</data>
+	<data name="mapleUnion_attackerSetting_scroll_attackerScroll_enabled_next2" type="System.Resources.ResXFileRef, System.Windows.Forms">
+		<value>Resources\mapleUnion.attackerSetting.scroll_attackerScroll.enabled.next2.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+	</data>
+	<data name="mapleUnion_attackerSetting_scroll_attackerScroll_enabled_thumb0" type="System.Resources.ResXFileRef, System.Windows.Forms">
+		<value>Resources\mapleUnion.attackerSetting.scroll_attackerScroll.enabled.thumb0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+	</data>
+	<data name="mapleUnion_attackerSetting_scroll_attackerScroll_enabled_thumb1" type="System.Resources.ResXFileRef, System.Windows.Forms">
+		<value>Resources\mapleUnion.attackerSetting.scroll_attackerScroll.enabled.thumb1.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+	</data>
+	<data name="mapleUnion_attackerSetting_scroll_attackerScroll_enabled_thumb2" type="System.Resources.ResXFileRef, System.Windows.Forms">
+		<value>Resources\mapleUnion.attackerSetting.scroll_attackerScroll.enabled.thumb2.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
 	</data>
 	<data name="mapleUnion_attackerSetting_AreaButtons_AreaMouseOver_0_focused_0" type="System.Resources.ResXFileRef, System.Windows.Forms">
 		<value>Resources\mapleUnion.attackerSetting.AreaButtons.AreaMouseOver.0.focused.0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>

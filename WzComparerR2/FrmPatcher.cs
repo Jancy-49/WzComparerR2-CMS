@@ -181,40 +181,51 @@ namespace WzComparerR2
             }
         }
 
-        private void buttonXCheck_Click(object sender, EventArgs e)
+        private async void buttonXCheck_Click(object sender, EventArgs e)
         {
             DownloadingItem item = new DownloadingItem(txtUrl.Text, null);
-            try
+
+            panelEx3.Visible = true;
+            this.expandablePanel1.Height = 280;
+            txtResult.Text = $"[{DateTime.Now:HH:mm:ss}] 开始检测补丁文件\r\n";
+
+            while (true)
             {
-                item.GetFileLength();
-                if (item.FileLength > 0)
+                try
                 {
-                    switch (MessageBoxEx.Show(string.Format("容量 : {0:N0}B, 开始上传 : {1:yyyy-MM-dd HH:mm:ss}\r\n您要立即下载补丁文件吗？", item.FileLength, item.LastModified), "补丁工具", MessageBoxButtons.YesNo))
+                    item.GetFileLength();
+                    if (item.FileLength > 0)
                     {
-                        case DialogResult.Yes:
+                        txtResult.Text += $"[{DateTime.Now:HH:mm:ss}] 文件已可用! 容量: {item.FileLength:N0}B\r\n";
+
+                        if (MessageBoxEx.Show(
+                            string.Format("容量 : {0:N0}B, 开始上传 : {1:yyyy-MM-dd HH:mm:ss}\r\n您要立即下载补丁文件吗？",
+                            item.FileLength, item.LastModified),
+                            "补丁工具",
+                            MessageBoxButtons.YesNo) == DialogResult.Yes)
+                        {
 #if NET6_0_OR_GREATER
-                            Process.Start(new ProcessStartInfo
-                            {
-                                UseShellExecute = true,
-                                FileName = txtUrl.Text,
-                            });
+                    Process.Start(new ProcessStartInfo { UseShellExecute = true, FileName = txtUrl.Text });
 #else
                             Process.Start(txtUrl.Text);
 #endif
-                            return;
-
-                        case DialogResult.No:
-                            return;
+                        }
+                        panelEx3.Visible = false;
+                        this.expandablePanel1.Height = 87;
+                        return;
+                    }
+                    else
+                    {
+                        txtResult.Text += $"[{DateTime.Now:HH:mm:ss}] 文件暂不可用，30秒后重试...\r\n";
+                        await Task.Delay(30000);
                     }
                 }
-                else
+                catch (Exception ex)
                 {
-                    MessageBoxEx.Show("文件不存在。");
+                    txtResult.Text += $"[{DateTime.Now:HH:mm:ss}] 错误: {ex.Message}\r\n";
+                    txtResult.Text += $"[{DateTime.Now:HH:mm:ss}] 30秒后重试...\r\n";
+                    await Task.Delay(30000);
                 }
-            }
-            catch (Exception ex)
-            {
-                MessageBoxEx.Show("错误 : " + ex.Message);
             }
         }
 

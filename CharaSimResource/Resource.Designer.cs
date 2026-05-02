@@ -4703,6 +4703,116 @@ namespace CharaSimResource {
         /// <summary>
         ///   查找 System.Drawing.Bitmap 类型的本地化资源。
         /// </summary>
+        public static System.Drawing.Bitmap mapleUnion_attackerSetting_scroll_attackerScroll_disabled_base {
+            get {
+                object obj = ResourceManager.GetObject("mapleUnion_attackerSetting_scroll_attackerScroll_disabled_base", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   查找 System.Drawing.Bitmap 类型的本地化资源。
+        /// </summary>
+        public static System.Drawing.Bitmap mapleUnion_attackerSetting_scroll_attackerScroll_enabled_base {
+            get {
+                object obj = ResourceManager.GetObject("mapleUnion_attackerSetting_scroll_attackerScroll_enabled_base", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   查找 System.Drawing.Bitmap 类型的本地化资源。
+        /// </summary>
+        public static System.Drawing.Bitmap mapleUnion_attackerSetting_scroll_attackerScroll_enabled_next0 {
+            get {
+                object obj = ResourceManager.GetObject("mapleUnion_attackerSetting_scroll_attackerScroll_enabled_next0", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   查找 System.Drawing.Bitmap 类型的本地化资源。
+        /// </summary>
+        public static System.Drawing.Bitmap mapleUnion_attackerSetting_scroll_attackerScroll_enabled_next1 {
+            get {
+                object obj = ResourceManager.GetObject("mapleUnion_attackerSetting_scroll_attackerScroll_enabled_next1", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   查找 System.Drawing.Bitmap 类型的本地化资源。
+        /// </summary>
+        public static System.Drawing.Bitmap mapleUnion_attackerSetting_scroll_attackerScroll_enabled_next2 {
+            get {
+                object obj = ResourceManager.GetObject("mapleUnion_attackerSetting_scroll_attackerScroll_enabled_next2", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   查找 System.Drawing.Bitmap 类型的本地化资源。
+        /// </summary>
+        public static System.Drawing.Bitmap mapleUnion_attackerSetting_scroll_attackerScroll_enabled_prev0 {
+            get {
+                object obj = ResourceManager.GetObject("mapleUnion_attackerSetting_scroll_attackerScroll_enabled_prev0", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   查找 System.Drawing.Bitmap 类型的本地化资源。
+        /// </summary>
+        public static System.Drawing.Bitmap mapleUnion_attackerSetting_scroll_attackerScroll_enabled_prev1 {
+            get {
+                object obj = ResourceManager.GetObject("mapleUnion_attackerSetting_scroll_attackerScroll_enabled_prev1", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   查找 System.Drawing.Bitmap 类型的本地化资源。
+        /// </summary>
+        public static System.Drawing.Bitmap mapleUnion_attackerSetting_scroll_attackerScroll_enabled_prev2 {
+            get {
+                object obj = ResourceManager.GetObject("mapleUnion_attackerSetting_scroll_attackerScroll_enabled_prev2", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   查找 System.Drawing.Bitmap 类型的本地化资源。
+        /// </summary>
+        public static System.Drawing.Bitmap mapleUnion_attackerSetting_scroll_attackerScroll_enabled_thumb0 {
+            get {
+                object obj = ResourceManager.GetObject("mapleUnion_attackerSetting_scroll_attackerScroll_enabled_thumb0", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   查找 System.Drawing.Bitmap 类型的本地化资源。
+        /// </summary>
+        public static System.Drawing.Bitmap mapleUnion_attackerSetting_scroll_attackerScroll_enabled_thumb1 {
+            get {
+                object obj = ResourceManager.GetObject("mapleUnion_attackerSetting_scroll_attackerScroll_enabled_thumb1", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   查找 System.Drawing.Bitmap 类型的本地化资源。
+        /// </summary>
+        public static System.Drawing.Bitmap mapleUnion_attackerSetting_scroll_attackerScroll_enabled_thumb2 {
+            get {
+                object obj = ResourceManager.GetObject("mapleUnion_attackerSetting_scroll_attackerScroll_enabled_thumb2", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   查找 System.Drawing.Bitmap 类型的本地化资源。
+        /// </summary>
         public static System.Drawing.Bitmap mapleUnion_button_championSetting_check_0 {
             get {
                 object obj = ResourceManager.GetObject("mapleUnion_button_championSetting_check_0", resourceCulture);
@@ -8754,6 +8864,16 @@ namespace CharaSimResource {
         /// <summary>
         ///   查找 System.Drawing.Bitmap 类型的本地化资源。
         /// </summary>
+        public static System.Drawing.Bitmap UICharacterInfo_img_common_main_layer_genesisPass {
+            get {
+                object obj = ResourceManager.GetObject("UICharacterInfo_img_common_main_layer_genesisPass", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   查找 System.Drawing.Bitmap 类型的本地化资源。
+        /// </summary>
         public static System.Drawing.Bitmap UICharacterInfo_img_common_main_layername {
             get {
                 object obj = ResourceManager.GetObject("UICharacterInfo_img_common_main_layername", resourceCulture);
@@ -10328,6 +10448,16 @@ namespace CharaSimResource {
         /// <summary>
         ///   查找 System.Drawing.Bitmap 类型的本地化资源。
         /// </summary>
+        public static System.Drawing.Bitmap UICharacterInfo_img_remote_detailCash_canvaspreset {
+            get {
+                object obj = ResourceManager.GetObject("UICharacterInfo_img_remote_detailCash_canvaspreset", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   查找 System.Drawing.Bitmap 类型的本地化资源。
+        /// </summary>
         public static System.Drawing.Bitmap UICharacterInfo_img_remote_detailCash_tabcashTab_normal_0 {
             get {
                 object obj = ResourceManager.GetObject("UICharacterInfo_img_remote_detailCash_tabcashTab_normal_0", resourceCulture);
@@ -11158,6 +11288,16 @@ namespace CharaSimResource {
         /// <summary>
         ///   查找 System.Drawing.Bitmap 类型的本地化资源。
         /// </summary>
+        public static System.Drawing.Bitmap UICharacterInfo_img_remote_detailEquip_skillRingEquip_canvas_skillRing {
+            get {
+                object obj = ResourceManager.GetObject("UICharacterInfo_img_remote_detailEquip_skillRingEquip_canvas_skillRing", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   查找 System.Drawing.Bitmap 类型的本地化资源。
+        /// </summary>
         public static System.Drawing.Bitmap UICharacterInfo_img_remote_detailEquip_tabsymbolTab_normal_0 {
             get {
                 object obj = ResourceManager.GetObject("UICharacterInfo_img_remote_detailEquip_tabsymbolTab_normal_0", resourceCulture);
@@ -11231,6 +11371,106 @@ namespace CharaSimResource {
         public static System.Drawing.Bitmap UICharacterInfo_img_remote_detailSkill_canvasskillBlank {
             get {
                 object obj = ResourceManager.GetObject("UICharacterInfo_img_remote_detailSkill_canvasskillBlank", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   查找 System.Drawing.Bitmap 类型的本地化资源。
+        /// </summary>
+        public static System.Drawing.Bitmap UICharacterInfo_img_remote_detailSkill_scroll_slot_enabled_base {
+            get {
+                object obj = ResourceManager.GetObject("UICharacterInfo_img_remote_detailSkill_scroll_slot_enabled_base", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   查找 System.Drawing.Bitmap 类型的本地化资源。
+        /// </summary>
+        public static System.Drawing.Bitmap UICharacterInfo_img_remote_detailSkill_scroll_slot_enabled_next0 {
+            get {
+                object obj = ResourceManager.GetObject("UICharacterInfo_img_remote_detailSkill_scroll_slot_enabled_next0", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   查找 System.Drawing.Bitmap 类型的本地化资源。
+        /// </summary>
+        public static System.Drawing.Bitmap UICharacterInfo_img_remote_detailSkill_scroll_slot_enabled_next1 {
+            get {
+                object obj = ResourceManager.GetObject("UICharacterInfo_img_remote_detailSkill_scroll_slot_enabled_next1", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   查找 System.Drawing.Bitmap 类型的本地化资源。
+        /// </summary>
+        public static System.Drawing.Bitmap UICharacterInfo_img_remote_detailSkill_scroll_slot_enabled_next2 {
+            get {
+                object obj = ResourceManager.GetObject("UICharacterInfo_img_remote_detailSkill_scroll_slot_enabled_next2", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   查找 System.Drawing.Bitmap 类型的本地化资源。
+        /// </summary>
+        public static System.Drawing.Bitmap UICharacterInfo_img_remote_detailSkill_scroll_slot_enabled_prev0 {
+            get {
+                object obj = ResourceManager.GetObject("UICharacterInfo_img_remote_detailSkill_scroll_slot_enabled_prev0", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   查找 System.Drawing.Bitmap 类型的本地化资源。
+        /// </summary>
+        public static System.Drawing.Bitmap UICharacterInfo_img_remote_detailSkill_scroll_slot_enabled_prev1 {
+            get {
+                object obj = ResourceManager.GetObject("UICharacterInfo_img_remote_detailSkill_scroll_slot_enabled_prev1", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   查找 System.Drawing.Bitmap 类型的本地化资源。
+        /// </summary>
+        public static System.Drawing.Bitmap UICharacterInfo_img_remote_detailSkill_scroll_slot_enabled_prev2 {
+            get {
+                object obj = ResourceManager.GetObject("UICharacterInfo_img_remote_detailSkill_scroll_slot_enabled_prev2", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   查找 System.Drawing.Bitmap 类型的本地化资源。
+        /// </summary>
+        public static System.Drawing.Bitmap UICharacterInfo_img_remote_detailSkill_scroll_slot_enabled_thumb0 {
+            get {
+                object obj = ResourceManager.GetObject("UICharacterInfo_img_remote_detailSkill_scroll_slot_enabled_thumb0", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   查找 System.Drawing.Bitmap 类型的本地化资源。
+        /// </summary>
+        public static System.Drawing.Bitmap UICharacterInfo_img_remote_detailSkill_scroll_slot_enabled_thumb1 {
+            get {
+                object obj = ResourceManager.GetObject("UICharacterInfo_img_remote_detailSkill_scroll_slot_enabled_thumb1", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   查找 System.Drawing.Bitmap 类型的本地化资源。
+        /// </summary>
+        public static System.Drawing.Bitmap UICharacterInfo_img_remote_detailSkill_scroll_slot_enabled_thumb2 {
+            get {
+                object obj = ResourceManager.GetObject("UICharacterInfo_img_remote_detailSkill_scroll_slot_enabled_thumb2", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

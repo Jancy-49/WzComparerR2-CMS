@@ -41,6 +41,7 @@
             this.comboItem2 = new DevComponents.Editors.ComboItem();
             this.comboItem6 = new DevComponents.Editors.ComboItem();
             this.comboItem7 = new DevComponents.Editors.ComboItem();
+            this.comboItem8 = new DevComponents.Editors.ComboItem();
             this.labelX3 = new DevComponents.DotNetBar.LabelX();
             this.slider1 = new DevComponents.DotNetBar.Controls.Slider();
             this.labelX4 = new DevComponents.DotNetBar.LabelX();
@@ -83,6 +84,7 @@
             this.buttonX2 = new DevComponents.DotNetBar.ButtonX();
             this.buttonX1 = new DevComponents.DotNetBar.ButtonX();
             this.btnPreset = new DevComponents.DotNetBar.ButtonX();
+            this.btnDiscordPreset = new DevComponents.DotNetBar.ButtonItem();
             this.btnNonTransparentMP4Preset = new DevComponents.DotNetBar.ButtonItem();
             this.btnGreenBackdropMP4Preset = new DevComponents.DotNetBar.ButtonItem();
             this.btnBlueBackdropMP4Preset = new DevComponents.DotNetBar.ButtonItem();
@@ -136,12 +138,19 @@
             this.btnPreset.TabIndex = 4;
             this.btnPreset.Text = "预设";
             this.btnPreset.SubItems.AddRange(new DevComponents.DotNetBar.BaseItem[] {
+            this.btnDiscordPreset,
             this.btnNonTransparentMP4Preset,
             this.btnGreenBackdropMP4Preset,
             this.btnBlueBackdropMP4Preset,
             this.btnTransparentMOVPreset,
             this.btnTransparentWebMPreset,
             this.btnDefaultPreset});
+            //
+            // btnDiscordPreset
+            //
+            this.btnDiscordPreset.Name = "btnDiscordPreset";
+            this.btnDiscordPreset.Text = "Discord用GIF";
+            this.btnDiscordPreset.Click += new System.EventHandler(this.btnDiscordPreset_Click);
             //
             // btnNonTransparentMP4Preset
             //
@@ -219,7 +228,8 @@
             this.comboItem1,
             this.comboItem2,
             this.comboItem6,
-            this.comboItem7});
+            this.comboItem7,
+            this.comboItem8});
             this.comboBoxEx1.Location = new System.Drawing.Point(100, 178);
             this.comboBoxEx1.Name = "comboBoxEx1";
             this.comboBoxEx1.Size = new System.Drawing.Size(129, 21);
@@ -241,6 +251,10 @@
             // comboItem7
             // 
             this.comboItem7.Text = "FFmpeg编码器";
+            // 
+            // comboItem8
+            // 
+            this.comboItem8.Text = "传统Gif编码器";
             // 
             // labelX3
             // 
@@ -916,10 +930,12 @@
         private DevComponents.DotNetBar.LabelX labelX11;
         private DevComponents.DotNetBar.Controls.TextBoxX textBoxX1;
         private DevComponents.Editors.ComboItem comboItem7;
+        private DevComponents.Editors.ComboItem comboItem8;
         private DevComponents.DotNetBar.LabelX labelX12;
         private DevComponents.DotNetBar.Controls.TextBoxX textBoxX3;
         private DevComponents.DotNetBar.LabelX labelX13;
         private DevComponents.DotNetBar.ButtonX btnPreset;
+        private DevComponents.DotNetBar.ButtonItem btnDiscordPreset;
         private DevComponents.DotNetBar.ButtonItem btnNonTransparentMP4Preset;
         private DevComponents.DotNetBar.ButtonItem btnGreenBackdropMP4Preset;
         private DevComponents.DotNetBar.ButtonItem btnBlueBackdropMP4Preset;

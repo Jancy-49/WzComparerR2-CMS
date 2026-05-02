@@ -617,6 +617,7 @@ namespace WzComparerR2.MapRender.UI
                  "[Ctrl+S] 仅捕获当前画面",
                  "",
                  "模拟 :",
+                 "[R] 全部怪物初始化",
                  "[鼠标左击] 怪物攻击",
                  "[Ctrl+鼠标点击] 使用怪物技能"
             };

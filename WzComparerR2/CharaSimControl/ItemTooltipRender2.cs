@@ -82,6 +82,7 @@ namespace WzComparerR2.CharaSimControl
         public TooltipRender SetItemRender { get; set; }
         public TooltipRender CashPackageRender { get; set; }
         public TooltipRender FamiliarRender { get; set; }
+        public TooltipRender MorphRender { get; set; }
         private AvatarCanvasManager avatar { get; set; }
         private bool isCurrencyConversionEnabled = (Translator.DefaultDesiredCurrency != "none");
         private string titleLanguage = "";
@@ -277,6 +278,15 @@ namespace WzComparerR2.CharaSimControl
                 }
             }
 
+            if (this.item.Specs.TryGetValue(ItemSpecType.morph, out long morphID) && morphID > 0)
+            {
+                Morph morph = Morph.CreateFromNode(PluginManager.FindWz($@"Morph\{morphID:D4}.img", this.SourceWzFile), PluginManager.FindWz, PluginManager.FindWz, this.SourceWzFile);
+                if (morph != null)
+                {
+                    setItemBmp = RenderMorph(morph);
+                    morph.Dispose();
+                }
+            }
 
             //计算布局
             Size totalSize = new Size(itemBmp.Width, picHeight);
@@ -939,11 +949,11 @@ namespace WzComparerR2.CharaSimControl
                     picH += 12;
                     if (Translator.IsKoreanStringPresent(descLeftAlign))
                     {
-                        GearGraphics.DrawString(g, descLeftAlign, GearGraphics.KMSItemDetailFont, 14, right, ref picH, 16);
+                        GearGraphics.DrawString(g, ReplaceDescTags(descLeftAlign), GearGraphics.KMSItemDetailFont, 14, right, ref picH, 16);
                     }
                     else
                     {
-                        GearGraphics.DrawString(g, descLeftAlign, GearGraphics.ItemDetailFont, 14, right, ref picH, 16);
+                        GearGraphics.DrawString(g, ReplaceDescTags(descLeftAlign), GearGraphics.ItemDetailFont, 14, right, ref picH, 16);
                     }
                 }
                 if (item.CoreSpecs.Count > 0)
@@ -1310,6 +1320,19 @@ namespace WzComparerR2.CharaSimControl
             return renderer.Render();
         }
 
+        private Bitmap RenderMorph(Morph morph)
+        {
+            TooltipRender renderer = this.MorphRender;
+            if (renderer == null)
+            {
+                MorphTooltipRenderer defaultRenderer = new MorphTooltipRenderer();
+                defaultRenderer.StringLinker = this.StringLinker;
+                defaultRenderer.ShowObjectID = this.ShowObjectID;
+                renderer = defaultRenderer;
+            }
+            renderer.TargetItem = morph;
+            return renderer.Render();
+        }
 
         private Bitmap RenderLinkRecipeInfo(Recipe recipe)
         {
@@ -1522,6 +1545,56 @@ namespace WzComparerR2.CharaSimControl
         {
             resNode = PluginBase.PluginManager.FindWz("UI/NameTag.img/nick/" + nickTag);
             return resNode != null;
+        }
+
+        private string ReplaceDescTags(string text)
+        {
+            if (text.Contains("#cosmetic_EULO#"))
+            {
+                this.Item.Specs.TryGetValue(ItemSpecType.cosmetic, out long cosmeticID);
+                var gender = Gear.GetGender((int)cosmeticID);
+                var name = "";
+                if (StringLinker == null || !StringLinker.StringEqp.TryGetValue((int)cosmeticID, out var sr))
+                {
+                    sr = new StringResult();
+                    sr.Name = "(null)";
+                }
+                name = $"#c{sr.Name}{(gender == 0 ? "(男)" : (gender == 1 ? "(女)" : ""))}#";
+
+                int last = (name.LastOrDefault(c => c >= '가' && c <= '힣') - '가') % 28;
+                name += ((last == 0 || last == 8 ? "" : "으") + "로");
+
+                foreach (var color in AvatarCanvas.HairColor)
+                {
+                    name = name.Replace($"{color} ", "");
+                }
+
+                text = text.Replace("#cosmetic_EULO#", name);
+            }
+
+            text = Regex.Replace(text, @$"#(t)\s*(\d{{1,9}}).*?#", match => // id should be less than 1,000,000,000
+            {
+                string tag = match.Groups[1].Value;
+                if (!int.TryParse(match.Groups[2].Value, out int id)) id = -1;
+                StringResult sr;
+                var name = "";
+                switch (tag)
+                {
+                    case "t":
+                        StringLinker.StringItem.TryGetValue(id, out sr);
+                        if (sr == null)
+                        {
+                            StringLinker.StringEqp.TryGetValue(id, out sr);
+                        }
+                        name = sr?.Name ?? id.ToString();
+                        return $"{name}";
+
+                    default:
+                        return id.ToString();
+                }
+            });
+
+            return text;
         }
 
         public bool HasSamples()

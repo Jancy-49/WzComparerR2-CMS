@@ -371,8 +371,8 @@ namespace WzComparerR2.CharaSimControl
                     PluginBase.PluginManager.FindWz(Wz_Type.Item).GetValueEx<Wz_File>(null),
                     PluginBase.PluginManager.FindWz(Wz_Type.Etc).GetValueEx<Wz_File>(null),
                     PluginBase.PluginManager.FindWz(Wz_Type.Quest).GetValueEx<Wz_File>(null));
-                tooltip.SkillRender.InputMode = true;
             }
+            tooltip.SkillRender.InputMode = true;
             if (e.Obj == null)
             {
                 tooltip.Visible = false;

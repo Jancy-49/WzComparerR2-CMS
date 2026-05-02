@@ -221,7 +221,7 @@ namespace WzComparerR2.CharaSimControl
                 { "$g", ((SolidBrush)GearGraphics.Equip22BrushGray).Color },
                 { "$d", ((SolidBrush)GearGraphics.Equip22BrushDarkGray).Color },
                 { "$z", ((SolidBrush)GearGraphics.GreenBrush2).Color },
-
+                { "$S", ((SolidBrush)GearGraphics.ItemPriceBrush).Color },
             };
             var itemPotentialColorTable = new Dictionary<string, Color>()
             {
@@ -315,6 +315,18 @@ namespace WzComparerR2.CharaSimControl
             {
                 TextRenderer.DrawText(g, "BLACKPINK标签", GearGraphics.EquipDetailFont, new Point(width, picH), Color.FromArgb(242, 140, 160), TextFormatFlags.HorizontalCenter);
                 picH += 16;
+            }
+            else if (Gear.Props.TryGetValue(GearPropType.limitedLabel, out value) && value > 0)
+            {
+                Color limitedLabelTooltipColor = Color.FromArgb(Gear.LimitedLabel.TooltipNameColor);
+                TextRenderer.DrawText(g, Gear.LimitedLabel.TooltipName, GearGraphics.EquipMDMoris9Font, new Point(width, picH), limitedLabelTooltipColor, TextFormatFlags.HorizontalCenter);
+                picH += 16;
+                if (!string.IsNullOrEmpty(Gear.LimitedLabel.GradeTooltip))
+                {
+                    var limitedLabelText = Regex.Replace(Gear.LimitedLabel.GradeTooltip, "%d", "0");
+                    TextRenderer.DrawText(g, limitedLabelText, GearGraphics.EquipMDMoris9Font, new Point(width, picH), limitedLabelTooltipColor, TextFormatFlags.HorizontalCenter);
+                    picH += 16;
+                }
             }
             else if (Gear.Props.TryGetValue(GearPropType.magicLayerWz2, out value) && value > 0)
             {
@@ -424,7 +436,7 @@ namespace WzComparerR2.CharaSimControl
                 }
                 else if (Gear.Props.TryGetValue(GearPropType.limitedLabel, out value) && value > 0)
                 {
-                    cashImg = Resource.CashShop_img_CashItem_label_15;
+                    cashImg = (Bitmap)Resource.ResourceManager.GetObject($"CashShop_img_CashItem_label_{Gear.LimitedLabel.IconLabelNum}");
                     cashOrigin = new Point(12, 12);
                 }
                 else if (Gear.Props.TryGetValue(GearPropType.magicLayerWz2, out value) && value > 0)
@@ -1224,7 +1236,25 @@ namespace WzComparerR2.CharaSimControl
                 this.AvatarSample = new Bitmap(cosmeticSample.Bitmap);
                 cosmeticSample.Bitmap.Dispose();
             }
-            // 准备说明
+
+            // 原初徽章额外效果说明
+            if (!string.IsNullOrEmpty(Gear.SpecificTargetDesc))
+            {
+                AddLines(0, 7, ref picH, condition: secondLineNeeded);
+                secondLineNeeded = false;
+                hasThirdContents = true;
+                if (Translator.IsKoreanStringPresent(Gear.SpecificTargetDesc))
+                {
+                    GearGraphics.DrawString(g, Gear.SpecificTargetDesc.Replace("#c", " #$g").Trim(), GearGraphics.EquipMDMoris9Font, equip22ColorTable, 15, 305, ref picH, 16, strictlyAlignLeft: 1);
+                }
+                else
+                {
+                    GearGraphics.DrawString(g, Gear.SpecificTargetDesc.Replace("#c", " #$g").Trim(), GearGraphics.EquipDetailFont, equip22ColorTable, 15, 305, ref picH, 16, strictlyAlignLeft: 1);
+                }
+                picH += 4;
+            }
+
+            // 装备说明
             if (!string.IsNullOrEmpty(sr.Desc))
             {
                 AddLines(0, 7, ref picH, condition: secondLineNeeded);
@@ -1395,6 +1425,7 @@ namespace WzComparerR2.CharaSimControl
             int enhance_potential = 0;
             int enhance_addiPotential = 0;
             int tuc = 0;
+            bool enhanceable = Gear.GetBooleanValue(GearPropType.setExtraOption);
             Gear.Props.TryGetValue(GearPropType.tuc, out tuc);
             if (!Gear.Cash && Gear.IsEnhanceable(Gear.type))
             {
@@ -1429,7 +1460,7 @@ namespace WzComparerR2.CharaSimControl
                     enhance_starForce = 0;
                 }
 
-                if (Gear.CanEnhanceBonusStat(Gear.type) && !Gear.GetBooleanValue(GearPropType.blockUpgradeExtraOption))
+                if ((Gear.CanEnhanceBonusStat(Gear.type) && !Gear.GetBooleanValue(GearPropType.blockUpgradeExtraOption)) || Gear.GetBooleanValue(GearPropType.setExtraOption))
                 {
                     enhance_bonusStat = 1;
                 }
@@ -2079,6 +2110,18 @@ namespace WzComparerR2.CharaSimControl
                 tags.Add(text);
             }
             tempTags.Clear();
+            // 특수 스킬 반지
+            if (Gear.Props.TryGetValue(GearPropType.activeSkillRing, out value) && value != 0)
+            {
+                tags.Add($"#$r道具组内不可重复佩戴# (特殊技能戒指)\n" +
+                    $"#$r主动特殊技能戒指不可重复佩戴#");
+            }
+
+            // 프리즘 불가
+            if (Gear.Props.TryGetValue(GearPropType.noPrism, out value) && value != 0)
+            {
+                tags.Add(ItemStringHelper.GetGearPropString22(GearPropType.noPrism, value)[0]);
+            }
 
             // 계정 내 교환
             if (Gear.Props.TryGetValue(GearPropType.accountSharable, out value) && value != 0)
@@ -2133,6 +2176,12 @@ namespace WzComparerR2.CharaSimControl
             if (Gear.Props.TryGetValue(GearPropType.colorvar, out value) && value > 0 && !Gear.Cash)
             {
                 tags.Add(ItemStringHelper.GetGearPropString(GearPropType.colorvar, value));
+            }
+
+            // 不可重新发放
+            if (Gear.Props.TryGetValue(GearPropType.reissueBan, out value) && value != 0)
+            {
+                tags.Add(ItemStringHelper.GetGearPropString22(GearPropType.reissueBan, value, 0)[0]);
             }
 
             // 铁砧

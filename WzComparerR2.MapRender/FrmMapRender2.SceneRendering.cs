@@ -71,16 +71,20 @@ namespace WzComparerR2.MapRender
                         var smAni = (life.View.Animator as StateMachineAnimator);
                         if (smAni != null)
                         {
-                            if (smAni.GetCurrent() == null) //当前无动作
+                            if (life.Type == LifeItem.LifeType.Mob)
                             {
-                                if (life.Type == LifeItem.LifeType.Mob)
+                                if (life.Controller.BState == BehaviorController.BaseState.None) // 초기
                                 {
                                     if (life.Controller.PlayRegenMotion)
-                                        smAni.SetAnimation("regen");
+                                        life.Controller.SetRegen();
                                     else
-                                        smAni.SetAnimation("stand");
+                                        life.Controller.SetBaseIdle();
+                                    life.Controller.PlayRegenSound = true; // 리젠 소리 제한 해제
                                 }
-                                else
+                            }
+                            else
+                            {
+                                if (smAni.GetCurrent() == null) //当前无动作
                                 {
                                     smAni.SetAnimation(smAni.Data.States[0]); //动作0
                                 }
@@ -172,15 +176,15 @@ namespace WzComparerR2.MapRender
             }
             var cursorPos = renderEnv.Camera.CameraToWorld(renderEnv.Input.MousePosition);
             var eventList = itemEvents.Select(ie =>
-            {
-                return new
                 {
-                    SlotName = ie.SlotName,
-                    Animation = ie.Animation,
-                    MapEvent = this.mapData.Events.FirstOrDefault(me => me.Index == ie.ActionKey),
-                    Rect = (animator as ISpineAnimator).GetBounds(ie.SlotName),
-                };
-            }).Where(data => data.MapEvent != null || !string.IsNullOrEmpty(data.Animation));
+                    return new
+                    {
+                        SlotName = ie.SlotName,
+                        Animation = ie.Animation,
+                        MapEvent = this.mapData.MapEvents.Where(me => ie.ActionKeys.Contains(me.Index)),
+                        Rect = (animator as ISpineAnimator).GetSlotBounds(ie.SlotName),
+                    };
+                }).Where(data => data.MapEvent != null || !string.IsNullOrEmpty(data.Animation));
 
             foreach (var data in eventList)
             {
@@ -190,30 +194,46 @@ namespace WzComparerR2.MapRender
                     if (!string.IsNullOrEmpty(data.Animation))
                     {
                         var tmpMapEvent = new MapEvent(null, "SetAnimationOnceAndReturn", defaultAniName, data.Animation, null);
-                        InvokeMapEvent(animator as ISpineAnimator, tmpMapEvent);
+                        InvokeMapEvent(animator as ISpineAnimator, new List<MapEvent>() { tmpMapEvent });
                     }
-                    else InvokeMapEvent(animator as ISpineAnimator, data.MapEvent);
+                    else InvokeMapEvent(animator as ISpineAnimator, data.MapEvent.ToList());
                 }
             }
         }
 
-        private void InvokeMapEvent(ISpineAnimator spine, MapEvent mapEvent)
+        private void InvokeMapEvent(ISpineAnimator sender, List<MapEvent> mapEvents)
         {
-            if (spine != null && mapEvent != null)
+            if (sender != null)
             {
-                switch (mapEvent.Type)
+                foreach (var mapEvent in mapEvents)
                 {
-                    case MapEventType.SetAnimationOnceAndReturn:
-                        if (spine.NextAnimationName.Count > 0)
-                        {
-                            return;
-                        }
-                        else
-                        {
-                            spine.SelectedAnimationName = mapEvent.ChangedAnimation;
-                            spine.NextAnimationName.Enqueue(mapEvent.DefaultAnimation);
-                        }
-                        break;
+                    if (mapEvent == null) continue;
+
+                    List<ISpineAnimator> targets = mapEvent.Tags == null ? new List<ISpineAnimator>() { sender as ISpineAnimator } :
+                        GetSceneContainers(this.mapData?.Scene)
+                        .SelectMany(container => container.Slots)
+                        .Where(sceneItem => sceneItem.Tags != null && sceneItem.Tags.Contains(mapEvent.Tags))
+                        .Select(sceneItem => (ISpineAnimator)((sceneItem as ObjItem)?.View?.Animator) ?? null)
+                        .Where(spine => spine != null)
+                        .Distinct()
+                        .ToList();
+                    switch (mapEvent.Type)
+                    {
+                        case MapEventType.SetAnimationOnceAndReturn:
+                            foreach (var spine in targets)
+                            {
+                                if (spine.NextAnimationName.Count > 0)
+                                {
+                                    return;
+                                }
+                                else
+                                {
+                                    spine.SelectedAnimationName = mapEvent.ChangedAnimation;
+                                    spine.NextAnimationName.Enqueue(mapEvent.DefaultAnimation);
+                                }
+                            }
+                            break;
+                    }
                 }
             }
         }
@@ -293,27 +313,31 @@ namespace WzComparerR2.MapRender
 
         private void UpdateMinimapIcons()
         {
+            if (this.mapData == null) return;
+
             this.ui.Minimap.Icons.RemoveAll(icon => icon.Tag == "mob");
             foreach (var mob in this.mapData.Scene.Mobs)
             {
                 var mobNode = PluginManager.FindWz(string.Format("Mob/{0:D7}.img/info", mob.ID));
-                if ((mobNode?.Nodes["minimap"].GetValueEx(0) ?? 0) != 0)
+                int minimapIconType;
+                if ((minimapIconType = mobNode?.Nodes["minimap"].GetValueEx(0) ?? 0) != 0)
                 {
                     var x = mob.X + mob.Controller.RelPos.X;
                     var y = mob.Y + mob.Controller.RelPos.Y;
                     this.ui.Minimap.Icons.Add(new UIMinimap2.MapIcon()
                     {
-                        IconType = UIMinimap2.IconType.Another,
+                        IconType = UIMinimap2.IconType.Mob,
                         WorldPosition = new EmptyKeys.UserInterface.PointF(x, y),
-                        Tag = "mob"
+                        Tag = "mob",
+                        MobIconType = minimapIconType,
                     });
                 }
             }
         }
 
-        private void OnSceneItemClick(SceneItem item, EmptyKeys.UserInterface.Input.MouseButton targetButton)
+        private void OnSceneItemClick(SceneItem item, bool ctrlOn)
         {
-            if (item is PortalItem && targetButton == EmptyKeys.UserInterface.Input.MouseButton.Left)
+            if (item is PortalItem)
             {
                 var portal = (PortalItem)item;
                 if (portal.ToMap != 999999999)
@@ -338,12 +362,12 @@ namespace WzComparerR2.MapRender
                     BlinkPortal(portal.ToName); // blink
                 }
             }
-            else if (item is IlluminantClusterItem && targetButton == EmptyKeys.UserInterface.Input.MouseButton.Left)
+            else if (item is IlluminantClusterItem)
             {
                 var illuminantCluster = (IlluminantClusterItem)item;
                 this.cm.StartCoroutine(OnCameraMoving(new Point(illuminantCluster.End.X, illuminantCluster.End.Y), 500));
             }
-            else if (item is ReactorItem && targetButton == EmptyKeys.UserInterface.Input.MouseButton.Left)
+            else if (item is ReactorItem)
             {
                 var reactor = (ReactorItem)item;
                 reactor.View.NextStage = reactor.View.Stage + 1;
@@ -355,31 +379,22 @@ namespace WzComparerR2.MapRender
                 var life = (LifeItem)item;
                 if (life.Type == LifeItem.LifeType.Mob)
                 {
-                    var ani = life.View.Animator as StateMachineAnimator;
-                    var soundEffPath = $@"Sound\Mob.img\{life.ID:D7}\";
-
-                    if (life.Controller.CanHit && targetButton == EmptyKeys.UserInterface.Input.MouseButton.Left)
+                    if (life.Controller.CanHit && !ctrlOn)
                     {
                         life.Controller.DoDamage();
                         if (life.Controller.DecideDie())
                         {
                             life.Controller.SetDied();
-                            soundEffPath += "Die";
                         }
                         else
                         {
                             life.Controller.SetHit();
-                            soundEffPath += "Damage";
                         }
-
-                        PlaySoundEff(soundEffPath);
                     }
-                    else if (life.Controller.CanAttack && targetButton == EmptyKeys.UserInterface.Input.MouseButton.Middle)
+                    else if (life.Controller.CanAttack && ctrlOn)
                     {
-                        soundEffPath += life.Controller.DecideAttack().Replace("attack", "Attack").Replace("skill", "Skill");
+                        life.Controller.DecideAttack();
                         life.Controller.SetAttack();
-
-                        PlaySoundEff(soundEffPath);
                     }
                 }
             }
@@ -679,7 +694,7 @@ namespace WzComparerR2.MapRender
                 foreach (var rect in rectList)
                 {
                     var meshItem = this.batcher.MeshPop();
-                    meshItem.RenderObject = new RectMesh(rect, color, 1);
+                    meshItem.RenderObject = new RectMesh(rect, color, 1, alpha: 0.3);
                     this.batcher.Draw(meshItem);
                     this.batcher.MeshPush(meshItem);
                 }
@@ -700,7 +715,7 @@ namespace WzComparerR2.MapRender
                         var y = (int)mob.Controller.IntCurPos.Y;
                         Rectangle rect = new Rectangle(x + lt.X, y + lt.Y, rb.X - lt.X, rb.Y - lt.Y);
 
-                        if (mob.Flip)
+                        if (mob.Controller.FlipX)
                         {
                             rect.X = 2 * x - rect.X - rect.Width;
                         }
@@ -712,7 +727,7 @@ namespace WzComparerR2.MapRender
                 foreach (var rect in rectList)
                 {
                     var meshItem = this.batcher.MeshPop();
-                    meshItem.RenderObject = new RectMesh(rect, color, 1);
+                    meshItem.RenderObject = new RectMesh(rect, color, 1, alpha: 0.3);
                     this.batcher.Draw(meshItem);
                     this.batcher.MeshPush(meshItem);
                 }
@@ -766,7 +781,7 @@ namespace WzComparerR2.MapRender
 
                             //绘制怪物名称
                             mesh = batcher.MeshPop();
-                            mesh.Position = new Vector2(life.X, life.Cy + 4) + life.Controller.IntRelPos;
+                            mesh.Position = life.Controller.IntCurPos + new Vector2(0, 4);
                             mesh.RenderObject = new TextMesh()
                             {
                                 Align = Alignment.Center,
@@ -889,7 +904,7 @@ namespace WzComparerR2.MapRender
                 this.lightRenderer.DrawSpotLight(light2D);
             }
             // render texture light
-            foreach (var container in GetSceneContainers(this.mapData.Scene))
+            foreach(var container in GetSceneContainers(this.mapData.Scene))
             {
                 foreach (var item in container.Slots)
                 {
@@ -957,7 +972,7 @@ namespace WzComparerR2.MapRender
                     }
                 }
 
-            _pop:
+                _pop:
                 if (sceneStack.Count > 0)
                 {
                     currNode = sceneStack.Pop();
@@ -1120,7 +1135,7 @@ namespace WzComparerR2.MapRender
                         renderSize = msCustomSprite.Size.ToPoint();
                         break;
                 }
-
+                
                 if (cx == 0) cx = renderSize.X;
                 if (cy == 0) cy = renderSize.Y;
             }
@@ -1253,7 +1268,7 @@ namespace WzComparerR2.MapRender
             var mesh = batcher.MeshPop();
             mesh.RenderObject = renderObj;
             mesh.Position = life.Controller.IntCurPos;
-            mesh.FlipX = life.Controller.MovementEnabled ? life.Controller.FlipX : life.Flip;
+            mesh.FlipX = life.Controller.FlipX;
             mesh.Z0 = ((renderObj as Frame)?.Z ?? 0);
             mesh.Z1 = life.Index;
             return mesh;
@@ -1374,7 +1389,7 @@ namespace WzComparerR2.MapRender
             }
             else if (animator is StateMachineAnimator smAni)
             {
-                return effectAni ? smAni.EffectData?.GetMesh() : smAni.Data.GetMesh();
+                return effectAni ? smAni.EffectData?.GetMesh() :smAni.Data.GetMesh();
             }
             else if (animator is MsCustomSprite msCustomSprite)
             {

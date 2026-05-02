@@ -228,7 +228,7 @@ namespace WzComparerR2
                 this.richTextBoxEx1.SelectionColor = this.richTextBoxEx1.ForeColor;
             }
 
-            AppendStateText("Starting update process...\r\n", Color.Black);
+            AppendStateText("开始更新过程...\r\n", Color.Black);
         }
 
         private void FrmGMSDownloader_FormClosing(object sender, FormClosingEventArgs e)

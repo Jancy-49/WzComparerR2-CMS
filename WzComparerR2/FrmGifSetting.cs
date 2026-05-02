@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -8,6 +9,7 @@ using System.Linq;
 using System.Windows.Forms;
 using System.Reflection;
 using DevComponents.DotNetBar;
+using Newtonsoft.Json.Linq;
 using WzComparerR2.Config;
 using MathHelper = Microsoft.Xna.Framework.MathHelper;
 
@@ -203,6 +205,31 @@ namespace WzComparerR2
             config.FFmpegBinPath = this.FFmpegBinPath;
             config.FFmpegArgument = this.FFmpegArgument;
             config.FFmpegOutputFileExtension = this.FFmpegDefaultExtension;
+        }
+
+        private void btnDiscordPreset_Click(object sender, EventArgs e)
+        {
+            string discordConfigPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "discord", "settings.json");
+            if (File.Exists(discordConfigPath))
+            {
+                // TO DO: Add support for Nitro exclusive background colors.
+                try
+                {
+                    JObject discordConfig = JObject.Parse(File.ReadAllText(discordConfigPath));
+                    string bgColor = discordConfig.SelectToken("BACKGROUND_COLOR").ToString().Replace("#", "FF");
+                    BackgroundColor = Color.FromArgb(Convert.ToInt32(bgColor, 16));
+                }
+                catch
+                {
+                    BackgroundColor = Color.FromArgb(-13750732);
+                }
+            }
+            else
+            {
+                BackgroundColor = Color.FromArgb(-13750732);
+            }
+            BackgroundType = ImageBackgroundType.Color;
+            GifEncoder = 1;
         }
 
         private void btnNonTransparentMP4Preset_Click(object sender, EventArgs e)

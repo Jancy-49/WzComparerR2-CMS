@@ -62,6 +62,7 @@ namespace WzComparerR2.CharaSim
         pointCost,
         tamingMob,
         cashTradeBlock,
+        saveWhenLogout,
         //MSN only
         mintable,
     }

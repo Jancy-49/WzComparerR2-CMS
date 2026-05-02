@@ -33,16 +33,6 @@ namespace WzComparerR2.Comparer
         {
             this.Comparer = new WzFileComparer();
         }
-        private Wz_Node wzNew { get; set; }
-        private Wz_Node wzOld { get; set; }
-        private Wz_File stringWzNew { get; set; }
-        private Wz_File itemWzNew { get; set; }
-        private Wz_File etcWzNew { get; set; }
-        private Wz_File questWzNew { get; set; }
-        private Wz_File stringWzOld { get; set; }
-        private Wz_File itemWzOld { get; set; }
-        private Wz_File etcWzOld { get; set; }
-        private Wz_File questWzOld { get; set; }
         private Wz_Node[] WzNewOld { get; set; } = new Wz_Node[2];
         private Wz_File[] WzFileNewOld { get; set; } = new Wz_File[2];
         private Wz_File[] StringWzNewOld { get; set; } = new Wz_File[2];
@@ -80,7 +70,7 @@ namespace WzComparerR2.Comparer
         public bool OutputPng { get; set; }
         public bool OutputAddedImg { get; set; }
         public bool OutputRemovedImg { get; set; }
-        public bool EnableDarkMode { get; set; }
+        public List<Color> ColorTable { get; set; }
         public bool saveSkillTooltip { get; set; }
         public bool saveItemTooltip { get; set; }
         public bool saveCashTooltip { get; set; }
@@ -204,15 +194,18 @@ namespace WzComparerR2.Comparer
                     this.WzFileNewOld[0] = fileNew.Node.GetNodeWzFile();
                     this.WzFileNewOld[1] = fileOld.Node.GetNodeWzFile();
 
-                    StateInfo = "正在初始化5转技能应用职业代码...";
+                    StateInfo = "正在导入新旧版本StringLinker...";
                     for (int i = 0; i < 2; i++)
                     {
                         this.StringLinkerNewOld[i] = new StringLinker();
-                        this.StringLinkerNewOld[i].Load(WzNewOld[i]?.FindNodeByPath("String").GetNodeWzFile(),
-                            WzNewOld[i]?.FindNodeByPath("Item").GetNodeWzFile(),
-                            WzNewOld[i]?.FindNodeByPath("Etc").GetNodeWzFile(),
-                            WzNewOld[i]?.FindNodeByPath("Quest").GetNodeWzFile());
-
+                        this.StringLinkerNewOld[i].Load(WzNewOld[i].FindNodeByPath("String").GetNodeWzFile(),
+                            WzNewOld[i].FindNodeByPath("Item").GetNodeWzFile(),
+                            WzNewOld[i].FindNodeByPath("Etc").GetNodeWzFile(),
+                            WzNewOld[i].FindNodeByPath("Quest").GetNodeWzFile());
+                    }
+                    StateInfo = "正在初始化5转技能应用职业代码...";
+                    for (int i = 0; i < 2; i++)
+                    {
                         Wz_Node vCoreData = PluginManager.FindWz("Etc\\VcoreNew.img\\vSkill\\CoreData", WzFileNewOld[i]);
                         if (vCoreData == null || vCoreData.FullPath == "Base.wz") vCoreData = PluginManager.FindWz("Etc\\VCore.img\\CoreData", WzFileNewOld[i]);
                         if (vCoreData == null || vCoreData.FullPath == "Base.wz") break;
@@ -654,7 +647,6 @@ namespace WzComparerR2.Comparer
                     this.OutputPng ? "-OutputPng" : null,
                     this.OutputAddedImg ? "-OutputAddedImg" : null,
                     this.OutputRemovedImg ? "-OutputRemovedImg" : null,
-                    this.EnableDarkMode ? "-EnableDarkMode" : null,
                     "-PngComparison " + this.Comparer.PngComparison,
                     this.Comparer.ResolvePngLink ? "-ResolvePngLink" : null,
                     this.SkipKMSContent ? "-SkipKMSContent" : null,
@@ -885,7 +877,7 @@ namespace WzComparerR2.Comparer
                 {
                     Directory.CreateDirectory(eqpTooltipPath);
                 }
-                saveGearTooltip(eqpTooltipPath);
+                SaveGearTooltip(eqpTooltipPath);
             }
             if (saveMapTooltip && type.ToString() == "String" && OutputMapTooltipIDs != null)
             {
@@ -935,6 +927,12 @@ namespace WzComparerR2.Comparer
                 }
                 SaveCashTooltip(itemTooltipPath);
             }
+            //for (var i = 0; i < 2; i++)
+            //{
+            //    this.WzNewOld[i] = null;
+            //    this.WzFileNewOld[i] = null;
+            //    this.StringLinkerNewOld[i] = null;
+            //}
             if (EnableBucket && (saveCashTooltip || saveEqpTooltip || saveItemTooltip || saveMapTooltip || saveMobTooltip || saveNpcTooltip || saveSkillTooltip || saveQuestTooltip || saveAchievementTooltip))
             {
                 uploadToBucket(outputDir);
@@ -1127,7 +1125,6 @@ namespace WzComparerR2.Comparer
 
                 if (SkipKMSContent && isKMSSkillID(Int32.Parse(skillID))) continue;
 
-                string skillType = "";
                 string skillNodePath = int.Parse(skillID) / 10000000 == 8 ? String.Format(@"\{0:D}.img\skill\{1:D}", int.Parse(skillID) / 100, skillID) : String.Format(@"\{0:D}.img\skill\{1:D}", int.Parse(skillID) / 10000, skillID);
                 if (int.Parse(skillID) / 10000 == 0) skillNodePath = String.Format(@"\000.img\skill\{0:D7}", skillID);
                 int nullSkillIdx = 0;
@@ -1208,6 +1205,8 @@ namespace WzComparerR2.Comparer
 
                     int maxSkillIndex = 0;
                     bool isSixthJobSkill = int.Parse(skillID) / 100000000 == 5;
+
+                    bool isPerJobVariableSkill = true;
 
                     // 变更前后Tooltip图像生成
                     for (int i = 0; i < 2; i++) // 0: New, 1: Old
@@ -1297,8 +1296,8 @@ namespace WzComparerR2.Comparer
                             Directory.CreateDirectory(Path.Combine(skillTooltipPath, categoryPath));
                         }
 
-                        string imageName = Path.Combine(skillTooltipPath, categoryPath, "Skill_" + skillID + '[' + (ItemStringHelper.GetJobName(int.Parse(skillID) / 10000) ?? "其它") + "]_" + skillType + ".png");
-                        diffHtml["Skill"][skillType].Add("Skill_" + skillID + '[' + (ItemStringHelper.GetJobName(int.Parse(skillID) / 10000) ?? "其它") + "]_" + skillType + ".png");
+                        string imageName = Path.Combine(skillTooltipPath, categoryPath, "Skill_" + skillID + '[' + (ItemStringHelper.GetJobName(targetJobId / 10000) ?? "其它") + "]_" + skillType + ".png");
+                        diffHtml["Skill"][skillType].Add("Skill_" + skillID + '[' + (ItemStringHelper.GetJobName(targetJobId) ?? "其它") + "]_" + skillType + ".png");
                         if (!File.Exists(imageName))
                         {
                             resultImage.Save(imageName, System.Drawing.Imaging.ImageFormat.Png);
@@ -1331,11 +1330,17 @@ namespace WzComparerR2.Comparer
                     tooltipRenderNewOld[i] = new ItemTooltipRender3();
                     tooltipRenderNewOld[i].StringLinker = this.StringLinkerNewOld[i];
                     tooltipRenderNewOld[i].ShowObjectID = true;
+                    (tooltipRenderNewOld[i] as ItemTooltipRender3).LinkRecipeInfo = true;
+                    (tooltipRenderNewOld[i] as ItemTooltipRender3).LinkRecipeItem = true;
+                    (tooltipRenderNewOld[i] as ItemTooltipRender3).ShowLevelOrSealed = true;
+                    (tooltipRenderNewOld[i] as ItemTooltipRender3).CompareMode = true;
+                    //tooltipRenderNewOld[i].SourceWzFile = WzFileNewOld[i];
                     (tooltipRenderNewOld[i] as ItemTooltipRender3).ShowLinkedTamingMob = this.ShowLinkedTamingMob;
                     (tooltipRenderNewOld[i] as ItemTooltipRender3).AllowFamiliarOutOfBounds = this.AllowFamiliarOutOfBounds;
                     (tooltipRenderNewOld[i] as ItemTooltipRender3).UseCTFamiliarRender = this.UseCTFamiliarUI;
                     (tooltipRenderNewOld[i] as ItemTooltipRender3).ShowApplicablePetEquip = this.LocatePetEquip;
                     (tooltipRenderNewOld[i] as ItemTooltipRender3).ShowCashPurchasePrice = CharaSimConfig.Default.Item.ShowPurchasePrice;
+                    (tooltipRenderNewOld[i] as ItemTooltipRender3).LoadedCommoditiesSlot = i;
                     (tooltipRenderNewOld[i] as ItemTooltipRender3).CompareMode = true;
                 }
                 else
@@ -1343,11 +1348,17 @@ namespace WzComparerR2.Comparer
                     tooltipRenderNewOld[i] = new ItemTooltipRender2();
                     tooltipRenderNewOld[i].StringLinker = this.StringLinkerNewOld[i];
                     tooltipRenderNewOld[i].ShowObjectID = true;
+                    (tooltipRenderNewOld[i] as ItemTooltipRender2).LinkRecipeInfo = true;
+                    (tooltipRenderNewOld[i] as ItemTooltipRender2).LinkRecipeItem = true;
+                    (tooltipRenderNewOld[i] as ItemTooltipRender2).ShowLevelOrSealed = true;
+                    (tooltipRenderNewOld[i] as ItemTooltipRender2).CompareMode = true;
+                    //tooltipRenderNewOld[i].SourceWzFile = WzFileNewOld[i];
                     (tooltipRenderNewOld[i] as ItemTooltipRender2).ShowLinkedTamingMob = this.ShowLinkedTamingMob;
                     (tooltipRenderNewOld[i] as ItemTooltipRender2).AllowFamiliarOutOfBounds = this.AllowFamiliarOutOfBounds;
                     (tooltipRenderNewOld[i] as ItemTooltipRender2).UseCTFamiliarRender = this.UseCTFamiliarUI;
                     (tooltipRenderNewOld[i] as ItemTooltipRender2).ShowApplicablePetEquip = this.LocatePetEquip;
                     (tooltipRenderNewOld[i] as ItemTooltipRender2).ShowCashPurchasePrice = CharaSimConfig.Default.Item.ShowPurchasePrice;
+                    (tooltipRenderNewOld[i] as ItemTooltipRender2).LoadedCommoditiesSlot = i;
                     (tooltipRenderNewOld[i] as ItemTooltipRender2).CompareMode = true;
                 }
             }
@@ -1355,16 +1366,15 @@ namespace WzComparerR2.Comparer
 
             foreach (var itemID in OutputItemTooltipIDs)
             {
+                StateInfo = string.Format("{0}/{1} 道具: {2}", ++count, allCount, itemID);
+                StateDetail = "正在以Tooltip图像处理道具变更点...";
+                string itemType = Item.GetItemType(itemID).ToString();
+                string nodePath = (itemID / 10000 == 500) ? $@"{itemID:D7}.img"
+                    : (itemID / 1000 == 3015) ? $@"{(itemID / 100):D6}.img\{itemID:D8}"
+                    : (itemID / 10000 == 301) ? $@"{(itemID / 1000):D5}.img\{itemID:D8}"
+                    : $@"{(itemID / 10000):D4}.img\{itemID:D8}";
                 try
                 {
-                    StateInfo = string.Format("{0}/{1} 道具: {2}", ++count, allCount, itemID);
-                    StateDetail = "正在以Tooltip图像处理道具变更点...";
-                    string itemType = Item.GetItemType(itemID).ToString();
-                    string nodePath = (itemID / 10000 == 500) ? $@"{itemID:D7}.img"
-                        : (itemID / 1000 == 3015) ? $@"{(itemID / 100):D6}.img\{itemID:D8}"
-                        : (itemID / 10000 == 301) ? $@"{(itemID / 1000):D5}.img\{itemID:D8}"
-                        : $@"{(itemID / 10000):D4}.img\{itemID:D8}";
-
                     if (SkipKMSContent && KMSContentID["Item"].Contains(itemID)) continue;
                     int nullItemIdx = 0;
 
@@ -1386,14 +1396,14 @@ namespace WzComparerR2.Comparer
                 }
                 catch (Exception ex)
                 {
-                    FailToExportTooltips.Add("Item Tooltip 3: " + itemID, ex.Message);
+                    FailToExportTooltips.Add("Item Tooltip 3: " + $@"Item\{itemType}\{nodePath}", ex.Message);
                 }
             }
             OutputItemTooltipIDs.Clear();
         }
 
         // 变更装备Tooltip输出
-        private void saveGearTooltip(string eqpTooltipPath)
+        private void SaveGearTooltip(string eqpTooltipPath)
         {
             TooltipRender[] tooltipRenderNewOld = new TooltipRender[2];
             Wz_Node[] CharaWzNodeNewOld = new Wz_Node[2];
@@ -1956,12 +1966,17 @@ namespace WzComparerR2.Comparer
                 string skillID = match.Groups[1].ToString();
                 if (skillID != null)
                 {
-                    if (node.FindNodeByPath("common\\attackInfo") != null)
+                    if (node.FindNodeByPath("common")?.FindNodeByPath("attackInfo") != null)
                     {
                         if (!OutputPerJobSkillTooltipIDs.Contains(skillID))
                         {
                             OutputPerJobSkillTooltipIDs.Add(skillID);
                             diffPerJobSkillTags[skillID] = new List<string>();
+                        }
+
+                        if (tag != null && !diffPerJobSkillTags[skillID].Contains(tag))
+                        {
+                            diffPerJobSkillTags[skillID].Add(tag);
                         }
                     }
                     else
@@ -1971,11 +1986,11 @@ namespace WzComparerR2.Comparer
                             OutputSkillTooltipIDs.Add(skillID);
                             diffSkillTags[skillID] = new List<string>();
                         }
-                    }
 
-                    if (tag != null && !diffSkillTags[skillID].Contains(tag))
-                    {
-                        diffSkillTags[skillID].Add(tag);
+                        if (tag != null && !diffSkillTags[skillID].Contains(tag))
+                        {
+                            diffSkillTags[skillID].Add(tag);
+                        }
                     }
                 }
             }
@@ -2725,42 +2740,24 @@ namespace WzComparerR2.Comparer
             string path = Path.Combine(outputDir, "style.css");
             if (File.Exists(path))
                 return;
+            StringBuilder css = new StringBuilder();
+            css.AppendLine($"body {{ font-size:12px; background-color:{ColorToHex(ColorTable[0])}; color:{ColorToHex(ColorTable[1])}; }}");
+            css.AppendLine($"a {{ color:{ColorToHex(ColorTable[8])}; }}");
+            css.AppendLine($"p.wzf {{ }}");
+            css.AppendLine($"table, tr, th, td {{ border:1px solid #ff8000; border-collapse:collapse; }}");
+            css.AppendLine($"table {{ margin-bottom:16px; }}");
+            css.AppendLine($"th {{ text-align:left; }}");
+            css.AppendLine($"table.lst0 {{ }}");
+            css.AppendLine($"table.lst1 {{ }}");
+            css.AppendLine($"table.lst2 {{ }}");
+            css.AppendLine($"table.img {{ }}");
+            css.AppendLine($"table.img tr.r0 {{ background-color:{ColorToHex(ColorTable[2])}; color:{ColorToHex(ColorTable[5])}; }}");
+            css.AppendLine($"table.img tr.r1 {{ background-color:{ColorToHex(ColorTable[3])}; color:{ColorToHex(ColorTable[6])}; }}");
+            css.AppendLine($"table.img tr.r2 {{ background-color:{ColorToHex(ColorTable[4])}; color:{ColorToHex(ColorTable[7])}; }}");
+            css.AppendLine($"table.img.noChange {{ display:none; }}");
             FileStream fs = new FileStream(path, FileMode.Create, FileAccess.Write);
             StreamWriter sw = new StreamWriter(fs, Encoding.UTF8);
-            if (EnableDarkMode)
-            {
-
-                sw.WriteLine("body { font-size:12px; background-color:black; color:white; }");
-                sw.WriteLine("a { color:white; }");
-                sw.WriteLine("p.wzf { }");
-                sw.WriteLine("table, tr, th, td { border:1px solid #ff8000; border-collapse:collapse; }");
-                sw.WriteLine("table { margin-bottom:16px; }");
-                sw.WriteLine("th { text-align:left; }");
-                sw.WriteLine("table.lst0 { }");
-                sw.WriteLine("table.lst1 { }");
-                sw.WriteLine("table.lst2 { }");
-                sw.WriteLine("table.img { }");
-                sw.WriteLine("table.img tr.r0 { background-color:#003049; }");
-                sw.WriteLine("table.img tr.r1 { background-color:#000000; }");
-                sw.WriteLine("table.img tr.r2 { background-color:#462306; }");
-                sw.WriteLine("table.img.noChange { display:none; }");
-            }
-            else
-            {
-                sw.WriteLine("body { font-size:12px; }");
-                sw.WriteLine("p.wzf { }");
-                sw.WriteLine("table, tr, th, td { border:1px solid #ff8000; border-collapse:collapse; }");
-                sw.WriteLine("table { margin-bottom:16px; }");
-                sw.WriteLine("th { text-align:left; }");
-                sw.WriteLine("table.lst0 { }");
-                sw.WriteLine("table.lst1 { }");
-                sw.WriteLine("table.lst2 { }");
-                sw.WriteLine("table.img { }");
-                sw.WriteLine("table.img tr.r0 { background-color:#fff4c4; }");
-                sw.WriteLine("table.img tr.r1 { background-color:#ebf2f8; }");
-                sw.WriteLine("table.img tr.r2 { background-color:#ffffff; }");
-                sw.WriteLine("table.img.noChange { display:none; }");
-            }
+            sw.Write(css.ToString());
             sw.Flush();
             sw.Close();
         }
@@ -3133,6 +3130,11 @@ namespace WzComparerR2.Comparer
                 default:
                     return true;
             }
+        }
+
+        private static string ColorToHex(Color color)
+        {
+            return $"#{color.R:X2}{color.G:X2}{color.B:X2}";
         }
     }
 }

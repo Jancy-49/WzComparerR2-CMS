@@ -43,12 +43,6 @@ namespace WzComparerR2
                 new ComboItem("ASCII"){ Value = -1 },
             });
 
-            cmbWzVersionVerifyMode.Items.AddRange(new[]
-            {
-                new ComboItem("基础"){ Value = WzLib.WzVersionVerifyMode.Default },
-                new ComboItem("快速"){ Value = WzLib.WzVersionVerifyMode.Fast },
-            });
-
             cmbDesiredLanguage.Items.AddRange(new[]
 {
                 new ComboItem("英语 (GMS/MSEA)"){ Value = "en" },
@@ -573,17 +567,6 @@ namespace WzComparerR2
             txtLMTemperature.Enabled = chkOpenAIExtraOption.Checked;
             txtMaximumToken.Enabled = chkOpenAIExtraOption.Checked;
         }
-        public WzLib.WzVersionVerifyMode WzVersionVerifyMode
-        {
-            get { return ((cmbWzVersionVerifyMode.SelectedItem as ComboItem)?.Value as WzLib.WzVersionVerifyMode?) ?? default; }
-            set
-            {
-                var items = cmbWzVersionVerifyMode.Items.Cast<ComboItem>();
-                var item = items.FirstOrDefault(_item => _item.Value as WzLib.WzVersionVerifyMode? == value)
-                    ?? items.First();
-                cmbWzVersionVerifyMode.SelectedItem = item;
-            }
-        }
 
         public void Load(WcR2Config config)
         {
@@ -592,7 +575,6 @@ namespace WzComparerR2
             this.DefaultWzCodePage = config.WzEncoding;
             this.AutoDetectExtFiles = config.AutoDetectExtFiles;
             this.ImgCheckDisabled = config.ImgCheckDisabled;
-            this.WzVersionVerifyMode = config.WzVersionVerifyMode;
             this.NxOpenAPIKey = config.NxOpenAPIKey;
             this.NxSecretKey = config.NxSecretKey;
             this.MozhiBackend = config.MozhiBackend;
@@ -620,7 +602,6 @@ namespace WzComparerR2
             config.WzEncoding = this.DefaultWzCodePage;
             config.AutoDetectExtFiles = this.AutoDetectExtFiles;
             config.ImgCheckDisabled = this.ImgCheckDisabled;
-            config.WzVersionVerifyMode = this.WzVersionVerifyMode;
             config.NxOpenAPIKey = this.NxOpenAPIKey;
             config.NxSecretKey = this.NxSecretKey;
             config.MozhiBackend = this.MozhiBackend;

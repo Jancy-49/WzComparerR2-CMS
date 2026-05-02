@@ -1,17 +1,18 @@
-﻿using System;
+﻿using DevComponents.DotNetBar;
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Drawing;
+using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
+using System.Text.RegularExpressions;
 using System.Windows.Forms;
-using Resource = CharaSimResource.Resource;
-using WzComparerR2.Common;
 using WzComparerR2.CharaSim;
-using WzComparerR2.WzLib;
+using WzComparerR2.Common;
 using WzComparerR2.Comparer;
 using WzComparerR2.PluginBase;
-using System.Text.RegularExpressions;
-using System.Security.Cryptography;
+using WzComparerR2.WzLib;
+using Resource = CharaSimResource.Resource;
 
 namespace WzComparerR2.CharaSimControl
 {
@@ -44,6 +45,7 @@ namespace WzComparerR2.CharaSimControl
         public Wz_Node wzNode { get; set; } = null;
 
         public TooltipRender LinkRidingGearRender { get; set; }
+        public TooltipRender SetItemRender { get; set; }
         public string ParsedHdesc { get; set; }
 
         public override Bitmap Render()
@@ -65,6 +67,7 @@ namespace WzComparerR2.CharaSimControl
             Bitmap originBmp = RenderSkill(region, out picHeight, out splitterH, doHighlight);
             Bitmap ridingGearBmp = null;
             Bitmap origindescBmp = null;
+            Bitmap setItemBmp = null;
 
             int vehicleID = Skill.VehicleID;
             if (vehicleID == 0)
@@ -84,6 +87,17 @@ namespace WzComparerR2.CharaSimControl
                 }
             }
 
+            if (Skill.setItemReason != 0)
+            {
+                Wz_Node setItemNode = PluginBase.PluginManager.FindWz(string.Format(@"Etc\SetItemInfo.img\{0}", Skill.setItemReason));
+                if (setItemNode != null)
+                {
+                    SetItem setItem = SetItem.CreateFromNode(setItemNode, null);
+                    if (setItem != null) setItemBmp = RenderSetItem(setItem);
+                }
+
+            }
+
             if ((Skill.Origin || Skill.Ascent) && !Skill.Invisible)
             {
                 origindescBmp = RenderOrigindesc(region, out picH);
@@ -95,9 +109,11 @@ namespace WzComparerR2.CharaSimControl
                 origindescBmp = tempBmp;
             }
 
+
             Size totalSize = new Size(originBmp.Width, picHeight);
             Point ridingGearOrigin = Point.Empty;
             Point origindescOrigin = Point.Empty;
+            Point setItemOrigin = Point.Empty;
 
             if (ridingGearBmp != null)
             {
@@ -111,6 +127,13 @@ namespace WzComparerR2.CharaSimControl
                 totalSize.Width += origindescBmp.Width;
                 totalSize.Height = Math.Max(picHeight, origindescBmp.Height);
                 origindescOrigin.X = originBmp.Width;
+            }
+
+            if (setItemBmp != null)
+            {
+                totalSize.Width += setItemBmp.Width;
+                totalSize.Height = Math.Max(totalSize.Height, setItemBmp.Height);
+                setItemOrigin.X = totalSize.Width - setItemBmp.Width;
             }
 
             Bitmap tooltip = new Bitmap(totalSize.Width, totalSize.Height);
@@ -150,12 +173,20 @@ namespace WzComparerR2.CharaSimControl
                     new Rectangle(Point.Empty, origindescBmp.Size), GraphicsUnit.Pixel);
             }
 
+            if (setItemBmp != null)
+            {
+                g.DrawImage(setItemBmp, setItemOrigin.X, setItemOrigin.Y,
+                    new Rectangle(Point.Empty, setItemBmp.Size), GraphicsUnit.Pixel);
+            }
+
             if (originBmp != null)
                 originBmp.Dispose();
             if (ridingGearBmp != null)
                 ridingGearBmp.Dispose();
             if (origindescBmp != null)
                 origindescBmp.Dispose();
+            if (setItemBmp != null)
+                setItemBmp.Dispose();
 
             g.Dispose();
             return tooltip;
@@ -169,7 +200,7 @@ namespace WzComparerR2.CharaSimControl
             var v6SkillSummaryFontColorTable = new Dictionary<string, Color>()
             {
                 { "c", GearGraphics.SkillSummaryOrangeTextColor },
-                { "$g", GearGraphics.gearCyanColor },
+                { "$g", GearGraphics.gearGreenColor },
             };
 
             // Initialize skillCommon Dictionary
@@ -945,12 +976,12 @@ namespace WzComparerR2.CharaSimControl
                 {
                     int jobID = Skill.PerJobAttackInfo.ElementAt(Skill.PerJobIndex).Key;
                     if (Skill.SkillID / 100000000 == 5) jobID += 2;
-                    skillDescEx.Add($"#c[适用职业] {ItemStringHelper.GetJobName(jobID)}#");
+                    skillDescEx.Add($"#c[适用职业] {ItemStringHelper.GetJobName(jobID)}({jobID})#");
                 }
                 else
                 {
                     int jobID = ItemStringHelper.Get4thjob(selectJob);
-                    skillDescEx.Add($"#c[适用职业] {ItemStringHelper.GetJobName(jobID)}#");
+                    skillDescEx.Add($"#c[适用职业] {ItemStringHelper.GetJobName(jobID)}({jobID})#");
                 }
             }
 
@@ -1028,6 +1059,21 @@ namespace WzComparerR2.CharaSimControl
                     if (para.Count > 0)
                     {
                         paramtext = "[Common] " + string.Join(", ", para.ToArray());
+                        GearGraphics.DrawPlainText(g, paramtext, GearGraphics.ItemDetailFont, Color.FromArgb(175, 173, 255), region.LevelDescLeft, region.TextRight, ref picH, 16);
+                    }
+                }
+                if (Skill.Info.Count > 0)
+                {
+                    string paramtext = "";
+                    List<string> para = new List<string>();
+                    foreach (var kv in Skill.Info)
+                    {
+                        string paramName = kv.Key.ToString();
+                        para.Add(paramName + ": " + kv.Value);
+                    }
+                    if (para.Count > 0)
+                    {
+                        paramtext = "[Info] " + string.Join(", ", para.ToArray());
                         GearGraphics.DrawPlainText(g, paramtext, GearGraphics.ItemDetailFont, Color.FromArgb(175, 173, 255), region.LevelDescLeft, region.TextRight, ref picH, 16);
                     }
                 }
@@ -1113,6 +1159,31 @@ namespace WzComparerR2.CharaSimControl
             }
             g.Dispose();
             return bitmap;
+        }
+
+        private Bitmap RenderSetItem(SetItem setItem)
+        {
+            TooltipRender renderer = this.SetItemRender;
+            if (renderer == null)
+            {
+                if (this.Enable22AniStyle)
+                {
+                    SetItemTooltipRender22 defaultRenderer = new SetItemTooltipRender22();
+                    defaultRenderer.StringLinker = this.StringLinker;
+                    defaultRenderer.ShowObjectID = true;
+                    renderer = defaultRenderer;
+                }
+                else
+                {
+                    SetItemTooltipRender defaultRenderer = new SetItemTooltipRender();
+                    defaultRenderer.StringLinker = this.StringLinker;
+                    defaultRenderer.ShowObjectID = true;
+                    renderer = defaultRenderer;
+                }
+            }
+
+            renderer.TargetItem = setItem;
+            return renderer.Render();
         }
 
         private class CanvasRegion

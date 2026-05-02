@@ -1,20 +1,23 @@
-﻿using System;
-using System.Linq;
-using System.Drawing;
+﻿using CharaSimResource;
+using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
-using System.Windows.Forms;
+using System.Drawing;
+using System.Linq;
+using System.Reflection;
+using System.Runtime.InteropServices;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Text.RegularExpressions;
-using CharaSimResource;
+using System.Threading;
+using System.Windows.Forms;
+using WzComparerR2.AvatarCommon;
 using WzComparerR2.CharaSim;
 using WzComparerR2.Common;
 using WzComparerR2.Controls;
+using WzComparerR2.PluginBase;
 using WzComparerR2.WzLib;
-using System.Security.Cryptography.X509Certificates;
-using System.Runtime.InteropServices;
-using System.Threading;
-using Newtonsoft.Json.Linq;
 
 namespace WzComparerR2.CharaSimControl
 {
@@ -42,8 +45,15 @@ namespace WzComparerR2.CharaSimControl
         private List<TooltipHelpRect> detailStatList;
         private int hyperStatScrollValue;
         private int[] hyperStatList;
+        private List<int> GearList = new List<int>();
+        private List<int> SlotIndexList = new List<int>();
+        private List<int> SkillList = new List<int>();
+        private List<string> SkillNames = new List<string>();
+        private List<int> SkillLevels = new List<int>();
         private Bitmap[] hyperStatBitmapList;
         private Skill[] hyperStatSkillList;
+        private Skill[] skillList;
+        private Gear[] gearList;
 
         private ContextMenuStrip menu;
         private ACtrlVScroll vScroll;
@@ -92,13 +102,61 @@ namespace WzComparerR2.CharaSimControl
         private ACtrlButton btnReduce;
         private bool waitForRefresh;
 
+        private AvatarCanvasManager avatar { get; set; }
         public JObject resultJson = null;//基础信息
         public JObject resultJson2 = null;//人气度信息
         public JObject resultJson3 = null;//角色属性信息
+        public JObject resultJson4 = null;//超级属性信息
+        public JObject resultJson5 = null;//内在能力信息
+        public JObject resultJson6 = null;//V矩阵信息
+        public JObject resultJson7 = null;//HEXA矩阵信息
+        public JObject resultJson8 = null;//链接技能信息
+        public JObject resultJson9 = null;//装备道具信息
         private string character_name = "WzComparerR2";
         private string character_class = "元素师";
+        private string character_guild_name = "-";
+        private string liberation_quest_clear = "0";
+        private string damage = "0.00";
+        private string bossDam = "0.00";
+        private string finalDam = "0.00";
+        private string ignoreDEF = "0.00";
+        private string normalDam = "0.00";
+        private string criRate = "0.00";
+        private string criDam = "0.00";
+        private string cooldownReduceSec = "5";
+        private string cooldownReduce = "0";
+        private string cooldownIgnore = "0";
+        private string buffDuration = "0.00";
+        private string elemResistance = "0.00";
+        private string abnormalDam = "0.00";
+        private string tamingmobDuration = "0";
+        private string starforce = "0";
+        private string arcforce = "0";
+        private string autforce = "0";
+        private string mesoRate = "0";
+        private string dropRate = "0";
+        private string expRate = "0.00";
+        private string statusResistance = "0";
+        private string stance = "0";
+        private string defense = "0";
+        private string movement = "100";
+        private string jump = "100";
+        private string attackSpeed = "1";
+        private string ability_grade = "legendary";
         private int character_level = 281;
+        public int union_level = 281;
+        public int dojang_best_floor = 0;
         private int popularity = 0;
+        private long attack_range = 49999999;
+        private long combat_power = 49999999;
+        private int STR = 2052;
+        private int DEX = 1670;
+        private int INT = 39263;
+        private int LUK = 3011;
+        private int HP = 50000;
+        private int MP = 50000;
+        private int ATT = 1082;
+        private int MATT = 3095;
 
         public event ObjectMouseEventHandler ObjectMouseMove;
         public event EventHandler ObjectMouseLeave;
@@ -126,28 +184,18 @@ namespace WzComparerR2.CharaSimControl
         public bool EquipVisible = false;
         public bool SkillVisible = false;
         public bool CashVisible = false;
+        public bool RingSlotVisible = false;
         public int statFont = 1;
         public int presetPage = 1;
         public int ArcAut = 1;
         public int SkillTab = 1;
         public int CashPreset = 1;
-        public int hyperLv = 0;
-        public int hyperLv2 = 0;
-        public int hyperLv3 = 0;
-        public int hyperLv4 = 0;
-        public int hyperLv5 = 0;
-        public int hyperLv6 = 0;
-        public int hyperLv7 = 0;
-        public int hyperLv8 = 0;
-        public int hyperLv9 = 0;
-        public int hyperLv10 = 0;
-        public int hyperLv11 = 0;
-        public int hyperLv12 = 0;
-        public int hyperLv13 = 0;
-        public int hyperLv14 = 0;
-        public int hyperLv15 = 0;
-        public int hyperLv16 = 0;
-        public int hyperLv17 = 0;
+        public List<int> hyperStats = Enumerable.Repeat(0, 17).ToList();
+        public List<int> hyperStats2 = Enumerable.Repeat(0, 17).ToList();
+        public List<int> hyperStats3 = Enumerable.Repeat(0, 17).ToList();
+        public List<int> hyperStatsOnUse = new List<int>();
+        public string use_preset_no = "1";
+        public int scrollValue = 0;
 
         private Rectangle DetailRect
         {
@@ -169,6 +217,16 @@ namespace WzComparerR2.CharaSimControl
             }
         }
 
+        private Rectangle RingSlot
+        {
+            get
+            {
+                return new Rectangle(
+                    new Point(baseOffset.X - Resource.UICharacterInfo_img_remote_detailEquip_skillRingEquip_canvas_skillRing.Width - 1, baseOffset.Y + 351),
+                    Resource.UICharacterInfo_img_remote_detailEquip_skillRingEquip_canvas_skillRing.Size);
+            }
+        }
+
         private void initCtrl()
         {
             this.menu = new ContextMenuStrip();
@@ -178,29 +236,30 @@ namespace WzComparerR2.CharaSimControl
 
             this.vScroll = new ACtrlVScroll();  //鼠标滑轮区域
 
-            this.vScroll.PicBase.Normal = new BitmapOrigin(Resource.VScr9_enabled_base);
-            this.vScroll.PicBase.Disabled = new BitmapOrigin(Resource.VScr9_disabled_base);
+            this.vScroll.PicBase.Normal = new BitmapOrigin(Resource.UICharacterInfo_img_remote_detailSkill_scroll_slot_enabled_base);
+            this.vScroll.PicBase.Disabled = new BitmapOrigin(Resource.UICharacterInfo_img_remote_detailSkill_scroll_slot_enabled_base);
 
-            this.vScroll.BtnPrev.Normal = new BitmapOrigin(Resource.VScr9_enabled_prev0);
-            this.vScroll.BtnPrev.Pressed = new BitmapOrigin(Resource.VScr9_enabled_prev1);
-            this.vScroll.BtnPrev.MouseOver = new BitmapOrigin(Resource.VScr9_enabled_prev2);
-            this.vScroll.BtnPrev.Disabled = new BitmapOrigin(Resource.VScr9_enabled_prev0);
+            this.vScroll.BtnPrev.Normal = new BitmapOrigin(Resource.UICharacterInfo_img_remote_detailSkill_scroll_slot_enabled_prev0);
+            this.vScroll.BtnPrev.Pressed = new BitmapOrigin(Resource.UICharacterInfo_img_remote_detailSkill_scroll_slot_enabled_prev1);
+            this.vScroll.BtnPrev.MouseOver = new BitmapOrigin(Resource.UICharacterInfo_img_remote_detailSkill_scroll_slot_enabled_prev2);
+            this.vScroll.BtnPrev.Disabled = new BitmapOrigin(Resource.UICharacterInfo_img_remote_detailSkill_scroll_slot_enabled_prev0);
             this.vScroll.BtnPrev.Size = this.vScroll.BtnPrev.Normal.Bitmap.Size;
             this.vScroll.BtnPrev.Location = new Point(0, 0);
 
-            this.vScroll.BtnNext.Normal = new BitmapOrigin(Resource.VScr9_enabled_next0);
-            this.vScroll.BtnNext.Pressed = new BitmapOrigin(Resource.VScr9_enabled_next1);
-            this.vScroll.BtnNext.MouseOver = new BitmapOrigin(Resource.VScr9_enabled_next2);
-            this.vScroll.BtnNext.Disabled = new BitmapOrigin(Resource.VScr9_enabled_next0);
+            this.vScroll.BtnNext.Normal = new BitmapOrigin(Resource.UICharacterInfo_img_remote_detailSkill_scroll_slot_enabled_next0);
+            this.vScroll.BtnNext.Pressed = new BitmapOrigin(Resource.UICharacterInfo_img_remote_detailSkill_scroll_slot_enabled_next1);
+            this.vScroll.BtnNext.MouseOver = new BitmapOrigin(Resource.UICharacterInfo_img_remote_detailSkill_scroll_slot_enabled_next2);
+            this.vScroll.BtnNext.Disabled = new BitmapOrigin(Resource.UICharacterInfo_img_remote_detailSkill_scroll_slot_enabled_next0);
             this.vScroll.BtnNext.Size = this.vScroll.BtnNext.Normal.Bitmap.Size;
+            this.vScroll.BtnNext.Location = new Point(0, 344);
 
-            this.vScroll.BtnThumb.Normal = new BitmapOrigin(Resource.VScr9_enabled_thumb0);
-            this.vScroll.BtnThumb.Pressed = new BitmapOrigin(Resource.VScr9_enabled_thumb1);
-            this.vScroll.BtnThumb.MouseOver = new BitmapOrigin(Resource.VScr9_enabled_thumb2);
+            this.vScroll.BtnThumb.Normal = new BitmapOrigin(Resource.UICharacterInfo_img_remote_detailSkill_scroll_slot_enabled_thumb0);
+            this.vScroll.BtnThumb.Pressed = new BitmapOrigin(Resource.UICharacterInfo_img_remote_detailSkill_scroll_slot_enabled_thumb1);
+            this.vScroll.BtnThumb.MouseOver = new BitmapOrigin(Resource.UICharacterInfo_img_remote_detailSkill_scroll_slot_enabled_thumb2);
             this.vScroll.BtnThumb.Size = this.vScroll.BtnThumb.Normal.Bitmap.Size;
 
             this.vScroll.Visible = false;
-            //this.vScroll.ValueChanged += new EventHandler(vScroll_ValueChanged);
+            this.vScroll.ValueChanged += new EventHandler(vScroll_ValueChanged);
             this.vScroll.ChildButtonStateChanged += new EventHandler(aCtrl_RefreshCall);
 
             this.btnClose = new ACtrlButton(); //主页关闭按钮
@@ -618,6 +677,57 @@ namespace WzComparerR2.CharaSimControl
                     hyperStatSkillList = null;
                 }
             }
+            if (skillList == null)
+            {
+                try
+                {
+                    skillList = this.SkillList.Select(id => Skill.CreateFromNode(PluginBase.PluginManager.FindWz("Skill/" + (Regex.IsMatch(id.ToString(), @"80\d{6}") ? id.ToString().PadLeft(7, '0').Substring(0, 6) : id.ToString().PadLeft(7, '0').Substring(0, id.ToString().Length - 4)) + ".img/skill/" + id.ToString()), PluginBase.PluginManager.FindWz, PluginBase.PluginManager.FindWz)).ToArray();
+                }
+                catch (Exception ex)
+                {
+                    skillList = null;
+                }
+            }
+            if (gearList == null)
+            {
+                try
+                {
+                    gearList = this.GearList.Select(gearID =>
+                    {
+                        string nodePath = $@"{gearID:D8}.img";
+                        foreach (Wz_Node category in PluginManager.FindWz("Character").Nodes)
+                        {
+                            if (category.Text.ToLower().Contains("canvas")) continue;
+
+                            if (category.Text == nodePath)
+                            {
+                                var img = category.GetValueEx<Wz_Image>(null);
+                                if (img != null && img.TryExtract())
+                                {
+                                    return Gear.CreateFromNode(img.Node, PluginManager.FindWz);
+                                }
+                            }
+
+                            Wz_Node gearNode = category.FindNodeByPath(nodePath);
+                            if (gearNode != null)
+                            {
+                                var img = gearNode.GetValueEx<Wz_Image>(null);
+                                if (img != null)
+                                {
+                                    gearNode = img.TryExtract() ? img.Node : null;
+                                }
+
+                                return Gear.CreateFromNode(gearNode, PluginManager.FindWz);
+                            }
+                        }
+                        return null;
+                    }).ToArray();
+                }
+                catch (Exception ex) 
+                { 
+                    gearList = null;
+                }
+            }
         }
 
         private Point calcRenderBaseOffset()
@@ -630,116 +740,20 @@ namespace WzComparerR2.CharaSimControl
 
         private void setControlState()
         {
-            if (this.StatVisible && this.DetailVisible)
-            {
-                this.btntoggleDetailOpen.Visible = false;
-                this.btntoggleDetailClose.Visible = true;
-                this.btnDetailOpen.Visible = true;
-                this.btnDetailClose.Visible = false;
-                this.btnhelp.Visible = true;
-                this.EquipVisible = false;
-                this.SkillVisible = false;
-                this.CashVisible = false;
-                this.vScroll.Visible = false;
-            }
-            else if (this.EquipVisible && this.DetailVisible)
-            {
-                this.btntoggleDetailOpen.Visible = false;
-                this.btntoggleDetailClose.Visible = true;
-                this.btnDetailOpen.Visible = false;
-                this.btnDetailClose.Visible = false;
-                this.btnhelp.Visible = false;
-                this.StatVisible = false;
-                this.SkillVisible = false;
-                this.CashVisible = false;
-                this.vScroll.Visible = false;
-            }
-            else if (this.SkillVisible && this.DetailVisible)
-            {
-                this.btntoggleDetailOpen.Visible = false;
-                this.btntoggleDetailClose.Visible = true;
-                this.btnDetailOpen.Visible = false;
-                this.btnDetailClose.Visible = false;
-                this.btnhelp.Visible = false;
-                this.StatVisible = false;
-                this.EquipVisible = false;
-                this.CashVisible = false;
-                this.vScroll.Visible = true;
-            }
-            else if (this.CashVisible && this.DetailVisible)
-            {
-                this.btntoggleDetailOpen.Visible = false;
-                this.btntoggleDetailClose.Visible = true;
-                this.btnDetailOpen.Visible = false;
-                this.btnDetailClose.Visible = false;
-                this.btnhelp.Visible = false;
-                this.StatVisible = false;
-                this.EquipVisible = false;
-                this.SkillVisible = false;
-                this.vScroll.Visible = false;
-            }
-            else
-            {
-                this.btntoggleDetailOpen.Visible = true;
-                this.btntoggleDetailClose.Visible = false;
-                this.btnDetailOpen.Visible = false;
-                this.btnDetailClose.Visible = false;
-                this.btnhelp.Visible = false;
-                this.StatVisible = false;
-                this.EquipVisible = false;
-                this.SkillVisible = false;
-                this.CashVisible = false;
-                this.vScroll.Visible = false;
-            }
-            if (this.AbilityVisible && this.StatVisible)
-            {
-                this.btnDetailOpen.Visible = false;
-                this.btnDetailClose.Visible = true;
-                this.btnHpUp.Visible = true;
-            }
-            else if (this.AbilityVisible && !this.StatVisible)
-            {
-                this.btnDetailOpen.Visible = false;
-                this.btnDetailClose.Visible = false;
-                this.btnHpUp.Visible = true;
-            }
-            else if (!this.AbilityVisible && this.StatVisible)
-            {
-                this.btnDetailOpen.Visible = true;
-                this.btnDetailClose.Visible = false;
-                this.btnHpUp.Visible = false;
-            }
-            else
-            {
-                this.btnDetailOpen.Visible = false;
-                this.btnDetailClose.Visible = false;
-                this.btnHpUp.Visible = false;
-            }
-
-            if (this.HyperStatVisible && this.StatVisible)
-            {
-                this.btnHyperStatOpen.Visible = false;
-                this.btnHyperStatClose.Visible = true;
-                this.btnReduce.Visible = true;
-            }
-            else if (this.HyperStatVisible && !this.StatVisible)
-            {
-                this.btnHyperStatOpen.Visible = false;
-                this.btnHyperStatClose.Visible = false;
-                this.btnReduce.Visible = true;
-            }
-            else if (!this.HyperStatVisible && this.StatVisible)
-            {
-                this.btnHyperStatOpen.Visible = true;
-                this.btnHyperStatClose.Visible = false;
-                this.btnReduce.Visible = false;
-            }
-            else
-            {
-                this.btnHyperStatOpen.Visible = false;
-                this.btnHyperStatClose.Visible = false;
-                this.btnReduce.Visible = false;
-            }
+            this.btntoggleDetailOpen.Visible = !this.DetailVisible;
+            this.btntoggleDetailClose.Visible = this.DetailVisible;
+            this.btnDetailOpen.Visible = this.StatVisible && !this.AbilityVisible && this.DetailVisible;
+            this.btnDetailClose.Visible = this.AbilityVisible && this.StatVisible;
+            this.btnHpUp.Visible = this.AbilityVisible;
+            this.btnhelp.Visible = this.StatVisible && this.DetailVisible;
+            this.btnHyperStatClose.Visible = this.HyperStatVisible && this.StatVisible;
+            this.btnHyperStatOpen.Visible = !this.HyperStatVisible && this.StatVisible;
+            this.btnReduce.Visible = this.HyperStatVisible;
+            this.vScroll.Visible = this.SkillVisible && this.DetailVisible;
+            this.vScroll.Location = new Point(448, 323);
+            this.vScroll.Size = new Size(7, 366);
+            this.vScroll.ScrollableLocation = new Point(13, 323);
+            this.vScroll.ScrollableSize = new Size(448, 366);
 
             if (this.character != null)
             {
@@ -767,11 +781,138 @@ namespace WzComparerR2.CharaSimControl
             {
                 this.character_name = resultJson["character_name"].ToString();
                 this.character_class = resultJson["character_class"].ToString();
+                this.character_guild_name = resultJson["character_guild_name"].ToString();
+                this.liberation_quest_clear = resultJson["liberation_quest_clear"].ToString();
                 this.character_level = resultJson["character_level"].ToObject<int>();
             }
             if (resultJson2 != null)
             {
                 this.popularity = resultJson2["popularity"].ToObject<int>();
+            }
+            if (resultJson3 != null)
+            {
+                this.attack_range = resultJson3["final_stat"][0]["stat_value"].ToObject<long>();
+                this.damage = resultJson3["final_stat"][2]["stat_value"].ToObject<string>();
+                this.bossDam = resultJson3["final_stat"][3]["stat_value"].ToObject<string>();
+                this.finalDam = resultJson3["final_stat"][4]["stat_value"].ToObject<string>();
+                this.ignoreDEF = resultJson3["final_stat"][5]["stat_value"].ToObject<string>();
+                this.criRate = resultJson3["final_stat"][6]["stat_value"].ToObject<string>();
+                this.criDam = resultJson3["final_stat"][7]["stat_value"].ToObject<string>();
+                this.statusResistance = resultJson3["final_stat"][8]["stat_value"].ToObject<string>();
+                this.stance = resultJson3["final_stat"][9]["stat_value"].ToObject<string>();
+                this.defense = resultJson3["final_stat"][10]["stat_value"].ToObject<string>();
+                this.movement = resultJson3["final_stat"][11]["stat_value"].ToObject<string>();
+                this.jump = resultJson3["final_stat"][12]["stat_value"].ToObject<string>();
+                this.starforce = resultJson3["final_stat"][13]["stat_value"].ToObject<string>();
+                this.arcforce = resultJson3["final_stat"][14]["stat_value"].ToObject<string>();
+                this.autforce = resultJson3["final_stat"][15]["stat_value"].ToObject<string>();
+                this.STR = resultJson3["final_stat"][16]["stat_value"].ToObject<int>();
+                this.DEX = resultJson3["final_stat"][17]["stat_value"].ToObject<int>();
+                this.INT = resultJson3["final_stat"][18]["stat_value"].ToObject<int>();
+                this.LUK = resultJson3["final_stat"][19]["stat_value"].ToObject<int>();
+                this.HP = resultJson3["final_stat"][20]["stat_value"].ToObject<int>();
+                this.MP = resultJson3["final_stat"][21]["stat_value"].ToObject<int>();
+                this.dropRate = resultJson3["final_stat"][28]["stat_value"].ToObject<string>();
+                this.mesoRate = resultJson3["final_stat"][29]["stat_value"].ToObject<string>();
+                this.buffDuration = resultJson3["final_stat"][30]["stat_value"].ToObject<string>();
+                this.attackSpeed = resultJson3["final_stat"][31]["stat_value"].ToObject<string>();
+                this.normalDam = resultJson3["final_stat"][32]["stat_value"].ToObject<string>();
+                this.cooldownReduceSec = resultJson3["final_stat"][33]["stat_value"].ToObject<string>();
+                this.cooldownReduce = resultJson3["final_stat"][34]["stat_value"].ToObject<string>();
+                this.cooldownIgnore = resultJson3["final_stat"][35]["stat_value"].ToObject<string>();
+                this.elemResistance = resultJson3["final_stat"][36]["stat_value"].ToObject<string>();
+                this.abnormalDam = resultJson3["final_stat"][37]["stat_value"].ToObject<string>();
+                this.expRate = resultJson3["final_stat"][39]["stat_value"].ToObject<string>();
+                this.ATT = resultJson3["final_stat"][40]["stat_value"].ToObject<int>();
+                this.MATT = resultJson3["final_stat"][41]["stat_value"].ToObject<int>();
+                this.combat_power = resultJson3["final_stat"][42]["stat_value"].ToObject<long>();
+                this.tamingmobDuration = resultJson3["final_stat"][43]["stat_value"].ToObject<string>();
+            }
+            if (resultJson4 != null)
+            {
+                use_preset_no = resultJson4["use_preset_no"].ToObject<string>();
+                hyperStats = resultJson4["hyper_stat_preset_1"].Select(item => item["stat_level"]?.ToObject<int>() ?? 0).ToList();
+                hyperStats2 = resultJson4["hyper_stat_preset_2"].Select(item => item["stat_level"]?.ToObject<int>() ?? 0).ToList();
+                hyperStats3 = resultJson4["hyper_stat_preset_3"].Select(item => item["stat_level"]?.ToObject<int>() ?? 0).ToList();
+                switch (presetPage)
+                {
+                    case 1: hyperStatsOnUse = hyperStats; break;
+                    case 2: hyperStatsOnUse = hyperStats2; break;
+                    case 3: hyperStatsOnUse = hyperStats3; break;
+                }
+            }
+            if (resultJson5 != null)
+            {
+                ability_grade = ability_rank(resultJson5["ability_grade"].ToObject<String>());
+            }
+            if (resultJson6 != null && SkillTab == 2)
+            {
+                SkillList.Clear();
+                SkillNames.Clear();
+                SkillLevels.Clear();
+                var character_skill = resultJson6["character_skill"] as JArray;
+                foreach (var skill in character_skill)
+                {
+                    string skill_icon = skill["skill_icon"].ToString();
+                    string skill_name = skill["skill_name"].ToString();
+                    int skill_level = skill["skill_level"].Value<int>();
+                    int convertedValue = indexConversion(skill_icon.Substring(skill_icon.LastIndexOf('/') + 1).Trim());
+                    SkillList.Add(convertedValue);
+                    SkillNames.Add(skill_name);
+                    SkillLevels.Add(skill_level);
+                }
+                this.vScroll.Maximum = SkillList.Count > 12 ? SkillList.Count / 2 - 6 : 0;
+            }
+            else if (resultJson7 != null && SkillTab == 3)
+            {
+                SkillList.Clear();
+                SkillNames.Clear();
+                SkillLevels.Clear();
+                var character_skill = resultJson7["character_skill"] as JArray;
+                foreach (var skill in character_skill)
+                {
+                    string skill_icon = skill["skill_icon"].ToString();
+                    string skill_name = skill["skill_name"].ToString();
+                    int skill_level = skill["skill_level"].Value<int>();
+                    int convertedValue = indexConversion(skill_icon.Substring(skill_icon.LastIndexOf('/') + 1).Trim());
+                    SkillList.Add(convertedValue);
+                    SkillNames.Add(skill_name);
+                    SkillLevels.Add(skill_level);
+                }
+                this.vScroll.Maximum = SkillList.Count > 12 ? SkillList.Count / 2 - 6 : 0;
+            }
+            else if (resultJson8 != null && SkillTab == 1)
+            {
+                SkillList.Clear();
+                SkillNames.Clear();
+                SkillLevels.Clear();
+                var character_link_skill = resultJson8["character_link_skill"] as JArray;
+                foreach (var skill in character_link_skill)
+                {
+                    string skill_icon = skill["skill_icon"].ToString();
+                    string skill_name = skill["skill_name"].ToString();
+                    int skill_level = skill["skill_level"].Value<int>();
+                    int convertedValue = indexConversion(skill_icon.Substring(skill_icon.LastIndexOf('/') + 1).Trim());
+                    SkillList.Add(convertedValue);
+                    SkillNames.Add(skill_name);
+                    SkillLevels.Add(skill_level);
+                }
+                this.vScroll.Maximum = 0;
+            }
+            if (resultJson9 != null && EquipVisible)
+            {
+                GearList.Clear();
+                SlotIndexList.Clear();
+                var item_equipment = resultJson9["item_equipment"] as JArray;
+                foreach ( var equip in item_equipment)
+                {
+                    string item_icon = equip["item_icon"].ToString();
+                    string item_equipment_slot = equip["item_equipment_slot"].ToString();
+                    int slotIndex = GetSlotIndex(item_equipment_slot);
+                    int convertedValue = ItemIndexConversion(item_icon.Substring(item_icon.LastIndexOf('/') + 1).Trim());
+                    GearList.Add(convertedValue);
+                    SlotIndexList.Add(slotIndex);
+                }
             }
         }
 
@@ -839,6 +980,17 @@ namespace WzComparerR2.CharaSimControl
             return sb.Length > 0 ? sb.ToString() : "0";
         }
 
+        private static string ability_rank(string grade)
+        {
+            switch (grade)
+            {
+                case "레전드리": case "Legendary": case "傳說": return "legendary"; 
+                case "유니크": case "Unique": case "罕見": return "unique";
+                case "에픽": case "Epic": case "稀有": return "epic";
+                default: return "normal";
+            }
+        }
+
         private void renderBase(Graphics g) //绘制角色信息界面
         {
             g.TranslateTransform(baseOffset.X, baseOffset.Y);
@@ -846,17 +998,18 @@ namespace WzComparerR2.CharaSimControl
             //g.DrawImage(Resource.UICharacterInfo_img_customBackground_5_image_0, 141, 32);
             g.DrawImage(Resource.UICharacterInfo_img_common_main_layername, 183, 32);
             g.DrawImage(Resource.UICharacterInfo_img_common_main_canvasmasterDisciple, 437, 39);
+            if (liberation_quest_clear == "2")
+                g.DrawImage(Resource.UICharacterInfo_img_common_main_layer_genesisPass, 342, 39);
             if (this.character != null)
             {
-                CharacterStatus charStat = this.character.Status;
-                g.DrawString(character_name, GearGraphics.ItemDetailFont, GearGraphics.WhiteBrush, (472f - g.MeasureString(this.character.Name, GearGraphics.ItemDetailFont).Width) / 2, 174f);
-                g.DrawString(character_class, GearGraphics.ItemDetailFont, GearGraphics.WhiteBrush, (150f - g.MeasureString(character_class, GearGraphics.ItemDetailFont).Width) / 2, 44f);
-                g.DrawString(string.IsNullOrEmpty(this.character.Guild) ? "  King丶Back" : this.character.Guild.PadLeft(12), GearGraphics.ItemDetailFont, GearGraphics.GrayBrush, 373f, 150f);
+                g.DrawString(character_name, GearGraphics.ItemDetailFont, GearGraphics.WhiteBrush, (472 - g.MeasureString(character_name, GearGraphics.ItemDetailFont).Width) / 2, 174f);
+                g.DrawString(character_class, GearGraphics.ItemDetailFont, GearGraphics.WhiteBrush, (150 - g.MeasureString(character_class, GearGraphics.ItemDetailFont).Width) / 2, 44f);
+                g.DrawString(character_guild_name, GearGraphics.ItemDetailFont, GearGraphics.GrayBrush, 444f - g.MeasureString(character_guild_name, GearGraphics.ItemDetailFont).Width, 150f);
                 g.DrawString("-", GearGraphics.ItemDetailFont, GearGraphics.GrayBrush, 444f - g.MeasureString("-", GearGraphics.ItemDetailFont).Width, 173f);
                 g.DrawString(popularity.ToString().PadLeft(5), GearGraphics.ItemDetailFont, GearGraphics.GrayBrush, 92f, 173f);
                 g.DrawString(character_level.ToString().PadLeft(3), GearGraphics.LevelBoldFont, GearGraphics.WhiteBrush, 234f, 35f);
-                g.DrawString(charStat.UnionLevel.ToString().PadLeft(5), GearGraphics.ItemDetailFont, GearGraphics.GrayBrush, 92f, 129f);
-                g.DrawString(charStat.DojoFloor.ToString().PadLeft(3) + "层", GearGraphics.ItemDetailFont, GearGraphics.GrayBrush, 92f, 151f);
+                g.DrawString(union_level.ToString().PadLeft(5), GearGraphics.ItemDetailFont, GearGraphics.GrayBrush, 92f, 129f);
+                g.DrawString(dojang_best_floor.ToString().PadLeft(3) + "层", GearGraphics.ItemDetailFont, GearGraphics.GrayBrush, 92f, 151f);
             }
             g.ResetTransform();
         }
@@ -890,7 +1043,7 @@ namespace WzComparerR2.CharaSimControl
 
                 double max, min;
                 this.character.CalcAttack(out max, out min, out brushSign);
-                g.DrawString(charStat.MaxHP.GetSum().ToString("N0").PadLeft(7), GearGraphics.ItemDetailFont, GearGraphics.WhiteBrush, 187f, 320f);
+                g.DrawString(HP.ToString("N0").PadLeft(7), GearGraphics.ItemDetailFont, GearGraphics.WhiteBrush, 187f, 320f);
                 switch (charStat.Job)
                 {
                     case 3101:
@@ -914,14 +1067,6 @@ namespace WzComparerR2.CharaSimControl
                         g.DrawImage(Resource.UICharacterInfo_img_common_detailStat_Stat_1_titleImageDF, 244, 321);
                         g.DrawString(charStat.SpecialValue.GetSum().ToString("N0").PadLeft(7), GearGraphics.ItemDetailFont, GearGraphics.WhiteBrush, 406f, 320f);
                         break;
-                    case 4200:
-                    case 4210:
-                    case 4211:
-                    case 4212:
-                    case 4216:
-                        g.DrawImage(Resource.UICharacterInfo_img_common_detailStat_Stat_1_titleImageSE, 244, 321);
-                        g.DrawString(charStat.SpecialValue.GetSum().ToString("N0").PadLeft(7), GearGraphics.ItemDetailFont, GearGraphics.WhiteBrush, 406f, 320f);
-                        break;
                     case 10000:
                     case 10100:
                     case 10110:
@@ -933,10 +1078,10 @@ namespace WzComparerR2.CharaSimControl
                         break;
                     default:
                         g.DrawImage(Resource.UICharacterInfo_img_common_detailStat_Stat_1_titleImage, 244, 321);
-                        g.DrawString(charStat.MaxMP.GetSum().ToString("N0").PadLeft(7), GearGraphics.ItemDetailFont, GearGraphics.WhiteBrush, 406f, 320f);
+                        g.DrawString(MP.ToString("N0").PadLeft(7), GearGraphics.ItemDetailFont, GearGraphics.WhiteBrush, 406f, 320f);
                         break;
                 }
-                string CombatPower = ToCJKNumberExpr(charStat.combatPower.GetSum());
+                string CombatPower = ToCJKNumberExpr(combat_power);
                 int xPosition = 200;
                 foreach (char c in CombatPower)
                 {
@@ -952,51 +1097,51 @@ namespace WzComparerR2.CharaSimControl
                     DrawImage(g, imageName, xPosition, 279);
                     xPosition += GetImageWidth(imageName);
                 }
-                g.DrawString(charStat.Strength.GetSum().ToString("N0").PadLeft(7), GearGraphics.ItemDetailFont, GearGraphics.WhiteBrush, 187f, 342f);
-                g.DrawString(charStat.Dexterity.GetSum().ToString("N0").PadLeft(7), GearGraphics.ItemDetailFont, GearGraphics.WhiteBrush, 406f, 342f);
-                g.DrawString(charStat.Intelligence.GetSum().ToString("N0").PadLeft(7), GearGraphics.ItemDetailFont, GearGraphics.WhiteBrush, 187f, 364f);
-                g.DrawString(charStat.Luck.GetSum().ToString("N0").PadLeft(7), GearGraphics.ItemDetailFont, GearGraphics.WhiteBrush, 406f, 364f);
+                g.DrawString(STR.ToString("N0").PadLeft(7), GearGraphics.ItemDetailFont, GearGraphics.WhiteBrush, 187f, 342f);
+                g.DrawString(DEX.ToString("N0").PadLeft(7), GearGraphics.ItemDetailFont, GearGraphics.WhiteBrush, 406f, 342f);
+                g.DrawString(INT.ToString("N0").PadLeft(7), GearGraphics.ItemDetailFont, GearGraphics.WhiteBrush, 187f, 364f);
+                g.DrawString(LUK.ToString("N0").PadLeft(7), GearGraphics.ItemDetailFont, GearGraphics.WhiteBrush, 406f, 364f);
 
                 float y = 401f;
                 StringFormat format = new StringFormat();
                 format.Alignment = StringAlignment.Far;
-                g.DrawString(ToCJKNumberExpr(charStat.attackRange.GetSum()), GearGraphics.ItemDetailFont, GearGraphics.WhiteBrush, 234f, y, format);
-                g.DrawString(charStat.DamageRate.GetSum().ToString("N2") + "%", GearGraphics.ItemDetailFont, charStat.DamageRate.BuffAdd > 0 ? Brushes.Red : GearGraphics.WhiteBrush, 451f, y, format);
-                g.DrawString(charStat.FinalDamageRate.GetSum().ToString("N2") + "%", GearGraphics.ItemDetailFont, charStat.FinalDamageRate.BuffAdd > 0 ? Brushes.Red : GearGraphics.WhiteBrush, 234f, (y += 22f), format);
-                g.DrawString(charStat.BossDamageRate.GetSum().ToString("N2") + "%", GearGraphics.ItemDetailFont, charStat.BossDamageRate.BuffAdd > 0 ? Brushes.Red : GearGraphics.WhiteBrush, 451f, y, format);
-                g.DrawString(charStat.IgnoreMobDefenceRate.GetSum().ToString("N2") + "%", GearGraphics.ItemDetailFont, charStat.IgnoreMobDefenceRate.BuffAdd > 0 ? Brushes.Red : GearGraphics.WhiteBrush, 234f, (y += 22f), format);
-                g.DrawString(charStat.NormalMonsterDamR.GetSum() + ".00%", GearGraphics.ItemDetailFont, charStat.NormalMonsterDamR.BuffAdd > 0 ? Brushes.Red : GearGraphics.WhiteBrush, 451f, y, format);
-                g.DrawString(charStat.PADamage.GetSum().ToString("N0"), GearGraphics.ItemDetailFont, charStat.PADamage.BuffAdd > 0 ? Brushes.Red : GearGraphics.WhiteBrush, 234f, (y += 22f), format);
-                g.DrawString(charStat.CriticalRate.GetSum() + "%", GearGraphics.ItemDetailFont, charStat.CriticalRate.BuffAdd > 0 ? Brushes.Red : GearGraphics.WhiteBrush, 451f, y, format);
-                g.DrawString(charStat.MADamage.GetSum().ToString("N0"), GearGraphics.ItemDetailFont, charStat.MADamage.BuffAdd > 0 ? Brushes.Red : GearGraphics.WhiteBrush, 234f, (y += 22f), format);
-                g.DrawString(charStat.CriticalDamage.GetSum().ToString("N2") + "%", GearGraphics.ItemDetailFont, charStat.CriticalDamage.BuffAdd > 0 ? Brushes.Red : GearGraphics.WhiteBrush, 451f, y, format);
-                g.DrawString(charStat.CooltimeReduceSecond.GetSum() + "秒/" + charStat.CooltimeReduceR.GetSum() + "%", GearGraphics.ItemDetailFont, GearGraphics.WhiteBrush, 234f, (y += 22f), format);
-                g.DrawString(charStat.BuffDurationIncR.GetSum() + "%", GearGraphics.ItemDetailFont, charStat.BuffDurationIncR.BuffAdd > 0 ? Brushes.Red : GearGraphics.WhiteBrush, 451f, y, format);
-                g.DrawString(charStat.CooltimeIgnoreR.GetSum().ToString("N2") + "%", GearGraphics.ItemDetailFont, charStat.CooltimeIgnoreR.BuffAdd > 0 ? Brushes.Red : GearGraphics.WhiteBrush, 234f, (y += 22f), format);
-                g.DrawString(charStat.StatusResistance.GetSum().ToString("N2") + "%", GearGraphics.ItemDetailFont, charStat.StatusResistance.BuffAdd > 0 ? Brushes.Red : GearGraphics.WhiteBrush, 451f, y, format);
-                g.DrawString(charStat.AbnormalDmgR.ToString("N2") + "%", GearGraphics.ItemDetailFont, GearGraphics.WhiteBrush, 234f, (y += 22f), format);
-                g.DrawString(charStat.TamingMobDurationIncR.GetSum() + "%", GearGraphics.ItemDetailFont, charStat.TamingMobDurationIncR.BuffAdd > 0 ? Brushes.Red : GearGraphics.WhiteBrush, 451f, y, format);
+                g.DrawString(ToCJKNumberExpr(attack_range), GearGraphics.ItemDetailFont, GearGraphics.WhiteBrush, 234f, y, format);
+                g.DrawString(damage + "%", GearGraphics.ItemDetailFont, GearGraphics.WhiteBrush, 451f, y, format);
+                g.DrawString(finalDam + "%", GearGraphics.ItemDetailFont, GearGraphics.WhiteBrush, 234f, (y += 22f), format);
+                g.DrawString(bossDam + "%", GearGraphics.ItemDetailFont, GearGraphics.WhiteBrush, 451f, y, format);
+                g.DrawString(ignoreDEF + "%", GearGraphics.ItemDetailFont, GearGraphics.WhiteBrush, 234f, (y += 22f), format);
+                g.DrawString(normalDam + "%", GearGraphics.ItemDetailFont, GearGraphics.WhiteBrush, 451f, y, format);
+                g.DrawString(ATT.ToString("N0"), GearGraphics.ItemDetailFont, GearGraphics.WhiteBrush, 234f, (y += 22f), format);
+                g.DrawString(criRate + "%", GearGraphics.ItemDetailFont, GearGraphics.WhiteBrush, 451f, y, format);
+                g.DrawString(MATT.ToString("N0"), GearGraphics.ItemDetailFont, GearGraphics.WhiteBrush, 234f, (y += 22f), format);
+                g.DrawString(criDam + "%", GearGraphics.ItemDetailFont,GearGraphics.WhiteBrush, 451f, y, format);
+                g.DrawString(cooldownReduceSec + "秒/" + cooldownReduce + "%", GearGraphics.ItemDetailFont, GearGraphics.WhiteBrush, 234f, (y += 22f), format);
+                g.DrawString(buffDuration + "%", GearGraphics.ItemDetailFont, GearGraphics.WhiteBrush, 451f, y, format);
+                g.DrawString(cooldownIgnore + "%", GearGraphics.ItemDetailFont, GearGraphics.WhiteBrush, 234f, (y += 22f), format);
+                g.DrawString(elemResistance + "%", GearGraphics.ItemDetailFont, GearGraphics.WhiteBrush, 451f, y, format);
+                g.DrawString(abnormalDam + "%", GearGraphics.ItemDetailFont, GearGraphics.WhiteBrush, 234f, (y += 22f), format);
+                g.DrawString(tamingmobDuration + "%", GearGraphics.ItemDetailFont, GearGraphics.WhiteBrush, 451f, y, format);
 
                 y = 594f;
                 switch (statFont)
                 {
                     case 1:
                         g.DrawImage(Resource.UICharacterInfo_img_common_detailStat_canvasutilityFont, 24, 594);  //三选一属性第1页
-                        g.DrawString(charStat.MesoGainR.GetSum() + "%", GearGraphics.ItemDetailFont, charStat.MesoGainR.BuffAdd > 0 ? Brushes.Red : GearGraphics.WhiteBrush, 235f, y, format);
-                        g.DrawString(charStat.StarForce.GetSum().ToString("N0"), GearGraphics.ItemDetailFont, charStat.StarForce.BuffAdd > 0 ? Brushes.Red : GearGraphics.WhiteBrush, 453f, y, format);
-                        g.DrawString(charStat.DropGainR.GetSum() + "%", GearGraphics.ItemDetailFont, charStat.DropGainR.BuffAdd > 0 ? Brushes.Red : GearGraphics.WhiteBrush, 235f, (y += 22f), format);
-                        g.DrawString(charStat.ArcaneForce.GetSum().ToString("N0"), GearGraphics.ItemDetailFont, charStat.ArcaneForce.BuffAdd > 0 ? Brushes.Red : GearGraphics.WhiteBrush, 453f, y, format);
-                        g.DrawString(charStat.ExpGainR.ToString("N2") + "%", GearGraphics.ItemDetailFont, GearGraphics.WhiteBrush, 235f, (y += 22f), format);
-                        g.DrawString(charStat.AuthenticForce.GetSum().ToString("N0"), GearGraphics.ItemDetailFont, charStat.AuthenticForce.BuffAdd > 0 ? Brushes.Red : GearGraphics.WhiteBrush, 453f, y, format);
+                        g.DrawString(mesoRate + "%", GearGraphics.ItemDetailFont, GearGraphics.WhiteBrush, 235f, y, format);
+                        g.DrawString(starforce, GearGraphics.ItemDetailFont, GearGraphics.WhiteBrush, 453f, y, format);
+                        g.DrawString(dropRate + "%", GearGraphics.ItemDetailFont, GearGraphics.WhiteBrush, 235f, (y += 22f), format);
+                        g.DrawString(arcforce, GearGraphics.ItemDetailFont, GearGraphics.WhiteBrush, 453f, y, format);
+                        g.DrawString(expRate + "%", GearGraphics.ItemDetailFont, GearGraphics.WhiteBrush, 235f, (y += 22f), format);
+                        g.DrawString(autforce, GearGraphics.ItemDetailFont, GearGraphics.WhiteBrush, 453f, y, format);
                         break;
                     case 2:
                         g.DrawImage(Resource.UICharacterInfo_img_common_detailStat_canvasdefenseFont, 24, 594);  //三选一属性第2页
-                        g.DrawString(charStat.Defense.GetSum().ToString("N0"), GearGraphics.ItemDetailFont, charStat.MesoGainR.BuffAdd > 0 ? Brushes.Red : GearGraphics.WhiteBrush, 235f, y, format);
-                        g.DrawString(charStat.StatusResistance.GetSum().ToString("N0"), GearGraphics.ItemDetailFont, charStat.StarForce.BuffAdd > 0 ? Brushes.Red : GearGraphics.WhiteBrush, 453f, y, format);
-                        g.DrawString(charStat.MoveSpeed.GetSum() + "%", GearGraphics.ItemDetailFont, charStat.DropGainR.BuffAdd > 0 ? Brushes.Red : GearGraphics.WhiteBrush, 235f, (y += 22f), format);
-                        g.DrawString(charStat.Jump.GetSum().ToString("N0") + "%", GearGraphics.ItemDetailFont, charStat.ArcaneForce.BuffAdd > 0 ? Brushes.Red : GearGraphics.WhiteBrush, 453f, y, format);
-                        g.DrawString(charStat.Stance.GetSum().ToString("N0") + "%", GearGraphics.ItemDetailFont, GearGraphics.WhiteBrush, 235f, (y += 22f), format);
-                        g.DrawString("第" + charStat.attackSpeed.GetSum().ToString("N0") + "阶段", GearGraphics.ItemDetailFont, charStat.AuthenticForce.BuffAdd > 0 ? Brushes.Red : GearGraphics.WhiteBrush, 455f, y, format);
+                        g.DrawString(defense, GearGraphics.ItemDetailFont, GearGraphics.WhiteBrush, 235f, y, format);
+                        g.DrawString(statusResistance, GearGraphics.ItemDetailFont, GearGraphics.WhiteBrush, 453f, y, format);
+                        g.DrawString(movement + "%", GearGraphics.ItemDetailFont, GearGraphics.WhiteBrush, 235f, (y += 22f), format);
+                        g.DrawString(jump + "%", GearGraphics.ItemDetailFont, GearGraphics.WhiteBrush, 453f, y, format);
+                        g.DrawString(stance + "%", GearGraphics.ItemDetailFont, GearGraphics.WhiteBrush, 235f, (y += 22f), format);
+                        g.DrawString("第" + attackSpeed + "阶段", GearGraphics.ItemDetailFont, GearGraphics.WhiteBrush, 455f, y, format);
                         break;
                     case 3:
                         g.DrawImage(Resource.UICharacterInfo_img_common_detailStat_canvascnFont, 24, 594);  //三选一属性第3页
@@ -1027,6 +1172,29 @@ namespace WzComparerR2.CharaSimControl
             g.DrawImage(Resource.UICharacterInfo_img_remote_detailEquip_canvasequip, 13, 269);
             g.DrawImage(Resource.UICharacterInfo_img_remote_detailEquip_tabsymbolTab_normal_0, 262, 280);
             g.DrawImage(Resource.UICharacterInfo_img_remote_detailEquip_tabsymbolTab_normal_1, 354, 280);
+            if (gearList != null)
+            {
+                foreach (Gear gear in gearList)
+                {
+                    if (gear == null) continue;
+                    // 检查 IconRaw 和 Bitmap
+                    if (gear.IconRaw.Bitmap == null)
+                    {
+                        // 尝试使用 Icon 属性
+                        if (gear.Icon.Bitmap == null)
+                            continue; // 跳过没有图标的装备
+                    }
+                    Bitmap gearIcon = gear.IconRaw.Bitmap ?? gear.Icon.Bitmap;
+                    int index = Array.IndexOf(gearList, gear);
+                    int slotIndex = SlotIndexList[index];
+                    if (slotIndex < 0) continue;
+                    Wz_Vector vector = get_vector(slotIndex);
+                    int x = vector.X + 13 + 21 - gearIcon.Width / 2;
+                    int y = vector.Y + 269 + 21 - gearIcon.Height / 2;
+                    g.DrawImage(gearIcon, new Point(x, y));
+                }
+            }
+
             switch (this.ArcAut)
             {
                 case 1:
@@ -1062,31 +1230,54 @@ namespace WzComparerR2.CharaSimControl
             g.DrawImage(Resource.UICharacterInfo_img_remote_detailSkill_tabtypeTab_normal_0, 28, 285);
             g.DrawImage(Resource.UICharacterInfo_img_remote_detailSkill_tabtypeTab_normal_1, 169, 285);
             g.DrawImage(Resource.UICharacterInfo_img_remote_detailSkill_tabtypeTab_normal_2, 310, 285);
-            int skillNum = 12;
             switch (this.SkillTab)
             {
                 case 1:
                     g.DrawImage(Resource.UICharacterInfo_img_remote_detailSkill_tabtypeTab_selected_0, 28, 285);
-                    renderSkillBack(g, skillNum);
+                    renderSkillBack(g, SkillList);
                     break;
                 case 2:
                     g.DrawImage(Resource.UICharacterInfo_img_remote_detailSkill_tabtypeTab_selected_1, 169, 285);
-                    renderSkillBack(g, skillNum);
+                    renderSkillBack(g, SkillList);
                     break;
                 case 3:
                     g.DrawImage(Resource.UICharacterInfo_img_remote_detailSkill_tabtypeTab_selected_2, 310, 285);
-                    renderSkillBack(g, skillNum);
+                    renderSkillBack(g, SkillList);
                     break;
                 default: break;
             }
             g.ResetTransform();
         }
 
-        private void renderSkillBack(Graphics g, int skillNum)
+        private void renderSkillBack(Graphics g, List<int> SkillList)
         {
-            for (int i = 0; i <= (skillNum - 1); i++)
+            for (int i = 0; i < 12; i++)
             {
-                g.DrawImage(Resource.UICharacterInfo_img_remote_detailSkill_canvasskillBlank, 26 + (i % 2) * 208, 323 + (i / 2) * 61);
+                int index = i + scrollValue * 2;
+                if (index < 0 || index >= SkillList.Count)
+                {
+                    g.DrawImage(Resource.UICharacterInfo_img_remote_detailSkill_canvasskillBlank, 26 + (i % 2) * 208, 323 + (i / 2) * 61);
+                    continue;
+                }
+
+                if (SkillList[index] != 0)
+                {
+                    g.DrawImage(Resource.UICharacterInfo_img_remote_detailSkill_canvasskill0, 26 + (i % 2) * 208, 323 + (i / 2) * 61);
+                    if (skillList != null && index < skillList.Length)
+                    {
+                        Skill skill = skillList[index];
+                        Bitmap skillIcon = skill.Icon.Bitmap;
+                        string skillName = SkillNames[index];
+                        string skillLevel = SkillLevels[index].ToString();
+                        g.DrawImage(skillIcon, 41 + (i % 2) * 208, 335 + (i / 2) * 61);
+                        g.DrawString(skillName, GearGraphics.ItemDetailFont, GearGraphics.WhiteBrush, 149 + (i % 2) * 208 - g.MeasureString(skillName, GearGraphics.ItemDetailFont).Width / 2, 335 + (i / 2) * 61);
+                        g.DrawString(skillLevel, GearGraphics.ItemDetailFont, GearGraphics.WhiteBrush, 149 + (i % 2) * 208 - g.MeasureString(skillLevel, GearGraphics.ItemDetailFont).Width / 2, 355 + (i / 2) * 61);
+                    }
+                }
+                else
+                {
+                    g.DrawImage(Resource.UICharacterInfo_img_remote_detailSkill_canvasskillBlank, 26 + (i % 2) * 208, 323 + (i / 2) * 61);
+                }
             }
         }
 
@@ -1094,13 +1285,17 @@ namespace WzComparerR2.CharaSimControl
         {
             g.TranslateTransform(baseOffset.X, baseOffset.Y);
             g.DrawImage(Resource.UICharacterInfo_img_remote_detail_tabdetailTab_selected_3, 351, 242);
-            g.DrawImage(Resource.UICharacterInfo_img_remote_detailCash_canvascash, 13, 269);
-            g.DrawImage(Resource.UICharacterInfo_img_remote_detailCash_tabcashTab_normal_0, 28, 280);
-            g.DrawImage(Resource.UICharacterInfo_img_remote_detailCash_tabcashTab_normal_1, 117, 280);
             switch (this.CashPreset)
             {
-                case 1: g.DrawImage(Resource.UICharacterInfo_img_remote_detailCash_tabcashTab_selected_0, 28, 280); break;
-                case 2: g.DrawImage(Resource.UICharacterInfo_img_remote_detailCash_tabcashTab_selected_1, 117, 280); break;
+                case 1:
+                    g.DrawImage(Resource.UICharacterInfo_img_remote_detailCash_canvascash, 13, 269);
+                    g.DrawImage(Resource.UICharacterInfo_img_remote_detailCash_tabcashTab_selected_0, 28, 280);
+                    g.DrawImage(Resource.UICharacterInfo_img_remote_detailCash_tabcashTab_normal_1, 117, 280);
+                    break;
+                case 2:
+                    g.DrawImage(Resource.UICharacterInfo_img_remote_detailCash_canvaspreset, 13, 269);
+                    g.DrawImage(Resource.UICharacterInfo_img_remote_detailCash_tabcashTab_normal_0, 28, 280);
+                    g.DrawImage(Resource.UICharacterInfo_img_remote_detailCash_tabcashTab_selected_1, 117, 280); break;
                 default: break;
             }
             g.ResetTransform();
@@ -1113,16 +1308,27 @@ namespace WzComparerR2.CharaSimControl
             int AbilityYOffset = Resource.UICharacterInfo_img_common_main_backgrnd.Height + Resource.UICharacterInfo_img_local_detail_backgrnd.Height - Resource.UICharacterInfo_img_remote_detailStat_ability_backgrnd.Height;
             g.DrawImage(Resource.UICharacterInfo_img_remote_detailStat_ability_backgrnd, 1, AbilityYOffset);
 
-            g.DrawImage(Resource.UICharacterInfo_img_remote_detailStat_ability_abilityTitle_legendary_0, 11, (AbilityYOffset + 30));
-            g.DrawImage(Resource.UICharacterInfo_img_remote_detailStat_ability_metierLine_activated_0_legendary_0, 12, (AbilityYOffset + 62));
-            g.DrawImage(Resource.UICharacterInfo_img_remote_detailStat_ability_metierLine_activated_0_unique_0, 12, (AbilityYOffset + 82));
-            g.DrawImage(Resource.UICharacterInfo_img_remote_detailStat_ability_metierLine_activated_0_unique_0, 12, (AbilityYOffset + 102));
-
-            if (this.character != null)
+            Bitmap abilityTitle = Resource.ResourceManager.GetObject("UICharacterInfo_img_remote_detailStat_ability_abilityTitle_" + ability_grade + "_0") as Bitmap;
+            g.DrawImage(abilityTitle, 11, (AbilityYOffset + 30));
+            if (resultJson5 != null)
             {
-                CharacterStatus charStat = this.character.Status;
+                int i = 0;
+                foreach (var ability in resultJson5["ability_info"])
+                {
+                    string abilityGrade = ability_rank(ability["ability_grade"].ToString());
+                    string abilityValue = ability["ability_value"].ToString();
+                    Bitmap metierLine = Resource.ResourceManager.GetObject("UICharacterInfo_img_remote_detailStat_ability_metierLine_activated_0_" + abilityGrade + "_0") as Bitmap;
+                    g.DrawImage(metierLine, 12, (AbilityYOffset + 62 + 20 * i));
+                    g.DrawString(abilityValue, GearGraphics.ItemDetailFont, GearGraphics.WhiteBrush, 14f, (AbilityYOffset + 70 + 20 * i));
+                    i++;
+                }
             }
-
+            else
+            {
+                g.DrawImage(Resource.UICharacterInfo_img_remote_detailStat_ability_metierLine_activated_0_legendary_0, 12, (AbilityYOffset + 62));
+                g.DrawImage(Resource.UICharacterInfo_img_remote_detailStat_ability_metierLine_activated_0_unique_0, 12, (AbilityYOffset + 82));
+                g.DrawImage(Resource.UICharacterInfo_img_remote_detailStat_ability_metierLine_activated_0_unique_0, 12, (AbilityYOffset + 102));
+            }
             g.ResetTransform();
         }
 
@@ -1140,26 +1346,13 @@ namespace WzComparerR2.CharaSimControl
                 default: break;
             }
             float ydistance = 22f;
-            var series = new[] { hyperLv, hyperLv2, hyperLv3, hyperLv4, hyperLv5, hyperLv6, hyperLv7, hyperLv8, hyperLv9, hyperLv10, hyperLv11, hyperLv12, hyperLv13, hyperLv14, hyperLv15, hyperLv16, hyperLv17 };
             int count = 0;
-            foreach (var param in series)
+            foreach (var statlevel in hyperStatsOnUse)
             {
-                g.DrawString(param.ToString(), GearGraphics.LevelBoldFont, GearGraphics.WhiteBrush, 183f, 42f + ydistance * count);
+                g.DrawString(statlevel.ToString(), GearGraphics.LevelBoldFont, GearGraphics.WhiteBrush, 190f - g.MeasureString(statlevel.ToString(), GearGraphics.LevelBoldFont).Width, 42f + ydistance * count);
                 count++;
             }
             g.ResetTransform();
-        }
-
-        private Brush getDetailBrush(int sign)
-        {
-            switch (sign)
-            {
-                case 1: return Brushes.Red;
-                case -1: return Brushes.Blue;
-                case 0:
-                default: return GearGraphics.GrayBrush;
-            }
-
         }
 
         public TooltipHelp GetPairByPoint(Point point)
@@ -1197,7 +1390,32 @@ namespace WzComparerR2.CharaSimControl
             return slotIdx;
         }
 
-        public Skill GetHyperStatByPoint(Point point)
+        private int GetSkillIndexByPoint(Point point)
+        {
+            // 技能区域起始位置 (13, 269) 是背景图位置
+            // 实际技能图标起始位置 (39, 334) 是第一个技能图标
+            // 每个技能图标大小和间距需要根据实际情况调整
+
+            int startX = 26;  // 技能区域起始X
+            int startY = 323; // 技能区域起始Y
+            int cellWidth = 208;  // 每个技能单元宽度（2列）
+            int cellHeight = 61;  // 每个技能单元高度（6行）
+
+            // 计算列和行
+            int col = (point.X - startX) / cellWidth;
+            int row = (point.Y - startY) / cellHeight;
+
+            // 检查是否在有效范围内
+            if (col < 0 || col >= 2 || row < 0 || row >= 6)
+                return -1;
+
+            // 计算索引（考虑滚动值）
+            int index = (row * 2 + col) + scrollValue * 2;
+
+            return index;
+        }
+
+        public Skill GetSkillByPoint(Point point)
         {
             if (HyperStatVisible && HyperStatRect.Contains(point) && hyperStatSkillList != null)
             {
@@ -1207,7 +1425,336 @@ namespace WzComparerR2.CharaSimControl
                 else
                     return null;
             }
+            if (SkillVisible && skillList != null)
+            {
+                int skillIdx = GetSkillIndexByPoint(point);
+                if (skillIdx > -1 && skillIdx < this.skillList.Length)
+                {
+                    this.skillList[skillIdx].Level = SkillLevels[skillIdx];
+                    return this.skillList[skillIdx];
+                }
+                else
+                    return null;
+            }
             return null;
+        }
+
+        private int indexConversion(string text)
+        {
+            if (text.Length != 10)
+                throw new ArgumentException("长度必须为10");
+
+            var reverseTable = GetSkillIDReverseTable();
+
+            char[] digits = new char[10];
+
+            for (int i = 0; i < 10; i++)
+            {
+                char c = text[i];
+
+                if (!reverseTable[i].TryGetValue(c, out int digit))
+                    throw new Exception($"第{i + 1}位字符 {c} 无法解析");
+
+                digits[i] = (char)('0' + digit);
+            }
+            return int.Parse(new string(digits));
+        }
+
+        private int ItemIndexConversion(string text)
+        {
+            if (text.Length != 8)
+                throw new ArgumentException("长度必须为8");
+
+            var reverseTable = GetItemIDReverseTable();
+
+            char[] digits = new char[8];
+
+            for (int i = 0; i < 8; i++)
+            {
+                char c = text[i];
+
+                if (!reverseTable[i].TryGetValue(c, out int digit))
+                    throw new Exception($"代码：{text} 第{i + 1}位字符 {c} 无法解析");
+
+                digits[i] = (char)('0' + digit);
+            }
+            return int.Parse(new string(digits));
+        }
+
+        private Dictionary<char, int>[] GetSkillIDReverseTable()
+        {
+            var table = new Dictionary<char, int>[10];
+
+            for (int i = 0; i < 10; i++)
+                table[i] = new Dictionary<char, int>();
+
+            // ===== 第1位 =====
+            table[0]['K'] = 0;
+
+            // ===== 第2位 =====
+            table[1]['F'] = 0;
+            table[1]['E'] = 1;
+            table[1]['H'] = 2;
+            table[1]['G'] = 3;
+            table[1]['B'] = 4;
+            table[1]['A'] = 5;
+
+            // ===== 第3位 =====
+            table[2]['P'] = 0;
+            table[2]['O'] = 1;
+            table[2]['N'] = 2;
+            table[2]['M'] = 3;
+            table[2]['L'] = 4;
+            table[2]['K'] = 5;
+            table[2]['J'] = 6;
+            table[2]['I'] = 7;
+            table[2]['H'] = 8;
+            table[2]['G'] = 9;
+
+            // ===== 第4位 =====
+            table[3]['C'] = 0;
+            table[3]['D'] = 1;
+            table[3]['A'] = 2;
+            table[3]['B'] = 3;
+            table[3]['G'] = 4;
+            table[3]['H'] = 5;
+            table[3]['E'] = 6;
+            table[3]['F'] = 7;
+            table[3]['K'] = 8;
+            table[3]['L'] = 9;
+
+            // ===== 第5位 =====
+            table[4]['L'] = 0;
+            table[4]['K'] = 1;
+            table[4]['J'] = 2;
+            table[4]['I'] = 3;
+            table[4]['D'] = 4;
+            table[4]['O'] = 5;
+            table[4]['N'] = 6;
+            table[4]['M'] = 7;
+            table[4]['P'] = 8;
+
+            // ===== 第6位 =====
+            table[5]['H'] = 0;
+            table[5]['G'] = 1;
+            table[5]['F'] = 2;
+            table[5]['E'] = 3;
+            table[5]['D'] = 4;
+            table[5]['C'] = 5;
+            table[5]['B'] = 6;
+            table[5]['A'] = 7;
+            table[5]['P'] = 8;
+            table[5]['O'] = 9;
+
+            // ===== 第7位=====
+            table[6]['O'] = 0;
+            table[6]['P'] = 1;
+            table[6]['M'] = 2;
+            table[6]['N'] = 3;
+            table[6]['K'] = 4;
+            table[6]['E'] = 5; // ⚠️ E/F 二选一
+            table[6]['F'] = 6; // ⚠️ E/F 二选一
+            table[6]['J'] = 7;
+            table[6]['G'] = 8;
+            table[6]['H'] = 9;
+
+            // ===== 第8位 =====
+            table[7]['B'] = 0;
+            table[7]['A'] = 1;
+            table[7]['D'] = 2;
+            table[7]['C'] = 3;
+            table[7]['F'] = 4;
+            table[7]['E'] = 5;
+            table[7]['H'] = 6;
+            table[7]['G'] = 7;
+            table[7]['J'] = 8;
+            table[7]['I'] = 9;
+
+            // ===== 第9位 =====
+            table[8]['M'] = 0;
+            table[8]['N'] = 1;
+            table[8]['O'] = 2;
+            table[8]['P'] = 3;
+            table[8]['I'] = 4;
+            table[8]['J'] = 5;
+            table[8]['K'] = 6;
+            table[8]['L'] = 7;
+            table[8]['E'] = 8;
+            table[8]['F'] = 9;
+
+            // ===== 第10位 =====
+            table[9]['A'] = 0;
+            table[9]['B'] = 1;
+            table[9]['C'] = 2;
+            table[9]['D'] = 3;
+            table[9]['E'] = 4;
+            table[9]['F'] = 5;
+            table[9]['G'] = 6;
+            table[9]['H'] = 7;
+            table[9]['I'] = 8;
+            table[9]['J'] = 9;
+
+            return table;
+        }
+
+        private Dictionary<char, int>[] GetItemIDReverseTable()
+        {
+            var table = new Dictionary<char, int>[8];
+
+            for (int i = 0; i < 8; i++)
+                table[i] = new Dictionary<char, int>();
+
+            // ===== 第1位 =====
+            table[0]['K'] = 0;
+
+            // ===== 第2位 =====
+            table[1]['E'] = 1;
+            table[1]['H'] = 2;
+            table[1]['G'] = 3;
+            table[1]['B'] = 4;
+            table[1]['A'] = 5;
+
+            // ===== 第3位 =====
+            table[2]['P'] = 0;
+            table[2]['O'] = 1;
+            table[2]['N'] = 2;
+            table[2]['M'] = 3;
+            table[2]['L'] = 4;
+            table[2]['K'] = 5;
+            table[2]['J'] = 6;
+            table[2]['I'] = 7;
+            table[2]['H'] = 8;
+            table[2]['G'] = 9;
+
+            // ===== 第4位 =====
+            table[3]['C'] = 0;
+            table[3]['D'] = 1;
+            table[3]['A'] = 2;
+            table[3]['B'] = 3;
+            table[3]['G'] = 4;
+            table[3]['H'] = 5;
+            table[3]['E'] = 6;
+            table[3]['F'] = 7;
+            table[3]['K'] = 8;
+            table[3]['L'] = 9;
+
+            // ===== 第5位 =====
+            table[4]['L'] = 0;
+            table[4]['K'] = 1;
+            table[4]['J'] = 2;
+            table[4]['I'] = 3;
+            table[4]['D'] = 4;
+            table[4]['O'] = 5;
+            table[4]['N'] = 6;
+            table[4]['M'] = 7;
+            table[4]['P'] = 8;
+            table[4]['C'] = 9;
+
+            // ===== 第6位 =====
+            table[5]['H'] = 0;
+            table[5]['G'] = 1;
+            table[5]['F'] = 2;
+            table[5]['E'] = 3;
+            table[5]['D'] = 4;
+            table[5]['C'] = 5;
+            table[5]['B'] = 6;
+            table[5]['A'] = 7;
+            table[5]['P'] = 8;
+            table[5]['O'] = 9;
+
+            // ===== 第7位 =====
+            table[6]['O'] = 0;
+            table[6]['P'] = 1;
+            table[6]['M'] = 2;
+            table[6]['N'] = 3;
+            table[6]['K'] = 4;
+            table[6]['L'] = 5;
+            table[6]['I'] = 6;
+            table[6]['J'] = 7;
+            table[6]['G'] = 8;
+            table[6]['H'] = 9;
+
+            // ===== 第8位 =====
+            table[7]['B'] = 0;
+            table[7]['A'] = 1;
+            table[7]['D'] = 2;
+            table[7]['C'] = 3;
+            table[7]['F'] = 4;
+            table[7]['E'] = 5;
+            table[7]['H'] = 6;
+            table[7]['G'] = 7;
+            table[7]['J'] = 8;
+            table[7]['I'] = 9;
+
+            return table;
+        }
+
+        private int GetSlotIndex(string Category)
+        {
+            switch (Category)
+            {
+                case "모자": case "Hat": return 1;
+                case "얼굴장식": case "Face Acc.": return 2;
+                case "눈장식": case "Eye Acc.": return 3;
+                case "귀고리": case "Earring": return 4;
+                case "상의": case "Top": return 5;
+                case "하의": case "Bottom": return 6;
+                case "신발": case "Shoes": return 7;
+                case "장갑": case "Glove": return 8;
+                case "망토": case "Cape": return 9;
+                case "보조무기": case "Secondary Weapons": return 10;
+                case "무기": case "Weapon": return 11;
+                case "반지1": case "Ring1": return 12;
+                case "반지2": case "Ring2": return 13;
+                case "반지3": case "Ring3": return 15;
+                case "반지4": case "Ring4": return 16;
+                case "펜던트": case "Pendant": return 17;
+                case "훈장": case "Medal": return 26;
+                case "벨트": case "Belt": return 29;
+                case "어깨장식": case "Shoulder": return 30;
+                case "펜던트2": case "Pendant 2": return 38;
+                case "포켓 아이템": case "Pocket Item": return 33;
+                case "기계 심장": case "M. Heart": return 35;
+                case "뱃지": case "Badge": return 36;
+                case "엠블렘": case "Emblem": return 37;
+                case "예비 특수 반지": return -1;
+                default: return -1;
+            }
+        }
+
+        private Wz_Vector get_vector(int slotIndex)
+        {
+            switch (slotIndex)
+            {
+                case 12: return new Wz_Vector(15, 173);
+                case 13: return new Wz_Vector(15, 128);
+                case 15: return new Wz_Vector(15, 83);
+                case 16: return new Wz_Vector(15, 38);
+                case 26: return new Wz_Vector(195, 173);
+                case 17: return new Wz_Vector(60, 218);
+                case 11: return new Wz_Vector(105, 83);
+                case 1: return new Wz_Vector(150, 38);
+                case 2: return new Wz_Vector(60, 38);
+                case 3: return new Wz_Vector(60, 83);
+                case 5: return new Wz_Vector(150, 83);
+                case 6: return new Wz_Vector(150, 128);
+                case 7: return new Wz_Vector(195, 128);
+                case 4: return new Wz_Vector(60, 128);
+                case 8: return new Wz_Vector(195, 83);
+                case 27: return new Wz_Vector(15, 218);
+                case 30: return new Wz_Vector(150, 173);
+                case 29: return new Wz_Vector(60, 263);
+                case 10: return new Wz_Vector(105, 128);
+                case 9: return new Wz_Vector(195, 38);
+                case 28: return new Wz_Vector(15, 263);
+                case 35: return new Wz_Vector(195, 218);
+                case 33: return new Wz_Vector(105, 218);
+                case 38: return new Wz_Vector(60, 173);
+                case 34: return new Wz_Vector(150, 218);
+                case 37: return new Wz_Vector(105, 173);
+                case 36: return new Wz_Vector(195, 263);
+                default: return new Wz_Vector(0, 0);
+            }
         }
 
         private void btnClose_MouseClick(object sender, MouseEventArgs e)
@@ -1282,6 +1829,8 @@ namespace WzComparerR2.CharaSimControl
             this.EquipVisible = true;
             this.SkillVisible = false;
             this.CashVisible = false;
+            GearList.Clear();
+            gearList = null;
         }
 
         private void btndetailTab3_MouseClick(object sender, MouseEventArgs e)
@@ -1345,18 +1894,39 @@ namespace WzComparerR2.CharaSimControl
         {
             if (this.SkillVisible)
                 this.SkillTab = 1;
+            this.scrollValue = 0;
+            this.vScroll.Maximum = 0;
+            SkillList.Clear();
+            SkillNames.Clear();
+            SkillLevels.Clear();
+            skillList = null;
+            this.Refresh();
         }
 
         private void btnVSkill_MouseClick(object sender, MouseEventArgs e)
         {
             if (this.SkillVisible)
                 this.SkillTab = 2;
+            this.scrollValue = 0;
+            this.vScroll.Maximum = 0;
+            SkillList.Clear();
+            SkillNames.Clear();
+            SkillLevels.Clear();
+            skillList = null;
+            this.Refresh();
         }
 
         private void btnHexaSkill_MouseClick(object sender, MouseEventArgs e)
         {
             if (this.SkillVisible)
                 this.SkillTab = 3;
+            this.scrollValue = 0;
+            this.vScroll.Maximum = 0;
+            SkillList.Clear();
+            SkillNames.Clear();
+            SkillLevels.Clear();
+            skillList = null;
+            this.Refresh();
         }
 
         private void btnCash_MouseClick(object sender, MouseEventArgs e)
@@ -1369,6 +1939,12 @@ namespace WzComparerR2.CharaSimControl
         {
             if (this.CashVisible)
                 this.CashPreset = 2;
+        }
+
+        private void vScroll_ValueChanged(object sneder, EventArgs e)
+        {
+            this.scrollValue = this.vScroll.Value;
+            this.waitForRefresh = true;
         }
 
         protected override void OnMouseMove(MouseEventArgs e)
@@ -1404,7 +1980,7 @@ namespace WzComparerR2.CharaSimControl
 
             object obj = GetPairByPoint(e.Location);
             if (obj == null)
-                obj = GetHyperStatByPoint(e.Location);
+                obj = GetSkillByPoint(e.Location);
             if (obj != null)
                 this.OnObjectMouseMove(new ObjectMouseEventArgs(e, obj));
             else

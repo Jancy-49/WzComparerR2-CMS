@@ -48,8 +48,6 @@
             this.btnTest = new DevComponents.DotNetBar.ButtonX();
             this.superTabControl1 = new DevComponents.DotNetBar.SuperTabControl();
             this.superTabControlPanel1 = new DevComponents.DotNetBar.SuperTabControlPanel();
-            this.cmbWzVersionVerifyMode = new DevComponents.DotNetBar.Controls.ComboBoxEx();
-            this.labelX2 = new DevComponents.DotNetBar.LabelX();
             this.chkImgCheckDisabled = new DevComponents.DotNetBar.Controls.CheckBoxX();
             this.chkWzSortByImgID = new DevComponents.DotNetBar.Controls.CheckBoxX();
             this.chkAutoDetectUpdate = new DevComponents.DotNetBar.Controls.CheckBoxX();
@@ -329,8 +327,6 @@
             // 
             // superTabControlPanel1
             // 
-            this.superTabControlPanel1.Controls.Add(this.cmbWzVersionVerifyMode);
-            this.superTabControlPanel1.Controls.Add(this.labelX2);
             this.superTabControlPanel1.Controls.Add(this.chkImgCheckDisabled);
             this.superTabControlPanel1.Controls.Add(this.chkWzSortByImgID);
             this.superTabControlPanel1.Controls.Add(this.chkAutoCheckExtFiles);
@@ -343,33 +339,6 @@
             this.superTabControlPanel1.Size = new System.Drawing.Size(314, 171);
             this.superTabControlPanel1.TabIndex = 1;
             this.superTabControlPanel1.TabItem = this.superTabItem1;
-            // 
-            // cmbWzVersionVerifyMode
-            // 
-            this.cmbWzVersionVerifyMode.DisplayMember = "Text";
-            this.cmbWzVersionVerifyMode.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed;
-            this.cmbWzVersionVerifyMode.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cmbWzVersionVerifyMode.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.cmbWzVersionVerifyMode.FormattingEnabled = true;
-            this.cmbWzVersionVerifyMode.ItemHeight = 13;
-            this.cmbWzVersionVerifyMode.Location = new System.Drawing.Point(148, 132);
-            this.cmbWzVersionVerifyMode.Name = "cmbWzVersionVerifyMode";
-            this.cmbWzVersionVerifyMode.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
-            this.cmbWzVersionVerifyMode.TabIndex = 8;
-            // 
-            // labelX2
-            // 
-            this.labelX2.AutoSize = true;
-            this.labelX2.BackColor = System.Drawing.Color.Transparent;
-            // 
-            // 
-            // 
-            this.labelX2.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
-            this.labelX2.Location = new System.Drawing.Point(14, 134);
-            this.labelX2.Name = "labelX2";
-            this.labelX2.Size = new System.Drawing.Size(138, 16);
-            this.labelX2.TabIndex = 7;
-            this.labelX2.Text = "wz版本验证";
             // 
             // chkImgCheckDisabled
             // 
@@ -1031,7 +1000,6 @@
         private DevComponents.DotNetBar.Controls.CheckBoxX chkImgCheckDisabled;
         private DevComponents.DotNetBar.Controls.CheckBoxX chkOpenAIExtraOption;
         private DevComponents.DotNetBar.Controls.CheckBoxX chkEnableTranslate;
-        private DevComponents.DotNetBar.Controls.ComboBoxEx cmbWzVersionVerifyMode;
         private DevComponents.DotNetBar.Controls.ComboBoxEx cmbDesiredLanguage;
         private DevComponents.DotNetBar.Controls.ComboBoxEx cmbMozhiBackend;
         private DevComponents.DotNetBar.Controls.ComboBoxEx cmbLanguageModel;
@@ -1039,7 +1007,6 @@
         private DevComponents.DotNetBar.Controls.ComboBoxEx cmbDesiredCurrency;
         private DevComponents.DotNetBar.Controls.ComboBoxEx cmbPreferredLayout;
         private DevComponents.DotNetBar.Controls.ComboBoxEx cmbPreferredTranslateEngine;
-        private DevComponents.DotNetBar.LabelX labelX2;
         private DevComponents.DotNetBar.LabelX labelX3;
         private DevComponents.DotNetBar.LabelX labelX4;
         private DevComponents.DotNetBar.LabelX labelX5;

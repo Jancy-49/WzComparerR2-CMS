@@ -172,7 +172,7 @@
             this.bar1.LayoutType = DevComponents.DotNetBar.eLayoutType.DockContainer;
             this.bar1.Location = new System.Drawing.Point(3, 0);
             this.bar1.Name = "bar1";
-            this.bar1.Size = new System.Drawing.Size(213, 278);
+            this.bar1.Size = new System.Drawing.Size(213, 218);
             this.bar1.Stretch = true;
             this.bar1.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
             this.bar1.TabIndex = 0;
@@ -186,7 +186,7 @@
             this.panelDockContainer1.DisabledBackColor = System.Drawing.Color.Empty;
             this.panelDockContainer1.Location = new System.Drawing.Point(3, 23);
             this.panelDockContainer1.Name = "panelDockContainer1";
-            this.panelDockContainer1.Size = new System.Drawing.Size(207, 252);
+            this.panelDockContainer1.Size = new System.Drawing.Size(207, 212);
             this.panelDockContainer1.Style.Alignment = System.Drawing.StringAlignment.Center;
             this.panelDockContainer1.Style.BackColor1.ColorSchemePart = DevComponents.DotNetBar.eColorSchemePart.BarBackground;
             this.panelDockContainer1.Style.BorderColor.ColorSchemePart = DevComponents.DotNetBar.eColorSchemePart.BarDockedBorder;
@@ -209,7 +209,7 @@
             this.itemPanel1.LayoutOrientation = DevComponents.DotNetBar.eOrientation.Vertical;
             this.itemPanel1.Location = new System.Drawing.Point(0, 0);
             this.itemPanel1.Name = "itemPanel1";
-            this.itemPanel1.Size = new System.Drawing.Size(207, 252);
+            this.itemPanel1.Size = new System.Drawing.Size(207, 212);
             this.itemPanel1.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
             this.itemPanel1.TabIndex = 8;
             this.itemPanel1.Text = "itemPanel1";
@@ -573,7 +573,7 @@
             // 
             this.btnBodyFloating.AccessibleRole = System.Windows.Forms.AccessibleRole.PushButton;
             this.btnBodyFloating.ColorTable = DevComponents.DotNetBar.eButtonColor.OrangeWithBackground;
-            this.btnBodyFloating.Location = new System.Drawing.Point(190, 82);
+            this.btnBodyFloating.Location = new System.Drawing.Point(180, 82);
             this.btnBodyFloating.Name = "btnBodyFloating";
             this.btnBodyFloating.Size = new System.Drawing.Size(70, 20);
             this.btnBodyFloating.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
@@ -653,7 +653,7 @@
             // 
             // 
             this.labelX5.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
-            this.labelX5.Location = new System.Drawing.Point(149, 108);
+            this.labelX5.Location = new System.Drawing.Point(144, 108);
             this.labelX5.Name = "labelX5";
             this.labelX5.Size = new System.Drawing.Size(19, 18);
             this.labelX5.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;

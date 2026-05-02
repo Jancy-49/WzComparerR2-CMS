@@ -32,7 +32,7 @@ namespace WzComparerR2
 #endif
 
             //this.lblCurrentVer.Text = $"{versionNumbers()[2]}.{versionNumbers()[3]}";
-            this.lblCurrentVer.Text = BuildInfo.BuildTime;
+            this.lblCurrentVer.Text = "v5.9.3";
             Task.Run(() => this.ExecuteUpdateAsync());
         }
 
@@ -152,7 +152,7 @@ namespace WzComparerR2
                 AppendText(Changelog, Color.Black);
                 this.richTextBoxEx1.SelectionStart = 0;
 
-                if (Int64.Parse(BuildNumber.Substring(1, 8)) > Int64.Parse(BuildInfo.BuildTime.Substring(1, 8)))
+                if (BuildNumber != lblCurrentVer.Text)
                 {
                     buttonX1.Enabled = true;
                     this.lblUpdateContent.Text = "可更新";
@@ -192,8 +192,10 @@ namespace WzComparerR2
                     }
                 }
 
+                // 提取更新程序到当前目录
                 ExtractResource("WzComparerR2.WzComparerR2.Updater.exe", Path.Combine(currentDirectory, "WzComparerR2.Updater.exe"));
 #if NET6_0_OR_GREATER
+                // .NET 6/8 还需要提取额外文件
                 ExtractResource("WzComparerR2.WzComparerR2.Updater.deps.json", Path.Combine(currentDirectory, "WzComparerR2.Updater.deps.json"));
                 ExtractResource("WzComparerR2.WzComparerR2.Updater.dll", Path.Combine(currentDirectory, "WzComparerR2.Updater.dll"));
                 ExtractResource("WzComparerR2.WzComparerR2.Updater.dll.config", Path.Combine(currentDirectory, "WzComparerR2.Updater.dll.config"));
@@ -201,6 +203,7 @@ namespace WzComparerR2
 #else
                 ExtractResource("WzComparerR2.WzComparerR2.Updater.exe.config", Path.Combine(currentDirectory, "WzComparerR2.Updater.exe.config"));
 #endif
+                // 启动更新程序并退出当前程序
                 RunProgram("WzComparerR2.Updater.exe", "\"" + savePath + "\"", version);
             }
             catch (Exception ex)

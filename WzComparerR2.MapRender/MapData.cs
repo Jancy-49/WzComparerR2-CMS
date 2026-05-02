@@ -22,7 +22,7 @@ namespace WzComparerR2.MapRender
             this.Scene = new MapScene();
             this.MiniMap = new MiniMap();
             this.Tooltips = new List<TooltipItem>();
-            this.Events = new List<MapEvent>();
+            this.MapEvents = new List<MapEvent>();
             this.FootholdManager = new FootholdManager();
             this.Date = DateTime.Now;
 
@@ -51,7 +51,7 @@ namespace WzComparerR2.MapRender
 
         public MapScene Scene { get; private set; }
         public IList<TooltipItem> Tooltips { get; private set; }
-        public List<MapEvent> Events { get; private set; }
+        public List<MapEvent> MapEvents { get; private set; }
         public FootholdManager FootholdManager { get; private set; }
         public DateTime Date { get; set; }
         public bool EnableMobMovement
@@ -67,15 +67,19 @@ namespace WzComparerR2.MapRender
                 enableMobMovement = value;
                 var hs = new HashSet<int>();
                 this.moveLayerQueue.Clear();
+                this.addToLayerQueue.Clear();
                 foreach (var life in this.Scene.Mobs)
                 {
                     if (life.Controller != null)
                     {
-                        if (!value)
+                        if (!value && life.Controller.CanDie)
                         {
+                            if (!hs.Add(life.Controller.ID))
+                            {
+                                life.Controller.PlayRegenSound = false; // 소리 테러 방지
+                                life.Controller.PlayDieSound = false; // 소리 테러 방지
+                            }
                             life.Controller.SetDied(blockRevive: true);
-                            if (hs.Add(life.Controller.ID)) PlaySoundEff(life.Controller.ID, "Die");
-                            else life.Controller.PlayRegenSound = false; // 소리 테러 방지
                         }
                         life.Controller.MovementEnabled = value;
                     }
@@ -139,16 +143,18 @@ namespace WzComparerR2.MapRender
             }
             if ((node = mapImgNode.Nodes["foothold"]) != null)
             {
+                this.FootholdManager = new FootholdManager();
                 this.Scene.FootholdContainerById.Clear();
+                int groupIndex = 0;
                 for (int i = 0; i <= 7; i++)
                 {
                     var fhLevel = node.Nodes[i.ToString()];
                     if (fhLevel != null)
                     {
-                        LoadFoothold(fhLevel, i);
+                        LoadFoothold(fhLevel, i, ref groupIndex);
                     }
                 }
-                FootholdManager.Build(this.Scene.Layers);
+                FootholdManager.Build();
             }
             if ((node = mapImgNode.Nodes["life"]) != null)
             {
@@ -188,7 +194,7 @@ namespace WzComparerR2.MapRender
             }
             if ((node = mapImgNode.Nodes["effect"]) != null)
             {
-                LoadEvents(node);
+                LoadMapEvents(node);
             }
 
             //计算地图大小
@@ -313,12 +319,13 @@ namespace WzComparerR2.MapRender
             }
         }
 
-        private void LoadFoothold(Wz_Node fhLayerNode, int level)
+        private void LoadFoothold(Wz_Node fhLayerNode, int level, ref int groupIndex)
         {
             var layerSceneNode = (LayerNode)this.Scene.Layers.Nodes[level];
 
             foreach (var group in fhLayerNode.Nodes)
             {
+                FootholdGroup fhGroup = new FootholdGroup(groupIndex++);
                 foreach (var node in group.Nodes)
                 {
                     var item = FootholdItem.LoadFromNode(node);
@@ -329,7 +336,9 @@ namespace WzComparerR2.MapRender
                     var fhSceneNode = new ContainerNode<FootholdItem>() { Item = item };
                     layerSceneNode.Foothold.Nodes.Add(fhSceneNode);
                     this.Scene.FootholdContainerById[item.ID] = fhSceneNode;
+                    fhGroup.Add(item);
                 }
+                FootholdManager.Add(fhGroup, level);
             }
         }
 
@@ -562,7 +571,7 @@ namespace WzComparerR2.MapRender
                 BackColor = node.Nodes["back_color"].GetXnaColor(),
             };
 
-            for (int i = 0; ; i++)
+            for (int i=0; ; i++)
             {
                 var lightNode = node.Nodes[i.ToString()];
                 if (lightNode == null)
@@ -587,7 +596,7 @@ namespace WzComparerR2.MapRender
             this.Light = mapLight;
         }
 
-        private void LoadEvents(Wz_Node effectNode)
+        private void LoadMapEvents(Wz_Node effectNode)
         {
             foreach (var node in effectNode.Nodes)
             {
@@ -598,7 +607,7 @@ namespace WzComparerR2.MapRender
                 var tags = node.FindNodeByPath("tags").GetValueEx<string>(null);
                 var item = new MapEvent(index, type, defaultAnimation, changedAnimation, tags);
 
-                this.Events.Add(item);
+                this.MapEvents.Add(item);
             }
         }
 
@@ -1195,8 +1204,7 @@ namespace WzComparerR2.MapRender
 
         private object CreateAnimator(object animationData, string aniName = null)
         {
-            switch (animationData)
-            {
+            switch (animationData) {
                 case RepeatableFrameAnimationData repFrameAni:
                     return new RepeatableFrameAnimator(repFrameAni);
 
@@ -1239,17 +1247,38 @@ namespace WzComparerR2.MapRender
                 return null;
             }
 
-            void SetIfDifferent(string name)
+            bool SetAni(string name)
             {
-                if (string.IsNullOrEmpty(name) || ani.GetCurrent() == name) return;
+                if (string.IsNullOrEmpty(name)) return false;
                 ani.SetAnimation(name);
+                return true;
             }
 
-            void SetEffectIfDifferent(string name)
+            bool SetIfDifferent(string name)
             {
-                if (string.IsNullOrEmpty(name) || ani.GetCurrentEffect() == name) return;
-                ani.SetEffectAnimation(name);
+                if (string.IsNullOrEmpty(name) || ani.GetCurrent() == name) return false;
+                ani.SetAnimation(name);
+                return true;
             }
+
+            bool SetEffectIfDifferent(string name)
+            {
+                if (string.IsNullOrEmpty(name) || ani.GetCurrentEffect() == name) return false;
+                ani.SetEffectAnimation(name);
+                return true;
+            }
+
+            bc.MobHit += (o, e) =>
+            {
+                string aniName = Prefer("hit1", "hit");
+                if (aniName == null)
+                {
+                    bc.RecoverHit();
+                    return;
+                }
+                SetAni(aniName);
+                PlaySoundEff(bc.ID, "Damage");
+            };
 
             bc.StateChanged += (o, e) =>
             {
@@ -1272,8 +1301,8 @@ namespace WzComparerR2.MapRender
                             bc.EndRegen();
                             return;
                         }
-                        SetIfDifferent(aniName);
-                        if (bc.PlayRegenSound) PlaySoundEff(bc.ID, "Regen");
+                        if (SetIfDifferent(aniName) && bc.PlayRegenSound)
+                            PlaySoundEff(bc.ID, "Regen");
                         return;
 
                     case BehaviorController.BaseState.Hit:
@@ -1299,7 +1328,8 @@ namespace WzComparerR2.MapRender
                             bc.RecoverDied();
                             return;
                         }
-                        SetIfDifferent(aniName);
+                        if (SetIfDifferent(aniName) && bc.PlayDieSound)
+                            PlaySoundEff(bc.ID, "Die");
                         return;
 
                     case BehaviorController.BaseState.Attack:
@@ -1309,7 +1339,8 @@ namespace WzComparerR2.MapRender
                             bc.EndAttack();
                             return;
                         }
-                        SetIfDifferent(aniName);
+                        if (SetIfDifferent(aniName))
+                            PlaySoundEff(bc.ID, life.Controller.SelectedAttack.Replace("attack", "Attack").Replace("skill", "Skill"));
                         SetEffectIfDifferent(aniName + "_effect");
                         return;
 
@@ -1486,6 +1517,25 @@ namespace WzComparerR2.MapRender
                 return true;
             }
             else return false;
+        }
+
+        public void ResetAllMobs()
+        {
+            var hs = new HashSet<int>();
+            this.moveLayerQueue.Clear();
+            this.addToLayerQueue.Clear();
+            foreach (var life in this.Scene.Mobs)
+            {
+                if (life.Controller != null && life.Controller.CanDie)
+                {
+                    if (!hs.Add(life.Controller.ID))
+                    {
+                        life.Controller.PlayRegenSound = false; // 소리 테러 방지
+                        life.Controller.PlayDieSound = false; // 소리 테러 방지
+                    }
+                    life.Controller.SetDied(blockRevive: true);
+                }
+            }
         }
 
         private void RequestMoveLayer(LifeItem lifeItem, int prev, int next)

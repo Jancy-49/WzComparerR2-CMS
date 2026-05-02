@@ -33,6 +33,7 @@ namespace WzComparerR2.CharaSim
         public Potential[] Options { get; private set; }
         public Potential[] AdditionalOptions { get; private set; }
         public AlienStone AlienStoneSlot { get; set; }
+        public GearLimitedLabel LimitedLabel { get; private set; } = new();
 
         public int Star { get; set; }
         public int ScrollUp { get; set; }
@@ -41,6 +42,7 @@ namespace WzComparerR2.CharaSim
         public int PlatinumHammer { get; set; }
         public bool CanPotential { get; internal set; }
         public string EpicHs { get; internal set; }
+        public string SpecificTargetDesc { get; internal set; }
         public BitmapOrigin ToolTIpPreview { get; set; }
         public BitmapOrigin IllusionRingPreview { get; set; }
 
@@ -398,6 +400,7 @@ namespace WzComparerR2.CharaSim
                 case GearType.face2:
                 case GearType.hair3:
                 case GearType.hair4:
+                case GearType.face3:
                 case GearType.medal:
                 case GearType.android:
                 case GearType.shovel:
@@ -433,6 +436,35 @@ namespace WzComparerR2.CharaSim
                     return true;
                 default:
                     return IsWeapon(type) ? true : false;
+            }
+        }
+
+        public static bool CanCustomIllust(GearType type)
+        {
+            switch (type)
+            {
+                case GearType.body:
+                case GearType.head:
+                case GearType.hair:
+                case GearType.hair2:
+                case GearType.hair3:
+                case GearType.hair4:
+                case GearType.face:
+                case GearType.face2:
+                case GearType.face3:
+                case GearType.cap:
+                case GearType.faceAccessory:
+                case GearType.eyeAccessory:
+                case GearType.earrings:
+                case GearType.coat:
+                case GearType.longcoat:
+                case GearType.pants:
+                case GearType.shoes:
+                case GearType.glove:
+                case GearType.cape:
+                    return true;
+                default:
+                    return false;
             }
         }
 
@@ -586,6 +618,10 @@ namespace WzComparerR2.CharaSim
                     return GearType.longSword;
                 case 1252:
                     return GearType.memorialStaff;
+                case 1253:
+                    return GearType.celestialLight;
+                case 1254:
+                    return GearType.onmyoSen;
                 case 1259:
                     return GearType.magicStick;
                 case 1403:
@@ -655,6 +691,7 @@ namespace WzComparerR2.CharaSim
                 case GearType.hair4:
                 case GearType.face:
                 case GearType.face2:
+                case GearType.face3:
                     return GetCosmeticGender(code) - 1;
             }
 
@@ -1131,6 +1168,28 @@ namespace WzComparerR2.CharaSim
                             {
                                 gear.ReqSpecJobs.Add(jobNode.GetValue<int>());
                             }
+                            break;
+
+                        case "limitedLabelTooltipName":
+                            gear.LimitedLabel.TooltipName = Convert.ToString(subNode.Value);
+                            break;
+
+                        case "limitedLabelTooltipNameColor":
+                            gear.LimitedLabel.TooltipNameColor = subNode.GetValueEx<int>(0);
+                            break;
+
+                        case "limitedLabelIconLabelNum":
+                            gear.LimitedLabel.IconLabelNum = subNode.GetValueEx<int>(16);
+                            break;
+
+                        case "limitedLabelGradeTooltip":
+                            gear.LimitedLabel.GradeTooltip = Convert.ToString(subNode.Value);
+                            break;
+
+                        case string text when text.StartsWith("specificTarget"):
+                            var stDesc = subNode.FindNodeByPath("desc").GetValueEx<string>(null);
+                            if (!string.IsNullOrEmpty(stDesc))
+                                gear.SpecificTargetDesc = stDesc;
                             break;
 
                         default:

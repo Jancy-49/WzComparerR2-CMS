@@ -894,7 +894,7 @@ namespace WzComparerR2.CharaSimControl
             skillList.Clear();
             skillList3.Clear();
             skillList4.Clear();
-            if (((normalmode || evanmode || yetipbmode || collabmode) && selectedTab < 5) || (dualblademode && selectedTab < 7)) //绘制非5转技能
+            if (((normalmode || evanmode) && selectedTab < 5) || ((yetipbmode || collabmode ) && selectedTab < 2)|| (dualblademode && selectedTab < 7)) //绘制非5转技能
             {
                 foreach (Wz_Node wz_Node in PluginManager.FindWz($@"Skill/{jobtab}.img/skill").Nodes)
                 {
@@ -958,11 +958,14 @@ namespace WzComparerR2.CharaSimControl
                     foreach (Wz_Node wz_Node2 in wz_Node.Nodes)
                     {
                         string tabnode = wz_Node2.GetValueEx<Int32>(400001000).ToString();
-                        string skillid = PluginManager.FindWz($"Etc/HexaCore.img/hexaSkill/coreData/{tabnode}/connectSkill/0").GetValueEx<Int32>(400001000).ToString();
-                        Wz_Node skillNode = PluginBase.PluginManager.FindWz(string.Format(@"Skill\{0}.img\skill\{1}", skillid.Remove(skillid.Length - 4), skillid));
-                        Skill skill = Skill.CreateFromNode(skillNode, PluginBase.PluginManager.FindWz, PluginBase.PluginManager.FindWz);
-                        if (skill.Invisible || skillList.Exists(t => t.Item4 == skillid)) continue;
-                        load_list(skill, skillid);
+                        foreach(Wz_Node wz_Node3 in PluginManager.FindWz($"Etc/HexaCore.img/hexaSkill/coreData/{tabnode}/connectSkill").Nodes)
+                        {
+                            string skillid = wz_Node3.GetValueEx<Int32>(400001000).ToString();
+                            Wz_Node skillNode = PluginBase.PluginManager.FindWz(string.Format(@"Skill\{0}.img\skill\{1}", skillid.Remove(skillid.Length - 4), skillid));
+                            Skill skill = Skill.CreateFromNode(skillNode, PluginBase.PluginManager.FindWz, PluginBase.PluginManager.FindWz);
+                            if (skill.Invisible || skillList.Exists(t => t.Item4 == skillid)) continue;
+                            load_list(skill, skillid);
+                        }
                     }
                 }
             }

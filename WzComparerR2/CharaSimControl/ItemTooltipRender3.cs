@@ -61,6 +61,10 @@ namespace WzComparerR2.CharaSimControl
         public long DamageSkinNumber { get; set; }
         public int CosmeticHairColor { get; set; }
         public int CosmeticFaceColor { get; set; }
+        //private int DLeft { get; set; }
+        //private int DTop { get; set; }
+        //private int DLeft_Set { get; set; }
+        //private int DTop_Set { get; set; }
         private bool WillDrawNickTag { get; set; }
         private Wz_Node NickResNode { get; set; }
         private Bitmap ItemSample { get; set; }
@@ -72,6 +76,7 @@ namespace WzComparerR2.CharaSimControl
         public TooltipRender SetItemRender { get; set; }
         public TooltipRender CashPackageRender { get; set; }
         public TooltipRender FamiliarRender { get; set; }
+        public TooltipRender MorphRender { get; set; }
         private AvatarCanvasManager avatar { get; set; }
         private bool isMsnClient;
         private string titleLanguage = "";
@@ -92,6 +97,10 @@ namespace WzComparerR2.CharaSimControl
             Bitmap setItemBmp = null;
             Bitmap levelBmp = null;
             int levelHeight = 0;
+            //this.DLeft = 0;
+            //this.DTop = 0;
+            //this.DLeft_Set = 0;
+            //this.DTop_Set = 0;
             if (this.ShowLevelOrSealed)
             {
                 levelBmp = RenderLevel(out levelHeight);
@@ -268,6 +277,16 @@ namespace WzComparerR2.CharaSimControl
                 }
             }
 
+            if (this.item.Specs.TryGetValue(ItemSpecType.morph, out long morphID) && morphID > 0)
+            {
+                Morph morph = Morph.CreateFromNode(PluginManager.FindWz($@"Morph\{morphID:D4}.img", this.SourceWzFile), PluginManager.FindWz, PluginManager.FindWz, this.SourceWzFile);
+                if (morph != null)
+                {
+                    setItemBmp = RenderMorph(morph);
+                    morph.Dispose();
+                }
+            }
+
             //计算布局
             Size totalSize = new Size(itemBmp.Width, picHeight);
             Point recipeInfoOrigin = Point.Empty;
@@ -277,9 +296,12 @@ namespace WzComparerR2.CharaSimControl
 
             if (setItemBmp != null)
             {
+                //this.DLeft = Math.Max(DLeft_Set - totalSize.Width, 0);
+                //this.DTop = this.DTop_Set;
+
                 setItemOrigin = new Point(totalSize.Width, 0);
                 totalSize.Width += setItemBmp.Width;
-                totalSize.Height = Math.Max(totalSize.Height, Math.Max(picHeight + recipeInfoBmps.Sum(bmp => bmp.Height), recipeItemBmps.Sum(bmp => bmp.Height)));
+                totalSize.Height = Math.Max(totalSize.Height, setItemBmp.Height);
             }
             if (levelBmp != null)
             {
@@ -317,6 +339,8 @@ namespace WzComparerR2.CharaSimControl
 
 
             //开始绘制
+            //totalSize.Width += this.DLeft;
+            //totalSize.Height += this.DTop;
             Bitmap tooltip = new Bitmap(totalSize.Width, totalSize.Height);
             Graphics g = Graphics.FromImage(tooltip);
 
@@ -399,7 +423,7 @@ namespace WzComparerR2.CharaSimControl
 
         private Bitmap RenderItem(out int picH, out List<int> splitterH)
         {
-            isMsnClient = StringLinker.StringEqp.TryGetValue(1006514, out _);
+            isMsnClient = PluginManager.FindWz("Character/Eqp/Cap/01006514.img") != null;
             bool isTranslateRequired = Translator.IsTranslateEnabled;
             StringFormat format = (StringFormat)StringFormat.GenericDefault.Clone();
             var item22ColorTable = new Dictionary<string, Color>()
@@ -407,6 +431,7 @@ namespace WzComparerR2.CharaSimControl
                 { "c", ((SolidBrush)GearGraphics.Equip22BrushEmphasis).Color },
                 { "$r", ((SolidBrush)GearGraphics.Equip22BrushRed).Color },
                 { "$g", ((SolidBrush)GearGraphics.Equip22BrushLegendary).Color },
+                { "$S", ((SolidBrush)GearGraphics.ItemPriceBrush).Color },
             };
             splitterH = new List<int>();
             picH = 0;
@@ -519,7 +544,7 @@ namespace WzComparerR2.CharaSimControl
                 picH += 15;
             }
 
-            // 상단 속성
+            // 上方属性
             var attrList = GetItemTopAttributeString();
             if (attrList.Count > 0)
             {
@@ -577,7 +602,7 @@ namespace WzComparerR2.CharaSimControl
                 GearGraphics.DrawString(g, expireTime, GearGraphics.ItemDetailFont, item22ColorTable, 0, tooltip.Width, ref picH, LineHeight, alignment: Text.TextAlignment.Center);
             }
 
-            // 생명의 물
+            // 生命之水
             if (item.Props.TryGetValue(ItemPropType.noRevive, out value) && value > 0)
             {
                 GearGraphics.DrawString(g, "#$r不可使用生命之水#", GearGraphics.ItemDetailFont, item22ColorTable, 0, tooltip.Width, ref picH, LineHeight, alignment: Text.TextAlignment.Center);
@@ -1137,6 +1162,20 @@ namespace WzComparerR2.CharaSimControl
             return tags;
         }
 
+        private Bitmap RenderMorph(Morph morph)
+        {
+            TooltipRender renderer = this.MorphRender;
+            if (renderer == null)
+            {
+                MorphTooltipRenderer defaultRenderer = new MorphTooltipRenderer();
+                defaultRenderer.StringLinker = this.StringLinker;
+                defaultRenderer.ShowObjectID = this.ShowObjectID;
+                renderer = defaultRenderer;
+            }
+            renderer.TargetItem = morph;
+            return renderer.Render();
+        }
+
         private List<string> GetItemBottomAttributeString(StringResult sr, bool isTranslateRequired = false)
         {
             long value;
@@ -1146,10 +1185,10 @@ namespace WzComparerR2.CharaSimControl
             string descLeftAlign = sr["desc_leftalign"];
             if (!string.IsNullOrEmpty(descLeftAlign))
             {
-                tags.Add(descLeftAlign);
+                tags.Add(ReplaceDescTags(descLeftAlign));
                 if (isTranslateRequired)
                 {
-                    tags.Add(Translator.TranslateString(descLeftAlign));
+                    tags.Add(Translator.TranslateString(ReplaceDescTags(descLeftAlign)));
                 }
             }
 
@@ -1311,6 +1350,11 @@ namespace WzComparerR2.CharaSimControl
                             tags.AddRange(priceList);
                             break;
                     }
+                }
+
+                if (item.Props.TryGetValue(ItemPropType.saveWhenLogout, out value) && value != 0)
+                {
+                    tags.Add($"#$r{ItemStringHelper.GetItemPropString(ItemPropType.saveWhenLogout, value)}#");
                 }
             }
 
@@ -1621,6 +1665,28 @@ namespace WzComparerR2.CharaSimControl
 
                 text = text.Replace("#cosmetic_EULO#", name);
             }
+
+            text = Regex.Replace(text, @$"#(t)\s*(\d{{1,9}}).*?#", match => // id should be less than 1,000,000,000
+            {
+                string tag = match.Groups[1].Value;
+                if (!int.TryParse(match.Groups[2].Value, out int id)) id = -1;
+                StringResult sr;
+                var name = "";
+                switch (tag)
+                {
+                    case "t":
+                        StringLinker.StringItem.TryGetValue(id, out sr);
+                        if (sr == null)
+                        {
+                            StringLinker.StringEqp.TryGetValue(id, out sr);
+                        }
+                        name = sr?.Name ?? id.ToString();
+                        return $"{name}";
+
+                    default:
+                        return id.ToString();
+                }
+            });
 
             return text;
         }

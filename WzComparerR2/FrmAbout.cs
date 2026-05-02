@@ -50,7 +50,7 @@ namespace WzComparerR2
         {
             this.advTree1.Nodes.Clear();
 
-            this.advTree1.Nodes.Add(new Node("CMS <font color=\"#808080\">v5.9.2</font>"));
+            this.advTree1.Nodes.Add(new Node("CMS <font color=\"#808080\">v5.9.3</font>"));
 
             foreach (var contribution in new[]
             {

@@ -1,18 +1,19 @@
-﻿using System;
+﻿using CharaSimResource;
+using DevComponents.AdvTree;
+using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
-using System.Windows.Forms;
 using System.Drawing;
+using System.Drawing.Imaging;
+using System.Security.Cryptography;
+using System.Security.Policy;
 using System.Text;
-using CharaSimResource;
-using WzComparerR2.WzLib;
+using System.Windows.Forms;
 using WzComparerR2.CharaSim;
 using WzComparerR2.Common;
 using WzComparerR2.Controls;
 using WzComparerR2.PluginBase;
-using System.Security.Cryptography;
-using DevComponents.AdvTree;
-using System.Security.Policy;
+using WzComparerR2.WzLib;
 
 namespace WzComparerR2.CharaSimControl
 {
@@ -74,8 +75,8 @@ namespace WzComparerR2.CharaSimControl
 
             this.hScroll.Location = new Point(378, 680);
             this.hScroll.Size = new Size(957, 5);
-            this.hScroll.ScrollableLocation = new Point(378, 680);
-            this.hScroll.ScrollableSize = new Size(957, 5);
+            this.hScroll.ScrollableLocation = new Point(0, 0);
+            this.hScroll.ScrollableSize = new Size(1366, 768);
             this.hScroll.Visible = true;
             this.hScroll.ValueChanged += new EventHandler(hScroll_ValueChanged);
             this.hScroll.ChildButtonStateChanged += new EventHandler(aCtrl_RefreshCall);
@@ -187,12 +188,23 @@ namespace WzComparerR2.CharaSimControl
             render_bitmap(g, "UI/Login.img/ClassSelect/back/0/1/0", 0, 0);
             Wz_Node charnode = PluginBase.PluginManager.FindWz($"UI/Login.img/ClassSelect/back/1/{job_list[selectIndex].ToString()}/0");
             Bitmap charBitmap = BitmapOrigin.CreateFromNode(charnode, PluginBase.PluginManager.FindWz).Bitmap;
+            if (charBitmap.Height > 768)
+            {
+                Bitmap resized = new Bitmap(charBitmap, new Size(charBitmap.Width * 768 / charBitmap.Height, 768));
+                charBitmap.Dispose();
+                charBitmap = resized;
+            }
             g.DrawImage(charBitmap, (1366 - charBitmap.Width) / 2, 0);
             render_bitmap(g, "UI/_Canvas/Login.img/ClassSelect/layer:aboveSpine", 0, 0);
+            //Bitmap mask = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/Login.img/ClassSelect/list/sprite:backgrnd1/0/0"), PluginBase.PluginManager.FindWz).Bitmap;
+            //Bitmap image = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/Login.img/ClassSelect/list/backgrnd1"), PluginBase.PluginManager.FindWz).Bitmap;
+            //Bitmap final = ApplyMaskWithOffset(image, mask, 378, 81, 378, 81);
+            //g.DrawImage(final, 378, 81);
             render_bitmap(g, "UI/Login.img/ClassSelect/list/backgrnd1", 378, 81);
             g.DrawImage(Resource.ClassSelect_back_2_0, 50, 13);
             render_bitmap(g, $"UI/Login.img/ClassSelect/desc/info/{job_list[selectIndex].ToString()}/className", 48, 44);
             render_bitmap(g, $"UI/Login.img/ClassSelect/desc/info/{job_list[selectIndex].ToString()}/jobMark", 50, 169);
+            render_bitmap(g, "UI/_Canvas/Login.img/ClassSelect/layer:aboveVideo", 50, 465);
             string subName = PluginManager.FindWz($@"UI/Login.img/ClassSelect/desc/info/{job_list[selectIndex].ToString()}/subName").GetValueEx<string>(null);
             string desc = PluginManager.FindWz($@"UI/Login.img/ClassSelect/desc/info/{job_list[selectIndex].ToString()}/desc").GetValueEx<string>(null).Replace("\\n", "\r\n");
             string race = PluginManager.FindWz($@"UI/Login.img/ClassSelect/desc/info/{job_list[selectIndex].ToString()}/race").GetValueEx<string>(null).Replace("\\n", "\r\n");
@@ -200,7 +212,7 @@ namespace WzComparerR2.CharaSimControl
             string stat = PluginManager.FindWz($@"UI/Login.img/ClassSelect/desc/info/{job_list[selectIndex].ToString()}/stat").GetValueEx<string>(null).Replace("\\n", "\r\n");
             g.DrawString(subName, GearGraphics.ClassSelectFontBold, GearGraphics.WhiteBrush, 48f, 193f);
             int picH = 233;
-            GearGraphics.DrawPlainText(g, desc, GearGraphics.ClassSelectDescFont, Color.FromArgb(255, 255, 255), 50, 305, ref picH, 16);
+            GearGraphics.DrawPlainText(g, desc, GearGraphics.ClassSelectDescFont, Color.FromArgb(255, 255, 255), 50, 354, ref picH, 16);
             g.DrawString(race, GearGraphics.ClassSelectDescFont, GearGraphics.WhiteBrush, 143f, 356f);
             g.DrawString(move, GearGraphics.ClassSelectDescFont, GearGraphics.WhiteBrush, 143f, 388f);
             g.DrawString(stat, GearGraphics.ClassSelectDescFont, GearGraphics.WhiteBrush, 143f, 421f);
@@ -225,6 +237,63 @@ namespace WzComparerR2.CharaSimControl
             Wz_Node Node = PluginBase.PluginManager.FindWz(nodepath);
             Bitmap image = BitmapOrigin.CreateFromNode(Node, PluginBase.PluginManager.FindWz).Bitmap;
             g.DrawImage(image, x, y);
+        }
+
+        private Bitmap ApplyMaskWithOffset(Bitmap image, Bitmap mask, int imageX, int imageY, int maskX, int maskY)
+        {
+            Bitmap result = new Bitmap(image.Width, image.Height, PixelFormat.Format32bppArgb);
+            Rectangle rect = new Rectangle(0, 0, image.Width, image.Height);
+
+            var imgData = image.LockBits(rect, ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
+            var resData = result.LockBits(rect, ImageLockMode.WriteOnly, PixelFormat.Format32bppArgb);
+
+            Rectangle maskRect = new Rectangle(0, 0, mask.Width, mask.Height);
+            var maskData = mask.LockBits(maskRect, ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
+
+            int imgStride = imgData.Stride;
+            int maskStride = maskData.Stride;
+
+            int offsetX = imageX - maskX;
+            int offsetY = imageY - maskY;
+            unsafe
+            {
+                byte* imgPtr = (byte*)imgData.Scan0;
+                byte* maskPtr = (byte*)maskData.Scan0;
+                byte* resPtr = (byte*)resData.Scan0;
+                for (int y = 0; y < image.Height; y++)
+                {
+                    for (int x = 0; x < image.Width; x++)
+                    {
+                        int imgIndex = y * imgStride + x * 4;
+
+                        byte b = imgPtr[imgIndex];
+                        byte g = imgPtr[imgIndex + 1];
+                        byte r = imgPtr[imgIndex + 2];
+                        byte a = imgPtr[imgIndex + 3];
+
+                        int mx = x + offsetX;
+                        int my = y + offsetY;
+
+                        byte maskA = 0;
+                        if (mx >= 0 && mx < mask.Width && my >= 0 && my < mask.Height)// 判断是否在 mask 范围内
+                        {
+                            int maskIndex = my * maskStride + mx * 4;
+                            maskA = maskPtr[maskIndex + 3];
+                        }
+
+                        byte newA = (byte)(a * maskA / 255);
+
+                        resPtr[imgIndex] = b;
+                        resPtr[imgIndex + 1] = g;
+                        resPtr[imgIndex + 2] = r;
+                        resPtr[imgIndex + 3] = newA;
+                    }
+                }
+            }
+            image.UnlockBits(imgData);
+            mask.UnlockBits(maskData);
+            result.UnlockBits(resData);
+            return result;
         }
 
         private IEnumerable<AControl> aControls
@@ -276,22 +345,22 @@ namespace WzComparerR2.CharaSimControl
 
         private void pagePrev_MouseClick(object sender, MouseEventArgs e)
         {
+            if (selectIndex >= ((pageIndex + 5) * 7 - 1) && selectIndex < (pageIndex + 7) * 7)
+                selectIndex -= 7;
             pageIndex -= 1;
             this.hScroll.Value = pageIndex;
             this.scrollValue = this.hScroll.Value;
-            if (selectIndex >= ((pageIndex + 5) * 7 - 1) && selectIndex < (pageIndex + 6) * 7)
-                selectIndex -= 7;
             waitForRefresh = true;
             Refresh();
         }
 
         private void pageNext_MouseClick(object sender, MouseEventArgs e)
         {
+            if (selectIndex >= 0 && selectIndex < (pageIndex + 1) * 7)
+                selectIndex += 7;
             pageIndex += 1;
             this.hScroll.Value = pageIndex;
             this.scrollValue = this.hScroll.Value;
-            if (selectIndex >= 0 && selectIndex < (pageIndex + 1) * 7)
-                selectIndex += 7;
             waitForRefresh = true;
             Refresh();
         }

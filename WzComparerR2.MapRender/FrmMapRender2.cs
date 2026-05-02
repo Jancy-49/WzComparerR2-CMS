@@ -246,6 +246,9 @@ namespace WzComparerR2.MapRender
 
             this.ui.InputBindings.Add(new KeyBinding(new RelayCommand(_ => { renderEnv.Camera.AdjustRectEnabled = !renderEnv.Camera.AdjustRectEnabled; }), KeyCode.U, ModifierKeys.Control));
 
+            //控制怪物
+            this.ui.InputBindings.Add(new KeyBinding(new RelayCommand(_ => this.mapData?.ResetAllMobs()), KeyCode.R, ModifierKeys.None));
+
             //层隐藏
             this.ui.InputBindings.Add(new KeyBinding(new RelayCommand(_ => this.patchVisibility.BackVisible = !this.patchVisibility.BackVisible), KeyCode.D1, ModifierKeys.Control));
             this.ui.InputBindings.Add(new KeyBinding(new RelayCommand(_ => this.patchVisibility.ReactorVisible = !this.patchVisibility.ReactorVisible), KeyCode.D2, ModifierKeys.Control));
@@ -643,7 +646,7 @@ namespace WzComparerR2.MapRender
 
             //点击事件
             var disposable = UIHelper.RegisterClickEvent<SceneItem>(this.ui, this.ui.ContentControl,
-                (UIElement sender, PointF point) =>
+                (sender, point) =>
                 {
                     var cameraScale = this.renderEnv.Camera.Scale;
                     int x = (int)(point.X / cameraScale);
@@ -654,9 +657,7 @@ namespace WzComparerR2.MapRender
                     });
                     return mouseTarget.item;
                 },
-                    (sceneItem, isRightButton) => this.OnSceneItemClick(
-                        sceneItem,
-                        isRightButton ? EmptyKeys.UserInterface.Input.MouseButton.Right : EmptyKeys.UserInterface.Input.MouseButton.Left));
+                this.OnSceneItemClick);
             this.attachedEvent.Add(disposable);
 
             this.ui.InputBindings.Add(new KeyBinding(new RelayCommand(_ => {

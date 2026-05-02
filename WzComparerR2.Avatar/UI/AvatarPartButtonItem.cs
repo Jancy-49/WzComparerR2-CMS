@@ -75,8 +75,8 @@ namespace WzComparerR2.Avatar.UI
         }
 
         public static readonly string[] HairColors = new[] { "黑色", "红色", "橙色", "黄色", "绿色", "蓝色", "紫色", "褐色" };
-        public static readonly string[] LensColors = new[] { "黑色", "蓝色", "红色", "绿色", "褐色", "祖母绿色", "紫色", "紫水晶色" };
-        public static readonly string[] PrismResourceTypes = new[] { "发型", "发型", "发型", "瞳孔", "瞳孔", "头发", "瞳孔", };
+        public static readonly string[] LensColors = new[] { "黑色", "蓝色", "红色", "绿色", "褐色", "祖母绿色", "紫色", "紫水晶色", "白色" };
+        public static readonly string[] PrismResourceTypes = new[] { "Hair", "Hair", "Hair", "Lens", "Lens", "Hair", "Lens", };
         public static readonly int[] PrismResourceIndex = new[] { 0, 1, 3, 3, 5, 5, 7 };
         public PrismDataCollection PrismData;
         public int PrismIndex;
@@ -162,9 +162,18 @@ namespace WzComparerR2.Avatar.UI
 
                 Bitmap normal = (Bitmap)Properties.Resources.ResourceManager.GetObject($"UtilDlgEx_Mix{PrismResourceTypes[i]}_KR_BtColor_button_BtColor{PrismResourceIndex[i]}_normal_0");
                 Bitmap pressed = (Bitmap)Properties.Resources.ResourceManager.GetObject($"UtilDlgEx_Mix{PrismResourceTypes[i]}_KR_BtColor_button_BtColor{PrismResourceIndex[i]}_pressed_0");
+
+                // 修复: 检查资源是否为 null
+                if (normal == null || pressed == null)
+                {
+                    // 使用空位图或跳过设置
+                    continue;
+                }
+
                 rdoPrismType[i].CheckBoxImageUnChecked = PadImage(normal, pressed.Size);
                 rdoPrismType[i].CheckBoxImageChecked = PadImage(pressed, normal.Size);
             }
+            int safePrismType = Math.Max(0, Math.Min(prismType, rdoPrismType.Length - 1));
             rdoPrismType[Math.Max(0, prismType)].Checked = true;
 
             if (Gear.IsWeapon(type) || Gear.IsCashWeapon(type))

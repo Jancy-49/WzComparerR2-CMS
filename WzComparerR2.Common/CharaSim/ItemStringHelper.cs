@@ -87,12 +87,12 @@ namespace WzComparerR2.CharaSim
                 case GearPropType.incMADr: return "魔法攻击力 : " + sign + value + "%";
                 case GearPropType.incPDD: return "防御力 : " + sign + value;
                 case GearPropType.incPDDr: return "防御力 : " + sign + value + "%";
-                //case GearPropType.incMDD: return "MAGIC DEF. : " + sign + value;
-                //case GearPropType.incMDDr: return "MAGIC DEF. : " + sign + value + "%";
-                //case GearPropType.incACC: return "ACCURACY : " + sign + value;
-                //case GearPropType.incACCr: return "ACCURACY : " + sign + value + "%";
-                //case GearPropType.incEVA: return "AVOIDABILITY : " + sign + value;
-                //case GearPropType.incEVAr: return "AVOIDABILITY : " + sign + value + "%";
+                case GearPropType.incMDD: return "魔法防御力 : " + sign + value;
+                case GearPropType.incMDDr: return "魔法防御力 : " + sign + value + "%";
+                case GearPropType.incACC: return "命中值 : " + sign + value;
+                case GearPropType.incACCr: return "命中率 : " + sign + value + "%";
+                case GearPropType.incEVA: return "回避值 : " + sign + value;
+                case GearPropType.incEVAr: return "回避率 : " + sign + value + "%";
                 case GearPropType.incSpeed: return "移动速度 : " + sign + value;
                 case GearPropType.incJump: return "跳跃力 : " + sign + value;
                 case GearPropType.incCraft: return "手技 : " + sign + value;
@@ -153,7 +153,9 @@ namespace WzComparerR2.CharaSim
                 case GearPropType.incPAD_incMAD:
                 case GearPropType.incAD: return "攻击力 / 魔力 : " + sign + value;
                 case GearPropType.incPDD_incMDD: return "防御力 : " + sign + value;
-                //case GearPropType.incACC_incEVA: return "ACC/AVO :" + sign + value;
+                case GearPropType.incACC_incEVA: return "命中/回避 :" + sign + value;
+                case GearPropType.incCRT: return "爆击率 :" + sign + value;
+                case GearPropType.incCRD: return "暴击伤害: " + sign + value;
 
                 case GearPropType.incARC: return "神秘之力 : " + sign + value;
                 case GearPropType.incAUT: return "原初之力 : " + sign + value;
@@ -205,12 +207,12 @@ namespace WzComparerR2.CharaSim
                 case GearPropType.incMADr: return "魔法攻击力";
                 case GearPropType.incPDD: return "防御力";
                 case GearPropType.incPDDr: return "防御力";
-                //case GearPropType.incMDD: return "MAGIC DEF.";
-                //case GearPropType.incMDDr: return "MAGIC DEF.";
-                //case GearPropType.incACC: return "ACCURACY";
-                //case GearPropType.incACCr: return "ACCURACY";
-                //case GearPropType.incEVA: return "AVOIDABILITY";
-                //case GearPropType.incEVAr: return "AVOIDABILITY";
+                case GearPropType.incMDD: return "魔法防御力";
+                case GearPropType.incMDDr: return "魔法防御力";
+                case GearPropType.incACC: return "命中值";
+                case GearPropType.incACCr: return "命中率";
+                case GearPropType.incEVA: return "回避值";
+                case GearPropType.incEVAr: return "回避率";
                 case GearPropType.incSpeed: return "移动速度";
                 case GearPropType.incJump: return "跳跃力";
                 case GearPropType.incCraft: return "手技";
@@ -271,7 +273,7 @@ namespace WzComparerR2.CharaSim
                 case GearPropType.incPAD_incMAD:
                 case GearPropType.incAD: return "攻击力 / 魔力";
                 case GearPropType.incPDD_incMDD: return "防御力";
-                //case GearPropType.incACC_incEVA: return "ACC/AVO :" + sign + value;
+                case GearPropType.incACC_incEVA: return "命中/回避率 :" + sign + value;
 
                 case GearPropType.incARC: return "神秘之力";
                 case GearPropType.incAUT: return "原初之力";
@@ -387,6 +389,30 @@ namespace WzComparerR2.CharaSim
                     res[0] = "防御力";
                     res[1] = sign + value + "%";
                     return res;
+                case GearPropType.incMDD:
+                    res[0] = "魔法防御力";
+                    res[1] = sign + value;
+                    return res;
+                case GearPropType.incMDDr:
+                    res[0] = "魔法防御力";
+                    res[1] = sign + value + "%";
+                    return res;
+                case GearPropType.incACC:
+                    res[0] = "命中值";
+                    res[1] = sign + value;
+                    return res;
+                case GearPropType.incACCr:
+                    res[0] = "命中率";
+                    res[1] = sign + value + "%";
+                    return res;
+                case GearPropType.incEVA:
+                    res[0] = "回避值";
+                    res[1] = sign + value;
+                    return res;
+                case GearPropType.incEVAr:
+                    res[0] = "回避率";
+                    res[1] = sign + value + "%";
+                    return res;
                 case GearPropType.incSpeed:
                     res[0] = "移动速度";
                     res[1] = sign + value;
@@ -404,9 +430,17 @@ namespace WzComparerR2.CharaSim
                     res[0] = "伤害";
                     res[1] = sign + value + "%";
                     return res;
+                case GearPropType.incCRT:
+                    res[0] = "爆击率";
+                    res[1] = sign + value;
+                    return res;
                 case GearPropType.incCr:
                     res[0] = "爆击率";
                     res[1] = sign + value + "%";
+                    return res;
+                case GearPropType.incCRD:
+                    res[0] = "暴击伤害";
+                    res[1] = sign + value;
                     return res;
                 case GearPropType.incCDr:
                     res[0] = "暴击伤害";
@@ -544,7 +578,12 @@ namespace WzComparerR2.CharaSim
                 case GearPropType.CuttableCount:
                     res[0] = $" #$r(可使用剪刀次数：{value} / {value})#";
                     return res;
-
+                case GearPropType.noPrism:
+                    res[0] = $"#$r不可使用棱镜#";
+                    return res;
+                case GearPropType.reissueBan:
+                    res[0] = $"#$r不可重新发放#";
+                    return res;
                 case GearPropType.incEXPr:
                 default: return res;
             }
@@ -730,6 +769,7 @@ namespace WzComparerR2.CharaSim
                 case GearType.head_n: return "皮肤";
                 case GearType.face:
                 case GearType.face2:
+                case GearType.face3:
                 case GearType.face_n: return "脸型";
                 case GearType.hair:
                 case GearType.hair2:
@@ -883,6 +923,9 @@ namespace WzComparerR2.CharaSim
                 case GearType.celestialLight: return "星光权杖";
                 case GearType.compass: return "引航指针";
 
+                case GearType.onmyoSen: return "阴阳扇";
+                case GearType.kannaReifu: return "灵符";
+
                 case GearType.arcaneSymbol: return "神秘徽章";
                 case GearType.authenticSymbol: return "原初徽章";
                 case GearType.grandAuthenticSymbol: return "豪华原初徽章";
@@ -989,7 +1032,8 @@ namespace WzComparerR2.CharaSim
                 case GearType.katana:
                 case GearType.kodachi:
                 case GearType.kodachi2: return GetExtraJobReqString(41);
-                case GearType.fan: return "阴阳师可佩戴";
+                case GearType.fan:
+                case GearType.kannaReifu: return "阴阳师可佩戴";
 
                 //5xxx
                 case GearType.soulShield: return "米哈尔可佩戴";
@@ -1244,6 +1288,8 @@ namespace WzComparerR2.CharaSim
                     return value == 0 ? "普通宠物 (不可与其它普通宠物重复使用)" : "多重宠物 (最多可与其它3个宠物重复使用)";
                 case ItemPropType.permanent:
                     return value == 0 ? null : "可以一直使用魔法的神奇宠物。";
+                case ItemPropType.saveWhenLogout:
+                    return value == 0 ? null : "可离线保存";
                 case ItemPropType.mintable:
                     return GetGearPropString(GearPropType.mintable, value);
                 default:

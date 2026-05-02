@@ -54,6 +54,13 @@ namespace WzComparerR2
                     encoder.OutputFileExtension = config.FFmpegOutputFileExtension;
                 }
             });
+
+            registeredEncoders.Add(4, new AnimateEncoderProvider<BuildInGifEncoder>
+            {
+                ID = 4,
+                Name = nameof(BuildInGifEncoder),
+                CreateEncoderCallback = () => new BuildInGifEncoder(),
+            });
         }
 
         public static GifEncoder CreateEncoder(ImageHandlerConfig config)

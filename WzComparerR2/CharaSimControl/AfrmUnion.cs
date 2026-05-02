@@ -31,6 +31,9 @@ namespace WzComparerR2.CharaSimControl
         private Point newLocation;
         private Character character;
         private ContextMenuStrip menu;
+        private ACtrlVScroll vScroll;
+        private ACtrlVScroll vScroll2;
+        private ACtrlVScroll vScroll3;
         private ACtrlButton btnClose;
         private ACtrlButton btnAttacker;
         private ACtrlButton btnArtifact;
@@ -66,6 +69,9 @@ namespace WzComparerR2.CharaSimControl
         private bool UIchampion = false;
         private bool UIdeploy = true;
         private bool UIapply = false;
+        private int scrollValue = 0;
+        private int scrollValue2 = 0;
+        private int scrollValue3 = 0;
         public string union_level = "9500";
         public string union_grade = "그랜드 마스터 유니온 4";
         private string attackers = "39";
@@ -85,10 +91,10 @@ namespace WzComparerR2.CharaSimControl
         public UnionInnerStat[] union_inner_stat = Array.Empty<UnionInnerStat>();
         public UnionChampion[] union_champion = Array.Empty<UnionChampion>();
         public UnionBadgeInfo[] champion_badge_total_info = Array.Empty<UnionBadgeInfo>();
-        public UnionRaiderStat[] union_rader_stat = Array.Empty<UnionRaiderStat>(); 
-        public UnionOccupiedStat[] union_occupied_stat = Array.Empty<UnionOccupiedStat>();
         public UnionArtifactEffect[] union_artifact_effect = Array.Empty<UnionArtifactEffect>();
         public UnionArtifactCrystal[] union_artifact_crystal = Array.Empty<UnionArtifactCrystal>();
+        public List<string> union_raider_stat = new List<string>();
+        public List<string> union_occupied_stat = new List<string>();
         public int union_preset = 1;
         private bool waitForRefresh;
 
@@ -129,16 +135,6 @@ namespace WzComparerR2.CharaSimControl
         {
             public int champion_slot { get; set; }
             public string champion_grade { get; set; }
-        }
-
-        public class UnionRaiderStat
-        {
-
-        }
-
-        public class UnionOccupiedStat
-        {
-
         }
 
         public class UnionBadgeInfo
@@ -183,6 +179,102 @@ namespace WzComparerR2.CharaSimControl
             this.menu.Items.Add(new ToolStripMenuItem("保存PNG", null, tsmiSave_Click));
             this.MouseClick += AfrmUnion_MouseClick;
 
+            this.vScroll = new ACtrlVScroll();  //攻击队员效果滚轮
+
+            this.vScroll.PicBase.Normal = new BitmapOrigin(Resource.mapleUnion_attackerSetting_scroll_attackerScroll_enabled_base);
+            this.vScroll.PicBase.Disabled = new BitmapOrigin(Resource.mapleUnion_attackerSetting_scroll_attackerScroll_disabled_base);
+
+            this.vScroll.BtnPrev.Normal = new BitmapOrigin(Resource.mapleUnion_attackerSetting_scroll_attackerScroll_enabled_prev0);
+            this.vScroll.BtnPrev.Pressed = new BitmapOrigin(Resource.mapleUnion_attackerSetting_scroll_attackerScroll_enabled_prev1);
+            this.vScroll.BtnPrev.MouseOver = new BitmapOrigin(Resource.mapleUnion_attackerSetting_scroll_attackerScroll_enabled_prev2);
+            this.vScroll.BtnPrev.Disabled = new BitmapOrigin(Resource.mapleUnion_attackerSetting_scroll_attackerScroll_enabled_prev0);
+            this.vScroll.BtnPrev.Size = this.vScroll.BtnPrev.Normal.Bitmap.Size;
+            this.vScroll.BtnPrev.Location = new Point(0, 0);
+
+            this.vScroll.BtnNext.Normal = new BitmapOrigin(Resource.mapleUnion_attackerSetting_scroll_attackerScroll_enabled_next0);
+            this.vScroll.BtnNext.Pressed = new BitmapOrigin(Resource.mapleUnion_attackerSetting_scroll_attackerScroll_enabled_next1);
+            this.vScroll.BtnNext.MouseOver = new BitmapOrigin(Resource.mapleUnion_attackerSetting_scroll_attackerScroll_enabled_next2);
+            this.vScroll.BtnNext.Disabled = new BitmapOrigin(Resource.mapleUnion_attackerSetting_scroll_attackerScroll_enabled_next0);
+            this.vScroll.BtnNext.Size = this.vScroll.BtnNext.Normal.Bitmap.Size;
+            this.vScroll.BtnNext.Location = new Point(0, 117);
+
+            this.vScroll.BtnThumb.Normal = new BitmapOrigin(Resource.mapleUnion_attackerSetting_scroll_attackerScroll_enabled_thumb0);
+            this.vScroll.BtnThumb.Pressed = new BitmapOrigin(Resource.mapleUnion_attackerSetting_scroll_attackerScroll_enabled_thumb1);
+            this.vScroll.BtnThumb.MouseOver = new BitmapOrigin(Resource.mapleUnion_attackerSetting_scroll_attackerScroll_enabled_thumb2);
+            this.vScroll.BtnThumb.Size = this.vScroll.BtnThumb.Normal.Bitmap.Size;
+
+            this.vScroll.Location = new Point(805, 544);
+            this.vScroll.Size = new Size(5, 145);
+            this.vScroll.ScrollableLocation = new Point(640, 544);
+            this.vScroll.ScrollableSize = new Size(175, 145);
+            this.vScroll.Value = 0;
+            this.vScroll.ValueChanged += new EventHandler(vScroll_ValueChanged);
+            this.vScroll.ChildButtonStateChanged += new EventHandler(aCtrl_RefreshCall);
+
+            this.vScroll2 = new ACtrlVScroll();  //攻击队占领效果滚轮
+
+            this.vScroll2.PicBase.Normal = new BitmapOrigin(Resource.mapleUnion_attackerSetting_scroll_attackerScroll_enabled_base);
+            this.vScroll2.PicBase.Disabled = new BitmapOrigin(Resource.mapleUnion_attackerSetting_scroll_attackerScroll_disabled_base);
+
+            this.vScroll2.BtnPrev.Normal = new BitmapOrigin(Resource.mapleUnion_attackerSetting_scroll_attackerScroll_enabled_prev0);
+            this.vScroll2.BtnPrev.Pressed = new BitmapOrigin(Resource.mapleUnion_attackerSetting_scroll_attackerScroll_enabled_prev1);
+            this.vScroll2.BtnPrev.MouseOver = new BitmapOrigin(Resource.mapleUnion_attackerSetting_scroll_attackerScroll_enabled_prev2);
+            this.vScroll2.BtnPrev.Disabled = new BitmapOrigin(Resource.mapleUnion_attackerSetting_scroll_attackerScroll_enabled_prev0);
+            this.vScroll2.BtnPrev.Size = this.vScroll.BtnPrev.Normal.Bitmap.Size;
+            this.vScroll2.BtnPrev.Location = new Point(0, 0);
+
+            this.vScroll2.BtnNext.Normal = new BitmapOrigin(Resource.mapleUnion_attackerSetting_scroll_attackerScroll_enabled_next0);
+            this.vScroll2.BtnNext.Pressed = new BitmapOrigin(Resource.mapleUnion_attackerSetting_scroll_attackerScroll_enabled_next1);
+            this.vScroll2.BtnNext.MouseOver = new BitmapOrigin(Resource.mapleUnion_attackerSetting_scroll_attackerScroll_enabled_next2);
+            this.vScroll2.BtnNext.Disabled = new BitmapOrigin(Resource.mapleUnion_attackerSetting_scroll_attackerScroll_enabled_next0);
+            this.vScroll2.BtnNext.Size = this.vScroll.BtnNext.Normal.Bitmap.Size;
+            this.vScroll2.BtnNext.Location = new Point(0, 117);
+
+            this.vScroll2.BtnThumb.Normal = new BitmapOrigin(Resource.mapleUnion_attackerSetting_scroll_attackerScroll_enabled_thumb0);
+            this.vScroll2.BtnThumb.Pressed = new BitmapOrigin(Resource.mapleUnion_attackerSetting_scroll_attackerScroll_enabled_thumb1);
+            this.vScroll2.BtnThumb.MouseOver = new BitmapOrigin(Resource.mapleUnion_attackerSetting_scroll_attackerScroll_enabled_thumb2);
+            this.vScroll2.BtnThumb.Size = this.vScroll.BtnThumb.Normal.Bitmap.Size;
+
+            this.vScroll2.Location = new Point(990, 544);
+            this.vScroll2.Size = new Size(5, 145);
+            this.vScroll2.ScrollableLocation = new Point(825, 544);
+            this.vScroll2.ScrollableSize = new Size(175, 145);
+            this.vScroll2.Value = 0;
+            this.vScroll2.ValueChanged += new EventHandler(vScroll2_ValueChanged);
+            this.vScroll2.ChildButtonStateChanged += new EventHandler(aCtrl_RefreshCall);
+
+            this.vScroll3 = new ACtrlVScroll();  //神器效果滚轮
+
+            this.vScroll3.PicBase.Normal = new BitmapOrigin(Resource.mapleUnion_attackerSetting_scroll_attackerScroll_enabled_base);
+            this.vScroll3.PicBase.Disabled = new BitmapOrigin(Resource.mapleUnion_attackerSetting_scroll_attackerScroll_disabled_base);
+
+            this.vScroll3.BtnPrev.Normal = new BitmapOrigin(Resource.mapleUnion_attackerSetting_scroll_attackerScroll_enabled_prev0);
+            this.vScroll3.BtnPrev.Pressed = new BitmapOrigin(Resource.mapleUnion_attackerSetting_scroll_attackerScroll_enabled_prev1);
+            this.vScroll3.BtnPrev.MouseOver = new BitmapOrigin(Resource.mapleUnion_attackerSetting_scroll_attackerScroll_enabled_prev2);
+            this.vScroll3.BtnPrev.Disabled = new BitmapOrigin(Resource.mapleUnion_attackerSetting_scroll_attackerScroll_enabled_prev0);
+            this.vScroll3.BtnPrev.Size = this.vScroll.BtnPrev.Normal.Bitmap.Size;
+            this.vScroll3.BtnPrev.Location = new Point(0, 0);
+
+            this.vScroll3.BtnNext.Normal = new BitmapOrigin(Resource.mapleUnion_attackerSetting_scroll_attackerScroll_enabled_next0);
+            this.vScroll3.BtnNext.Pressed = new BitmapOrigin(Resource.mapleUnion_attackerSetting_scroll_attackerScroll_enabled_next1);
+            this.vScroll3.BtnNext.MouseOver = new BitmapOrigin(Resource.mapleUnion_attackerSetting_scroll_attackerScroll_enabled_next2);
+            this.vScroll3.BtnNext.Disabled = new BitmapOrigin(Resource.mapleUnion_attackerSetting_scroll_attackerScroll_enabled_next0);
+            this.vScroll3.BtnNext.Size = this.vScroll.BtnNext.Normal.Bitmap.Size;
+            this.vScroll3.BtnNext.Location = new Point(0, 117);
+
+            this.vScroll3.BtnThumb.Normal = new BitmapOrigin(Resource.mapleUnion_attackerSetting_scroll_attackerScroll_enabled_thumb0);
+            this.vScroll3.BtnThumb.Pressed = new BitmapOrigin(Resource.mapleUnion_attackerSetting_scroll_attackerScroll_enabled_thumb1);
+            this.vScroll3.BtnThumb.MouseOver = new BitmapOrigin(Resource.mapleUnion_attackerSetting_scroll_attackerScroll_enabled_thumb2);
+            this.vScroll3.BtnThumb.Size = this.vScroll.BtnThumb.Normal.Bitmap.Size;
+
+            this.vScroll3.Location = new Point(990, 544);
+            this.vScroll3.Size = new Size(5, 145);
+            this.vScroll3.ScrollableLocation = new Point(640, 544);
+            this.vScroll3.ScrollableSize = new Size(360, 145);
+            this.vScroll3.Value = 0;
+            this.vScroll3.ValueChanged += new EventHandler(vScroll3_ValueChanged);
+            this.vScroll3.ChildButtonStateChanged += new EventHandler(aCtrl_RefreshCall);
+
             this.btnClose = new ACtrlButton(); //主页关闭按钮
             this.btnClose.Normal = new BitmapOrigin(Resource.mapleUnion_attackerSetting_buttonclose_normal_0);
             this.btnClose.Pressed = new BitmapOrigin(Resource.mapleUnion_attackerSetting_buttonclose_pressed_0);
@@ -200,7 +292,6 @@ namespace WzComparerR2.CharaSimControl
             this.btnAttacker.Disabled = new BitmapOrigin(Resource.mapleUnion_buttonattackerSetting_disabled_0);
             this.btnAttacker.Location = new Point(0, 12);
             this.btnAttacker.Size = new Size(29, 122);
-            this.btnAttacker.Visible = false;
             this.btnAttacker.ButtonStateChanged += new EventHandler(aCtrl_RefreshCall);
             this.btnAttacker.MouseClick += new MouseEventHandler(btnAttacker_MouseClick);
 
@@ -478,6 +569,9 @@ namespace WzComparerR2.CharaSimControl
         {
             get
             {
+                yield return this.vScroll;
+                yield return this.vScroll2;
+                yield return this.vScroll3;
                 yield return this.btnClose;
                 yield return this.btnAttacker;
                 yield return this.btnArtifact;
@@ -525,6 +619,7 @@ namespace WzComparerR2.CharaSimControl
             if (Bitmap != null)
                 Bitmap.Dispose();
 
+            control_event();
             Point baseOffsetnew = new Point(0, 0);
             Size size = Resource.mapleUnion_attackerSetting_backgrnd.Size;
             this.newLocation = new Point(this.Location.X + this.baseOffset.X - baseOffsetnew.X,
@@ -554,6 +649,42 @@ namespace WzComparerR2.CharaSimControl
             this.Bitmap = union;
         }
 
+        private void control_event()
+        {
+            this.btnAttacker.Visible = UIartifact || UIchampion;
+            this.btnArtifact.Visible = UIattacker || UIchampion;
+            this.btnChampion.Visible = UIattacker || UIartifact;
+            this.btnLeft.Visible = UIattacker;
+            this.btnRight.Visible = UIattacker;
+            this.btnpresetEdit.Visible = UIattacker && UIdeploy && !UIapply;
+            this.btnresetApply.Visible = UIattacker && UIdeploy && !UIapply;
+            //this.btnpresetSave.Visible = UIattacker && !UIdeploy;
+            //this.btnrollback.Visible = false;
+            //this.btnclear.Visible = false;
+            //this.btnSTR.Visible = UIattacker && !UIdeploy;
+            //this.btnDEX.Visible = UIattacker && !UIdeploy;
+            //this.btnINT.Visible = UIattacker && !UIdeploy;
+            //this.btnLUK.Visible = UIattacker && !UIdeploy;
+            //this.btnPAD.Visible = UIattacker && !UIdeploy;
+            //this.btnMAD.Visible = UIattacker && !UIdeploy;
+            //this.btnHP.Visible = UIattacker && !UIdeploy;
+            //this.btnMP.Visible = UIattacker && !UIdeploy;
+            this.btnPresetPage1.Visible = UIattacker && union_preset != 1;
+            this.btnPresetPage2.Visible = UIattacker && union_preset != 2;
+            this.btnPresetPage3.Visible = UIattacker && union_preset != 3;
+            this.btnPresetPage4.Visible = UIattacker && union_preset != 4;
+            this.btnPresetPage5.Visible = UIattacker && union_preset != 5;
+            this.btnslotPointReset.Visible = UIartifact;
+            this.btnartifactSync.Visible = UIartifact;
+            this.btnhelp.Visible = UIattacker || UIartifact;
+            this.vScroll.Visible = UIattacker;
+            this.vScroll2.Visible = UIattacker;
+            this.vScroll3.Visible = UIartifact;
+            this.vScroll.Maximum = Math.Max(0, union_raider_stat.Count - 10);
+            this.vScroll2.Maximum = Math.Max(0, union_occupied_stat.Count - 10);
+            this.vScroll3.Maximum = Math.Max(0, union_artifact_effect.Length - 10);
+        }
+
         private void renderattacker(Graphics g)
         {
             g.TranslateTransform(baseOffset.X, baseOffset.Y);
@@ -572,59 +703,21 @@ namespace WzComparerR2.CharaSimControl
             }
             switch (union_preset)
             {
-                case 1: 
-                    this.btnPresetPage1.Visible = false;
-                    this.btnPresetPage2.Visible = true;
-                    this.btnPresetPage3.Visible = true;
-                    this.btnPresetPage4.Visible = true;
-                    this.btnPresetPage5.Visible = true;
-                    g.DrawImage(Resource.mapleUnion_attackerSetting_buttonpresetPage1_checked_0, 256, 490);
-                    break;
-                case 2:
-                    this.btnPresetPage1.Visible = true;
-                    this.btnPresetPage2.Visible = false;
-                    this.btnPresetPage3.Visible = true;
-                    this.btnPresetPage4.Visible = true;
-                    this.btnPresetPage5.Visible = true;
-                    g.DrawImage(Resource.mapleUnion_attackerSetting_buttonpresetPage2_checked_0, 276, 490); 
-                    break;
-                case 3:
-                    this.btnPresetPage1.Visible = true;
-                    this.btnPresetPage2.Visible = true;
-                    this.btnPresetPage3.Visible = false;
-                    this.btnPresetPage4.Visible = true;
-                    this.btnPresetPage5.Visible = true;
-                    g.DrawImage(Resource.mapleUnion_attackerSetting_buttonpresetPage3_checked_0, 296, 490); 
-                    break;
-                case 4:
-                    this.btnPresetPage1.Visible = true;
-                    this.btnPresetPage2.Visible = true;
-                    this.btnPresetPage3.Visible = true;
-                    this.btnPresetPage4.Visible = false;
-                    this.btnPresetPage5.Visible = true;
-                    g.DrawImage(Resource.mapleUnion_attackerSetting_buttonpresetPage4_checked_0, 316, 490); 
-                    break;
-                case 5:
-                    this.btnPresetPage1.Visible = true;
-                    this.btnPresetPage2.Visible = true;
-                    this.btnPresetPage3.Visible = true;
-                    this.btnPresetPage4.Visible = true;
-                    this.btnPresetPage5.Visible = false;
-                    g.DrawImage(Resource.mapleUnion_attackerSetting_buttonpresetPage5_checked_0, 336, 490); 
-                    break;
+                case 1: g.DrawImage(Resource.mapleUnion_attackerSetting_buttonpresetPage1_checked_0, 256, 490); break;
+                case 2: g.DrawImage(Resource.mapleUnion_attackerSetting_buttonpresetPage2_checked_0, 276, 490); break;
+                case 3: g.DrawImage(Resource.mapleUnion_attackerSetting_buttonpresetPage3_checked_0, 296, 490); break;
+                case 4: g.DrawImage(Resource.mapleUnion_attackerSetting_buttonpresetPage4_checked_0, 316, 490); break;
+                case 5: g.DrawImage(Resource.mapleUnion_attackerSetting_buttonpresetPage5_checked_0, 336, 490); break;
                 default: break;
             }
             if (UIdeploy)
             { 
                 if (UIapply)
                 {
-                    this.btnresetApply.Visible = true;
                 }
                 else
                 {
                     g.DrawImage(Resource.mapleUnion_attackerSetting_buttonpresetApplication_disabled_0, 366, 483);
-                    this.btnpresetEdit.Visible = true;
-                    this.btnresetApply.Visible = false;
                     this.btnpresetSave.Visible = false;
                     this.btnrollback.Visible = false;
                     this.btnclear.Visible = false;
@@ -653,7 +746,7 @@ namespace WzComparerR2.CharaSimControl
                         int center_x = block.block_control_point.x;
                         int center_y = block.block_control_point.y * (-1);
                         string blockName = "mapleUnion_attackerSetting_Board_sector_char_" + block_subfix;
-                        System.Drawing.Bitmap image = Resource.ResourceManager.GetObject(blockName) as System.Drawing.Bitmap;
+                        Bitmap image = Resource.ResourceManager.GetObject(blockName) as Bitmap;
                         g.DrawImage(image, new Rectangle(327 + center_x * 22, 241 + center_y * 22, image.Width, image.Height));
                         foreach (var pos in block_position)
                         {
@@ -712,8 +805,6 @@ namespace WzComparerR2.CharaSimControl
             }
             else
             {
-                this.btnpresetEdit.Visible = false;
-                this.btnresetApply.Visible = false;
                 this.btnpresetSave.Visible = true;
                 this.btnrollback.Visible = true;
                 this.btnclear.Visible = true;
@@ -726,6 +817,16 @@ namespace WzComparerR2.CharaSimControl
                 this.btnHP.Visible = false;
                 this.btnMP.Visible = false;
                 g.DrawImage(Resource.mapleUnion_attackerSetting_Board_modeOverlay_setting, 47, 18);
+            }
+            for (int i = 0; i < 10; i++)
+            {
+                string option = i + scrollValue < union_raider_stat.Count ? union_raider_stat[i + scrollValue] : "";
+                g.DrawString(option, GearGraphics.EquipDetailFont, GearGraphics.GrayBrush, 650, 544 + 14 * i);
+            }
+            for (int i = 0; i < 10; i++)
+            {
+                string option2 = i + scrollValue2 < union_occupied_stat.Count ? union_occupied_stat[i + scrollValue2] : "";
+                g.DrawString(option2, GearGraphics.EquipDetailFont, GearGraphics.GrayBrush, 835, 544 + 14 * i);
             }
             g.ResetTransform();
         }
@@ -748,19 +849,14 @@ namespace WzComparerR2.CharaSimControl
                 {
                     g.DrawImage(Resource.mapleUnion_artifactSetting_canvasdisabledSlot, 49 + 188 * (i % 3), 20 + 218 * (i / 3));
                     string artifact_disabled = "artifact_artifacts_" + i.ToString() + "_gradeInfo_0_disabled";
-                    System.Drawing.Bitmap image = Resource.ResourceManager.GetObject(artifact_disabled) as System.Drawing.Bitmap;
+                    Bitmap image = Resource.ResourceManager.GetObject(artifact_disabled) as Bitmap;
                     g.DrawImage(image, new Rectangle(49 + 188 * (i % 3) + 89 - image.Width / 2, 20 + 218 * (i / 3) + 105 - image.Height / 2, image.Width, image.Height));
                     g.DrawImage(Resource.mapleUnion_artifactSetting_canvasdisabled, 50 + 188 * (i % 3), 22 + 218 * (i / 3));
                 }
                 else
                 {
                     var crystal = union_artifact_crystal[i];
-                    var effect = union_artifact_effect[i];
                     int artifact_level = crystal.level;
-                    int effect_level = effect.level;
-                    string effect_name = effect.name;
-                    g.DrawString("Lv. " + effect_level.ToString(), GearGraphics.EquipDetailFont, GearGraphics.WhiteBrush, 653, 524 + 16 * i);
-                    g.DrawString(effect_name, GearGraphics.EquipDetailFont, GearGraphics.GrayBrush, 695, 524 + 16 * i);
                     if (artifact_level < 5)
                     {
                         g.DrawImage(Resource.artifact_slot_0_0, 49 + 188 * (i % 3), 20 + 218 * (i / 3));
@@ -794,6 +890,17 @@ namespace WzComparerR2.CharaSimControl
                     }
                 }
             }
+            for (int i = 0; i < 10; i++)
+            {
+                if (i + scrollValue3 < union_artifact_effect.Length)
+                {
+                    var effect = union_artifact_effect[i + scrollValue3];
+                    int effect_level = effect.level;
+                    string effect_name = effect.name;
+                    g.DrawString("Lv. " + effect_level.ToString(), GearGraphics.EquipDetailFont, GearGraphics.WhiteBrush, 653, 524 + 16 * i);
+                    g.DrawString(effect_name, GearGraphics.EquipDetailFont, GearGraphics.GrayBrush, 695, 524 + 16 * i);
+                }
+            }
             g.DrawImage(Resource.mapleUnion_artifactSetting_scrollslot_enabled_base, 608, 20);
             g.DrawString(artifact_ap, GearGraphics.ItemDetailFont, GearGraphics.WhiteBrush, 590f, 682f);
             g.ResetTransform();
@@ -818,7 +925,7 @@ namespace WzComparerR2.CharaSimControl
             g.DrawImage(Resource.mapleUnion_unionInfo_layerartifactExpGaugeBlank, 879, 250);
             int artifact_max_exp = artifact_exp_list[union_artifact_level - 1];
             System.Drawing.Bitmap layer = Resource.ResourceManager.GetObject("mapleUnion_unionInfo_layerartifactExpGauge") as System.Drawing.Bitmap;
-            g.DrawImage(layer, new Rectangle(881, 251, layer.Width * union_artifact_exp / artifact_max_exp, layer.Height));
+            g.DrawImage(layer, new Rectangle(881, 251, artifact_max_exp > 0 ? layer.Width * union_artifact_exp / artifact_max_exp : 0, layer.Height));
             g.ResetTransform();
         }
 
@@ -1045,18 +1152,8 @@ namespace WzComparerR2.CharaSimControl
             this.UIattacker = true;
             this.UIartifact = false;
             this.UIchampion = false;
-            this.btnAttacker.Visible = false;
-            this.btnArtifact.Visible = true;
-            this.btnChampion.Visible = true;
-            this.btnLeft.Visible = true;
-            this.btnRight.Visible = true;
-            this.btnslotPointReset.Visible = false;
-            this.btnartifactSync.Visible = false;
             this.UIdeploy = true;
             this.UIapply = false;
-            this.btnslotPointReset.Visible = false;
-            this.btnartifactSync.Visible = false;
-            this.btnhelp.Visible = true;
         }
         
         private void btnArtifact_MouseClick(object sender, EventArgs e)
@@ -1064,13 +1161,6 @@ namespace WzComparerR2.CharaSimControl
             this.UIattacker = false;
             this.UIartifact = true;
             this.UIchampion = false;
-            this.btnAttacker.Visible = true;
-            this.btnArtifact.Visible = false;
-            this.btnChampion.Visible = true;
-            this.btnLeft.Visible = false;
-            this.btnRight.Visible = false;
-            this.btnpresetEdit.Visible = false;
-            this.btnresetApply.Visible = false;
             this.btnpresetSave.Visible = false;
             this.btnrollback.Visible = false;
             this.btnclear.Visible = false;
@@ -1084,14 +1174,6 @@ namespace WzComparerR2.CharaSimControl
             this.btnMAD.Visible = false;
             this.btnHP.Visible = false;
             this.btnMP.Visible = false;
-            this.btnPresetPage1.Visible = false;
-            this.btnPresetPage2.Visible = false;
-            this.btnPresetPage3.Visible = false;
-            this.btnPresetPage4.Visible = false;
-            this.btnPresetPage5.Visible = false;
-            this.btnslotPointReset.Visible = true;
-            this.btnartifactSync.Visible = true;
-            this.btnhelp.Visible = true;
         }
 
         private void btnChampion_MouseClick(object sender, MouseEventArgs e)
@@ -1099,13 +1181,6 @@ namespace WzComparerR2.CharaSimControl
             this.UIattacker = false;
             this.UIartifact = false;
             this.UIchampion = true;
-            this.btnAttacker.Visible = true;
-            this.btnArtifact.Visible = true;
-            this.btnChampion.Visible = false;
-            this.btnLeft.Visible = false;
-            this.btnRight.Visible = false;
-            this.btnpresetEdit.Visible = false;
-            this.btnresetApply.Visible = false;
             this.btnpresetSave.Visible = false;
             this.btnrollback.Visible = false;
             this.btnclear.Visible = false;
@@ -1119,14 +1194,6 @@ namespace WzComparerR2.CharaSimControl
             this.btnMAD.Visible = false;
             this.btnHP.Visible = false;
             this.btnMP.Visible = false;
-            this.btnPresetPage1.Visible = false;
-            this.btnPresetPage2.Visible = false;
-            this.btnPresetPage3.Visible = false;
-            this.btnPresetPage4.Visible = false;
-            this.btnPresetPage5.Visible = false;
-            this.btnslotPointReset.Visible = false;
-            this.btnartifactSync.Visible = false;
-            this.btnhelp.Visible = false;
         }
 
         private void btnpresetEdit_MouseClick(object sender, MouseEventArgs e)
@@ -1174,6 +1241,24 @@ namespace WzComparerR2.CharaSimControl
         private void btnClose_MouseClick(object sender, MouseEventArgs e)
         {
             this.Visible = false;
+        }
+
+        private void vScroll_ValueChanged(object sender, EventArgs e)
+        {
+            scrollValue = vScroll.Value;
+            this.waitForRefresh = true;
+        }
+
+        private void vScroll2_ValueChanged(object sender, EventArgs e)
+        {
+            scrollValue2 = vScroll2.Value;
+            this.waitForRefresh = true;
+        }
+
+        private void vScroll3_ValueChanged(object sender, EventArgs e)
+        {
+            scrollValue3 = vScroll3.Value;
+            this.waitForRefresh = true;
         }
 
         protected override void OnMouseMove(MouseEventArgs e)

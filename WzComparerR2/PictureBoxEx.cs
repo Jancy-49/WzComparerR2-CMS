@@ -1040,9 +1040,9 @@ namespace WzComparerR2
             if (this.ShowInfo && this.XnaFont != null)
             {
                 UpdateInfoText();
-                sprite.Begin();
-                sprite.DrawStringEx(this.XnaFont, this.sbInfo, Vector2.Zero, Color.Black);
-                sprite.End();
+                //sprite.Begin();
+                //sprite.DrawStringEx(this.XnaFont, this.sbInfo, Vector2.Zero, Color.Black);
+                //sprite.End();
             }
         }
 
@@ -1069,18 +1069,24 @@ namespace WzComparerR2
             e.Handled = true;
         }
 
+        public event EventHandler<string> InfoChanged;
+
+        // 在 sbInfo 更新的地方调用此方法
+        private void OnInfoChanged()
+        {
+            InfoChanged?.Invoke(this, sbInfo.ToString());
+        }
+
         private void UpdateInfoText()
         {
             this.sbInfo.Clear();
             if (ShowOverlayAni)
             {
-                this.sbInfo.Append("애니메이션 중첩 중\n");
-                this.Padding = new System.Windows.Forms.Padding(0, 28, 0, 0);
+                this.sbInfo.Append("[动画嵌套中] ");
+                //this.Padding = new System.Windows.Forms.Padding(0, 28, 0, 0);
             }
-            else
-            {
-                this.Padding = new System.Windows.Forms.Padding(0, 14, 0, 0);
-            }
+            this.Padding = new System.Windows.Forms.Padding(0);
+
             if (this.Items.Count > 0)
             {
                 //var aniItem = this.Items[0];
@@ -1101,7 +1107,7 @@ namespace WzComparerR2
                 }
                 */
                 time = this.CurrentTime;
-                this.sbInfo.AppendFormat("pos: {0}, scale: {1:p0}, play: {2} / {3}",
+                this.sbInfo.AppendFormat("位置: {0}, 放大: {1:p0}, 播放: {2} / {3}",
                     aniItem.Position,
                     base.GlobalScale,
                     //aniItem.Length <= 0 ? 0 : (time % aniItem.Length),
@@ -1109,6 +1115,7 @@ namespace WzComparerR2
                     this.MaxLength <= 0 ? 0 : (time % this.MaxLength),
                     this.MaxLength);
             }
+            OnInfoChanged(); // 触发事件
         }
 
         public void DoPause()

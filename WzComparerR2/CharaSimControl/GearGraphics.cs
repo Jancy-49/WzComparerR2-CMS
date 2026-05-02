@@ -200,7 +200,8 @@ namespace WzComparerR2.CharaSimControl
         public static readonly Brush ItemPriceBrush = new SolidBrush(Color.FromArgb(119, 204, 255));
         public static readonly Brush ArchiveNameBrush = new SolidBrush(Color.FromArgb(206,255, 255, 234));
         public static readonly Brush WorldInfoBrush = new SolidBrush(Color.FromArgb(102, 255, 130, 121));
-        public static readonly Brush RegionBrush = new SolidBrush(Color.FromArgb(255, 0, 0));
+        public static readonly Brush RegionBrush = new SolidBrush(Color.FromArgb(86, 76, 63));
+        public static readonly Brush numBrush = new SolidBrush(Color.FromArgb(138, 255, 174, 156));
 
         public static readonly Brush Equip22BrushGray = new SolidBrush(Color.FromArgb(183, 191, 197));
         public static readonly Brush Equip22BrushDarkGray = new SolidBrush(Color.FromArgb(133, 145, 159));
@@ -297,7 +298,7 @@ namespace WzComparerR2.CharaSimControl
         /// 表示金色品质的装备名字画刷，额外属性为40~54。
         /// </summary>
         public static readonly Brush GearNameBrushF = new SolidBrush(gearGoldColor);
-        private static Color gearGreenColor = Color.FromArgb(204, 255, 0);
+        public static Color gearGreenColor = Color.FromArgb(204, 255, 0);
         /// <summary>
         /// 表示绿色品质的装备名字画刷，额外属性为55~69。
         /// </summary>
@@ -440,6 +441,21 @@ namespace WzComparerR2.CharaSimControl
                 r.UseGDIRenderer = false;
                 r.DrawPlainText(g, s, font, color, x, x1, ref y, height, alignment);
             }
+        }
+
+        public static void DrawFormattedDesc(Graphics g, string text, int x, int x1, ref int y, int height, Color textColor)
+        {
+            if (string.IsNullOrEmpty(text))
+                return;
+
+            var fontTable = new Dictionary<string, System.Drawing.Font>();
+            fontTable["c"] = GearGraphics.ArchiveNameFont;
+
+            var colorTable = new Dictionary<string, Color>();
+
+            text = text.Replace("#e", "#c").Replace("#n", "#");
+            GearGraphics.DrawString(g, text, GearGraphics.ArchiveNameFont, colorTable, fontTable, null,
+                x, x1, ref y, height, TextAlignment.Left, 0, textColor);
         }
 
         public static Bitmap EnlargeBitmap(Bitmap bitmap)

@@ -20,6 +20,7 @@ namespace WzComparerR2.CharaSim
             this.levelCommon = new List<Dictionary<string, string>>();
             this.common = new Dictionary<string, string>();
             this.PVPcommon = new Dictionary<string, string>();
+            this.info = new Dictionary<string, string>();
             this.RelationSkill = null;
             this.ReqSkill = new Dictionary<int, int>();
             this.Action = new List<string>();
@@ -38,6 +39,7 @@ namespace WzComparerR2.CharaSim
         private int perJobIndex;
         internal List<Dictionary<string, string>> levelCommon;
         internal Dictionary<string, string> common;
+        internal Dictionary<string, string> info;
 
         public Dictionary<string, string> Common
         {
@@ -48,6 +50,11 @@ namespace WzComparerR2.CharaSim
                 else
                     return common;
             }
+        }
+        
+        public Dictionary<string, string> Info
+        {
+            get { return info; }
         }
 
         public Dictionary<string, string> PVPcommon { get; private set; }
@@ -186,6 +193,7 @@ namespace WzComparerR2.CharaSim
         public int fixSkillAlpha { get; set; }
         public int tabIndex { get; set; }
         public int categoryIndex { get; set; }
+        public int setItemReason { get; set; }
         public bool Hasreq { get; set; }
         public bool HasreqLevel { get; set; }
         public DrawingPoint LT { get; set; }
@@ -359,6 +367,15 @@ namespace WzComparerR2.CharaSim
                             if (commonNode.Value != null && !(commonNode.Value is Wz_Vector))
                             {
                                 skill.PVPcommon[commonNode.Text] = commonNode.Value.ToString();
+                            }
+                        }
+                        break;
+                    case "info":
+                        foreach (Wz_Node commonNode in childNode.Nodes)
+                        {
+                            if (commonNode.Value != null && !(commonNode.Value is Wz_Vector))
+                            {
+                                skill.Info[commonNode.Text] = commonNode.Value.ToString();
                             }
                         }
                         break;
@@ -694,6 +711,9 @@ namespace WzComparerR2.CharaSim
                         break;
                     case "categoryIndex":
                         skill.categoryIndex = childNode.GetValue<int>();
+                        break;
+                    case "setItemReason":
+                        skill.setItemReason = childNode.GetValue<int>();
                         break;
                 }
             }

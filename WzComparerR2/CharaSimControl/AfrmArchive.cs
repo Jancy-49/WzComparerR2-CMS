@@ -1,19 +1,25 @@
 using CharaSimResource;
 using DevComponents.AdvTree;
+using SharpDX.Direct3D11;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Drawing;
+using System.Drawing.Imaging;
+using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Xml.Linq;
 using WzComparerR2.CharaSim;
 using WzComparerR2.Common;
 using WzComparerR2.Controls;
 using WzComparerR2.PluginBase;
 using WzComparerR2.WzLib;
+using static System.Net.Mime.MediaTypeNames;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace WzComparerR2.CharaSimControl
@@ -31,6 +37,7 @@ namespace WzComparerR2.CharaSimControl
 
         private ACtrlVScroll vScroll;
         private ACtrlVScroll vScroll2;
+        private ACtrlVScroll vScroll3;
         private ACtrlButton btnClose;
         private ACtrlButton btnClose2;
         private ACtrlButton btnClose3;
@@ -38,6 +45,8 @@ namespace WzComparerR2.CharaSimControl
         private ACtrlButton btnReward;
         private ACtrlButton btnHelp;
         private ACtrlButton btnWorldSelect;
+        private ACtrlButton btnWorldSelect2;
+        private ACtrlButton btnWorldSelect3;
         private ACtrlButton btnSupplement;
         private ACtrlButton btnBack;
         private ACtrlButton btnRegion;
@@ -67,26 +76,34 @@ namespace WzComparerR2.CharaSimControl
 
         private int scrollValue = 0;
         private int scrollValue2 = 0;
+        private int scrollValue3 = 0;
         private int selectedIndex = -1;
         private int selectedIndex2 = 0;
         private int selectedIndex3 = 0;
+        private int lastLoadedBookIndex = -1;
         private int lastLoadedNpcIndex = -1;
         private int lastLoadedMobIndex = -1;
         private int lastLoadedChapterIndex = -1;
         private int selectedTab = 0;
         private int selectedTitle = -1;
         private int selectedChapter = -1;
+        private int bookArea = -1;
         private int page = 0;
         private int maxpage = 0;
         private int detailpage = 0;
         private int maxdetailpage = 0;
+        private int maxcount = 0;
         private List<string> books = new List<String>();
         private List<string> mobs = new List<String>();
         private List<string> npcs = new List<String>();
+        private List<string> npcNodeNames = new List<String>();
+        private List<string> mobNodeNames = new List<String>();
         private List<string> specialNpcs = new List<String>();
+        private List<string> imageNpcs = new List<String>();
+        private List<string> imageMobs = new List<String>();
         private List<string> Infos = new List<String>();
         private bool mainPage = true;
-        private bool mapleWorldPage = false;
+        private bool bookPage = false;
         private bool detailPage = false;
         private bool extraPage = false;
         private bool showIllust = false;
@@ -133,6 +150,7 @@ namespace WzComparerR2.CharaSimControl
             this.vScroll.Size = new Size(5, 445);
             this.vScroll.ScrollableLocation = new Point(319, 79);
             this.vScroll.ScrollableSize = new Size(626, 468);
+            this.vScroll.Value = scrollValue;
             this.vScroll.Visible = false;
             this.vScroll.ValueChanged += new EventHandler(vScroll_ValueChanged);
             this.vScroll.ChildButtonStateChanged += new EventHandler(aCtrl_RefreshCall);
@@ -151,15 +169,45 @@ namespace WzComparerR2.CharaSimControl
             this.vScroll2.BtnNext.Location = new Point(0, 388);
 
             this.vScroll2.BtnThumb.Normal = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/Basic.img/VScr113/enabled/thumb0"), PluginBase.PluginManager.FindWz);
+            this.vScroll2.BtnThumb.Pressed = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/Basic.img/VScr113/enabled/thumb1"), PluginBase.PluginManager.FindWz);
+            this.vScroll2.BtnThumb.MouseOver = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/Basic.img/VScr113/enabled/thumb2"), PluginBase.PluginManager.FindWz);
             this.vScroll2.BtnThumb.Size = this.vScroll.BtnThumb.Normal.Bitmap.Size;
 
-            this.vScroll2.Location = new Point(894, 110);
+            this.vScroll2.Location = new Point(895, 111);
             this.vScroll2.Size = new Size(5, 388);
-            this.vScroll2.ScrollableLocation = new Point(832, 84);
+            this.vScroll2.ScrollableLocation = new Point(830, 111);
             this.vScroll2.ScrollableSize = new Size(92, 388);
+            this.vScroll2.Value = scrollValue2;
             this.vScroll2.Visible = false;
             this.vScroll2.ValueChanged += new EventHandler(vScroll2_ValueChanged);
             this.vScroll2.ChildButtonStateChanged += new EventHandler(aCtrl_RefreshCall);
+
+            this.vScroll3 = new ACtrlVScroll();  //文字区域滚轮
+
+            this.vScroll3.PicBase.Normal = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/Basic.img/VScr113/enabled/base"), PluginBase.PluginManager.FindWz);
+            this.vScroll3.PicBase.Disabled = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/Basic.img/VScr113/disabled/base"), PluginBase.PluginManager.FindWz);
+
+            this.vScroll3.BtnPrev.Normal = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/Basic.img/VScr113/enabled/prev0"), PluginBase.PluginManager.FindWz);
+            this.vScroll3.BtnPrev.Size = this.vScroll.BtnPrev.Normal.Bitmap.Size;
+            this.vScroll3.BtnPrev.Location = new Point(0, 0);
+
+            this.vScroll3.BtnNext.Normal = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/Basic.img/VScr113/enabled/next0"), PluginBase.PluginManager.FindWz);
+            this.vScroll3.BtnNext.Size = this.vScroll.BtnNext.Normal.Bitmap.Size;
+            this.vScroll3.BtnNext.Location = new Point(0, 388);
+
+            this.vScroll3.BtnThumb.Normal = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/Basic.img/VScr113/enabled/thumb0"), PluginBase.PluginManager.FindWz);
+            this.vScroll3.BtnThumb.Pressed = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/Basic.img/VScr113/enabled/thumb1"), PluginBase.PluginManager.FindWz);
+            this.vScroll3.BtnThumb.MouseOver = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/Basic.img/VScr113/enabled/thumb2"), PluginBase.PluginManager.FindWz);
+            this.vScroll3.BtnThumb.Size = this.vScroll.BtnThumb.Normal.Bitmap.Size;
+
+            this.vScroll3.Location = new Point(800, 110);
+            this.vScroll3.Size = new Size(5, 388);
+            this.vScroll3.ScrollableLocation = new Point(493, 113);
+            this.vScroll3.ScrollableSize = new Size(275, 386);
+            this.vScroll3.Value = scrollValue3;
+            this.vScroll3.Visible = false;
+            this.vScroll3.ValueChanged += new EventHandler(vScroll3_ValueChanged);
+            this.vScroll3.ChildButtonStateChanged += new EventHandler(aCtrl_RefreshCall);
 
             this.btnClose = new ACtrlButton();//主页关闭按钮
             this.btnClose.Normal = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/ChatBalloon.img/popupSayEx/Button/close/normal/0"), PluginBase.PluginManager.FindWz);
@@ -239,6 +287,29 @@ namespace WzComparerR2.CharaSimControl
             this.btnWorldSelect.ButtonStateChanged += new EventHandler(aCtrl_RefreshCall);
             this.btnWorldSelect.MouseClick += new MouseEventHandler(btnWorldSelect_MouseClick);
             //this.btnWorldSelect.MouseMove += new MouseEventHandler(btnWorldSelect_MouseMove);
+
+            this.btnWorldSelect2 = new ACtrlButton();
+            this.btnWorldSelect2.Normal = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIworldArchive.img/worldSelect/button:worldSelect_1/normal/0"), PluginBase.PluginManager.FindWz);
+            this.btnWorldSelect2.Pressed = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIworldArchive.img/worldSelect/button:worldSelect_1/pressed/0"), PluginBase.PluginManager.FindWz);
+            this.btnWorldSelect2.MouseOver = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIworldArchive.img/worldSelect/button:worldSelect_1/mouseOver/0"), PluginBase.PluginManager.FindWz);
+            this.btnWorldSelect2.Disabled = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIworldArchive.img/worldSelect/button:worldSelect_1/disabled/0"), PluginBase.PluginManager.FindWz);
+            this.btnWorldSelect2.Location = new Point(123, 115);
+            this.btnWorldSelect2.Size = new Size(255, 173);
+            this.btnWorldSelect2.Visible = false;
+            this.btnWorldSelect2.ButtonStateChanged += new EventHandler(aCtrl_RefreshCall);
+            this.btnWorldSelect2.MouseClick += new MouseEventHandler(btnWorldSelect2_MouseClick);
+            //this.btnWorldSelect2.MouseMove += new MouseEventHandler(btnWorldSelect_MouseMove);
+
+            this.btnWorldSelect3 = new ACtrlButton();
+            this.btnWorldSelect3.Normal = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIworldArchive.img/worldSelect/button:worldSelect_2/normal/0"), PluginBase.PluginManager.FindWz);
+            this.btnWorldSelect3.Pressed = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIworldArchive.img/worldSelect/button:worldSelect_2/pressed/0"), PluginBase.PluginManager.FindWz);
+            this.btnWorldSelect3.MouseOver = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIworldArchive.img/worldSelect/button:worldSelect_2/mouseOver/0"), PluginBase.PluginManager.FindWz);
+            this.btnWorldSelect3.Disabled = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIworldArchive.img/worldSelect/button:worldSelect_2/disabled/0"), PluginBase.PluginManager.FindWz);
+            this.btnWorldSelect3.Location = new Point(604, 164);
+            this.btnWorldSelect3.Size = new Size(255, 173);
+            this.btnWorldSelect3.ButtonStateChanged += new EventHandler(aCtrl_RefreshCall);
+            this.btnWorldSelect3.MouseClick += new MouseEventHandler(btnWorldSelect3_MouseClick);
+            //this.btnWorldSelect3.MouseMove += new MouseEventHandler(btnWorldSelect_MouseMove);
 
             this.btnSupplement = new ACtrlButton();  //进入Extra页面
             this.btnSupplement.Normal = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIworldArchive.img/worldSelect/button:supplement/normal/0"), PluginBase.PluginManager.FindWz);
@@ -383,7 +454,7 @@ namespace WzComparerR2.CharaSimControl
             this.btnBookMark3.ButtonStateChanged += new EventHandler(aCtrl_RefreshCall);
             //this.btnBookMark3.MouseClick += new MouseEventHandler(btnBookMark3_MouseClick);
 
-            this.btnChapterPrev = new ACtrlButton();
+            this.btnChapterPrev = new ACtrlButton();//章节上一页
             this.btnChapterPrev.Normal = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIWorldArchiveBonusBook.img/main/button:pagePrev/normal/0"), PluginBase.PluginManager.FindWz);
             this.btnChapterPrev.Pressed = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIWorldArchiveBonusBook.img/main/button:pagePrev/pressed/0"), PluginBase.PluginManager.FindWz);
             this.btnChapterPrev.MouseOver = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIWorldArchiveBonusBook.img/main/button:pagePrev/mouseOver/0"), PluginBase.PluginManager.FindWz);
@@ -393,7 +464,7 @@ namespace WzComparerR2.CharaSimControl
             this.btnChapterPrev.ButtonStateChanged += new EventHandler(aCtrl_RefreshCall);
             this.btnChapterPrev.MouseClick += new MouseEventHandler(btnChapterPrev_MouseClick);
 
-            this.btnChapterNext = new ACtrlButton();
+            this.btnChapterNext = new ACtrlButton();//章节下一页
             this.btnChapterNext.Normal = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIWorldArchiveBonusBook.img/main/button:pageNext/normal/0"), PluginBase.PluginManager.FindWz);
             this.btnChapterNext.Pressed = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIWorldArchiveBonusBook.img/main/button:pageNext/pressed/0"), PluginBase.PluginManager.FindWz);
             this.btnChapterNext.MouseOver = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIWorldArchiveBonusBook.img/main/button:pageNext/mouseOver/0"), PluginBase.PluginManager.FindWz);
@@ -408,32 +479,7 @@ namespace WzComparerR2.CharaSimControl
 
         private void btns()
         {
-            var nodes = PluginManager.FindWz($@"Etc/worldArchive.img/collectionInfo/0").Nodes;
-            int count = nodes.Count;
-            this.vScroll.Value = scrollValue;
-            this.vScroll2.Value = scrollValue2;
             int i = 0;
-            foreach (Wz_Node node in nodes)
-            {
-                if (!Regex.Match(node.Text, @"\d+$").Success) continue;
-                int buttonType = PluginManager.FindWz($@"Etc/worldArchive.img/collectionInfo/0/{node.Text}/buttonType").GetValueEx<Int32>(1);
-                var btnBook = new ACtrlButton();
-                btnBook.Normal = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz($"UI/_Canvas/UIworldArchive.img/regionSelect/list/button1/{buttonType}/normal/0"), PluginBase.PluginManager.FindWz);
-                btnBook.Pressed = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz($"UI/_Canvas/UIworldArchive.img/regionSelect/list/button1/{buttonType}/pressed/0"), PluginBase.PluginManager.FindWz);
-                btnBook.MouseOver = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz($"UI/_Canvas/UIworldArchive.img/regionSelect/list/button1/{buttonType}/mouseOver/0"), PluginBase.PluginManager.FindWz);
-                btnBook.Disabled = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz($"UI/_Canvas/UIworldArchive.img/regionSelect/list/button1/{buttonType}/disabled/0"), PluginBase.PluginManager.FindWz);
-                btnBook.Size = new Size(133, 185);
-                btnBook.Location = new Point(26 + 146 * (i % 4), 2 + 185 * (i / 4));
-                btnBook.Visible = false;
-                btnBook.ButtonStateChanged += new EventHandler(aCtrl_RefreshCall);
-                btnBook.MouseClick += new MouseEventHandler(btnBook_MouseClick);
-                btnBooks.Add(btnBook);
-                books.Add(node.Text);
-                i++;
-            }
-            this.vScroll.Maximum = i / 4 - 1;
-
-            i = 0;
             foreach (Wz_Node node in PluginManager.FindWz($@"UI/UIWorldArchiveBonusBook.img/info").Nodes)
             {
                 string name = PluginManager.FindWz($"UI/_Canvas/UIWorldArchiveBonusBook.img/info/{node.Text}/name").GetValueEx<string>(null);
@@ -456,7 +502,7 @@ namespace WzComparerR2.CharaSimControl
         {
             this.preRender();
             this.SetBitmap(this.Bitmap);
-            this.CaptionRectangle = new Rectangle(this.baseOffset, (mainPage || mapleWorldPage)? new Size(956, 30) : detailPage ? new Size(861, 40) : new Size(1044, 40));
+            this.CaptionRectangle = new Rectangle(this.baseOffset, (mainPage || bookPage)? new Size(956, 30) : detailPage ? new Size(861, 40) : new Size(1044, 40));
             this.Location = newLocation;
             base.Refresh();
         }
@@ -472,7 +518,7 @@ namespace WzComparerR2.CharaSimControl
             Size size = new Size(0, 0);
             if (mainPage)
                 size = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIworldArchive.img/worldSelect/backgrnd"), PluginBase.PluginManager.FindWz).Bitmap.Size;
-            else if (mapleWorldPage)
+            else if (bookPage)
                 size = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIworldArchive.img/regionSelect/main/backgrnd"), PluginBase.PluginManager.FindWz).Bitmap.Size;
             else if (detailPage && selectedIndex > -1)
                 size = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIworldArchive.img/detail/main/backgrnd"), PluginBase.PluginManager.FindWz).Bitmap.Size;
@@ -492,7 +538,7 @@ namespace WzComparerR2.CharaSimControl
             Graphics g = Graphics.FromImage(bitmap);
             if (mainPage)
                 render_base(g);
-            else if (mapleWorldPage)
+            else if (bookPage)
             {
                 render_mapleWorld(g);
                 render_book(g);
@@ -519,23 +565,49 @@ namespace WzComparerR2.CharaSimControl
                 string npcID = node.Text;
                 if(!specialNpcs.Contains(npcID)) specialNpcs.Add(npcID);
             }
-            this.btnWorldSelect.Visible = mainPage;
+            foreach (Wz_Node node in PluginManager.FindWz("UI/UIworldArchive.img/image/npc").Nodes)
+            {
+                string npcID = node.Text;
+                if(!imageNpcs.Contains(npcID)) imageNpcs.Add(npcID);
+            }
+            foreach (Wz_Node node in PluginManager.FindWz("UI/UIworldArchive.img/image/mob").Nodes)
+            {
+                string mobID = node.Text;
+                if(!imageMobs.Contains(mobID)) imageMobs.Add(mobID);
+            }
+            maxcount = 0;
+            foreach (Wz_Node node in PluginManager.FindWz("Etc/worldArchive.img/collectionInfo").Nodes)
+            {
+                foreach (Wz_Node node2 in node.Nodes)
+                {
+                    if (!Regex.Match(node2.Text, @"\d+$").Success) continue;
+                    string bookID = node2.Text;
+                    int mobcount = PluginManager.FindWz($@"Etc/worldArchive.img/collectionInfo/{node.Text}/{bookID}/mob").Nodes.Count;
+                    int npccount = PluginManager.FindWz($@"Etc/worldArchive.img/collectionInfo/{node.Text}/{bookID}/npc").Nodes.Count;
+                    maxcount += mobcount + npccount;
+                }
+            }
+            this.btnWorldSelect.Visible = mainPage && PluginManager.FindWz("Etc/worldArchive.img/collectionInfo/0/0") != null;
+            this.btnWorldSelect2.Visible = mainPage && PluginManager.FindWz("Etc/worldArchive.img/collectionInfo/1/0") != null;
+            this.btnWorldSelect3.Visible = mainPage && PluginManager.FindWz("Etc/worldArchive.img/collectionInfo/2/0") != null;
             this.btnClose.Visible = mainPage;
             this.btnClose2.Visible = extraPage;
             this.btnClose3.Visible = detailPage;
             this.btnClose4.Visible = showIllust;
-            this.btnReward.Visible = mainPage || mapleWorldPage;
-            this.btnHelp.Visible = mainPage || mapleWorldPage;
-            this.btnBack.Visible = mapleWorldPage;
-            this.vScroll.Visible = mapleWorldPage;
+            this.btnReward.Visible = mainPage || bookPage;
+            this.btnHelp.Visible = mainPage || bookPage;
+            this.btnBack.Visible = bookPage;
+            this.vScroll.Visible = bookPage;
             this.vScroll2.Visible = detailPage && selectedTab > 0;
+            this.vScroll3.Visible = detailPage;
             this.btnlistUp.Visible = detailPage && selectedTab > 0;
             this.btnlistDown.Visible = detailPage && selectedTab > 0;
             this.btnlistUp2.Visible = extraPage && tablePage2;
             this.btnlistDown2.Visible = extraPage && tablePage2;
             this.btnRegion.Visible = detailPage;
-            this.btnCharacter.Visible = detailPage;
-            this.btnMonster.Visible = detailPage;
+            this.btnCharacter.Visible = detailPage && npcs.Count > 0;
+            this.btnMonster.Visible = detailPage && mobs.Count > 0;
+            this.btnHidden.Visible = detailPage && selectedTab == 1 && specialNpcs.Contains(npcs[selectedIndex2]);
             this.btnRight.Visible = showIllust && page < maxpage - 1;
             this.btnLeft.Visible = showIllust && page > 0 && maxpage > 0;
             this.btnTitle.Visible = extraPage && (tablePage2 || detailInfo);
@@ -544,13 +616,43 @@ namespace WzComparerR2.CharaSimControl
             this.btnBookMark3.Visible = extraPage && (tablePage2 || detailInfo) && selectedTitle == 2;
             this.btnChapterPrev.Visible = extraPage && detailInfo && detailpage > 0 && maxdetailpage > 0;
             this.btnChapterNext.Visible = extraPage && detailInfo && detailpage < maxdetailpage && maxdetailpage > 0;
-            foreach (var btnbook in btnBooks)
+            if (bookArea > -1 && bookArea != lastLoadedBookIndex)
             {
-                int i = btnBooks.IndexOf(btnbook);
-                int y = 2 + 185 * (i / 4 - scrollValue);
-                btnbook.Visible = y >= 2 && mapleWorldPage;
-                btnbook.Location = new Point(26 + 146 * (i % 4), y);
+                lastLoadedBookIndex = bookArea;
+                btnBooks.Clear();
+                books.Clear();
+                int i = 0;
+                var nodes = PluginManager.FindWz($@"Etc/worldArchive.img/collectionInfo/{bookArea}").Nodes;
+                foreach (Wz_Node node in nodes)
+                {
+                    if (!Regex.Match(node.Text, @"\d+$").Success) continue;
+                    int buttonType = PluginManager.FindWz($@"Etc/worldArchive.img/collectionInfo/{bookArea}/{node.Text}/buttonType").GetValueEx<Int32>(1);
+                    var btnBook = new ACtrlButton();
+                    btnBook.Normal = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz($"UI/_Canvas/UIworldArchive.img/regionSelect/list/button/{buttonType}/normal/0"), PluginBase.PluginManager.FindWz);
+                    btnBook.Pressed = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz($"UI/_Canvas/UIworldArchive.img/regionSelect/list/button/{buttonType}/pressed/0"), PluginBase.PluginManager.FindWz);
+                    btnBook.MouseOver = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz($"UI/_Canvas/UIworldArchive.img/regionSelect/list/button/{buttonType}/mouseOver/0"), PluginBase.PluginManager.FindWz);
+                    btnBook.Disabled = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz($"UI/_Canvas/UIworldArchive.img/regionSelect/list/button/{buttonType}/disabled/0"), PluginBase.PluginManager.FindWz);
+                    btnBook.Size = new Size(133, 185);
+                    btnBook.Location = new Point(26 + 146 * (i % 4), 2 + 185 * (i / 4));
+                    btnBook.Visible = bookPage && 2 + 185 * (i / 4) >= 2;
+                    btnBook.ButtonStateChanged += new EventHandler(aCtrl_RefreshCall);
+                    btnBook.MouseClick += new MouseEventHandler(btnBook_MouseClick);
+                    btnBooks.Add(btnBook);
+                    books.Add(node.Text);
+                    i++;
+                }
+                this.vScroll.Maximum = i / 4 - 1;
             }
+            else
+            {
+                for (int i = 0; i < btnBooks.Count; i++)
+                {
+                    int y = 2 + 185 * (i / 4 - scrollValue);
+                    btnBooks[i].Visible = bookPage && y >= 2;
+                    btnBooks[i].Location = new Point(26 + 146 * (i % 4), y);
+                }
+            }
+
             foreach (var title in Titles)
             {
                 title.Visible = tablePage && extraPage;
@@ -561,28 +663,29 @@ namespace WzComparerR2.CharaSimControl
                 int i = 0;
                 btnNpcs.Clear();
                 npcs.Clear();
-                var Npcs = PluginManager.FindWz($@"Etc/worldArchive.img/collectionInfo/0/{selectedIndex}/npc")?.Nodes;
+                var Npcs = PluginManager.FindWz($@"Etc/worldArchive.img/collectionInfo/{bookArea}/{books[selectedIndex]}/npc")?.Nodes;
                 foreach (Wz_Node node in Npcs)
                 {
-                    string npcID = PluginManager.FindWz($@"Etc/worldArchive.img/collectionInfo/0/{selectedIndex}/npc/{node.Text}/id/0").GetValueEx<string>(null);
+                    string npcID = PluginManager.FindWz($@"Etc/worldArchive.img/collectionInfo/{bookArea}/{books[selectedIndex]}/npc/{node.Text}/id/0").GetValueEx<string>(null);
                     var btnNpc = new ACtrlButton();
                     btnNpc.MouseOver = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz($"UI/_Canvas/UIworldArchive.img/detail/list/slotSelected"), PluginBase.PluginManager.FindWz);
                     btnNpc.Size = new Size(54, 54);
-                    btnNpc.Location = new Point(840, 110 + 55 * (i - scrollValue2));
+                    btnNpc.Location = new Point(840, 111 + 55 * (i - scrollValue2));
                     btnNpc.Visible = (i - scrollValue2) >= 0 && (i - scrollValue2) <= 6 && detailPage;
                     btnNpc.ButtonStateChanged += new EventHandler(aCtrl_RefreshCall);
                     btnNpc.MouseClick += new MouseEventHandler(btnNpc_MouseClick);
                     btnNpcs.Add(btnNpc);
                     npcs.Add(npcID);
+                    npcNodeNames.Add(node.Text);
                     i++;
                 }
-                this.vScroll2.Maximum = npcs.Count - 7;
+                this.vScroll2.Maximum = npcs.Count > 7 ? npcs.Count - 7 : 0;
             }
             else
             {
                 for (int i = 0; i < btnNpcs.Count; i++)
                 {
-                    btnNpcs[i].Location = new Point(840, 110 + 55 * (i - scrollValue2));
+                    btnNpcs[i].Location = new Point(840, 111 + 55 * (i - scrollValue2));
                     btnNpcs[i].Visible = (i - scrollValue2) >= 0 && (i - scrollValue2) <= 6 && selectedTab == 1 && detailPage;
                 }
             }
@@ -592,28 +695,29 @@ namespace WzComparerR2.CharaSimControl
                 btnMobs.Clear();
                 mobs.Clear();
                 int i = 0;
-                var Mobs = PluginManager.FindWz($@"Etc/worldArchive.img/collectionInfo/0/{selectedIndex}/mob")?.Nodes;
+                var Mobs = PluginManager.FindWz($@"Etc/worldArchive.img/collectionInfo/{bookArea}/{books[selectedIndex]}/mob")?.Nodes;
                 foreach (Wz_Node node in Mobs)
                 {
-                    string MobId = PluginManager.FindWz($@"Etc/worldArchive.img/collectionInfo/0/{selectedIndex}/mob/{node.Text}/id/0").GetValueEx<string>(null);
+                    string MobId = PluginManager.FindWz($@"Etc/worldArchive.img/collectionInfo/{bookArea}/{books[selectedIndex]}/mob/{node.Text}/id/0").GetValueEx<string>(null);
                     var btnMob = new ACtrlButton();
                     btnMob.MouseOver = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz($"UI/_Canvas/UIworldArchive.img/detail/list/slotSelected"), PluginBase.PluginManager.FindWz);
                     btnMob.Size = new Size(54, 54);
-                    btnMob.Location = new Point(840, 110 + 55 * (i - scrollValue2));
+                    btnMob.Location = new Point(840, 111 + 55 * (i - scrollValue2));
                     btnMob.Visible = (i - scrollValue2) >= 0 && (i - scrollValue2) <= 6 && selectedTab == 2 && detailPage;
                     btnMob.ButtonStateChanged += new EventHandler(aCtrl_RefreshCall);
                     btnMob.MouseClick += new MouseEventHandler(btnMob_MouseClick);
                     btnMobs.Add(btnMob);
                     mobs.Add(MobId);
+                    mobNodeNames.Add(node.Text);  // 存储节点名称
                     i++;
                 }
-                this.vScroll2.Maximum = mobs.Count - 7;
+                this.vScroll2.Maximum = mobs.Count > 7 ? mobs.Count - 7 : 0;
             }
             else
             {
                 for (int i = 0; i < btnMobs.Count; i++)
                 {
-                    btnMobs[i].Location = new Point(840, 110 + 55 * (i - scrollValue2));
+                    btnMobs[i].Location = new Point(840, 111 + 55 * (i - scrollValue2));
                     btnMobs[i].Visible = (i - scrollValue2) >= 0 && (i - scrollValue2) <= 6 && selectedTab == 2 && detailPage;
                 }
             }
@@ -653,9 +757,12 @@ namespace WzComparerR2.CharaSimControl
             g.TranslateTransform(baseOffset.X, baseOffset.Y);
             render_bitmap(g, "UI/_Canvas/UIworldArchive.img/worldSelect/backgrnd", 0, 0);
             render_bitmap(g, "UI/_Canvas/UIworldArchive.img/worldSelect/layer:rewardBase", 652, 42);
-            render_bitmap(g, "UI/_Canvas/UIworldArchive.img/worldSelect/button:worldSelect_1/disabled/0", 126, 159);
-            render_bitmap(g, "UI/_Canvas/UIworldArchive.img/worldSelect/button:worldSelect_1/disabled/0", 607, 208);
-
+            if (PluginManager.FindWz("Etc/worldArchive.img/collectionInfo/1/0") == null)
+                render_bitmap(g, "UI/_Canvas/UIworldArchive.img/worldSelect/button:worldSelect_1/disabled/0", 126, 159);
+            if (PluginManager.FindWz("Etc/worldArchive.img/collectionInfo/2/0") == null)
+                render_bitmap(g, "UI/_Canvas/UIworldArchive.img/worldSelect/button:worldSelect_2/disabled/0", 607, 208);
+            g.DrawString(maxcount.ToString(), GearGraphics.ItemDetailFont, GearGraphics.numBrush, new Point(698, 49));
+            g.DrawString(maxcount.ToString(), GearGraphics.ItemDetailFont, GearGraphics.numBrush, new Point(748, 49));
             foreach (AControl aCtrl in this.aControls)
             {
                 aCtrl.Draw(g);
@@ -670,11 +777,12 @@ namespace WzComparerR2.CharaSimControl
             render_bitmap(g, "UI/_Canvas/UIworldArchive.img/regionSelect/main/layer:cover", 319, 32);
             render_bitmap(g, "UI/_Canvas/UIworldArchive.img/regionSelect/main/layer:rewardBase", 652, 42);
             render_bitmap(g, "UI/_Canvas/UIworldArchive.img/regionSelect/main/layer:light", 319, 32);
-            render_bitmap(g, "UI/_Canvas/UIworldArchive.img/regionSelect/main/world/0", 43, 69);
-            string worldDesc = PluginManager.FindWz($@"Etc/worldArchive.img/collectionInfo/0/worldDesc").GetValueEx<string>(null).Replace("\\r\\n", "\r\n").Replace("\\n", "\n");
+            render_bitmap(g, $"UI/_Canvas/UIworldArchive.img/regionSelect/main/world/{bookArea}", 43, 69);
+            string worldDesc = PluginManager.FindWz($@"Etc/worldArchive.img/collectionInfo/{bookArea}/worldDesc").GetValueEx<string>(null).Replace("\\r\\n", "\r\n").Replace("\\n", "\n");
             int picH = 320;
-            GearGraphics.DrawPlainText(g, worldDesc, GearGraphics.ArchiveNameFont2, Color.FromArgb(255, 130, 102), 49, 280, ref picH, 12, WzComparerR2.Text.TextAlignment.Center);
-
+            GearGraphics.DrawPlainText(g, worldDesc, GearGraphics.ArchiveNameFont2, Color.FromArgb(86, 76, 63), 49, 280, ref picH, 12, WzComparerR2.Text.TextAlignment.Center);
+            g.DrawString(maxcount.ToString(), GearGraphics.ItemDetailFont, GearGraphics.numBrush, new Point(698, 49));
+            g.DrawString(maxcount.ToString(), GearGraphics.ItemDetailFont, GearGraphics.numBrush, new Point(748, 49));
             foreach (AControl mapleCtrl in this.mapleControls)
             {
                 mapleCtrl.Draw(g);
@@ -685,43 +793,53 @@ namespace WzComparerR2.CharaSimControl
         private void render_book(Graphics g)
         {
             g.TranslateTransform(BookRect.X, BookRect.Y);
-            foreach (AControl btn in this.bookControls)
+            Bitmap buffer = new Bitmap(623, 466, PixelFormat.Format32bppArgb);
+            using (Graphics gBuffer = Graphics.FromImage(buffer))
             {
-                btn.Draw(g);
+                gBuffer.Clear(Color.Transparent);
+                gBuffer.TranslateTransform(0, 0);
+                render_bitmap(gBuffer, "UI/_Canvas/UIworldArchive.img/regionSelect/list/basePattern", 0, 0);
+                render_bitmap(gBuffer, "UI/_Canvas/UIworldArchive.img/regionSelect/list/blockPattern", 0, 117);
+                render_bitmap(gBuffer, "UI/_Canvas/UIworldArchive.img/regionSelect/list/blockPattern", 0, 302);
+                foreach (AControl btn in this.bookControls)
+                {
+                    if (!btn.Visible) continue;
+                    btn.Draw(gBuffer);
+                }
             }
-            var nodes = PluginManager.FindWz($@"Etc/worldArchive.img/collectionInfo/0").Nodes;
+            Bitmap mask = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIworldArchive.img/regionSelect/list/mask/shader/0/texture/1"), PluginBase.PluginManager.FindWz).Bitmap;
+            Bitmap final = ApplyMaskWithOffset(buffer,mask, 0, 0, 0, 0);
+            g.DrawImage(final, new Point(0, 0));
+
+            var nodes = PluginManager.FindWz($@"Etc/worldArchive.img/collectionInfo/{bookArea}").Nodes;
             int count = nodes.Count;
             int i = 0;
             foreach (Wz_Node node in nodes)
             {
                 if (!Regex.Match(node.Text, @"\d+$").Success) continue;
-                int buttonType = PluginManager.FindWz($@"Etc/worldArchive.img/collectionInfo/0/{node.Text}/buttonType").GetValueEx<Int32>(1);
+                int buttonType = PluginManager.FindWz($@"Etc/worldArchive.img/collectionInfo/{bookArea}/{node.Text}/buttonType").GetValueEx<Int32>(1);
                 if (2 + 185 * (i / 4 - scrollValue) > 0)
                 {
-                    if (PluginBase.PluginManager.FindWz($@"Etc/worldArchive.img/collectionInfo/0/{node.Text}/regionName_MultiLine") != null)
+                    if (PluginBase.PluginManager.FindWz($@"Etc/worldArchive.img/collectionInfo/{bookArea}/{node.Text}/regionName_MultiLine") != null)
                     {
-                        string regionName_MultiLine = PluginManager.FindWz($@"Etc/worldArchive.img/collectionInfo/0/{node.Text}/regionName_MultiLine").GetValueEx<string>(null);
+                        string regionName_MultiLine = PluginManager.FindWz($@"Etc/worldArchive.img/collectionInfo/{bookArea}/{node.Text}/regionName_MultiLine").GetValueEx<string>(null);
                         string[] lines = regionName_MultiLine.Split(new[] { "\\n" }, StringSplitOptions.RemoveEmptyEntries);
-                        // 计算按钮的基准X坐标
-                        int buttonBaseX = 26 + 146 * (i % 4);
-                        int baseY = 2 + 185 * (i / 4 - scrollValue);
                         float lineHeight = GearGraphics.ArchiveNameFont2.GetHeight(g);
-
                         float line1Width = g.MeasureString(lines[0], GearGraphics.ArchiveNameFont2).Width;
                         float line2Width = g.MeasureString(lines[1], GearGraphics.ArchiveNameFont2).Width;
-
-                        g.DrawString(lines[0], GearGraphics.ArchiveNameFont2, GearGraphics.ArchiveNameBrush, buttonBaseX + (133 - line1Width) / 2, baseY + 120);
-                        g.DrawString(lines[1], GearGraphics.ArchiveNameFont2, GearGraphics.ArchiveNameBrush, buttonBaseX + (133 - line2Width) / 2, baseY + 120 + lineHeight);
+                        g.DrawString(lines[0], GearGraphics.ArchiveNameFont2, GearGraphics.ArchiveNameBrush, 26 + 146 * (i % 4) + (133 - line1Width) / 2, 2 + 185 * (i / 4 - scrollValue) + 120);
+                        g.DrawString(lines[1], GearGraphics.ArchiveNameFont2, GearGraphics.ArchiveNameBrush, 26 + 146 * (i % 4) + (133 - line2Width) / 2, 2 + 185 * (i / 4 - scrollValue) + 120 + lineHeight);
                     }
                     else
                     {
-                        string regionName = PluginManager.FindWz($@"Etc/worldArchive.img/collectionInfo/0/{node.Text}/regionName").GetValueEx<string>(null);
+                        string regionName = PluginManager.FindWz($@"Etc/worldArchive.img/collectionInfo/{bookArea}/{node.Text}/regionName").GetValueEx<string>(null);
                         float nameWidth = g.MeasureString(regionName, GearGraphics.ArchiveNameFont).Width;
                         g.DrawString(regionName, GearGraphics.ArchiveNameFont, GearGraphics.ArchiveNameBrush, 26 + 146 * (i % 4) + (133 - nameWidth) / 2, 2 + 185 * (i / 4 - scrollValue) + 124);
                     }
                 }
                 i++;
             }
+            vScroll.Draw(g);
             g.ResetTransform();
         }
 
@@ -732,80 +850,191 @@ namespace WzComparerR2.CharaSimControl
             {
                 case 0:
                     render_bitmap(g, "UI/_Canvas/UIworldArchive.img/detail/main/category/selected/0", 38, 0);
-                    render_bitmap(g, "UI/_Canvas/UIworldArchive.img/detail/main/category/normal/1", 137, 10);
-                    render_bitmap(g, "UI/_Canvas/UIworldArchive.img/detail/main/category/normal/2", 236, 10);
+                    if (npcs.Count > 0) render_bitmap(g, "UI/_Canvas/UIworldArchive.img/detail/main/category/normal/1", 137, 10);
+                    if (npcs.Count > 0 && mobs.Count > 0) render_bitmap(g, "UI/_Canvas/UIworldArchive.img/detail/main/category/normal/2", 236, 10);
+                    if (npcs.Count == 0 && mobs.Count > 0) render_bitmap(g, "UI/_Canvas/UIworldArchive.img/detail/main/category/normal/2", 137, 10);
                     break;
                 case 1:
                     render_bitmap(g, "UI/_Canvas/UIworldArchive.img/detail/main/category/normal/0", 38, 10);
                     render_bitmap(g, "UI/_Canvas/UIworldArchive.img/detail/main/category/selected/1", 137, 0);
-                    render_bitmap(g, "UI/_Canvas/UIworldArchive.img/detail/main/category/normal/2", 236, 10);
+                    if (npcs.Count > 0 && mobs.Count > 0) render_bitmap(g, "UI/_Canvas/UIworldArchive.img/detail/main/category/normal/2", 236, 10);
                     break;
                 case 2:
                     render_bitmap(g, "UI/_Canvas/UIworldArchive.img/detail/main/category/normal/0", 38, 10);
-                    render_bitmap(g, "UI/_Canvas/UIworldArchive.img/detail/main/category/normal/1", 137, 10);
-                    render_bitmap(g, "UI/_Canvas/UIworldArchive.img/detail/main/category/selected/2", 236, 0);
+                    if (npcs.Count > 0) render_bitmap(g, "UI/_Canvas/UIworldArchive.img/detail/main/category/normal/1", 137, 10);
+                    if (npcs.Count > 0) render_bitmap(g, "UI/_Canvas/UIworldArchive.img/detail/main/category/selected/2", 236, 0);
+                    if (npcs.Count == 0) render_bitmap(g, "UI/_Canvas/UIworldArchive.img/detail/main/category/selected/2", 137, 0);
                     break;
                 default: break;
             }
             render_bitmap(g, "UI/_Canvas/UIworldArchive.img/detail/main/backgrnd", 0, 0);
             switch (selectedTab)
             {
-                case 0: render_bitmap(g, $"UI/_Canvas/UIworldArchive.img/detail/main/regionillust/0/{books[selectedIndex]}", 77, 91);
-                    string regionName = PluginManager.FindWz($@"Etc/worldArchive.img/collectionInfo/0/{books[selectedIndex]}/regionName").GetValueEx<string>(null);
-                    string regionDesc = PluginManager.FindWz($@"Etc/worldArchive.img/collectionInfo/0/{books[selectedIndex]}/regionDesc").GetValueEx<string>(null).Replace("\\r\\n", "\r\n").Replace("\\n", "\n");
+                case 0:
+                    Bitmap mask = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIworldArchive.img/detail/main/mask_illust"), PluginBase.PluginManager.FindWz).Bitmap;
+                    Bitmap image = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz($"UI/_Canvas/UIworldArchive.img/detail/main/regionillust/{bookArea}/{books[selectedIndex]}"), PluginBase.PluginManager.FindWz).Bitmap;
+                    Bitmap final = ApplyMaskWithOffset(image, mask, 76, 91, 72, 86);
+                    g.DrawImage(final, 76, 91);
+                    //render_bitmap(g, $"UI/_Canvas/UIworldArchive.img/detail/main/regionillust/{bookArea}/{books[selectedIndex]}", 76, 91);
+                    string regionName = PluginManager.FindWz($@"Etc/worldArchive.img/collectionInfo/{bookArea}/{books[selectedIndex]}/regionName").GetValueEx<string>(null);
+                    string regionDesc = PluginManager.FindWz($@"Etc/worldArchive.img/collectionInfo/{bookArea}/{books[selectedIndex]}/regionDesc").GetValueEx<string>(null)?.Replace("\\r\\n", "\r\n").Replace("\\n", "\n");
                     g.DrawString(regionName, GearGraphics.ArchiveNameFont3, GearGraphics.RegionBrush, 235 - g.MeasureString(regionName, GearGraphics.ArchiveNameFont3).Width / 2, 456);
-                    int picH = 113;
-                    GearGraphics.DrawPlainText(g, regionDesc, GearGraphics.ArchiveNameFont, Color.FromArgb(255, 130, 102), 493, 753, ref picH, 20); 
+                    int totalLines = CalculateTextLines(regionDesc, GearGraphics.ArchiveNameFont, 265);
+                    int totalTextHeight = totalLines * 20;
+                    this.vScroll3.Maximum = totalTextHeight > 386 ? (totalTextHeight - 386) / 20 : 0;
+                    this.vScroll3.Visible = totalTextHeight > 386;
+                    Bitmap textBuffer = new Bitmap(275, 386, PixelFormat.Format32bppArgb);
+                    using (Graphics gText = Graphics.FromImage(textBuffer))
+                    {
+                        gText.Clear(Color.Transparent);
+                        gText.TextRenderingHint = System.Drawing.Text.TextRenderingHint.SingleBitPerPixelGridFit;
+                        int picH = -this.scrollValue3 * 20;
+                        GearGraphics.DrawFormattedDesc(gText, regionDesc, 0, 265, ref picH, 20, Color.FromArgb(86, 76, 63));
+                        //GearGraphics.DrawPlainText(gText, regionDesc, GearGraphics.ArchiveNameFont, Color.FromArgb(255, 130, 102), 0, 265, ref picH, 20);
+                        foreach (AControl scroll in this.scrollControls)
+                        {
+                            scroll.Draw(gText);
+                        }
+                    }
+                    mask = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIworldArchive.img/detail/desc/mask/shader/0/texture/1"), PluginBase.PluginManager.FindWz).Bitmap;
+                    Bitmap finalText = ApplyMaskWithOffset(textBuffer, mask, 493, 113, 493, 113);
+                    g.DrawImage(finalText, new Point(493, 113));
                     break;
                 case 1: render_bitmap(g, "UI/_Canvas/UIworldArchive.img/detail/list/backgrnd", 832, 84); 
                     string npcName = PluginManager.FindWz($@"String/Npc.img/{npcs[selectedIndex2]}/name").GetValueEx<string>(null);
-                    string npcDesc = PluginManager.FindWz($@"Etc/worldArchive.img/collectionInfo/0/{books[selectedIndex]}/npc/{selectedIndex2}/desc").GetValueEx<string>(null).Replace("\\r\\n", "\r\n").Replace("\\n", "\n");
+                    string npcDesc = PluginManager.FindWz($@"Etc/worldArchive.img/collectionInfo/{bookArea}/{books[selectedIndex]}/npc/{npcNodeNames[selectedIndex2]}/desc").GetValueEx<string>(null)?.Replace("\\r\\n", "\r\n").Replace("\\n", "\n");
                     g.DrawString(npcName, GearGraphics.ArchiveNameFont3, GearGraphics.RegionBrush, 235 - g.MeasureString(npcName, GearGraphics.ArchiveNameFont3).Width / 2, 456);
-                    picH = 113;
-                    GearGraphics.DrawPlainText(g, npcDesc, GearGraphics.ArchiveNameFont, Color.FromArgb(255, 130, 102), 493, 753, ref picH, 20);
-                    var npcNode = PluginManager.FindWz($@"Npc/{npcs[selectedIndex2].PadLeft(7, '0')}.img");
-                    Npc npc = Npc.CreateFromNode(npcNode, PluginBase.PluginManager.FindWz, PluginBase.PluginManager.FindWz);
-                    Bitmap npcImage = npc.Default.Bitmap;
-                    g.DrawImage(npcImage, 236 - npcImage.Width, 251 - npcImage.Height, npcImage.Width * 2, npcImage.Height * 2);
-                    foreach (string npcID in npcs)
+                    totalLines = CalculateTextLines(npcDesc, GearGraphics.ArchiveNameFont, 265);
+                    totalTextHeight = totalLines * 20;
+                    this.vScroll3.Maximum = totalTextHeight > 386 ? (totalTextHeight - 386) / 20 : 0;
+                    this.vScroll3.Visible = totalTextHeight > 386;
+                    textBuffer = new Bitmap(275, 386, PixelFormat.Format32bppArgb);
+                    using (Graphics gText = Graphics.FromImage(textBuffer))
                     {
-                        int i = npcs.IndexOf(npcID);
-                        if ((i - scrollValue2) >= 0 && (i - scrollValue2) <= 6) render_bitmap(g, "UI/_Canvas/UIworldArchive.img/detail/list/slotBase", 844, 112 + 55 * (i - scrollValue2));
-                        npcNode = PluginManager.FindWz($@"Npc/{npcID.PadLeft(7, '0')}.img");
-                        npc = Npc.CreateFromNode(npcNode, PluginBase.PluginManager.FindWz, PluginBase.PluginManager.FindWz);
-                        npcImage = npc.Default.Bitmap;
-                        if ((i - scrollValue2) >= 0 && (i - scrollValue2) <= 6)
-                        {
-                            int x = npcImage.Width > npcImage.Height ? 46 : npcImage.Width * 46 / npcImage.Height;
-                            int y = npcImage.Width > npcImage.Height ? npcImage.Height * 46 / npcImage.Width : 46;
-                            g.DrawImage(npcImage, 867 - x/2, 136 - y/2 + 55 * (i - scrollValue2), x, y);
-                        }
+                        gText.Clear(Color.Transparent);
+                        gText.TextRenderingHint = System.Drawing.Text.TextRenderingHint.SingleBitPerPixelGridFit;
+                        int picH = - this.scrollValue3 * 20;
+                        GearGraphics.DrawFormattedDesc(gText, npcDesc, 0, 265, ref picH, 20, Color.FromArgb(86, 76, 63));
+                        //GearGraphics.DrawPlainText(gText, npcDesc, GearGraphics.ArchiveNameFont, Color.FromArgb(255, 130, 102), 0, 265, ref picH, 20);
+                        vScroll3.Draw(gText);
                     }
+                    mask = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIworldArchive.img/detail/desc/mask/shader/0/texture/1"), PluginBase.PluginManager.FindWz).Bitmap;
+                    finalText = ApplyMaskWithOffset(textBuffer, mask, 493, 113, 493, 113);
+                    g.DrawImage(finalText, new Point(493, 113));
+                    Wz_Node npcNode = PluginManager.FindWz($@"Npc/{npcs[selectedIndex2].PadLeft(7, '0')}.img");
+                    if (npcNode != null)
+                    {
+                        Bitmap npcImage = imageNpcs.Contains(npcs[selectedIndex2]) ? BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz($"UI/_Canvas/UIworldArchive.img/image/npc/{npcs[selectedIndex2]}"), PluginBase.PluginManager.FindWz).Bitmap :
+                            Npc.CreateFromNode(npcNode, PluginBase.PluginManager.FindWz, PluginBase.PluginManager.FindWz).Default.Bitmap;
+                        int scale = PluginManager.FindWz($@"Etc/worldArchive.img/collectionInfo/{bookArea}/{books[selectedIndex]}/npc/{npcNodeNames[selectedIndex2]}/scale").GetValueEx<Int32>(100);
+                        int x = npcImage.Width * scale / 100;
+                        int y = npcImage.Height * scale / 100;
+                        if (x > 328 || y > 330)
+                        {
+                            double scaleRatio = x > y ? 328.0 / x: 330.0 / y;
+                            x = (int)(x * scaleRatio);
+                            y = (int)(y * scaleRatio);
+                            Bitmap scaledImage = new Bitmap(x, y);
+                            using (Graphics g2 = Graphics.FromImage(scaledImage))
+                            {
+                                g2.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
+                                g2.DrawImage(npcImage, 0, 0, x, y);
+                            }
+                            npcImage = scaledImage;
+                        }
+                        g.DrawImage(npcImage, 236 - x/2, 251 - y/2, x, y);
+                    }
+                    textBuffer = new Bitmap(65, 388, PixelFormat.Format32bppArgb);
+                    using (Graphics list = Graphics.FromImage(textBuffer))
+                    {
+                        foreach (string npcID in npcs)
+                        {
+                            int i = npcs.IndexOf(npcID);
+                            if ((i - scrollValue2) >= 0 && (i - scrollValue2) <= 6) render_bitmap(list, "UI/_Canvas/UIworldArchive.img/detail/list/slotBase", 12, 1 + 55 * (i - scrollValue2));
+                            npcNode = PluginManager.FindWz($@"Npc/{npcID.PadLeft(7, '0')}.img");
+                            if (npcNode == null) continue;
+                            Bitmap npcImage = imageNpcs.Contains(npcID) ? BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz($"UI/_Canvas/UIworldArchive.img/image/npc/{npcID}"), PluginBase.PluginManager.FindWz).Bitmap :
+                                Npc.CreateFromNode(npcNode, PluginBase.PluginManager.FindWz, PluginBase.PluginManager.FindWz).Default.Bitmap;
+                            if ((i - scrollValue2) >= 0 && (i - scrollValue2) <= 6)
+                            {
+                                int x = npcImage.Width > npcImage.Height ? 46 : npcImage.Width * 46 / npcImage.Height;
+                                int y = npcImage.Width > npcImage.Height ? npcImage.Height * 46 / npcImage.Width : 46;
+                                list.DrawImage(npcImage, 35 - x / 2, 24 - y / 2 + 55 * (i - scrollValue2), x, y);
+                            }
+                        }
+                        vScroll2.Draw(list);
+                    }
+                    mask = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIworldArchive.img/detail/desc/mask/shader/0/texture/1"), PluginBase.PluginManager.FindWz).Bitmap;
+                    finalText = ApplyMaskWithOffset(textBuffer, mask, 832, 113, 832, 113);
+                    g.DrawImage(finalText, new Point(832, 113));
                     break;
                 case 2: render_bitmap(g, "UI/_Canvas/UIworldArchive.img/detail/list/backgrnd", 832, 84);
                     string mobName = PluginManager.FindWz($@"String/Mob.img/{mobs[selectedIndex3]}/name").GetValueEx<string>(null);
-                    string mobDesc = PluginManager.FindWz($@"Etc/worldArchive.img/collectionInfo/0/{books[selectedIndex]}/mob/{selectedIndex3}/desc").GetValueEx<string>(null).Replace("\\r\\n", "\r\n").Replace("\\n", "\n");
+                    string mobDesc = PluginManager.FindWz($@"Etc/worldArchive.img/collectionInfo/{bookArea}/{books[selectedIndex]}/mob/{mobNodeNames[selectedIndex3]}/desc").GetValueEx<string>(null)?.Replace("\\r\\n", "\r\n").Replace("\\n", "\n");
                     g.DrawString(mobName, GearGraphics.ArchiveNameFont3, GearGraphics.RegionBrush, 235 - g.MeasureString(mobName, GearGraphics.ArchiveNameFont3).Width / 2, 456);
-                    picH = 113;
-                    GearGraphics.DrawPlainText(g, mobDesc, GearGraphics.ArchiveNameFont, Color.FromArgb(255, 130, 102), 493, 753, ref picH, 20);
-                    var mobNode = PluginManager.FindWz($@"Mob/{mobs[selectedIndex3].PadLeft(7, '0')}.img");
-                    Mob mob = Mob.CreateFromNode(mobNode, PluginBase.PluginManager.FindWz, PluginBase.PluginManager.FindWz);
-                    Bitmap mobImage = mob.Default.Bitmap;
-                    g.DrawImage(mobImage, 236 - mobImage.Width, 251 - mobImage.Height, mobImage.Width * 2, mobImage.Height * 2);
-                    foreach (string mobID in mobs)
+                    totalLines = CalculateTextLines(mobDesc, GearGraphics.ArchiveNameFont, 265);
+                    totalTextHeight = totalLines * 20;
+                    this.vScroll3.Maximum = totalTextHeight > 386 ? (totalTextHeight - 386) / 20 : 0;
+                    this.vScroll3.Visible = totalTextHeight > 386;
+                    textBuffer = new Bitmap(275, 386, PixelFormat.Format32bppArgb);
+                    using (Graphics gText = Graphics.FromImage(textBuffer))
                     {
-                        int i = mobs.IndexOf(mobID);
-                        if ((i - scrollValue2) >= 0 && (i - scrollValue2) <= 6) render_bitmap(g, "UI/_Canvas/UIworldArchive.img/detail/list/slotBase", 844, 112 + 55 * (i - scrollValue2));
-                        mobNode = PluginManager.FindWz($@"Mob/{mobID.PadLeft(7, '0')}.img");
-                        mob = Mob.CreateFromNode(mobNode, PluginBase.PluginManager.FindWz, PluginBase.PluginManager.FindWz);
-                        mobImage = mob.Default.Bitmap;
-                        if ((i - scrollValue2) >= 0 && (i - scrollValue2) <= 6)
-                        {
-                            int x = mobImage.Width > mobImage.Height ? 46 : mobImage.Width * 46 / mobImage.Height;
-                            int y = mobImage.Width > mobImage.Height ? mobImage.Height * 46 / mobImage.Width : 46;
-                            g.DrawImage(mobImage, 867 - x/2, 136 - y/2 + 55 * (i - scrollValue2), x, y);
-                        }
+                        gText.Clear(Color.Transparent);
+                        gText.TextRenderingHint = System.Drawing.Text.TextRenderingHint.SingleBitPerPixelGridFit;
+                        int picH = -this.scrollValue3 * 20;
+                        GearGraphics.DrawFormattedDesc(gText, mobDesc, 0, 265, ref picH, 20, Color.FromArgb(86, 76, 63));
+                        //GearGraphics.DrawPlainText(gText, mobDesc, GearGraphics.ArchiveNameFont, Color.FromArgb(255, 130, 102), 0, 265, ref picH, 20);
+                        vScroll3.Draw(gText);
                     }
+                    mask = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIworldArchive.img/detail/desc/mask/shader/0/texture/1"), PluginBase.PluginManager.FindWz).Bitmap;
+                    finalText = ApplyMaskWithOffset(textBuffer, mask, 493, 113, 493, 113);
+                    g.DrawImage(finalText, new Point(493, 113));
+                    var mobNode = PluginManager.FindWz($@"Mob/{mobs[selectedIndex3].PadLeft(7, '0')}.img");
+                    if (mobNode != null)
+                    {
+                        Bitmap mobImage = imageMobs.Contains(mobs[selectedIndex3]) ? BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz($"UI/_Canvas/UIworldArchive.img/image/mob/{mobs[selectedIndex3]}"), PluginBase.PluginManager.FindWz).Bitmap:
+                            Mob.CreateFromNode(mobNode, PluginBase.PluginManager.FindWz, PluginBase.PluginManager.FindWz).Default.Bitmap;
+                        int scale = PluginManager.FindWz($@"Etc/worldArchive.img/collectionInfo/{bookArea}/{books[selectedIndex]}/mob/{mobNodeNames[selectedIndex3]}/scale").GetValueEx<Int32>(100);
+                        int x = mobImage.Width * scale / 100;
+                        int y = mobImage.Height * scale / 100;
+                        if (x > 328 || y > 330)
+                        {
+                            double scaleRatio = (double)x > y ? 328.0 / x : 330.0 / y;
+                            x = (int)(x * scaleRatio);
+                            y = (int)(y * scaleRatio);
+                            Bitmap scaledImage = new Bitmap(x, y);
+                            using (Graphics g2 = Graphics.FromImage(scaledImage))
+                            {
+                                g2.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
+                                g2.DrawImage(mobImage, 0, 0, x, y);
+                            }
+                            mobImage = scaledImage;
+                        }
+                        g.DrawImage(mobImage, 236 - x / 2, 251 - y / 2, x, y);
+                    }
+                    textBuffer = new Bitmap(65, 388, PixelFormat.Format32bppArgb);
+                    using (Graphics list = Graphics.FromImage(textBuffer))
+                    {
+                        foreach (string mobID in mobs)
+                        {
+                            int i = mobs.IndexOf(mobID);
+                            if ((i - scrollValue2) >= 0 && (i - scrollValue2) <= 6) render_bitmap(list, "UI/_Canvas/UIworldArchive.img/detail/list/slotBase", 12, 1 + 55 * (i - scrollValue2));
+                            mobNode = PluginManager.FindWz($@"Mob/{mobID.PadLeft(7, '0')}.img");
+                            if (mobNode == null) continue;
+                            Bitmap mobImage = imageMobs.Contains(mobID) ? BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz($"UI/_Canvas/UIworldArchive.img/image/mob/{mobID}"), PluginBase.PluginManager.FindWz).Bitmap :
+                                Mob.CreateFromNode(mobNode, PluginBase.PluginManager.FindWz, PluginBase.PluginManager.FindWz).Default.Bitmap;
+                            if ((i - scrollValue2) >= 0 && (i - scrollValue2) <= 6)
+                            {
+                                int x = mobImage.Width > mobImage.Height ? 46 : mobImage.Width * 46 / mobImage.Height;
+                                int y = mobImage.Width > mobImage.Height ? mobImage.Height * 46 / mobImage.Width : 46;
+                                list.DrawImage(mobImage, 35 - x / 2, 24 - y / 2 + 55 * (i - scrollValue2), x, y);
+                            }
+                        }
+                        vScroll2.Draw(list);
+                    }
+                    mask = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz("UI/_Canvas/UIworldArchive.img/detail/desc/mask/shader/0/texture/1"), PluginBase.PluginManager.FindWz).Bitmap;
+                    finalText = ApplyMaskWithOffset(textBuffer, mask, 832, 113, 832, 113);
+                    g.DrawImage(finalText, new Point(832, 113));
                     break;
                 default: break;
             }
@@ -878,7 +1107,8 @@ namespace WzComparerR2.CharaSimControl
                     {
                         render_bitmap(g, "UI/_Canvas/UIWorldArchiveBonusBook.img/main/canvas:pageText", 136, 79);
                         int picH = 100;
-                        GearGraphics.DrawPlainText(g, str, GearGraphics.ArchiveNameFont, Color.FromArgb(255, 130, 102), 168, 432, ref picH, 20);
+                        GearGraphics.DrawFormattedDesc(g, str, 168, 432, ref picH, 20, Color.FromArgb(86, 76, 63));
+                        //GearGraphics.DrawPlainText(g, str, GearGraphics.ArchiveNameFont, Color.FromArgb(86, 76, 63), 168, 432, ref picH, 20);
                     }
                     //右页
                     int rightIndex = 1 + detailpage * 2;
@@ -891,13 +1121,15 @@ namespace WzComparerR2.CharaSimControl
                         render_bitmap(g, "UI/_Canvas/UIWorldArchiveBonusBook.img/main/canvas:pageTitle", 575, 102);
                         g.DrawString(title, GearGraphics.ArchiveNameFont3, GearGraphics.RegionBrush, 708 - g.MeasureString(title, GearGraphics.ArchiveNameFont3).Width / 2, 129 - g.MeasureString(title, GearGraphics.ArchiveNameFont3).Height / 2);
                         int picH = 160;
-                        GearGraphics.DrawPlainText(g, str, GearGraphics.ArchiveNameFont, Color.FromArgb(255, 130, 102), 578, 842, ref picH, 20);
+                        GearGraphics.DrawFormattedDesc(g, str, 578, 832, ref picH, 20, Color.FromArgb(86, 76, 63));
+                        //GearGraphics.DrawPlainText(g, str, GearGraphics.ArchiveNameFont, Color.FromArgb(86, 76, 63), 578, 842, ref picH, 20);
                     }
                     else if (str != null)
                     {
                         render_bitmap(g, "UI/_Canvas/UIWorldArchiveBonusBook.img/main/canvas:pageText", 546, 79);
                         int picH = 100;
-                        GearGraphics.DrawPlainText(g, str, GearGraphics.ArchiveNameFont, Color.FromArgb(255, 130, 102), 578, 842, ref picH, 20);
+                        GearGraphics.DrawFormattedDesc(g, str, 578, 842, ref picH, 20, Color.FromArgb(86, 76, 63));
+                        //GearGraphics.DrawPlainText(g, str, GearGraphics.ArchiveNameFont, Color.FromArgb(86, 76, 63), 578, 842, ref picH, 20);
                     }
                 }
                 render_bitmap(g, "UI/_Canvas/UIWorldArchiveBonusBook.img/main/chapterList/backgrnd", 891, 180);
@@ -932,14 +1164,73 @@ namespace WzComparerR2.CharaSimControl
             g.DrawImage(image, x, y);
         }
 
+        private int CalculateTextLines(string text, System.Drawing.Font font, int maxWidth)
+        {
+            if (string.IsNullOrEmpty(text)) return 0;
+            if (font == null || maxWidth <= 0) return 0;
+
+            // 移除富文本标签以获得纯文本长度
+            string plainText = text.Replace("#e", "#c").Replace("#n", "").Replace("#", "");
+
+            int lineCount = 0;
+            string[] paragraphs = text.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None);
+
+            // 使用更大的位图来避免 GDI+ 问题
+            using (Bitmap bmp = new Bitmap(Math.Max(maxWidth, 100), 100))
+            using (Graphics g = Graphics.FromImage(bmp))
+            {
+                g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.SingleBitPerPixelGridFit;
+
+                foreach (string paragraph in paragraphs)
+                {
+                    if (string.IsNullOrEmpty(paragraph))
+                    {
+                        lineCount++;
+                        continue;
+                    }
+
+                    try
+                    {
+                        SizeF size = g.MeasureString(paragraph, font);
+                        if (size.Width <= maxWidth)
+                        {
+                            lineCount++;
+                        }
+                        else
+                        {
+                            int charsFitted, linesFilled;
+                            g.MeasureString(paragraph, font, new SizeF(maxWidth, float.MaxValue),
+                                StringFormat.GenericDefault, out charsFitted, out linesFilled);
+                            lineCount += Math.Max(1, linesFilled);
+                        }
+                    }
+                    catch (ExternalException)
+                    {
+                        lineCount += Math.Max(1, (int)Math.Ceiling(paragraph.Length / 20.0));
+                    }
+                    catch (ArgumentException)
+                    {
+                        lineCount += Math.Max(1, (int)Math.Ceiling(paragraph.Length / 20.0));
+                    }
+                }
+            }
+
+            return lineCount;
+        }
+
         private void btnClose_MouseClick(object sender, MouseEventArgs e)
         {
             this.Visible = false;
             selectedIndex = -1;
-            lastLoadedNpcIndex = -1;  // 重置NPC缓存
-            lastLoadedMobIndex = -1;  // 重置怪物缓存
+            lastLoadedBookIndex = -1;
+            lastLoadedNpcIndex = -1;
+            lastLoadedMobIndex = -1;
             lastLoadedChapterIndex = -1;
             this.books.Clear();
+            this.npcs.Clear();
+            this.mobs.Clear();
+            this.npcNodeNames.Clear();  // 新增
+            this.mobNodeNames.Clear();  // 新增
         }
 
         private void btnClose2_MouseClick(object sender, MouseEventArgs e)
@@ -948,9 +1239,11 @@ namespace WzComparerR2.CharaSimControl
             lastLoadedNpcIndex = -1;
             lastLoadedMobIndex = -1;
             lastLoadedChapterIndex = -1;
+            detailpage = 0;
+            maxdetailpage = 0;
             Chapters.Clear();
             mainPage = true;
-            mapleWorldPage = false;
+            bookPage = false;
             detailPage = false;
             extraPage = false;
             tablePage = false;
@@ -963,13 +1256,14 @@ namespace WzComparerR2.CharaSimControl
         private void btnClose3_MouseClick(object sender, MouseEventArgs e)
         {
             selectedIndex = -1;
-            lastLoadedNpcIndex = -1;  // 重置NPC缓存
-            lastLoadedMobIndex = -1;  // 重置怪物缓存
+            lastLoadedBookIndex = -1;
+            lastLoadedNpcIndex = -1;
+            lastLoadedMobIndex = -1;
             lastLoadedChapterIndex = -1;
             selectedTab = 1;
             scrollValue = 0;
             mainPage = false;
-            mapleWorldPage = true;
+            bookPage = true;
             detailPage = false;
             extraPage = false;
             showIllust = false;
@@ -981,7 +1275,7 @@ namespace WzComparerR2.CharaSimControl
             selectedTab = 1;
             scrollValue = 0;
             mainPage = false;
-            mapleWorldPage = false;
+            bookPage = false;
             detailPage = true;
             extraPage = false;
             showIllust = false;
@@ -990,12 +1284,39 @@ namespace WzComparerR2.CharaSimControl
 
         private void btnWorldSelect_MouseClick(object sender, MouseEventArgs e)
         {
+            lastLoadedBookIndex = -1;
             selectedIndex = -1;
-            lastLoadedNpcIndex = -1;  // 重置NPC缓存
-            lastLoadedMobIndex = -1;  // 重置怪物缓存
-            lastLoadedChapterIndex = -1;
             mainPage = false;
-            mapleWorldPage = true;
+            bookPage = true;
+            bookArea = 0;
+            detailPage = false;
+            extraPage = false;
+            showIllust = false;
+            lastPageSwitchTime = DateTime.Now; // 记录页面切换时间
+            this.Refresh();
+        }
+
+        private void btnWorldSelect2_MouseClick(object sender, MouseEventArgs e)
+        {
+            lastLoadedBookIndex = -1;
+            selectedIndex = -1;
+            mainPage = false;
+            bookPage = true;
+            bookArea = 1;
+            detailPage = false;
+            extraPage = false;
+            showIllust = false;
+            lastPageSwitchTime = DateTime.Now; // 记录页面切换时间
+            this.Refresh();
+        }
+
+        private void btnWorldSelect3_MouseClick(object sender, MouseEventArgs e)
+        {
+            lastLoadedBookIndex = -1;
+            selectedIndex = -1;
+            mainPage = false;
+            bookPage = true;
+            bookArea = 2;
             detailPage = false;
             extraPage = false;
             showIllust = false;
@@ -1015,10 +1336,11 @@ namespace WzComparerR2.CharaSimControl
         private void btnBack_MouseClick(object sender, MouseEventArgs e)
         {
             selectedIndex = -1;
-            lastLoadedNpcIndex = -1;  // 重置NPC缓存
-            lastLoadedMobIndex = -1;  // 重置怪物缓存
+            lastLoadedBookIndex = -1;
+            lastLoadedNpcIndex = -1;
+            lastLoadedMobIndex = -1; 
             mainPage = true;
-            mapleWorldPage = false;
+            bookPage = false;
             detailPage = false;
             extraPage = false;
             tablePage = false;
@@ -1032,7 +1354,7 @@ namespace WzComparerR2.CharaSimControl
             lastLoadedNpcIndex = -1;  // 重置NPC缓存
             lastLoadedMobIndex = -1;  // 重置怪物缓存
             mainPage = false;
-            mapleWorldPage = false;
+            bookPage = false;
             detailPage = false;
             extraPage = true;
             tablePage = true;
@@ -1051,8 +1373,10 @@ namespace WzComparerR2.CharaSimControl
             selectedTab = 0;
             selectedIndex2 = 0;
             selectedIndex3 = 0;
+            npcNodeNames.Clear();  // 新增
+            mobNodeNames.Clear();  // 新增
             mainPage = false;
-            mapleWorldPage = false;
+            bookPage = false;
             detailPage = true;
             extraPage = false;
             showIllust = false;
@@ -1075,13 +1399,14 @@ namespace WzComparerR2.CharaSimControl
         private void btnNpc_MouseClick(object sender, MouseEventArgs e)
         {
             selectedIndex2 = btnNpcs.IndexOf(sender as ACtrlButton);
-            this.btnHidden.Visible = detailPage && specialNpcs.Contains(npcs[selectedIndex2]);
+            this.vScroll3.Value = 0;
             this.Refresh();
         }
 
         private void btnMob_MouseClick(object sender, MouseEventArgs e)
         {
             selectedIndex3 = btnMobs.IndexOf(sender as ACtrlButton);
+            this.vScroll3.Value = 0;
             this.Refresh();
         }
 
@@ -1089,6 +1414,7 @@ namespace WzComparerR2.CharaSimControl
         {
             selectedTab = 0;
             scrollValue2 = 0;
+            scrollValue3 = 0;
             selectedIndex2 = 0;
             selectedIndex3 = 0;
             this.Refresh();
@@ -1098,6 +1424,7 @@ namespace WzComparerR2.CharaSimControl
         {
             selectedTab = 1;
             scrollValue2 = 0;
+            scrollValue3 = 0;
             selectedIndex3 = 0;
             this.Refresh();
         }
@@ -1106,6 +1433,7 @@ namespace WzComparerR2.CharaSimControl
         {
             selectedTab = 2;
             scrollValue2 = 0;
+            scrollValue3 = 0;
             selectedIndex2 = 0;
             this.Refresh();
         }
@@ -1121,7 +1449,7 @@ namespace WzComparerR2.CharaSimControl
         {
             this.showIllust = true;
             mainPage = false;
-            mapleWorldPage = false;
+            bookPage = false;
             detailPage = false;
             extraPage = false;
             this.waitForRefresh = true;
@@ -1161,6 +1489,8 @@ namespace WzComparerR2.CharaSimControl
             tablePage2 = false;
             detailInfo = false;
             lastLoadedChapterIndex = -1;
+            detailpage = 0;
+            maxdetailpage = 0;
             this.Refresh();
         }
 
@@ -1172,7 +1502,7 @@ namespace WzComparerR2.CharaSimControl
             selectedChapter = Chapters.IndexOf(sender as ACtrlButton) + 1;
             if (PluginManager.FindWz($"UI/UIWorldArchiveBonusBook.img/info/{selectedTitle}/{selectedChapter}/disable") == null)
             {
-                maxdetailpage = (PluginManager.FindWz($"UI/UIWorldArchiveBonusBook.img/info/{selectedTitle}/{selectedChapter}").Nodes.Count - 1) / 2;
+                maxdetailpage = (PluginManager.FindWz($"UI/UIWorldArchiveBonusBook.img/info/{selectedTitle}/{selectedChapter}").Nodes.Count - 1) / 2 - 1;
             }
             else
                 maxdetailpage = 0;
@@ -1193,7 +1523,8 @@ namespace WzComparerR2.CharaSimControl
 
         private void btnChapterNext_MouseClick(Object sender, MouseEventArgs e)
         {
-            detailpage++;
+            if (detailpage < maxdetailpage)
+                detailpage++;
             this.Refresh();
         }
 
@@ -1209,9 +1540,72 @@ namespace WzComparerR2.CharaSimControl
             this.waitForRefresh = true;
         }
 
+        private void vScroll3_ValueChanged(object sender, EventArgs e)
+        {
+            this.scrollValue3 = this.vScroll3.Value;
+            this.waitForRefresh = true;
+        }
+
         private void aCtrl_RefreshCall(object sender, EventArgs e)
         {
             this.waitForRefresh = true;
+        }
+
+        private Bitmap ApplyMaskWithOffset(Bitmap image, Bitmap mask, int imageX, int imageY, int maskX, int maskY)
+        {
+            Bitmap result = new Bitmap(image.Width, image.Height, PixelFormat.Format32bppArgb);
+            Rectangle rect = new Rectangle(0, 0, image.Width, image.Height);
+
+            var imgData = image.LockBits(rect, ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
+            var resData = result.LockBits(rect, ImageLockMode.WriteOnly, PixelFormat.Format32bppArgb);
+
+            Rectangle maskRect = new Rectangle(0, 0, mask.Width, mask.Height);
+            var maskData = mask.LockBits(maskRect, ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
+
+            int imgStride = imgData.Stride;
+            int maskStride = maskData.Stride;
+
+            int offsetX = imageX - maskX;
+            int offsetY = imageY - maskY;
+            unsafe
+            {
+                byte* imgPtr = (byte*)imgData.Scan0;
+                byte* maskPtr = (byte*)maskData.Scan0;
+                byte* resPtr = (byte*)resData.Scan0;
+                for (int y = 0; y < image.Height; y++)
+                {
+                    for (int x = 0; x < image.Width; x++)
+                    {
+                        int imgIndex = y * imgStride + x * 4;
+
+                        byte b = imgPtr[imgIndex];
+                        byte g = imgPtr[imgIndex + 1];
+                        byte r = imgPtr[imgIndex + 2];
+                        byte a = imgPtr[imgIndex + 3];
+
+                        int mx = x + offsetX;
+                        int my = y + offsetY;
+
+                        byte maskA = 0;
+                        if (mx >= 0 && mx < mask.Width && my >= 0 && my < mask.Height)// 判断是否在 mask 范围内
+                        {
+                            int maskIndex = my * maskStride + mx * 4;
+                            maskA = maskPtr[maskIndex + 3];
+                        }
+
+                        byte newA = (byte)(a * maskA / 255);
+
+                        resPtr[imgIndex] = b;
+                        resPtr[imgIndex + 1] = g;
+                        resPtr[imgIndex + 2] = r;
+                        resPtr[imgIndex + 3] = newA;
+                    }
+                }
+            }
+            image.UnlockBits(imgData);
+            mask.UnlockBits(maskData);
+            result.UnlockBits(resData);
+            return result;
         }
 
         private IEnumerable<AControl> aControls
@@ -1222,6 +1616,8 @@ namespace WzComparerR2.CharaSimControl
                 yield return btnReward;
                 yield return btnHelp;
                 yield return btnWorldSelect;
+                //yield return btnWorldSelect2;
+                yield return btnWorldSelect3;
                 yield return btnSupplement;
             }
         }
@@ -1241,7 +1637,6 @@ namespace WzComparerR2.CharaSimControl
         {
             get
             {
-                yield return vScroll2;
                 yield return btnClose3;
                 yield return btnRegion;
                 if (npcs.Count > 0) yield return btnCharacter;
@@ -1256,6 +1651,16 @@ namespace WzComparerR2.CharaSimControl
                     foreach (var btnmob in btnMobs)
                         yield return btnmob;
 
+            }
+        }
+
+        private IEnumerable<AControl> scrollControls
+        {
+            get
+            {
+                yield return vScroll;
+                yield return vScroll2;
+                yield return vScroll3;
             }
         }
 
@@ -1299,8 +1704,7 @@ namespace WzComparerR2.CharaSimControl
         {
             get
             {
-                yield return vScroll;
-                if (mapleWorldPage)
+                if (bookPage)
                     foreach (var btn in btnBooks)
                         yield return btn;
             }
@@ -1325,6 +1729,11 @@ namespace WzComparerR2.CharaSimControl
                 ctrl.OnMouseMove(childArgs);
             }
 
+            foreach (AControl ctrl in this.scrollControls)
+            {
+                ctrl.OnMouseMove(childArgs);
+            }
+
             foreach (AControl ctrl in this.extraControls)
             {
                 ctrl.OnMouseMove(childArgs);
@@ -1335,7 +1744,7 @@ namespace WzComparerR2.CharaSimControl
                 ctrl.OnMouseMove(childArgs);
             }
 
-            if (mapleWorldPage)
+            if (bookPage)
             {
                 MouseEventArgs bookArgs = new MouseEventArgs(e.Button, e.Clicks, e.X - BookRect.X, e.Y - BookRect.Y, e.Delta);
 
@@ -1373,6 +1782,11 @@ namespace WzComparerR2.CharaSimControl
                 ctrl.OnMouseDown(childArgs);
             }
 
+            foreach (AControl ctrl in this.scrollControls)
+            {
+                ctrl.OnMouseDown(childArgs);
+            }
+
             foreach (AControl ctrl in this.extraControls)
             {
                 ctrl.OnMouseDown(childArgs);
@@ -1383,7 +1797,7 @@ namespace WzComparerR2.CharaSimControl
                 ctrl.OnMouseDown(childArgs);
             }
 
-            if (mapleWorldPage)
+            if (bookPage)
             {
                 MouseEventArgs bookArgs = new MouseEventArgs(e.Button, e.Clicks, e.X - BookRect.X, e.Y - BookRect.Y, e.Delta);
 
@@ -1421,6 +1835,11 @@ namespace WzComparerR2.CharaSimControl
                 ctrl.OnMouseUp(childArgs);
             }
 
+            foreach (AControl ctrl in this.scrollControls)
+            {
+                ctrl.OnMouseUp(childArgs);
+            }
+
             foreach (AControl ctrl in this.extraControls)
             {
                 ctrl.OnMouseUp(childArgs);
@@ -1431,7 +1850,7 @@ namespace WzComparerR2.CharaSimControl
                 ctrl.OnMouseUp(childArgs);
             }
 
-            if (mapleWorldPage)
+            if (bookPage)
             {
                 MouseEventArgs bookArgs = new MouseEventArgs(e.Button, e.Clicks, e.X - BookRect.X, e.Y - BookRect.Y, e.Delta);
 
@@ -1469,6 +1888,11 @@ namespace WzComparerR2.CharaSimControl
                 ctrl.OnMouseClick(childArgs);
             }
 
+            foreach (AControl ctrl in this.scrollControls)
+            {
+                ctrl.OnMouseClick(childArgs);
+            }
+
             foreach (AControl ctrl in this.extraControls)
             {
                 ctrl.OnMouseClick(childArgs);
@@ -1479,7 +1903,7 @@ namespace WzComparerR2.CharaSimControl
                 ctrl.OnMouseClick(childArgs);
             }
 
-            if (mapleWorldPage)
+            if (bookPage)
             {
                 MouseEventArgs bookArgs = new MouseEventArgs(e.Button, e.Clicks, e.X - BookRect.X, e.Y - BookRect.Y, e.Delta);
 
@@ -1517,6 +1941,11 @@ namespace WzComparerR2.CharaSimControl
                 ctrl.OnMouseWheel(e);
             }
 
+            foreach (AControl ctrl in this.scrollControls)
+            {
+                ctrl.OnMouseWheel(e);
+            }
+
             foreach (AControl ctrl in this.extraControls)
             {
                 ctrl.OnMouseWheel(childArgs);
@@ -1527,7 +1956,7 @@ namespace WzComparerR2.CharaSimControl
                 ctrl.OnMouseWheel(childArgs);
             }
 
-            if (mapleWorldPage)
+            if (bookPage)
             {
                 MouseEventArgs bookArgs = new MouseEventArgs(e.Button, e.Clicks, e.X - BookRect.X, e.Y - BookRect.Y, e.Delta);
 

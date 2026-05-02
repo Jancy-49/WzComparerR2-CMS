@@ -14,23 +14,20 @@ namespace WzComparerR2.OpenAPI
             Version = version;
             UnknownVer = false;
 
-            if (!Utils.Structure.ContainsKey(version))
+            if (!AvatarCodeStructure.Structure.ContainsKey(version))
             {
-                if (version < Utils.Structure.Keys.Min())
+                if (version < AvatarCodeStructure.Structure.Keys.Min())
                 {
-                    version = Utils.Structure.Keys.Min();
+                    version = AvatarCodeStructure.Structure.Keys.Min();
                 }
                 else
                 {
-                    version = Utils.Structure.Keys.Max();
+                    version = AvatarCodeStructure.Structure.Keys.Max();
                 }
                 UnknownVer = true;
             }
                 
-            Unpacked = Utils.Structure[version].Select(d => new DataInfo(d.Name, d.Bits)
-            {
-                Value = d.Value
-            }).ToList();
+            Unpacked = AvatarCodeStructure.Structure[version].Select(d => d.Clone()).ToList();
         }
 
         public int Version { get; set; }
@@ -83,7 +80,19 @@ namespace WzComparerR2.OpenAPI
             if (id == -1) return "";
 
             var ret = "";
-            ret += GetValue("face50k") != 0 ? 5 : 2;
+            var face10k = GetValue("face10k");
+            switch (face10k)
+            {
+                case 0:
+                    ret += 2;
+                    break;
+                case 1:
+                    ret += 5;
+                    break;
+                default:
+                    ret += face10k;
+                    break;
+            }
             ret += GetValue("faceGender");
             ret += id.ToString().PadLeft(3, '0');
             return ret;
@@ -570,9 +579,9 @@ namespace WzComparerR2.OpenAPI
                 case 3:
                     return "绿色系";
                 case 4:
-                    return "祖母绿色系";
+                    return "青绿色系";
                 case 5:
-                    return "青色系";
+                    return "蓝色系";
                 case 6:
                     return "紫色系";
                 default:
